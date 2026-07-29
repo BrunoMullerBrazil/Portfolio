@@ -744,19 +744,19 @@ body.site-ready .hero-photo-slot {
   var iframe = hm.querySelector('iframe');
 
   if(iframe){
-    var ratio = 16 / 9;
-    var videoW = w;
-    var videoH = videoW / ratio;
+    var videoRatio = 16 / 9;
+    var containerRatio = w / h;
 
-    if(videoH < h){
-      videoH = h;
-      videoW = videoH * ratio;
-    }
+    var scale = containerRatio < videoRatio
+      ? videoRatio / containerRatio
+      : containerRatio / videoRatio;
 
-    iframe.style.cssText=
-      'position:absolute;top:50%;left:50%;'+
-      'width:'+videoW+'px;height:'+videoH+'px;'+
-      'transform:translate(-50%,-50%);border:0;';
+    iframe.style.setProperty('width','100%','important');
+    iframe.style.setProperty('height','100%','important');
+    iframe.style.setProperty('top','0','important');
+    iframe.style.setProperty('left','0','important');
+    iframe.style.setProperty('transform','scale('+scale+')','important');
+    iframe.style.setProperty('transform-origin','center center','important');
   }
 }
   function initM(){
