@@ -737,8 +737,28 @@ body.site-ready .hero-photo-slot {
 
   function eic(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
   function setM(w,h,r,top){
-    hm.style.cssText='position:absolute;overflow:hidden;cursor:none;will-change:width,height,border-radius,top,left,transform;width:'+w+'px;height:'+h+'px;border-radius:'+r+'px;top:'+top+'px;left:50%;transform:translateX(-50%);';
+  hm.style.cssText=
+    'position:absolute;overflow:hidden;cursor:none;will-change:width,height,border-radius,top,left,transform;'+
+    'width:'+w+'px;height:'+h+'px;border-radius:'+r+'px;top:'+top+'px;left:50%;transform:translateX(-50%);';
+
+  var iframe = hm.querySelector('iframe');
+
+  if(iframe){
+    var ratio = 16 / 9;
+    var videoW = w;
+    var videoH = videoW / ratio;
+
+    if(videoH < h){
+      videoH = h;
+      videoW = videoH * ratio;
+    }
+
+    iframe.style.cssText=
+      'position:absolute;top:50%;left:50%;'+
+      'width:'+videoW+'px;height:'+videoH+'px;'+
+      'transform:translate(-50%,-50%);border:0;';
   }
+}
   function initM(){
     var vh=window.innerHeight,vw=window.innerWidth;
     var W=Math.min(Math.max(200,vw*.28),370),H=Math.min(Math.max(280,vh*.54),640);
