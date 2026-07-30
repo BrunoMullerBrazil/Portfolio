@@ -399,10 +399,10 @@ footer{padding:22px 48px;border-top:1px solid rgba(255,255,255,.04);display:flex
 
   /* Indicador de scroll sempre legível */
   .hero-scroll-cue{
-  position:absolute !important;
+  position:fixed !important;
   left:20px !important;
   right:auto !important;
-  bottom:max(20px,env(safe-area-inset-bottom)) !important;
+  bottom:calc(20px + env(safe-area-inset-bottom)) !important;
   transform:none !important;
   z-index:1000 !important;
 
@@ -411,8 +411,7 @@ footer{padding:22px 48px;border-top:1px solid rgba(255,255,255,.04);display:flex
   align-items:center;
   gap:10px;
 
-  opacity:1 !important;
-  visibility:visible !important;
+  opacity:1;
   animation:none !important;
 
   padding:8px 11px;
@@ -421,6 +420,8 @@ footer{padding:22px 48px;border-top:1px solid rgba(255,255,255,.04);display:flex
   background:rgba(245,243,239,.92);
   backdrop-filter:blur(8px);
   pointer-events:none;
+
+  transition:opacity .35s ease;
 }
 
   .scroll-mouse{
