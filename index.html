@@ -343,15 +343,138 @@ footer{padding:22px 48px;border-top:1px solid rgba(255,255,255,.04);display:flex
 
 @media(max-width:768px){
   body{cursor:auto;}
-  #cursor,#cursor-ring,#cursor-label{display:none;}
-  .hero-nav,#work-list,#about,#services,#contact,footer{padding-left:20px;padding-right:20px;}
-  .hero-nav{padding:20px;}
-  .hero-greeting{font-size:clamp(36px,10vw,64px);}
-  .hero-signature{width:clamp(120px,30vw,180px);}
-  #about,#contact{grid-template-columns:1fr;gap:48px;}
-  .services-grid{grid-template-columns:1fr;}
-  .work-card:hover{height:42vh;}
-  .folder-arrow-btn{right:-32px;}
+
+  #cursor,#cursor-ring,#cursor-label{
+    display:none;
+  }
+
+  .hero-nav,
+  #work-list,
+  #about,
+  #services,
+  #contact,
+  footer{
+    padding-left:20px;
+    padding-right:20px;
+  }
+
+  .hero-nav{
+    padding:20px;
+  }
+
+  /* Texto fica restrito ao lado esquerdo */
+  .hero-text-wrap{
+    padding:0 20px;
+    justify-content:flex-start;
+  }
+
+  .hero-greeting{
+    font-size:clamp(44px,13vw,58px);
+    max-width:42vw;
+  }
+
+  .hero-signature{
+    position:absolute;
+    left:20px;
+    top:64%;
+    width:clamp(100px,30vw,130px);
+  }
+
+  .hero-role{
+    right:20px;
+    bottom:88px;
+  }
+
+  .hero-role-line{
+    font-size:9px;
+  }
+
+  .hero-role-name{
+    font-size:18px;
+  }
+
+  /* Indicador de scroll sempre legível */
+  .hero-scroll-cue{
+    bottom:18px;
+    z-index:300;
+    opacity:1 !important;
+    animation:none;
+    padding:9px 12px;
+    border:1px solid rgba(12,12,11,.12);
+    border-radius:30px;
+    background:rgba(245,243,239,.88);
+    backdrop-filter:blur(8px);
+    pointer-events:none;
+  }
+
+  .scroll-mouse{
+    border-color:#6f6a63;
+  }
+
+  .scroll-dot{
+    background:#0c0c0b;
+  }
+
+  .scroll-txt{
+    color:#5f5a54;
+    font-weight:400;
+  }
+
+  /* Contraste da área escura */
+  .work-intro-label{
+    color:#aaa39a;
+  }
+
+  .work-intro-sub,
+  .section-meta,
+  .folder-count{
+    color:#817b74;
+  }
+
+  .about-eyebrow,
+  .stat-lbl,
+  .clink-lbl{
+    color:#918a82;
+  }
+
+  .about-text,
+  .clink-val{
+    color:#aaa39a;
+  }
+
+  .about-text strong{
+    color:#e0dbd1;
+  }
+
+  .svc-name{
+    color:#b0aaa1;
+  }
+
+  .svc-desc{
+    color:#918a82;
+  }
+
+  .footer-copy,
+  .footer-logo{
+    color:#77716f;
+  }
+
+  #about,#contact{
+    grid-template-columns:1fr;
+    gap:48px;
+  }
+
+  .services-grid{
+    grid-template-columns:1fr;
+  }
+
+  .work-card:hover{
+    height:42vh;
+  }
+
+  .folder-arrow-btn{
+    right:-32px;
+  }
 }
 
 </style>
@@ -797,9 +920,28 @@ body.site-ready .hero-photo-slot {
 
   function eic(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
   function setM(w,h,r,top){
+  var viewportW = window.innerWidth;
+  var mediaCenter = '50%';
+
+  /* No mobile, começa alinhado à direita e centraliza ao expandir */
+  if(viewportW <= 768){
+    var initialW = Math.min(Math.max(200,viewportW * .28),370);
+
+    var expansion = (w - initialW) / (viewportW - initialW);
+    expansion = Math.max(0,Math.min(expansion,1));
+
+    var rightGap = 16 * (1 - expansion);
+    var centerX = viewportW - rightGap - (w / 2);
+
+    mediaCenter = centerX + 'px';
+  }
+
   hm.style.cssText=
-    'position:absolute;overflow:hidden;cursor:none;will-change:width,height,border-radius,top,left,transform;'+
-    'width:'+w+'px;height:'+h+'px;border-radius:'+r+'px;top:'+top+'px;left:50%;transform:translateX(-50%);';
+    'position:absolute;overflow:hidden;cursor:none;'+
+    'will-change:width,height,border-radius,top,left,transform;'+
+    'width:'+w+'px;height:'+h+'px;'+
+    'border-radius:'+r+'px;top:'+top+'px;'+
+    'left:'+mediaCenter+';transform:translateX(-50%);';
 
   var iframe = hm.querySelector('iframe');
 
@@ -811,12 +953,14 @@ body.site-ready .hero-photo-slot {
       ? videoRatio / containerRatio
       : containerRatio / videoRatio;
 
+    iframe.style.setProperty('position','absolute','important');
     iframe.style.setProperty('width','100%','important');
     iframe.style.setProperty('height','100%','important');
     iframe.style.setProperty('top','0','important');
     iframe.style.setProperty('left','0','important');
     iframe.style.setProperty('transform','scale('+scale+')','important');
     iframe.style.setProperty('transform-origin','center center','important');
+    iframe.style.setProperty('border','0','important');
   }
 }
   function initM(){
