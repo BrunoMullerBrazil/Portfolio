@@ -241,6 +241,46 @@ body.cursor-play #cursor-label{opacity:1;}
 .stat-num{font-family:'GCGrind',sans-serif;font-size:clamp(36px,4.5vw,52px);color:#e0dbd1;letter-spacing:-.01em;line-height:1;}
 .stat-lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#3a3a38;}
 
+/* ── CLIENT LOGOS ── */
+.client-marquee{
+  width:100%;
+  overflow:hidden;
+  padding:48px 0;
+  background:transparent;
+  border-top:1px solid rgba(255,255,255,.05);
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.client-track{
+  display:flex;
+  width:max-content;
+  will-change:transform;
+  animation:clientMarqueeRight 28s linear infinite;
+}
+
+.client-group{
+  display:flex;
+  align-items:center;
+  flex-shrink:0;
+  gap:clamp(64px,8vw,140px);
+  padding-right:clamp(64px,8vw,140px);
+}
+
+.client-group img{
+  display:block;
+  width:auto;
+  height:clamp(28px,3vw,52px);
+  max-width:180px;
+  object-fit:contain;
+  opacity:.55;
+  filter:grayscale(1) brightness(0) invert(75%);
+}
+
+@keyframes clientMarqueeRight{
+  from{transform:translateX(-50%);}
+  to{transform:translateX(0);}
+}
+
 /* ── SERVICES ── */
 #services{padding:100px 48px 120px;border-top:1px solid rgba(255,255,255,.05);}
 .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:52px;}
@@ -670,6 +710,31 @@ body.site-ready .hero-photo-slot {
     <div class="stat reveal reveal-d3"><div class="stat-num">BR</div><div class="stat-lbl">Remoto disponível</div></div>
   </div>
 </section>
+
+<!-- ═══ CLIENT LOGOS ═══ -->
+<div class="client-marquee" aria-label="Clientes">
+  <div class="client-track">
+
+    <div class="client-group">
+      <img src="https://drive.google.com/uc?export=view&id=1PCeXGh1gqWwq94Xc4khhcatIWScjn2o7" alt="AENFLOCDL">
+      <img src="https://drive.google.com/uc?export=view&id=12bSHn3nG4S-4pqgTdsXa0tN8n2MAQixZ" alt="GLOSS_COMPANY">
+      <img src="URL_LOGO_CLIENTE_03" alt="Nome do cliente 03">
+      <img src="URL_LOGO_CLIENTE_04" alt="Nome do cliente 04">
+      <img src="URL_LOGO_CLIENTE_05" alt="Nome do cliente 05">
+      <img src="URL_LOGO_CLIENTE_06" alt="Nome do cliente 06">
+    </div>
+
+    <div class="client-group" aria-hidden="true">
+      <img src="https://drive.google.com/uc?export=view&id=1PCeXGh1gqWwq94Xc4khhcatIWScjn2o7" alt="AEMFLOCDL">
+      <img src="https://drive.google.com/uc?export=view&id=12bSHn3nG4S-4pqgTdsXa0tN8n2MAQixZ" alt="GLOSS_COMPANY">
+      <img src="URL_LOGO_CLIENTE_03" alt="">
+      <img src="URL_LOGO_CLIENTE_04" alt="">
+      <img src="URL_LOGO_CLIENTE_05" alt="">
+      <img src="URL_LOGO_CLIENTE_06" alt="">
+    </div>
+
+  </div>
+</div>
 
 <!-- ═══ SERVICES ═══ -->
 <section id="services">
