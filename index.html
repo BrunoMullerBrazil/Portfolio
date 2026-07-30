@@ -343,6 +343,10 @@ footer{padding:22px 48px;border-top:1px solid rgba(255,255,255,.04);display:flex
 
 @media(max-width:768px){
   body{cursor:auto;}
+  #hero-sticky{
+  height:100vh;
+  height:100svh;
+}
 
   #cursor,#cursor-ring,#cursor-label{
     display:none;
@@ -395,17 +399,29 @@ footer{padding:22px 48px;border-top:1px solid rgba(255,255,255,.04);display:flex
 
   /* Indicador de scroll sempre legível */
   .hero-scroll-cue{
-    bottom:18px;
-    z-index:300;
-    opacity:1 !important;
-    animation:none;
-    padding:9px 12px;
-    border:1px solid rgba(12,12,11,.12);
-    border-radius:30px;
-    background:rgba(245,243,239,.88);
-    backdrop-filter:blur(8px);
-    pointer-events:none;
-  }
+  position:absolute !important;
+  left:20px !important;
+  right:auto !important;
+  bottom:max(20px,env(safe-area-inset-bottom)) !important;
+  transform:none !important;
+  z-index:1000 !important;
+
+  display:flex !important;
+  flex-direction:row;
+  align-items:center;
+  gap:10px;
+
+  opacity:1 !important;
+  visibility:visible !important;
+  animation:none !important;
+
+  padding:8px 11px;
+  border:1px solid rgba(12,12,11,.16);
+  border-radius:30px;
+  background:rgba(245,243,239,.92);
+  backdrop-filter:blur(8px);
+  pointer-events:none;
+}
 
   .scroll-mouse{
     border-color:#6f6a63;
