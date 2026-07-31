@@ -1411,14 +1411,28 @@ var CAT_FRAMES = {
     return 'preto';
   }
 
-  /* ── POSICIONA ── */
+  /* ── POSICIONA — metade da pata visível, saindo da borda ── */
   function place(edge){
-    var vw=window.innerWidth, vh=window.innerHeight, h=SZ/2;
+    var vw=window.innerWidth, vh=window.innerHeight;
+    var half=SZ/2; /* mostra só metade: offset = metade do tamanho */
     var x,y,rot;
-    if(edge==='bottom'){ x=Math.max(h,Math.min(mx-h,vw-SZ)); y=vh-SZ+14;    rot='0deg';   }
-    else if(edge==='top'){x=Math.max(h,Math.min(mx-h,vw-SZ)); y=-14;         rot='180deg'; }
-    else if(edge==='left'){ x=-14;      y=Math.max(h,Math.min(my-h,vh-SZ)); rot='90deg';  }
-    else                  { x=vw-SZ+14; y=Math.max(h,Math.min(my-h,vh-SZ)); rot='-90deg';}
+    if(edge==='bottom'){
+      x=Math.max(half,Math.min(mx-half,vw-SZ));
+      y=vh-half;          /* ancora na borda, metade dentro */
+      rot='0deg';
+    } else if(edge==='top'){
+      x=Math.max(half,Math.min(mx-half,vw-SZ));
+      y=-half;            /* metade acima da borda */
+      rot='180deg';
+    } else if(edge==='left'){
+      x=-half;            /* metade à esquerda da borda */
+      y=Math.max(half,Math.min(my-half,vh-SZ));
+      rot='90deg';
+    } else {
+      x=vw-half;          /* metade à direita da borda */
+      y=Math.max(half,Math.min(my-half,vh-SZ));
+      rot='-90deg';
+    }
     paw.style.left=x+'px'; paw.style.top=y+'px';
     paw.style.transform='rotate('+rot+')';
   }
