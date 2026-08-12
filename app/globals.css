@@ -939,27 +939,11 @@ body.site-ready .hero-photo-slot {
 
 
 /* ── MOTION EXTRAS (3rd <style> block from index.html) ──
-   Cat-paw cursor system, work-intro floating particles, folder-burst
-   particles, and higher-specificity per-section motion overrides
-   (About/Contact/nav) that come later in source order and win the
-   cascade over the base rules above. ── */
-/* ── CAT PAW SYSTEM ── */
-#catPaw{
-  position:fixed;
-  width:90px;height:90px;
-  pointer-events:none;
-  z-index:9999;
-  opacity:0;
-  transition:opacity .3s ease;
-  image-rendering:auto;
-}
-#catPaw img{
-  position:absolute;top:0;left:0;
-  width:100%;height:100%;
-  opacity:0;
-  transition:opacity .06s linear;
-}
-#catPaw img.active{ opacity:1; }
+   Work-intro floating particles, folder-burst particles, and
+   higher-specificity per-section motion overrides (About/Contact/nav)
+   that come later in source order and win the cascade over the base
+   rules above. The cat-paw cursor system that also lived in this
+   block was intentionally dropped, not ported. ── */
 
 /* ── D: Partículas flutuantes work-intro ── */
 .wi-pt{
