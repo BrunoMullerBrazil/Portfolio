@@ -936,3 +936,226 @@ body.site-ready .hero-photo-slot {
   animation-play-state: running !important;
 }
 
+
+
+/* ── MOTION EXTRAS (3rd <style> block from index.html) ──
+   Cat-paw cursor system, work-intro floating particles, folder-burst
+   particles, and higher-specificity per-section motion overrides
+   (About/Contact/nav) that come later in source order and win the
+   cascade over the base rules above. ── */
+/* ── CAT PAW SYSTEM ── */
+#catPaw{
+  position:fixed;
+  width:90px;height:90px;
+  pointer-events:none;
+  z-index:9999;
+  opacity:0;
+  transition:opacity .3s ease;
+  image-rendering:auto;
+}
+#catPaw img{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;
+  opacity:0;
+  transition:opacity .06s linear;
+}
+#catPaw img.active{ opacity:1; }
+
+/* ── D: Partículas flutuantes work-intro ── */
+.wi-pt{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(224,214,196,.95);
+  box-shadow:0 0 6px 2px rgba(224,214,196,.45), 0 0 18px 4px rgba(224,214,196,.18);
+  pointer-events:none;
+  z-index:1;
+  opacity:0;
+}
+@keyframes wiDrift0{
+  0%  {opacity:0; transform:translate(0,0);}
+  12% {opacity:.85;}
+  50% {opacity:.65; transform:translate(22px,-38px);}
+  88% {opacity:.75;}
+  100%{opacity:0;  transform:translate(-10px,14px);}
+}
+@keyframes wiDrift1{
+  0%  {opacity:0; transform:translate(0,0);}
+  14% {opacity:.7;}
+  45% {opacity:.55; transform:translate(-18px,-28px) rotate(45deg);}
+  85% {opacity:.65;}
+  100%{opacity:0;  transform:translate(8px,16px);}
+}
+@keyframes wiDrift2{
+  0%  {opacity:0; transform:translate(0,0);}
+  10% {opacity:.9;}
+  52% {opacity:.7; transform:translate(14px,-44px) rotate(-30deg);}
+  90% {opacity:.8;}
+  100%{opacity:0;  transform:translate(-12px,10px);}
+}
+@keyframes wiDrift3{
+  0%  {opacity:0; transform:translate(0,0) scale(1);}
+  16% {opacity:.6;}
+  48% {opacity:.5; transform:translate(-24px,-22px) scale(1.2);}
+  84% {opacity:.55;}
+  100%{opacity:0;  transform:translate(6px,18px) scale(.8);}
+}
+@keyframes wiDrift4{
+  0%  {opacity:0; transform:translate(0,0);}
+  11% {opacity:.8;}
+  55% {opacity:.6; transform:translate(28px,-32px);}
+  89% {opacity:.7;}
+  100%{opacity:0;  transform:translate(-8px,12px);}
+}
+@keyframes wiDrift5{
+  0%  {opacity:0; transform:translate(0,0) rotate(0deg);}
+  13% {opacity:.7;}
+  50% {opacity:.55; transform:translate(-16px,-40px) rotate(60deg);}
+  87% {opacity:.65;}
+  100%{opacity:0;  transform:translate(10px,8px) rotate(-20deg);}
+}
+
+/* ── E: Partículas do burst da pasta ── */
+.bp{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(224,214,196,.95);
+  box-shadow:0 0 8px 2px rgba(224,214,196,.6);
+  top:48%;left:50%;
+  pointer-events:none;z-index:20;
+}
+@keyframes bpFly{
+  0%  {transform:translate(-50%,-50%) rotate(var(--a)) translateY(0)   scale(1);   opacity:1;}
+  50% {opacity:.8;}
+  100%{transform:translate(-50%,-50%) rotate(var(--a)) translateY(-70px) scale(0); opacity:0;}
+}
+
+/* ── About: hierarquia de motion ── */
+
+/* Eyebrow: rápido, discreto — apenas fades */
+.about-eyebrow.reveal{
+  transform:translateY(12px);
+  transition:opacity .55s cubic-bezier(0.16,1,0.3,1), transform .6s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* Texto: mais lento, mais pesado — dá peso ao parágrafo */
+.about-text.reveal{
+  transform:translateY(28px);
+  transition:opacity 1.3s cubic-bezier(0.16,1,0.3,1), transform 1.5s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* Ver trajetória: desliza da esquerda com spring — é o CTA */
+.about-traj.reveal{
+  transform:translateX(-22px);
+  transition:opacity .8s cubic-bezier(0.16,1,0.3,1), transform 1.0s cubic-bezier(0.34,1.56,0.64,1);
+}
+.about-traj.visible{ transform:translateX(0); }
+
+/* Stats: ocultos até stagger do JS — statPop mais expressivo */
+.stat-num{
+  opacity:0;
+  transform:scale(.65) translateY(10px);
+  transition:opacity .5s, transform .5s;
+}
+.stat-num.popped{
+  animation:statPopNew .65s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+@keyframes statPopNew{
+  0%   {opacity:0; transform:scale(.55) translateY(14px);}
+  55%  {opacity:1; transform:scale(1.08) translateY(-3px);}
+  78%  {transform:scale(.97) translateY(1px);}
+  100% {opacity:1; transform:scale(1) translateY(0);}
+}
+
+/* Stat label: entra mais suave depois do número */
+.stat-lbl{
+  opacity:0;
+  transition:opacity .6s cubic-bezier(0.16,1,0.3,1);
+}
+.stat-lbl.visible{ opacity:1; }
+
+/* ── Contact: clinks com motion real ── */
+
+/* Hover no link: sublinha cresce, gap aumenta */
+.clink{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:20px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  gap:0px;
+  transition:border-color .3s, gap .4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.clink:hover{ border-color:rgba(255,255,255,.18); gap:8px; }
+
+/* Left group: sutil translate no hover */
+.clink-lbl{
+  font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:#444;
+  transition:color .3s;
+}
+.clink:hover .clink-lbl{ color:#666; }
+
+.clink-val{
+  font-family:var(--font-gcgrind),sans-serif;
+  font-size:clamp(18px,2.4vw,28px);
+  letter-spacing:.03em;
+  color:#e0dbd1;
+  flex:1;
+  transition:color .3s, transform .4s cubic-bezier(0.16,1,0.3,1);
+}
+.clink:hover .clink-val{ color:#ffffff; transform:translateX(4px); }
+
+/* Arrow: spring no hover */
+.clink-arrow{
+  color:#444;
+  transform:translate(0,0) rotate(0deg);
+  transition:color .3s, transform .45s cubic-bezier(0.34,1.56,0.64,1);
+}
+.clink:hover .clink-arrow{
+  color:#e0dbd1;
+  transform:translate(8px,-8px) rotate(0deg);
+}
+
+/* Contact: links à esquerda, headline à direita *
+/* About: texto à esquerda (55%), stats horizontais embaixo */
+#about > div:first-child{
+  max-width:55%;
+  padding-bottom:80px;
+}
+.about-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  border-top:1px solid rgba(255,255,255,.06);
+  margin-top:0;
+}
+.stat{
+  padding:36px 0;
+  border-bottom:none;
+  border-right:1px solid rgba(255,255,255,.05);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding-right:48px;
+}
+.stat:last-child{ border-right:none; }
+.stat-num{ font-size:clamp(48px,6vw,80px); font-family:var(--font-gcgrind),sans-serif; letter-spacing:-.02em; color:#e0dbd1; }
+.stat-lbl{ font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:#444; }
+#contact > div:first-child { order:2; }
+#contact > div:not(:first-child) { order:1; }
+
+/* ── Nav entrance: stagger por item (inspirado no vídeo) ── */
+.hero-nav-logo{
+  opacity:0;
+  transform:translateY(-10px);
+  animation:navItemIn .5s .15s cubic-bezier(0.22,1,0.36,1) both;
+}
+.hero-nav-links a{
+  opacity:0;
+  transform:translateY(-8px);
+  animation:navItemIn .4s forwards cubic-bezier(0.22,1,0.36,1);
+}
+.hero-nav-links a:nth-child(1){ animation-delay:.28s; }
+.hero-nav-links a:nth-child(2){ animation-delay:.38s; }
+.hero-nav-links a:nth-child(3){ animation-delay:.48s; }
+@keyframes navItemIn{
+  from{ opacity:0; transform:translateY(-10px); }
+  to  { opacity:1; transform:translateY(0); }
+}
