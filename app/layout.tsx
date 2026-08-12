@@ -5,6 +5,7 @@ import SmoothScroll from "@/components/SmoothScroll";
 import Cursor from "@/components/Cursor";
 import Loader from "@/components/Loader";
 import RevealObserver from "@/components/RevealObserver";
+import MagneticCursor from "@/components/MagneticCursor";
 
 export const metadata: Metadata = {
   title: "Bruno Müller — Videomaker & Editor",
@@ -22,6 +23,7 @@ export default function RootLayout({
         <Cursor />
         <SmoothScroll />
         <RevealObserver />
+        <MagneticCursor />
         {children}
       </body>
     </html>

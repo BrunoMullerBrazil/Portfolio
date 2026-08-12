@@ -26,9 +26,9 @@ export default function About() {
         if (entries[0].isIntersecting && !triggered) {
           triggered = true;
           io.disconnect();
-          statsWrap.querySelectorAll<HTMLElement>("[data-count]").forEach((el, i) => {
+          statsWrap.querySelectorAll<HTMLElement>(".stat-num").forEach((el, i) => {
             setTimeout(() => {
-              ac(el, +(el.dataset.count || 0), el.dataset.suffix || "", 1000);
+              if (el.dataset.count) ac(el, +el.dataset.count, el.dataset.suffix || "", 1000);
               el.classList.add("popped");
               const lbl = el.parentElement?.querySelector<HTMLElement>(".stat-lbl");
               if (lbl) setTimeout(() => lbl.classList.add("visible"), 180);
