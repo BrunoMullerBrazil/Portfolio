@@ -1,3 +1,5 @@
+import { withBasePath } from "@/lib/basePath";
+
 const LINKS = [
   { href: "mailto:contato@aue.productions", label: "Email", value: "contato@aue.productions", external: false },
   { href: "https://instagram.com/aue.produ", label: "Instagram", value: "@aue.produ", external: true },
@@ -8,13 +10,12 @@ export default function Contact() {
   return (
     <section id="contact">
       <div className="reveal">
-        <div className="contact-hl">
-          Vamos
-          <br />
-          trabalhar
-          <br />
-          <em>juntos.</em>
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="contact-hl-img"
+          src={withBasePath("/assets/logos/vamos.png")}
+          alt="Vamos trabalhar juntos."
+        />
       </div>
       <div>
         <div className="contact-links">
