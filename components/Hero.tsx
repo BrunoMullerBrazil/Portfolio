@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Logo } from "./Logo";
+import { withBasePath } from "@/lib/basePath";
 
 function eic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -222,7 +223,7 @@ export default function Hero() {
           </div>
           <div className="hero-signature">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/signature.png" alt="" />
+            <img src={withBasePath("/assets/signature.png")} alt="" />
           </div>
         </div>
 

@@ -2,6 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { withBasePath } from "@/lib/basePath";
+
+const LOGOS = [
+  { file: "TOYOTA.png", alt: "Toyota" },
+  { file: "STALEKS.png", alt: "Staleks" },
+  { file: "AEMFLOCDL.png", alt: "AEMFLO CDL" },
+  { file: "GLOSSCOMPANY.png", alt: "Gloss Company" },
+];
 
 function ac(el: HTMLElement, t: number, s: string, d: number) {
   let st: number | null = null;
@@ -94,16 +102,14 @@ export default function About() {
       <div className="client-marquee" aria-label="Clientes">
         <div className="client-track">
           <div className="client-group">
-            <img src="/assets/logos/TOYOTA.png" alt="Toyota" />
-            <img src="/assets/logos/STALEKS.png" alt="Staleks" />
-            <img src="/assets/logos/AEMFLOCDL.png" alt="AEMFLO CDL" />
-            <img src="/assets/logos/GLOSSCOMPANY.png" alt="Gloss Company" />
+            {LOGOS.map((l) => (
+              <img key={l.file} src={withBasePath(`/assets/logos/${l.file}`)} alt={l.alt} />
+            ))}
           </div>
           <div className="client-group" aria-hidden="true">
-            <img src="/assets/logos/TOYOTA.png" alt="" />
-            <img src="/assets/logos/STALEKS.png" alt="" />
-            <img src="/assets/logos/AEMFLOCDL.png" alt="" />
-            <img src="/assets/logos/GLOSSCOMPANY.png" alt="" />
+            {LOGOS.map((l) => (
+              <img key={l.file} src={withBasePath(`/assets/logos/${l.file}`)} alt="" />
+            ))}
           </div>
         </div>
       </div>
