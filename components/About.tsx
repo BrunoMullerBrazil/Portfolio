@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 
 function ac(el: HTMLElement, t: number, s: string, d: number) {
   let st: number | null = null;
@@ -56,7 +57,7 @@ export default function About() {
             Trabalho em Florianópolis e de forma remota em projetos de <strong>brand film</strong>, making of, motion
             e editorial — do briefing à entrega final.
           </div>
-          <a href="trajetoria.html" className="about-traj reveal reveal-d3">
+          <Link href="/trajetoria" className="about-traj reveal reveal-d3">
             Minha trajetória
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path
@@ -67,7 +68,7 @@ export default function About() {
                 strokeLinejoin="round"
               />
             </svg>
-          </a>
+          </Link>
         </div>
         <div className="about-stats" ref={statsWrapRef}>
           <div className="stat reveal reveal-d1">
