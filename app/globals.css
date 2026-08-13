@@ -60,7 +60,7 @@ body.cursor-play #cursor-label{opacity:1;}
 .hero-role-name{font-family:var(--font-gcgrind),sans-serif;font-size:clamp(18px,2.5vw,28px);letter-spacing:.06em;color:#e0dbd1;}
 .hero-role-name em{font-style:italic;font-family:Georgia,serif;letter-spacing:.02em;}
 @keyframes fadeUpDark{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
-.hero-scroll-cue{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;animation:fadeUpDark .6s 1.5s cubic-bezier(.22,1,.36,1) forwards;transition:opacity .6s ease;}
+.hero-scroll-cue{position:absolute;bottom:44px;left:48px;z-index:100;display:flex;flex-direction:column;align-items:flex-start;gap:8px;opacity:0;animation:fadeUpDark .6s 1.5s cubic-bezier(.22,1,.36,1) forwards;transition:opacity .6s ease;}
 .scroll-mouse{width:22px;height:34px;border:1px solid #b0a898;border-radius:11px;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;}
 .scroll-dot{width:3px;height:6px;background:#b0a898;border-radius:2px;animation:scrollBounce 1.8s ease-in-out infinite;}
 @keyframes scrollBounce{0%,100%{transform:translateY(0);opacity:1;}60%{transform:translateY(8px);opacity:.3;}}
