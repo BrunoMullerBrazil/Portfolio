@@ -7,6 +7,22 @@ function eic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+// Base (pre-scroll) size of the hero media card. The desktop floor (200x280)
+// is too wide for phones — it collides with the greeting/signature text — so
+// mobile gets its own, smaller floor.
+function baseMediaSize(vw: number, vh: number) {
+  if (vw <= 768) {
+    return {
+      W0: Math.min(Math.max(80, vw * 0.22), 150),
+      H0: Math.min(Math.max(160, vh * 0.3), 280),
+    };
+  }
+  return {
+    W0: Math.min(Math.max(200, vw * 0.28), 370),
+    H0: Math.min(Math.max(280, vh * 0.54), 640),
+  };
+}
+
 export default function Hero() {
   const heroMediaRef = useRef<HTMLDivElement>(null);
   const heroTextsRef = useRef<HTMLDivElement>(null);
@@ -88,7 +104,7 @@ export default function Hero() {
       const isMobile = vw <= 768;
       let leftVal: string, txVal: string;
       if (isMobile) {
-        const W0 = Math.min(Math.max(180, vw * 0.52), 300);
+        const { W0 } = baseMediaSize(vw, window.innerHeight);
         const expansion = Math.max(0, Math.min((w - W0) / (vw - W0), 1));
         const rightGap = 12 * (1 - expansion);
         const centerX = vw - rightGap - w + w * 0.5 * expansion;
@@ -121,8 +137,7 @@ export default function Hero() {
     function initM() {
       const vh = window.innerHeight,
         vw = window.innerWidth;
-      const W = Math.min(Math.max(200, vw * 0.28), 370),
-        H = Math.min(Math.max(280, vh * 0.54), 640);
+      const { W0: W, H0: H } = baseMediaSize(vw, vh);
       setM(W, H, 20, (vh - H) / 2);
       hm!.style.opacity = "0";
       hm!.style.filter = "blur(16px)";
@@ -134,8 +149,7 @@ export default function Hero() {
       const sy = window.scrollY,
         vh = window.innerHeight,
         vw = window.innerWidth;
-      const W0 = Math.min(Math.max(200, vw * 0.28), 370),
-        H0 = Math.min(Math.max(280, vh * 0.54), 640);
+      const { W0, H0 } = baseMediaSize(vw, vh);
       const t1 = Math.min(sy / (vh * 3), 1),
         e1 = eic(t1);
       const cW = W0 + (vw - W0) * e1,

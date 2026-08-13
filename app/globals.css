@@ -1143,3 +1143,24 @@ body.site-ready .hero-photo-slot {
   from{ opacity:0; transform:translateY(-10px); }
   to  { opacity:1; transform:translateY(0); }
 }
+
+/* ── MOBILE FIXES (not present in index.html) ──
+   Two real bugs the ported CSS carried over from the original site:
+   1. The "#about,#contact{grid-template-columns:1fr}" mobile rule
+      targets #about, but #about is `display:block` — the actual grid
+      is `.about-stats`, which was never touched and stayed 3 columns
+      on phones. #contact happened to work because #contact itself is
+      the grid.
+   2. `.hero-text-wrap` uses `justify-content:space-between`, which is
+      fine on wide screens but pins `.hero-signature` to the same
+      right-hand edge where `#heroMedia` sits on mobile, so they
+      overlap. ── */
+@media(max-width:768px){
+  #about > div:first-child{ max-width:100%; }
+  .about-stats{ grid-template-columns:1fr; }
+  .stat{ border-right:none; border-bottom:1px solid rgba(255,255,255,.05); padding:24px 0; }
+  .stat:last-child{ border-bottom:none; }
+
+  .hero-text-wrap{ justify-content:flex-start; flex-wrap:wrap; gap:8px; }
+  .hero-signature{ width:clamp(46px,17vw,150px); }
+}
