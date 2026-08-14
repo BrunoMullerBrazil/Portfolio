@@ -493,7 +493,7 @@ body.cursor-play #cursor-label{opacity:1;}
 .svc-desc{font-size:13px;line-height:1.8;color:#444;}
 
 /* ── CONTACT ── */
-#contact{padding:120px 48px 90px;border-top:1px solid rgba(136,144,99,.1);display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;position:relative;overflow:hidden;background:radial-gradient(120% 130% at 50% 115%,#161b10 0%,#0e120a 55%,#0c0c0b 100%);}#contact::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(150,168,110,.028) 27px 28px),repeating-linear-gradient(90deg,transparent 0 27px,rgba(150,168,110,.028) 27px 28px);}#contact::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:var(--winshadow) center left/cover no-repeat;opacity:.42;transform:scaleX(-1);}#contact>*{position:relative;z-index:1;}
+#contact{padding:120px 48px 90px;border-top:1px solid rgba(136,144,99,.1);display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;position:relative;overflow:hidden;background:radial-gradient(120% 130% at 50% 115%,#161b10 0%,#0e120a 55%,#0c0c0b 100%);}#contact::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(150,168,110,.028) 27px 28px),repeating-linear-gradient(90deg,transparent 0 27px,rgba(150,168,110,.028) 27px 28px);}#contact::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:var(--winshadow) center left/cover no-repeat;opacity:.42;mix-blend-mode:multiply;transform:scaleX(-1);}#contact>*{position:relative;z-index:1;}
 .contact-hl-img{width:clamp(280px,34vw,520px);max-width:100%;height:auto;display:block;filter:drop-shadow(0 24px 40px rgba(0,0,0,.45));}
 .contact-links{display:flex;flex-direction:column;}
 /* clink override → ver bloco Contact motion */
@@ -859,7 +859,7 @@ body.dark-mode #cursor-ring{
 .about-traj:hover svg{transform:translateX(6px);}
 
 /* ── Müller logo: cor por modo (todos os paths) ── */
-body.hero-mode .hero-nav-logo svg path { fill: #0c0c0b; }
+body.hero-mode .hero-nav-logo svg path { fill: #e0dbd1; }
 body.dark-mode .hero-nav-logo svg path { fill: #e0dbd1; }
 .nav-dark-logo svg path { fill: #e0dbd1; }
 .footer-logo svg path { fill: #5a5a52; }

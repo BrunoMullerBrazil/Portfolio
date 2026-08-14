@@ -108,7 +108,14 @@ export default function Hero() {
         const { W0 } = baseMediaSize(vw, window.innerHeight);
         const expansion = Math.max(0, Math.min((w - W0) / (vw - W0), 1));
         const rightGap = 12 * (1 - expansion);
-        const centerX = vw - rightGap - w + w * 0.5 * expansion;
+        // Interpolate from right-anchored (small card, expansion 0) to
+        // truly horizontally centered (expansion 1) — the old formula
+        // (vw - rightGap - w + w*0.5*expansion) only converged to vw/2
+        // at full width instead of 0, leaving the card stuck off-screen
+        // to the right once it grew to fill the viewport.
+        const rightAnchoredLeft = vw - rightGap - w;
+        const centeredLeft = (vw - w) / 2;
+        const centerX = rightAnchoredLeft + (centeredLeft - rightAnchoredLeft) * expansion;
         leftVal = Math.max(0, centerX) + "px";
         txVal = "none";
       } else {
