@@ -88,14 +88,17 @@ export default function WorkIntro() {
     let current = 0;
     let inView = false;
 
-    function stopVideo() {
+    function unmountVideo() {
       media!.querySelector("iframe")?.remove();
       playBtn!.style.removeProperty("display");
     }
 
-    function playVideo(vimeoId: string) {
+    // muted=1 is required for the iframe to autoplay without a prior user
+    // gesture (browser autoplay policy) — native Vimeo controls still let
+    // the visitor unmute.
+    function mountVideo(vimeoId: string) {
       const iframe = document.createElement("iframe");
-      iframe.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&title=0&byline=0&portrait=0`;
+      iframe.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&title=0&byline=0&portrait=0`;
       iframe.allow = "autoplay; fullscreen; picture-in-picture";
       iframe.allowFullscreen = true;
       iframe.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;";
@@ -105,7 +108,7 @@ export default function WorkIntro() {
 
     function paint() {
       const p = filtered[current];
-      stopVideo();
+      unmountVideo();
       media!.style.background = GRADS[(p.id - 1) % GRADS.length];
       frame!.classList.toggle("vertical", p.orientation === "vertical");
       numEl!.textContent = p.num + " — Projeto";
@@ -115,12 +118,13 @@ export default function WorkIntro() {
       tagsEl!.textContent = p.tags;
       currEl!.textContent = pad(current + 1);
       totalEl!.textContent = pad(filtered.length);
+      if (inView) mountVideo(p.vimeoId);
     }
 
     let swapTimer: ReturnType<typeof setTimeout>;
     function render() {
       if (filtered.length === 0) return;
-      stopVideo();
+      unmountVideo();
       frame!.classList.add("cine-swap");
       meta!.classList.add("cine-swap");
       swapTimer = setTimeout(() => {
@@ -150,7 +154,7 @@ export default function WorkIntro() {
 
     function onPlayClick() {
       const p = filtered[current];
-      if (p) playVideo(p.vimeoId);
+      if (p) mountVideo(p.vimeoId);
     }
     playBtn.addEventListener("click", onPlayClick);
 
@@ -194,7 +198,14 @@ export default function WorkIntro() {
     if (sec && "IntersectionObserver" in window) {
       sectionObserver = new IntersectionObserver(
         (entries) => {
+          const wasInView = inView;
           inView = entries[0].isIntersecting;
+          if (inView && !wasInView) {
+            const p = filtered[current];
+            if (p) mountVideo(p.vimeoId);
+          } else if (!inView && wasInView) {
+            unmountVideo();
+          }
         },
         { threshold: 0.2 }
       );
