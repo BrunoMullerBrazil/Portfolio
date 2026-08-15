@@ -8,6 +8,18 @@ function eic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+// TODO: swap MOBILE_VIMEO_ID for a vertical-shot video once picked — right
+// now it reuses the horizontal desktop video, which is exactly the "crops
+// oddly at fullscreen" problem this is meant to fix.
+const DESKTOP_VIMEO_ID = "1213900059";
+const MOBILE_VIMEO_ID = "1213900059";
+const DESKTOP_VIDEO_RATIO = 16 / 9;
+const MOBILE_VIDEO_RATIO = 9 / 16;
+
+function vimeoSrc(id: string) {
+  return `https://player.vimeo.com/video/${id}?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0`;
+}
+
 // Base (pre-scroll) size of the hero media card. The desktop floor (200x280)
 // is too wide for phones — it collides with the greeting/signature text — so
 // mobile gets its own, smaller floor.
@@ -130,7 +142,7 @@ export default function Hero() {
 
       const iframe = hm!.querySelector<HTMLIFrameElement>("iframe");
       if (iframe) {
-        const videoRatio = 16 / 9;
+        const videoRatio = isMobile ? MOBILE_VIDEO_RATIO : DESKTOP_VIDEO_RATIO;
         const containerRatio = w / h;
         const scale = containerRatio < videoRatio ? videoRatio / containerRatio : containerRatio / videoRatio;
         iframe.style.setProperty("width", "100%", "important");
@@ -142,10 +154,24 @@ export default function Hero() {
       }
     }
 
+    // Only touch the iframe's src when isMobile actually flips (e.g. a phone
+    // rotating past the 768px breakpoint) — resize fires continuously while
+    // dragging a window, and resetting src on every tick would restart
+    // playback each time.
+    let lastIsMobile: boolean | null = null;
+    function syncVideoSrc() {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile === lastIsMobile) return;
+      lastIsMobile = isMobile;
+      const iframe = hm!.querySelector<HTMLIFrameElement>("iframe");
+      if (iframe) iframe.src = vimeoSrc(isMobile ? MOBILE_VIMEO_ID : DESKTOP_VIMEO_ID);
+    }
+
     function initM() {
       const vh = window.innerHeight,
         vw = window.innerWidth;
       const { W0: W, H0: H } = baseMediaSize(vw, vh);
+      syncVideoSrc();
       setM(W, H, 20, (vh - H) / 2);
       hm!.style.opacity = "0";
       hm!.style.filter = "blur(16px)";
@@ -244,7 +270,7 @@ export default function Hero() {
         <div id="heroMedia" ref={heroMediaRef}>
           <div className="hero-media-inner">
             <iframe
-              src="https://player.vimeo.com/video/1213900059?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0"
+              src={vimeoSrc(DESKTOP_VIMEO_ID)}
               frameBorder="0"
               allow="autoplay; fullscreen"
               allowFullScreen
