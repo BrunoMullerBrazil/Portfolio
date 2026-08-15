@@ -10,16 +10,15 @@ type Project = {
   desc: string;
   tags: string;
   filter: "brand-film" | "bts" | "motion";
+  vimeoId: string;
+  orientation: "horizontal" | "vertical";
 };
 
+// Client/desc/tags are intentionally blank — real videos first, copy comes later.
 const PROJECTS: Project[] = [
-  { id: 1, num: "01", name: "Projeto 01", client: "Cliente · 2025", desc: "Produção audiovisual criada para fortalecer a presença da marca em momentos estratégicos da campanha.", tags: "Direção · Captação · Edição", filter: "brand-film" },
-  { id: 2, num: "02", name: "Projeto 02", client: "Cliente · 2024", desc: "Brand film concebido para comunicar os valores da empresa para um público B2B de alto padrão.", tags: "Direção · Edição · Motion", filter: "brand-film" },
-  { id: 3, num: "03", name: "Projeto 03", client: "Cliente · 2025", desc: "Making of completo do processo de produção, com registro de bastidores e momentos exclusivos.", tags: "Captação · Edição", filter: "bts" },
-  { id: 4, num: "04", name: "Projeto 04", client: "Cliente · 2024", desc: "BTS de produção publicitária de grande porte, entregue para distribuição interna e redes sociais.", tags: "Captação · Edição · BTS", filter: "bts" },
-  { id: 5, num: "05", name: "Projeto 05", client: "Cliente · 2025", desc: "Motion design editorial criado para reforçar a identidade da marca em plataformas digitais.", tags: "Motion · Editorial", filter: "motion" },
-  { id: 6, num: "06", name: "Projeto 06", client: "Cliente · 2024", desc: "Edição criativa com ritmo e narrativa pensados para maximizar retenção em conteúdo vertical.", tags: "Edição · Motion", filter: "motion" },
-  { id: 7, num: "07", name: "Projeto 07", client: "Cliente · 2024", desc: "Série de vídeos editoriais com identidade visual unificada e fluxo de edição acelerado.", tags: "Motion · Editorial · Edição", filter: "motion" },
+  { id: 1, num: "01", name: "Motion Outubro Gloss", client: "", desc: "", tags: "", filter: "motion", vimeoId: "1218434521", orientation: "horizontal" },
+  { id: 2, num: "02", name: "Vídeo Promo Gloss", client: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435106", orientation: "vertical" },
+  { id: 3, num: "03", name: "Vídeo LP", client: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435477", orientation: "horizontal" },
 ];
 
 const GRADS = [
@@ -45,6 +44,7 @@ export default function WorkIntro() {
   const frameRef = useRef<HTMLDivElement>(null);
   const metaRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
+  const playBtnRef = useRef<HTMLButtonElement>(null);
   const numRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const clientRef = useRef<HTMLDivElement>(null);
@@ -60,6 +60,7 @@ export default function WorkIntro() {
     const frame = frameRef.current;
     const meta = metaRef.current;
     const media = mediaRef.current;
+    const playBtn = playBtnRef.current;
     const numEl = numRef.current;
     const titleEl = titleRef.current;
     const clientEl = clientRef.current;
@@ -67,7 +68,19 @@ export default function WorkIntro() {
     const tagsEl = tagsRef.current;
     const currEl = currRef.current;
     const totalEl = totalRef.current;
-    if (!frame || !meta || !media || !numEl || !titleEl || !clientEl || !descEl || !tagsEl || !currEl || !totalEl)
+    if (
+      !frame ||
+      !meta ||
+      !media ||
+      !playBtn ||
+      !numEl ||
+      !titleEl ||
+      !clientEl ||
+      !descEl ||
+      !tagsEl ||
+      !currEl ||
+      !totalEl
+    )
       return;
 
     let activeFilter: "all" | Project["filter"] = "all";
@@ -75,9 +88,26 @@ export default function WorkIntro() {
     let current = 0;
     let inView = false;
 
+    function stopVideo() {
+      media!.querySelector("iframe")?.remove();
+      playBtn!.style.removeProperty("display");
+    }
+
+    function playVideo(vimeoId: string) {
+      const iframe = document.createElement("iframe");
+      iframe.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&title=0&byline=0&portrait=0`;
+      iframe.allow = "autoplay; fullscreen; picture-in-picture";
+      iframe.allowFullscreen = true;
+      iframe.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;";
+      media!.appendChild(iframe);
+      playBtn!.style.display = "none";
+    }
+
     function paint() {
       const p = filtered[current];
+      stopVideo();
       media!.style.background = GRADS[(p.id - 1) % GRADS.length];
+      frame!.classList.toggle("vertical", p.orientation === "vertical");
       numEl!.textContent = p.num + " — Projeto";
       titleEl!.textContent = p.name;
       clientEl!.textContent = p.client;
@@ -90,6 +120,7 @@ export default function WorkIntro() {
     let swapTimer: ReturnType<typeof setTimeout>;
     function render() {
       if (filtered.length === 0) return;
+      stopVideo();
       frame!.classList.add("cine-swap");
       meta!.classList.add("cine-swap");
       swapTimer = setTimeout(() => {
@@ -116,6 +147,12 @@ export default function WorkIntro() {
     const prevBtn = prevBtnRef.current;
     nextBtn?.addEventListener("click", onNext);
     prevBtn?.addEventListener("click", onPrev);
+
+    function onPlayClick() {
+      const p = filtered[current];
+      if (p) playVideo(p.vimeoId);
+    }
+    playBtn.addEventListener("click", onPlayClick);
 
     const filterButtons = filterBtnRefs.current.filter(Boolean) as HTMLButtonElement[];
     function makeFilterHandler(btn: HTMLButtonElement, value: "all" | Project["filter"]) {
@@ -170,6 +207,7 @@ export default function WorkIntro() {
       clearTimeout(swapTimer);
       nextBtn?.removeEventListener("click", onNext);
       prevBtn?.removeEventListener("click", onPrev);
+      playBtn.removeEventListener("click", onPlayClick);
       filterButtons.forEach((btn, i) => btn.removeEventListener("click", filterHandlers[i]));
       document.removeEventListener("keydown", onKeydown);
       frame!.removeEventListener("touchstart", onTouchStart);
@@ -202,7 +240,7 @@ export default function WorkIntro() {
         <div className="cine-stage reveal reveal-d2">
           <div className="cine-frame" id="cineFrame" ref={frameRef}>
             <div className="cine-media" id="cineMedia" ref={mediaRef} />
-            <button className="cine-play" aria-label="Assistir">
+            <button className="cine-play" aria-label="Assistir" ref={playBtnRef}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M6 4L15 10L6 16V4Z" fill="rgba(255,255,255,.9)" />
               </svg>
@@ -216,13 +254,9 @@ export default function WorkIntro() {
             <h3 className="cine-title" id="cineTitle" ref={titleRef}>
               Projeto 01
             </h3>
-            <div className="cine-client" id="cineClient" ref={clientRef}>
-              Cliente · 2025
-            </div>
+            <div className="cine-client" id="cineClient" ref={clientRef} />
             <p className="cine-desc" id="cineDesc" ref={descRef} />
-            <div className="cine-tags" id="cineTags" ref={tagsRef}>
-              Direção · Captação · Edição
-            </div>
+            <div className="cine-tags" id="cineTags" ref={tagsRef} />
           </div>
         </div>
 
@@ -236,7 +270,7 @@ export default function WorkIntro() {
             <span id="cineCurr" ref={currRef}>
               01
             </span>{" "}
-            / <span id="cineTotal" ref={totalRef}>07</span>
+            / <span id="cineTotal" ref={totalRef}>03</span>
           </div>
           <button className="cine-arrow" id="cineNext" aria-label="Próximo" ref={nextBtnRef}>
             <svg width="15" viewBox="0 0 14 14" fill="none">
