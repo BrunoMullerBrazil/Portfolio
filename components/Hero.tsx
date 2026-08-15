@@ -183,13 +183,17 @@ export default function Hero() {
       const sy = window.scrollY,
         vh = window.innerHeight,
         vw = window.innerWidth;
+      // Desktop's 3x-viewport expansion distance felt like too much
+      // scrolling to reach the fullscreen video on a phone (reported by a
+      // friend testing the deployed site) — shrink it on mobile only.
+      const expandVh = vw <= 768 ? 1.8 : 3;
       const { W0, H0 } = baseMediaSize(vw, vh);
-      const t1 = Math.min(sy / (vh * 3), 1),
+      const t1 = Math.min(sy / (vh * expandVh), 1),
         e1 = eic(t1);
       const cW = W0 + (vw - W0) * e1,
         cH = H0 + (vh - H0) * e1,
         cR = 20 * (1 - e1);
-      const t2 = Math.max(0, Math.min((sy - vh * 3) / vh, 1)),
+      const t2 = Math.max(0, Math.min((sy - vh * expandVh) / vh, 1)),
         e2 = eic(t2);
       setM(cW, cH, cR, (vh - cH) / 2 - e2 * (vh + cH / 2));
       const uiF = Math.max(0, 1 - (t1 - 0.15) / 0.3);
@@ -202,7 +206,7 @@ export default function Hero() {
       hs!.style.backgroundColor = "rgba(245,243,239," + (1 - e2) + ")";
 
       const nd = document.getElementById("nav-dark");
-      if (sy >= vh * 3.8) {
+      if (sy >= vh * (expandVh + 0.8)) {
         document.body.classList.remove("hero-mode");
         document.body.classList.add("dark-mode");
         nd?.classList.add("visible");

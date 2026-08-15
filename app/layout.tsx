@@ -6,6 +6,7 @@ import Cursor from "@/components/Cursor";
 import Loader from "@/components/Loader";
 import RevealObserver from "@/components/RevealObserver";
 import MagneticCursor from "@/components/MagneticCursor";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { withBasePath } from "@/lib/basePath";
 
 export const metadata: Metadata = {
@@ -33,6 +34,7 @@ export default function RootLayout({
         <SmoothScroll />
         <RevealObserver />
         <MagneticCursor />
+        <WhatsAppButton />
         {children}
       </body>
     </html>

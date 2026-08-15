@@ -78,6 +78,18 @@ body.cursor-play #cursor-label{opacity:1;}
 .nav-dark-links a{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#555;transition:color .2s;}
 .nav-dark-links a:hover{color:#e0dbd1;}
 
+/* ── FLOATING WHATSAPP BUTTON ── */
+@keyframes waIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.wa-float{position:fixed;right:24px;bottom:24px;z-index:600;display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:100px;background:rgba(18,18,16,.55);backdrop-filter:blur(18px) saturate(1.25);-webkit-backdrop-filter:blur(18px) saturate(1.25);border:1px solid rgba(255,255,255,.1);color:#e0dbd1;box-shadow:0 22px 46px -22px rgba(0,0,0,.65);opacity:0;animation:waIn .6s 1.8s cubic-bezier(.22,1,.36,1) forwards;transition:background .3s,border-color .3s,box-shadow .3s;cursor:pointer;}
+.wa-float svg{flex-shrink:0;width:20px;height:20px;}
+.wa-float-label{font-size:11px;letter-spacing:.08em;white-space:nowrap;max-width:0;overflow:hidden;opacity:0;transition:max-width .35s cubic-bezier(.22,1,.36,1),opacity .25s;}
+.wa-float:hover{background:rgba(24,24,21,.72);border-color:rgba(255,255,255,.18);box-shadow:0 26px 54px -22px rgba(0,0,0,.75);}
+.wa-float:hover .wa-float-label{max-width:120px;opacity:1;}
+@media (max-width:768px){
+  .wa-float{right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:48px;height:48px;padding:0;border-radius:50%;justify-content:center;}
+  .wa-float-label{display:none;}
+}
+
 /* ── REVEAL ── */
 .reveal{
   opacity:0;
@@ -917,7 +929,8 @@ body:not(.site-ready) .hero-line-typed,
 body:not(.site-ready) .hero-role,
 body:not(.site-ready) .hero-scroll-cue,
 body:not(.site-ready) .hero-signature,
-body:not(.site-ready) .hero-photo-slot {
+body:not(.site-ready) .hero-photo-slot,
+body:not(.site-ready) .wa-float {
   animation-play-state: paused !important;
   opacity: 0 !important;
 }
@@ -930,7 +943,8 @@ body.site-ready .hero-line-typed,
 body.site-ready .hero-role,
 body.site-ready .hero-scroll-cue,
 body.site-ready .hero-signature,
-body.site-ready .hero-photo-slot {
+body.site-ready .hero-photo-slot,
+body.site-ready .wa-float {
   animation-play-state: running !important;
 }
 
