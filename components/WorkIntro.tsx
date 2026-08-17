@@ -16,9 +16,10 @@ type Project = {
 
 // Client/desc/tags are intentionally blank — real videos first, copy comes later.
 const PROJECTS: Project[] = [
-  { id: 1, num: "01", name: "Motion Outubro Gloss", client: "", desc: "", tags: "", filter: "motion", vimeoId: "1218434521", orientation: "horizontal" },
-  { id: 2, num: "02", name: "Vídeo Promo Gloss", client: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435106", orientation: "vertical" },
-  { id: 3, num: "03", name: "Vídeo LP", client: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435477", orientation: "horizontal" },
+  { id: 1, num: "01", name: "Projeto de Motion para Websérie de Viagem", client: "", desc: "", tags: "", filter: "motion", vimeoId: "1218890209", orientation: "horizontal" },
+  { id: 2, num: "02", name: "Motion Outubro Gloss", client: "", desc: "", tags: "", filter: "motion", vimeoId: "1218434521", orientation: "horizontal" },
+  { id: 3, num: "03", name: "Vídeo Promo Gloss", client: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435106", orientation: "vertical" },
+  { id: 4, num: "04", name: "Vídeo LP", client: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435477", orientation: "horizontal" },
 ];
 
 const GRADS = [
@@ -281,7 +282,7 @@ export default function WorkIntro() {
             <span id="cineCurr" ref={currRef}>
               01
             </span>{" "}
-            / <span id="cineTotal" ref={totalRef}>03</span>
+            / <span id="cineTotal" ref={totalRef}>04</span>
           </div>
           <button className="cine-arrow" id="cineNext" aria-label="Próximo" ref={nextBtnRef}>
             <svg width="15" viewBox="0 0 14 14" fill="none">
