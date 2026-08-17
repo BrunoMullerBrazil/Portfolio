@@ -284,7 +284,7 @@ export default function Hero() {
           <div className="scroll-mouse">
             <div className="scroll-dot" />
           </div>
-          <span className="scroll-txt">scroll</span>
+          <span className="scroll-txt">role para baixo</span>
         </div>
       </div>
     </section>
