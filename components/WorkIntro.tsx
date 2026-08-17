@@ -20,7 +20,18 @@ type Project = {
 // without copy yet are left blank on purpose.
 const PROJECTS: Project[] = [
   { id: 1, num: "01", name: "Projeto de Motion para Websérie de Viagem", client: "", year: "", desc: "", tags: "", filter: "motion", vimeoId: "1218890209", orientation: "horizontal" },
-  { id: 2, num: "02", name: "Motion Outubro Gloss", client: "", year: "", desc: "", tags: "", filter: "motion", vimeoId: "1218434521", orientation: "horizontal" },
+  {
+    id: 2,
+    num: "02",
+    name: "Motion Outubro Gloss",
+    client: "Gloss Express",
+    year: "2025",
+    desc: "Direção que transformou a bisnaga Gloss em Torre Eiffel, revelando a vencedora e seu prêmio: Paris.",
+    tags: "Motion, storytelling, direção",
+    filter: "motion",
+    vimeoId: "1218434521",
+    orientation: "horizontal",
+  },
   {
     id: 3,
     num: "03",
