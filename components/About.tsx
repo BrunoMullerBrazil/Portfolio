@@ -63,7 +63,7 @@ export default function About() {
             <br />
             <br />
             Trabalho em Florianópolis e de forma remota em projetos de <strong>brand film</strong>, making of, motion
-            e editorial — do briefing à entrega final.
+            e editorial, do briefing à entrega.
           </div>
           <Link href="/trajetoria" className="about-traj reveal reveal-d3">
             Minha trajetória

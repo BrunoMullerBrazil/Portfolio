@@ -7,8 +7,8 @@ export default function NavDark() {
         <Logo />
       </div>
       <div className="nav-dark-links">
-        <a href="#work-intro">Work</a>
-        <a href="#about">About</a>
+        <a href="#work-intro">Portfólio</a>
+        <a href="#about">Sobre</a>
         <a href="#contact">Contato</a>
       </div>
     </nav>

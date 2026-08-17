@@ -423,7 +423,7 @@ body.cursor-play #cursor-label{opacity:1;}
 /* ── ABOUT ── */
 #about{padding:120px 48px 70px;display:block;border-top:1px solid rgba(255,255,255,.05);}
 .about-eyebrow{font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:#7a8256;margin-bottom:24px;}
-.about-text{font-size:clamp(14px,1.4vw,16px);line-height:1.85;color:#6a6460;}
+.about-text{font-size:clamp(14px,1.4vw,16px);line-height:1.85;color:#6a6460;text-wrap:pretty;}
 .about-text strong{color:#b0aaa1;font-weight:400;}
 .about-stats{display:flex;flex-direction:column;}
 .stat{padding:28px 0;border-bottom:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:baseline;}
@@ -510,7 +510,7 @@ body.cursor-play #cursor-label{opacity:1;}
 .svc:hover .svc-n{color:rgba(136,144,99,.5);}
 .svc-name{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#807870;margin-bottom:14px;transition:color .3s;}
 .svc:hover .svc-name{color:#c0bab1;}
-.svc-desc{font-size:13px;line-height:1.8;color:#444;}
+.svc-desc{font-size:13px;line-height:1.8;color:#8a857c;}
 
 /* ── CONTACT ── */
 #contact{padding:120px 48px 90px;border-top:1px solid rgba(136,144,99,.1);display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;position:relative;overflow:hidden;background:radial-gradient(120% 130% at 50% 115%,#161b10 0%,#0e120a 55%,#0c0c0b 100%);}#contact::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(150,168,110,.028) 27px 28px),repeating-linear-gradient(90deg,transparent 0 27px,rgba(150,168,110,.028) 27px 28px);}#contact::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:var(--winshadow) center left/cover no-repeat;opacity:.42;mix-blend-mode:multiply;transform:scaleX(-1);}#contact>*{position:relative;z-index:1;}
@@ -1089,6 +1089,7 @@ body.site-ready .wa-float {
 /* Left group: sutil translate no hover */
 .clink-lbl{
   font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:#444;
+  width:96px;flex-shrink:0;
   transition:color .3s;
 }
 .clink:hover .clink-lbl{ color:#666; }

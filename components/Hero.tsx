@@ -233,8 +233,8 @@ export default function Hero() {
             <Logo />
           </div>
           <div className="hero-nav-links">
-            <a href="#work-intro">Work</a>
-            <a href="#about">About</a>
+            <a href="#work-intro">Portfólio</a>
+            <a href="#about">Sobre</a>
             <a href="#contact">Contato</a>
           </div>
         </div>
@@ -264,7 +264,7 @@ export default function Hero() {
         <div className="hero-role" id="heroRole" ref={heroRoleRef}>
           <div className="hero-role-line">Florianópolis · Brasil</div>
           <div className="hero-role-name">
-            <em>Brand film for all</em>
+            <em>Brand film para todos</em>
           </div>
         </div>
 

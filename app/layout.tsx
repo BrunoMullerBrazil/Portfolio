@@ -10,7 +10,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import { withBasePath } from "@/lib/basePath";
 
 export const metadata: Metadata = {
-  title: "Bruno Müller — Videomaker & Editor",
+  title: "Bruno Müller — Direção e Edição de Vídeo",
 };
 
 export default function RootLayout({
