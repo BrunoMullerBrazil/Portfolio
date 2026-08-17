@@ -1157,9 +1157,11 @@ body.site-ready .wa-float {
   padding-left:0;
   transition:padding-left .4s var(--motion-ease);
 }
+.stat:not(:first-child){ padding-left:24px; }
 .stat:hover{ padding-left:8px; }
+.stat:not(:first-child):hover{ padding-left:32px; }
 .stat:last-child{ border-right:none; }
-.stat-num{ font-size:clamp(48px,6vw,80px); font-family:var(--font-gcgrind),sans-serif; letter-spacing:-.02em; color:#e0dbd1; transition:color .4s var(--motion-ease); }
+.stat-num{ font-size:clamp(48px,6vw,80px); font-family:var(--font-gcgrind),sans-serif; letter-spacing:0; color:#e0dbd1; transition:color .4s var(--motion-ease); }
 .stat:hover .stat-num{ color:#c8cfa8; }
 .stat-accent{ width:22px; height:2px; background:#7a8256; transition:width .4s var(--motion-ease),background .4s var(--motion-ease); }
 .stat:hover .stat-accent{ width:44px; background:#c8cfa8; }
