@@ -44,7 +44,18 @@ const PROJECTS: Project[] = [
     vimeoId: "1218901316",
     orientation: "horizontal",
   },
-  { id: 4, num: "04", name: "Vídeo Promo Gloss", client: "", year: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435106", orientation: "vertical" },
+  {
+    id: 4,
+    num: "04",
+    name: "Gloss na Estrada — Transição Floripa–Curitiba",
+    client: "Gloss Express",
+    year: "2025",
+    desc: "Sistema de transições que transforma a viagem entre Florianópolis e Curitiba em passagem narrativa.",
+    tags: "Motion design, composição, edição audiovisual",
+    filter: "brand-film",
+    vimeoId: "1218435106",
+    orientation: "vertical",
+  },
   { id: 5, num: "05", name: "Vídeo LP", client: "", year: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435477", orientation: "horizontal" },
 ];
 
