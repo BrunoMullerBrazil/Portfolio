@@ -43,7 +43,7 @@ export default function LanguageSwitcher() {
       aria-label={target === "en" ? "Switch to English" : "Mudar para português"}
       title={target === "en" ? "English" : "Português"}
     >
-      {target === "en" ? <FlagUS /> : <FlagBR />}
+      {lang === "en" ? <FlagUS /> : <FlagBR />}
     </button>
   );
 }
