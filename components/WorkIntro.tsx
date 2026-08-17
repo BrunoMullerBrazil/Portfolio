@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage, t, type Translated } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
 
@@ -124,6 +124,7 @@ export default function WorkIntro() {
   const { lang } = useLanguage();
   const langRef = useRef(lang);
   const paintRef = useRef<(() => void) | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const sectionRef = useRef<HTMLElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
@@ -140,6 +141,11 @@ export default function WorkIntro() {
   const filterBtnRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const prevBtnRef = useRef<HTMLButtonElement>(null);
   const nextBtnRef = useRef<HTMLButtonElement>(null);
+  const fullscreenBtnRef = useRef<HTMLButtonElement>(null);
+  const fsPrevRef = useRef<HTMLButtonElement>(null);
+  const fsNextRef = useRef<HTMLButtonElement>(null);
+  const fsCurrRef = useRef<HTMLSpanElement>(null);
+  const fsTotalRef = useRef<HTMLSpanElement>(null);
 
   // The main effect below only runs once (mount) — it reads the current
   // language through this ref (always fresh) instead of closing over the
@@ -213,6 +219,8 @@ export default function WorkIntro() {
       tagsEl!.textContent = t(p.tags, currentLang);
       currEl!.textContent = pad(current + 1);
       totalEl!.textContent = pad(filtered.length);
+      if (fsCurrRef.current) fsCurrRef.current.textContent = pad(current + 1);
+      if (fsTotalRef.current) fsTotalRef.current.textContent = pad(filtered.length);
       if (inView) mountVideo(p.vimeoId);
     }
     paintRef.current = paint;
@@ -247,6 +255,31 @@ export default function WorkIntro() {
     const prevBtn = prevBtnRef.current;
     nextBtn?.addEventListener("click", onNext);
     prevBtn?.addEventListener("click", onPrev);
+
+    // The overlay prev/next (shown only while the frame is fullscreen)
+    // drive the same go() as the regular nav below the stage.
+    const fsPrevBtn = fsPrevRef.current;
+    const fsNextBtn = fsNextRef.current;
+    fsNextBtn?.addEventListener("click", onNext);
+    fsPrevBtn?.addEventListener("click", onPrev);
+
+    // Fullscreen only ever expands the video's own iframe, which covers
+    // the nav below it — request fullscreen on the frame itself instead,
+    // so this overlay (prev/next/count) stays reachable inside it.
+    const fullscreenBtn = fullscreenBtnRef.current;
+    function toggleFullscreen() {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        frame!.requestFullscreen?.().catch(() => {});
+      }
+    }
+    fullscreenBtn?.addEventListener("click", toggleFullscreen);
+
+    function onFullscreenChange() {
+      setIsFullscreen(document.fullscreenElement === frame);
+    }
+    document.addEventListener("fullscreenchange", onFullscreenChange);
 
     function onPlayClick() {
       const p = filtered[current];
@@ -314,6 +347,10 @@ export default function WorkIntro() {
       clearTimeout(swapTimer);
       nextBtn?.removeEventListener("click", onNext);
       prevBtn?.removeEventListener("click", onPrev);
+      fsNextBtn?.removeEventListener("click", onNext);
+      fsPrevBtn?.removeEventListener("click", onPrev);
+      fullscreenBtn?.removeEventListener("click", toggleFullscreen);
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
       playBtn.removeEventListener("click", onPlayClick);
       filterButtons.forEach((btn, i) => btn.removeEventListener("click", filterHandlers[i]));
       document.removeEventListener("keydown", onKeydown);
@@ -352,6 +389,48 @@ export default function WorkIntro() {
                 <path d="M6 4L15 10L6 16V4Z" fill="rgba(255,255,255,.9)" />
               </svg>
             </button>
+            <button
+              className="cine-fullscreen-btn"
+              aria-label={t(isFullscreen ? dict.ariaExitFullscreen : dict.ariaFullscreen, lang)}
+              ref={fullscreenBtnRef}
+            >
+              {isFullscreen ? (
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M6 2v3a1 1 0 0 1-1 1H2M10 2v3a1 1 0 0 0 1 1h3M6 14v-3a1 1 0 0 0-1-1H2M10 14v-3a1 1 0 0 1 1-1h3"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ) : (
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M2 6V3a1 1 0 0 1 1-1h3M11 2h3a1 1 0 0 1 1 1v3M14 10v3a1 1 0 0 1-1 1h-3M5 14H2a1 1 0 0 1-1-1v-3"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </button>
+            <div className="cine-fs-nav">
+              <button className="cine-arrow" aria-label={t(dict.ariaPrev, lang)} ref={fsPrevRef}>
+                <svg width="15" viewBox="0 0 14 14" fill="none">
+                  <path d="M9 2L4 7L9 12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <div className="cine-count">
+                <span ref={fsCurrRef}>01</span> / <span ref={fsTotalRef}>05</span>
+              </div>
+              <button className="cine-arrow" aria-label={t(dict.ariaNext, lang)} ref={fsNextRef}>
+                <svg width="15" viewBox="0 0 14 14" fill="none">
+                  <path d="M5 2L10 7L5 12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div className="cine-meta" id="cineMeta" ref={metaRef}>

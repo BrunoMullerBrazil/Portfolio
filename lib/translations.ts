@@ -53,6 +53,8 @@ export const dict = {
   ariaWatch: { pt: "Assistir", en: "Watch" },
   ariaPrev: { pt: "Anterior", en: "Previous" },
   ariaNext: { pt: "Próximo", en: "Next" },
+  ariaFullscreen: { pt: "Tela cheia", en: "Fullscreen" },
+  ariaExitFullscreen: { pt: "Sair da tela cheia", en: "Exit fullscreen" },
 
   whatsappLabel: { pt: "Fale comigo", en: "Message me" },
   whatsappMessage: {

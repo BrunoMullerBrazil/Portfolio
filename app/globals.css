@@ -187,6 +187,20 @@ body.cursor-play #cursor-label{opacity:1;}
 .cine-frame::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.42));pointer-events:none;}
 .cine-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:62px;height:62px;border-radius:50%;background:rgba(20,20,18,.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;padding-left:4px;cursor:none;z-index:3;transition:transform .4s var(--motion-ease),background .3s;}
 .cine-frame:hover .cine-play{transform:translate(-50%,-50%) scale(1.08);background:rgba(30,30,26,.55);}
+
+/* Fullscreen — the frame itself (not the video's own iframe) is the
+   fullscreen target, so this overlay nav stays reachable: entering
+   fullscreen via the iframe's own control only expands the video and
+   hides everything else, this button avoids that. */
+.cine-fullscreen-btn{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(20,20,18,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.16);color:#e0dbd1;display:flex;align-items:center;justify-content:center;cursor:none;z-index:4;opacity:0;transition:opacity .3s,background .3s;}
+.cine-frame:hover .cine-fullscreen-btn{opacity:1;}
+.cine-fullscreen-btn:hover{background:rgba(30,30,26,.6);}
+.cine-frame:fullscreen .cine-fullscreen-btn,
+.cine-frame:-webkit-full-screen .cine-fullscreen-btn{opacity:1;}
+
+.cine-fs-nav{display:none;position:absolute;left:50%;bottom:28px;transform:translateX(-50%);align-items:center;gap:20px;z-index:4;padding:10px 20px;border-radius:100px;background:rgba(12,12,11,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1);}
+.cine-frame:fullscreen .cine-fs-nav,
+.cine-frame:-webkit-full-screen .cine-fs-nav{display:flex;}
 .cine-meta{display:flex;flex-direction:column;transition:opacity .3s var(--motion-ease);}
 .cine-num{font-family:var(--font-gcgrind),sans-serif;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#7a8256;margin-bottom:18px;}
 .cine-title{font-family:var(--font-franie),var(--font-inter),sans-serif;font-weight:40;font-size:clamp(28px,3.4vw,44px);letter-spacing:-.02em;color:#ece7dd;line-height:1.03;margin-bottom:12px;}
