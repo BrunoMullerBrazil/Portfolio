@@ -4,15 +4,13 @@ import { useEffect, useRef } from "react";
 import { useLanguage, t } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
 
-// `en` is a placeholder copy of `pt` for now — real English copy gets
-// swapped in here later.
 const SERVICES = [
   {
     n: "01",
     name: { pt: "Brand Film", en: "Brand Film" },
     desc: {
       pt: "Produção audiovisual para marcas que precisam de presença com identidade.",
-      en: "Produção audiovisual para marcas que precisam de presença com identidade.",
+      en: "Audiovisual production for brands that need presence with identity.",
     },
   },
   {
@@ -20,7 +18,7 @@ const SERVICES = [
     name: { pt: "Making Of & BTS", en: "Making Of & BTS" },
     desc: {
       pt: "Registro e edição de bastidores de projetos publicitários, séries, eventos e produções de grande porte.",
-      en: "Registro e edição de bastidores de projetos publicitários, séries, eventos e produções de grande porte.",
+      en: "Behind-the-scenes footage and editing for advertising projects, series, events and large-scale productions.",
     },
   },
   {
@@ -28,7 +26,7 @@ const SERVICES = [
     name: { pt: "Motion & Editorial", en: "Motion & Editorial" },
     desc: {
       pt: "Edição criativa para plataformas digitais. Ritmo, narrativa e qualidade de acabamento em cada corte.",
-      en: "Edição criativa para plataformas digitais. Ritmo, narrativa e qualidade de acabamento em cada corte.",
+      en: "Creative editing for digital platforms. Pacing, narrative and finishing quality in every cut.",
     },
   },
 ];

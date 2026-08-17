@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { dict } from "./translations";
 
 export type Lang = "pt" | "en";
 
@@ -21,6 +22,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === "pt" || stored === "en") setLangState(stored);
   }, []);
+
+  // Keep <html lang> in sync for accessibility/SEO — the static export
+  // ships "pt-BR" for the no-JS/first-paint case, this updates it once
+  // the visitor's stored (or chosen) language is known.
+  useEffect(() => {
+    document.documentElement.lang = lang === "en" ? "en" : "pt-BR";
+    document.title = dict.siteTitle[lang];
+  }, [lang]);
 
   function setLang(next: Lang) {
     setLangState(next);

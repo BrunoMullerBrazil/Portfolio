@@ -6,8 +6,6 @@ import { useLanguage, t } from "@/lib/LanguageContext";
 
 const EMAIL = "contato@aue.productions";
 
-// `en` is a placeholder copy of `pt` for now — real English copy gets
-// swapped in here later.
 const LINKS = [
   { href: "mailto:" + EMAIL, label: { pt: "Email", en: "Email" }, value: EMAIL, external: false, isEmail: true },
   {
@@ -26,7 +24,7 @@ const LINKS = [
   },
 ];
 
-const COPIED_LABEL = { pt: "Copiado!", en: "Copiado!" };
+const COPIED_LABEL = { pt: "Copiado!", en: "Copied!" };
 
 export default function Contact() {
   const { lang } = useLanguage();

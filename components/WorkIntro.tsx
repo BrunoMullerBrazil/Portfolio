@@ -21,10 +21,8 @@ type Project = {
 // curta (a decisão de direção + o que ela resolveu), créditos. Entries
 // without copy yet are left blank on purpose.
 //
-// `en` is currently a placeholder copy of `pt` — real English copy gets
-// swapped in here later (translated externally), no code changes needed
-// beyond editing the `en` values below. `client`/`year` aren't translated
-// (proper nouns / numbers).
+// `name`/`client`/`year` aren't translated (real campaign titles and
+// proper nouns/numbers) — only `desc`/`tags` have an English version.
 const PROJECTS: Project[] = [
   {
     id: 1,
@@ -37,11 +35,11 @@ const PROJECTS: Project[] = [
     year: "2025",
     desc: {
       pt: "Sistema de transições que transforma a viagem entre Florianópolis e Curitiba em passagem narrativa.",
-      en: "Sistema de transições que transforma a viagem entre Florianópolis e Curitiba em passagem narrativa.",
+      en: "A transition system that turns the trip between Florianópolis and Curitiba into a narrative passage.",
     },
     tags: {
       pt: "Motion design, composição, edição audiovisual",
-      en: "Motion design, composição, edição audiovisual",
+      en: "Motion design, compositing, video editing",
     },
     filter: "motion",
     vimeoId: "1218890209",
@@ -55,9 +53,9 @@ const PROJECTS: Project[] = [
     year: "2025",
     desc: {
       pt: "Direção que transformou a bisnaga Gloss em Torre Eiffel, revelando a vencedora e seu prêmio: Paris.",
-      en: "Direção que transformou a bisnaga Gloss em Torre Eiffel, revelando a vencedora e seu prêmio: Paris.",
+      en: "Direction that turned the Gloss tube into the Eiffel Tower, revealing the winner and her prize: Paris.",
     },
-    tags: { pt: "Motion, storytelling, direção", en: "Motion, storytelling, direção" },
+    tags: { pt: "Motion, storytelling, direção", en: "Motion, storytelling, direction" },
     filter: "motion",
     vimeoId: "1218434521",
     orientation: "horizontal",
@@ -70,9 +68,9 @@ const PROJECTS: Project[] = [
     year: "2025",
     desc: {
       pt: "Direção que priorizou a mobilização real das equipes — e transformou a ação em prova institucional.",
-      en: "Direção que priorizou a mobilização real das equipes — e transformou a ação em prova institucional.",
+      en: "Direction that prioritized the team's real mobilization — turning the initiative into institutional proof.",
     },
-    tags: { pt: "Direção, montagem, cor, captação", en: "Direção, montagem, cor, captação" },
+    tags: { pt: "Direção, montagem, cor, captação", en: "Direction, editing, color grading, filming" },
     filter: "institucional",
     vimeoId: "1218901316",
     orientation: "horizontal",
