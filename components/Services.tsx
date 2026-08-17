@@ -1,22 +1,40 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLanguage, t } from "@/lib/LanguageContext";
+import { dict } from "@/lib/translations";
 
+// `en` is a placeholder copy of `pt` for now — real English copy gets
+// swapped in here later.
 const SERVICES = [
-  { n: "01", name: "Brand Film", desc: "Produção audiovisual para marcas que precisam de presença com identidade." },
+  {
+    n: "01",
+    name: { pt: "Brand Film", en: "Brand Film" },
+    desc: {
+      pt: "Produção audiovisual para marcas que precisam de presença com identidade.",
+      en: "Produção audiovisual para marcas que precisam de presença com identidade.",
+    },
+  },
   {
     n: "02",
-    name: "Making Of & BTS",
-    desc: "Registro e edição de bastidores de projetos publicitários, séries, eventos e produções de grande porte.",
+    name: { pt: "Making Of & BTS", en: "Making Of & BTS" },
+    desc: {
+      pt: "Registro e edição de bastidores de projetos publicitários, séries, eventos e produções de grande porte.",
+      en: "Registro e edição de bastidores de projetos publicitários, séries, eventos e produções de grande porte.",
+    },
   },
   {
     n: "03",
-    name: "Motion & Editorial",
-    desc: "Edição criativa para plataformas digitais. Ritmo, narrativa e qualidade de acabamento em cada corte.",
+    name: { pt: "Motion & Editorial", en: "Motion & Editorial" },
+    desc: {
+      pt: "Edição criativa para plataformas digitais. Ritmo, narrativa e qualidade de acabamento em cada corte.",
+      en: "Edição criativa para plataformas digitais. Ritmo, narrativa e qualidade de acabamento em cada corte.",
+    },
   },
 ];
 
 export default function Services() {
+  const { lang } = useLanguage();
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -67,22 +85,22 @@ export default function Services() {
           margin: "0 0 0 0",
         }}
       >
-        <div className="section-title">Serviços</div>
+        <div className="section-title">{t(dict.servicesEyebrow, lang)}</div>
       </div>
 
       <div className="services-grid" ref={gridRef}>
         {SERVICES.map((s) => (
           <div className="svc" key={s.n}>
             <div className="svc-n">{s.n}</div>
-            <div className="svc-name">{s.name}</div>
-            <div className="svc-desc">{s.desc}</div>
+            <div className="svc-name">{t(s.name, lang)}</div>
+            <div className="svc-desc">{t(s.desc, lang)}</div>
           </div>
         ))}
       </div>
 
       <div className="svc-cta-wrap reveal">
         <a href="https://wa.me/5548991879579" target="_blank" rel="noopener" className="svc-cta-btn">
-          Vamos conversar
+          {t(dict.servicesCta, lang)}
           <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path
               d="M2.5 6H9.5M6.5 3L9.5 6L6.5 9"

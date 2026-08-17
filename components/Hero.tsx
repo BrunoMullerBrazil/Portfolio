@@ -3,6 +3,9 @@
 import { useEffect, useRef } from "react";
 import { Logo } from "./Logo";
 import { withBasePath } from "@/lib/basePath";
+import { useLanguage, t } from "@/lib/LanguageContext";
+import { dict } from "@/lib/translations";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 function eic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -34,6 +37,7 @@ function baseMediaSize(vw: number, vh: number) {
 }
 
 export default function Hero() {
+  const { lang } = useLanguage();
   const heroMediaRef = useRef<HTMLDivElement>(null);
   const heroTextsRef = useRef<HTMLDivElement>(null);
   const heroRoleRef = useRef<HTMLDivElement>(null);
@@ -233,25 +237,30 @@ export default function Hero() {
             <Logo />
           </div>
           <div className="hero-nav-links">
-            <a href="#work-intro">Portfólio</a>
-            <a href="#about">Sobre</a>
-            <a href="#contact">Contato</a>
+            <a href="#work-intro">{t(dict.navWork, lang)}</a>
+            <a href="#about">{t(dict.navAbout, lang)}</a>
+            <a href="#contact">{t(dict.navContact, lang)}</a>
+            <LanguageSwitcher />
           </div>
         </div>
 
         <div className="hero-text-wrap" id="heroTexts" ref={heroTextsRef}>
-          <div className="hero-greeting" aria-label="Oi, eu sou Bruno.">
+          <div
+            className="hero-greeting"
+            aria-label={`${t(dict.heroGreeting1, lang)} ${t(dict.heroGreeting2, lang)} ${t(dict.heroGreeting3, lang)}.`}
+          >
             <div className="hg-line">
-              <span className="hg-w">Oi,</span>
+              <span className="hg-w">{t(dict.heroGreeting1, lang)}</span>
             </div>
             <div className="hg-line">
               <span className="hg-w" style={{ transitionDelay: ".12s" }}>
-                eu sou
+                {t(dict.heroGreeting2, lang)}
               </span>
             </div>
             <div className="hg-line">
               <span className="hg-w" style={{ transitionDelay: ".24s" }}>
-                Bruno<em>.</em>
+                {t(dict.heroGreeting3, lang)}
+                <em>.</em>
               </span>
             </div>
           </div>
@@ -262,9 +271,9 @@ export default function Hero() {
         </div>
 
         <div className="hero-role" id="heroRole" ref={heroRoleRef}>
-          <div className="hero-role-line">Florianópolis · Brasil</div>
+          <div className="hero-role-line">{t(dict.heroRoleLine, lang)}</div>
           <div className="hero-role-name">
-            <em>Brand film para todos</em>
+            <em>{t(dict.heroRoleName, lang)}</em>
           </div>
         </div>
 
@@ -284,7 +293,7 @@ export default function Hero() {
           <div className="scroll-mouse">
             <div className="scroll-dot" />
           </div>
-          <span className="scroll-txt">role para baixo</span>
+          <span className="scroll-txt">{t(dict.heroScrollCue, lang)}</span>
         </div>
       </div>
     </section>

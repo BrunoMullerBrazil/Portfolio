@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLanguage, t, type Translated } from "@/lib/LanguageContext";
+import { dict } from "@/lib/translations";
 
 type Project = {
   id: number;
   num: string;
-  name: string;
+  name: Translated;
   client: string;
   year: string;
-  desc: string;
-  tags: string;
+  desc: Translated;
+  tags: Translated;
   filter: "brand-film" | "bts" | "motion" | "institucional";
   vimeoId: string;
   orientation: "horizontal" | "vertical";
@@ -18,15 +20,29 @@ type Project = {
 // Fixed card format (never vary): título, "Cliente • Ano", uma descrição
 // curta (a decisão de direção + o que ela resolveu), créditos. Entries
 // without copy yet are left blank on purpose.
+//
+// `en` is currently a placeholder copy of `pt` — real English copy gets
+// swapped in here later (translated externally), no code changes needed
+// beyond editing the `en` values below. `client`/`year` aren't translated
+// (proper nouns / numbers).
 const PROJECTS: Project[] = [
   {
     id: 1,
     num: "01",
-    name: "Gloss na Estrada — Transição Floripa–Curitiba",
+    name: {
+      pt: "Gloss na Estrada — Transição Floripa–Curitiba",
+      en: "Gloss na Estrada — Transição Floripa–Curitiba",
+    },
     client: "Gloss Express",
     year: "2025",
-    desc: "Sistema de transições que transforma a viagem entre Florianópolis e Curitiba em passagem narrativa.",
-    tags: "Motion design, composição, edição audiovisual",
+    desc: {
+      pt: "Sistema de transições que transforma a viagem entre Florianópolis e Curitiba em passagem narrativa.",
+      en: "Sistema de transições que transforma a viagem entre Florianópolis e Curitiba em passagem narrativa.",
+    },
+    tags: {
+      pt: "Motion design, composição, edição audiovisual",
+      en: "Motion design, composição, edição audiovisual",
+    },
     filter: "motion",
     vimeoId: "1218890209",
     orientation: "horizontal",
@@ -34,11 +50,14 @@ const PROJECTS: Project[] = [
   {
     id: 2,
     num: "02",
-    name: "Motion Outubro Gloss",
+    name: { pt: "Motion Outubro Gloss", en: "Motion Outubro Gloss" },
     client: "Gloss Express",
     year: "2025",
-    desc: "Direção que transformou a bisnaga Gloss em Torre Eiffel, revelando a vencedora e seu prêmio: Paris.",
-    tags: "Motion, storytelling, direção",
+    desc: {
+      pt: "Direção que transformou a bisnaga Gloss em Torre Eiffel, revelando a vencedora e seu prêmio: Paris.",
+      en: "Direção que transformou a bisnaga Gloss em Torre Eiffel, revelando a vencedora e seu prêmio: Paris.",
+    },
+    tags: { pt: "Motion, storytelling, direção", en: "Motion, storytelling, direção" },
     filter: "motion",
     vimeoId: "1218434521",
     orientation: "horizontal",
@@ -46,17 +65,42 @@ const PROJECTS: Project[] = [
   {
     id: 3,
     num: "03",
-    name: "Institucional Retenção Day Toyota",
+    name: { pt: "Institucional Retenção Day Toyota", en: "Institucional Retenção Day Toyota" },
     client: "Hai Toyota",
     year: "2025",
-    desc: "Direção que priorizou a mobilização real das equipes — e transformou a ação em prova institucional.",
-    tags: "Direção, montagem, cor, captação",
+    desc: {
+      pt: "Direção que priorizou a mobilização real das equipes — e transformou a ação em prova institucional.",
+      en: "Direção que priorizou a mobilização real das equipes — e transformou a ação em prova institucional.",
+    },
+    tags: { pt: "Direção, montagem, cor, captação", en: "Direção, montagem, cor, captação" },
     filter: "institucional",
     vimeoId: "1218901316",
     orientation: "horizontal",
   },
-  { id: 4, num: "04", name: "Vídeo Promo Gloss", client: "", year: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435106", orientation: "vertical" },
-  { id: 5, num: "05", name: "Vídeo LP", client: "", year: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435477", orientation: "horizontal" },
+  {
+    id: 4,
+    num: "04",
+    name: { pt: "Vídeo Promo Gloss", en: "Vídeo Promo Gloss" },
+    client: "",
+    year: "",
+    desc: { pt: "", en: "" },
+    tags: { pt: "", en: "" },
+    filter: "brand-film",
+    vimeoId: "1218435106",
+    orientation: "vertical",
+  },
+  {
+    id: 5,
+    num: "05",
+    name: { pt: "Vídeo LP", en: "Vídeo LP" },
+    client: "",
+    year: "",
+    desc: { pt: "", en: "" },
+    tags: { pt: "", en: "" },
+    filter: "brand-film",
+    vimeoId: "1218435477",
+    orientation: "horizontal",
+  },
 ];
 
 const GRADS = [
@@ -66,12 +110,12 @@ const GRADS = [
   "radial-gradient(120% 120% at 58% 15%,#262327 0%,#16131a 60%,#0a090c 100%)",
 ];
 
-const FILTERS: { label: string; value: "all" | Project["filter"] }[] = [
-  { label: "Todos", value: "all" },
-  { label: "Brand Film", value: "brand-film" },
-  { label: "Institucional", value: "institucional" },
-  { label: "Making Of & BTS", value: "bts" },
-  { label: "Motion", value: "motion" },
+const FILTERS: { label: Translated; value: "all" | Project["filter"] }[] = [
+  { label: dict.filterAll, value: "all" },
+  { label: dict.filterBrandFilm, value: "brand-film" },
+  { label: dict.filterInstitucional, value: "institucional" },
+  { label: dict.filterBts, value: "bts" },
+  { label: dict.filterMotion, value: "motion" },
 ];
 
 function pad(n: number) {
@@ -79,6 +123,10 @@ function pad(n: number) {
 }
 
 export default function WorkIntro() {
+  const { lang } = useLanguage();
+  const langRef = useRef(lang);
+  const paintRef = useRef<(() => void) | null>(null);
+
   const sectionRef = useRef<HTMLElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const metaRef = useRef<HTMLDivElement>(null);
@@ -94,6 +142,15 @@ export default function WorkIntro() {
   const filterBtnRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const prevBtnRef = useRef<HTMLButtonElement>(null);
   const nextBtnRef = useRef<HTMLButtonElement>(null);
+
+  // The main effect below only runs once (mount) — it reads the current
+  // language through this ref (always fresh) instead of closing over the
+  // `lang` value from that first render, then re-paints the currently
+  // shown project whenever the language toggles.
+  useEffect(() => {
+    langRef.current = lang;
+    paintRef.current?.();
+  }, [lang]);
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -147,18 +204,20 @@ export default function WorkIntro() {
 
     function paint() {
       const p = filtered[current];
+      const currentLang = langRef.current;
       unmountVideo();
       media!.style.background = GRADS[(p.id - 1) % GRADS.length];
       frame!.classList.toggle("vertical", p.orientation === "vertical");
-      numEl!.textContent = p.num + " — Projeto";
-      titleEl!.textContent = p.name;
+      numEl!.textContent = p.num + t(dict.workIntroNumSuffix, currentLang);
+      titleEl!.textContent = t(p.name, currentLang);
       clientEl!.textContent = [p.client, p.year].filter(Boolean).join(" • ");
-      descEl!.textContent = p.desc;
-      tagsEl!.textContent = p.tags;
+      descEl!.textContent = t(p.desc, currentLang);
+      tagsEl!.textContent = t(p.tags, currentLang);
       currEl!.textContent = pad(current + 1);
       totalEl!.textContent = pad(filtered.length);
       if (inView) mountVideo(p.vimeoId);
     }
+    paintRef.current = paint;
 
     let swapTimer: ReturnType<typeof setTimeout>;
     function render() {
@@ -269,8 +328,8 @@ export default function WorkIntro() {
   return (
     <section id="work-intro" ref={sectionRef}>
       <div className="cine-wrap">
-        <div className="wi-eyebrow reveal">Portfólio</div>
-        <h2 className="wi-line reveal reveal-d1">Veja o trabalho.</h2>
+        <div className="wi-eyebrow reveal">{t(dict.workIntroEyebrow, lang)}</div>
+        <h2 className="wi-line reveal reveal-d1">{t(dict.workIntroHeading, lang)}</h2>
 
         <div className="cine-filters reveal reveal-d1">
           {FILTERS.map((f, i) => (
@@ -282,7 +341,7 @@ export default function WorkIntro() {
               className={"cine-filter" + (f.value === "all" ? " active" : "")}
               data-filter={f.value}
             >
-              {f.label}
+              {t(f.label, lang)}
             </button>
           ))}
         </div>
@@ -290,7 +349,7 @@ export default function WorkIntro() {
         <div className="cine-stage reveal reveal-d2">
           <div className="cine-frame" id="cineFrame" ref={frameRef}>
             <div className="cine-media" id="cineMedia" ref={mediaRef} />
-            <button className="cine-play" aria-label="Assistir" ref={playBtnRef}>
+            <button className="cine-play" aria-label={t(dict.ariaWatch, lang)} ref={playBtnRef}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M6 4L15 10L6 16V4Z" fill="rgba(255,255,255,.9)" />
               </svg>
@@ -311,7 +370,7 @@ export default function WorkIntro() {
         </div>
 
         <div className="cine-nav reveal reveal-d2">
-          <button className="cine-arrow" id="cinePrev" aria-label="Anterior" ref={prevBtnRef}>
+          <button className="cine-arrow" id="cinePrev" aria-label={t(dict.ariaPrev, lang)} ref={prevBtnRef}>
             <svg width="15" viewBox="0 0 14 14" fill="none">
               <path d="M9 2L4 7L9 12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -322,7 +381,7 @@ export default function WorkIntro() {
             </span>{" "}
             / <span id="cineTotal" ref={totalRef}>05</span>
           </div>
-          <button className="cine-arrow" id="cineNext" aria-label="Próximo" ref={nextBtnRef}>
+          <button className="cine-arrow" id="cineNext" aria-label={t(dict.ariaNext, lang)} ref={nextBtnRef}>
             <svg width="15" viewBox="0 0 14 14" fill="none">
               <path d="M5 2L10 7L5 12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>

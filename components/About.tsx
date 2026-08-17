@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { withBasePath } from "@/lib/basePath";
+import { useLanguage, t as tr } from "@/lib/LanguageContext";
+import { dict } from "@/lib/translations";
 
 const LOGOS = [
   { file: "TOYOTA.png", alt: "Toyota" },
@@ -23,6 +25,7 @@ function ac(el: HTMLElement, t: number, s: string, d: number) {
 }
 
 export default function About() {
+  const { lang } = useLanguage();
   const statsWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,17 +59,18 @@ export default function About() {
     <>
       <section id="about">
         <div>
-          <div className="about-eyebrow reveal">Sobre</div>
+          <div className="about-eyebrow reveal">{tr(dict.aboutEyebrow, lang)}</div>
           <div className="about-text reveal reveal-d2">
-            <strong>Direção, câmera e edição</strong> para marcas, empresas e projetos que precisam de presença
-            audiovisual com critério.
+            <strong>{tr(dict.aboutText1Strong, lang)}</strong>
+            {tr(dict.aboutText1Rest, lang)}
             <br />
             <br />
-            Trabalho em Florianópolis e de forma remota em projetos de <strong>brand film</strong>, making of, motion
-            e editorial, do briefing à entrega.
+            {tr(dict.aboutText2Pre, lang)}
+            <strong>{tr(dict.aboutText2Strong, lang)}</strong>
+            {tr(dict.aboutText2Rest, lang)}
           </div>
           <Link href="/trajetoria" className="about-traj reveal reveal-d3">
-            Minha trajetória
+            {tr(dict.aboutTrajButton, lang)}
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path
                 d="M2.5 6H9.5M6.5 3L9.5 6L6.5 9"
@@ -84,19 +88,19 @@ export default function About() {
               0
             </div>
             <div className="stat-accent" />
-            <div className="stat-lbl">Anos de experiência</div>
+            <div className="stat-lbl">{tr(dict.statYears, lang)}</div>
           </div>
           <div className="stat reveal reveal-d2">
             <div className="stat-num" data-count="40" data-suffix="+">
               0
             </div>
             <div className="stat-accent" />
-            <div className="stat-lbl">Projetos entregues</div>
+            <div className="stat-lbl">{tr(dict.statProjects, lang)}</div>
           </div>
           <div className="stat reveal reveal-d3">
             <div className="stat-num">BR</div>
             <div className="stat-accent" />
-            <div className="stat-lbl">Remoto disponível</div>
+            <div className="stat-lbl">{tr(dict.statRemote, lang)}</div>
           </div>
         </div>
       </section>

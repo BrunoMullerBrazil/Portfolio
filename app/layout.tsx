@@ -8,6 +8,7 @@ import RevealObserver from "@/components/RevealObserver";
 import MagneticCursor from "@/components/MagneticCursor";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { withBasePath } from "@/lib/basePath";
+import { LanguageProvider } from "@/lib/LanguageContext";
 
 export const metadata: Metadata = {
   title: "Bruno Müller — Direção e Edição de Vídeo",
@@ -29,13 +30,15 @@ export default function RootLayout({
           } as React.CSSProperties
         }
       >
-        <Loader />
-        <Cursor />
-        <SmoothScroll />
-        <RevealObserver />
-        <MagneticCursor />
-        <WhatsAppButton />
-        {children}
+        <LanguageProvider>
+          <Loader />
+          <Cursor />
+          <SmoothScroll />
+          <RevealObserver />
+          <MagneticCursor />
+          <WhatsAppButton />
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -46,9 +46,14 @@ body.cursor-play #cursor-label{opacity:1;}
 #hero-sticky::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:var(--winshadow) center right/cover no-repeat;opacity:.9;mix-blend-mode:normal;}
 .hero-nav{position:absolute;top:0;left:0;right:0;z-index:200;padding:28px 48px;display:flex;justify-content:space-between;align-items:center;transition:opacity .5s;}
 .hero-nav-logo{font-family:var(--font-gcgrind),sans-serif;font-size:15px;letter-spacing:.12em;color:#e0dbd1;opacity:0;animation:navIn .7s .2s cubic-bezier(.22,1,.36,1) forwards;}
-.hero-nav-links{display:flex;gap:36px;}
+.hero-nav-links{display:flex;align-items:center;gap:36px;}
 .hero-nav-links a{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#888;transition:color .2s;}
 .hero-nav-links a:hover{color:#e0dbd1;}
+
+/* ── Language switch ── */
+.lang-switch{display:flex;align-items:center;justify-content:center;width:24px;height:17px;padding:0;border:1px solid rgba(255,255,255,.14);border-radius:4px;background:rgba(255,255,255,.04);cursor:none;opacity:.75;line-height:0;transition:opacity .25s,border-color .25s,transform .25s;}
+.lang-switch:hover{opacity:1;border-color:rgba(255,255,255,.3);transform:translateY(-1px);}
+.lang-switch svg{display:block;border-radius:2px;overflow:hidden;width:18px;height:13px;}
 @keyframes navIn{to{opacity:1;}}
 .hero-text-wrap{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 48px;pointer-events:none;}
 .hero-greeting{font-family:var(--font-franie),var(--font-inter),sans-serif;font-weight:24;font-size:clamp(52px,9vw,118px);color:#ece7dd;letter-spacing:-.02em;line-height:.9;user-select:none;opacity:1;flex:0 0 auto;}
@@ -75,7 +80,7 @@ body.cursor-play #cursor-label{opacity:1;}
 #nav-dark{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:500;padding:11px 16px 11px 24px;display:flex;gap:44px;justify-content:space-between;align-items:center;background:rgba(18,18,16,.5);backdrop-filter:blur(18px) saturate(1.25);-webkit-backdrop-filter:blur(18px) saturate(1.25);border:1px solid rgba(255,255,255,.09);border-radius:100px;box-shadow:0 22px 55px -22px rgba(0,0,0,.7);opacity:0;pointer-events:none;transition:opacity .5s,transform .5s;}
 #nav-dark.visible{opacity:1;pointer-events:auto;}
 .nav-dark-logo{display:flex;align-items:center;}
-.nav-dark-links{display:flex;gap:36px;}
+.nav-dark-links{display:flex;align-items:center;gap:36px;}
 .nav-dark-links a{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#555;transition:color .2s;}
 .nav-dark-links a:hover{color:#e0dbd1;}
 
@@ -1192,4 +1197,10 @@ body.site-ready .wa-float {
      .hero-role more headroom so the two don't collide. There's
      plenty of empty space below the hero media card to spare. */
   .hero-role{ bottom:150px; }
+
+  /* Adding the language-switch flag button pushed the nav past the
+     viewport edge on narrow screens (36px gap × 4 items no longer
+     fits) — tighten the gap so everything stays on one row. */
+  .hero-nav-links{ gap:14px; }
+  .nav-dark-links{ gap:14px; }
 }
