@@ -8,11 +8,8 @@ function eic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-// TODO: swap MOBILE_VIMEO_ID for a vertical-shot video once picked — right
-// now it reuses the horizontal desktop video, which is exactly the "crops
-// oddly at fullscreen" problem this is meant to fix.
 const DESKTOP_VIMEO_ID = "1213900059";
-const MOBILE_VIMEO_ID = "1213900059";
+const MOBILE_VIMEO_ID = "1218888270";
 const DESKTOP_VIDEO_RATIO = 16 / 9;
 const MOBILE_VIDEO_RATIO = 9 / 16;
 
