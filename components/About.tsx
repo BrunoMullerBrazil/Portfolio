@@ -83,16 +83,19 @@ export default function About() {
             <div className="stat-num" data-count="5" data-suffix="+">
               0
             </div>
+            <div className="stat-accent" />
             <div className="stat-lbl">Anos de experiência</div>
           </div>
           <div className="stat reveal reveal-d2">
             <div className="stat-num" data-count="40" data-suffix="+">
               0
             </div>
+            <div className="stat-accent" />
             <div className="stat-lbl">Projetos entregues</div>
           </div>
           <div className="stat reveal reveal-d3">
             <div className="stat-num">BR</div>
+            <div className="stat-accent" />
             <div className="stat-lbl">Remoto disponível</div>
           </div>
         </div>

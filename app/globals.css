@@ -434,7 +434,7 @@ body.cursor-play #cursor-label{opacity:1;}
 .about-traj{
   display:inline-flex;align-items:center;gap:10px;
   margin-top:32px;
-  font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  font-size:11px;letter-spacing:.3em;text-transform:uppercase;
   color:#12140e;
   background:#c8cfa8;
   text-decoration:none;
@@ -1131,12 +1131,18 @@ body.site-ready .wa-float {
   border-right:1px solid rgba(255,255,255,.05);
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:14px;
   padding-right:48px;
+  padding-left:0;
+  transition:padding-left .4s var(--motion-ease);
 }
+.stat:hover{ padding-left:8px; }
 .stat:last-child{ border-right:none; }
-.stat-num{ font-size:clamp(48px,6vw,80px); font-family:var(--font-gcgrind),sans-serif; letter-spacing:-.02em; color:#e0dbd1; }
-.stat-lbl{ font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:#444; }
+.stat-num{ font-size:clamp(48px,6vw,80px); font-family:var(--font-gcgrind),sans-serif; letter-spacing:-.02em; color:#e0dbd1; transition:color .4s var(--motion-ease); }
+.stat:hover .stat-num{ color:#c8cfa8; }
+.stat-accent{ width:22px; height:2px; background:#7a8256; transition:width .4s var(--motion-ease),background .4s var(--motion-ease); }
+.stat:hover .stat-accent{ width:44px; background:#c8cfa8; }
+.stat-lbl{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#8a857c; }
 #contact > div:first-child { order:2; }
 #contact > div:not(:first-child) { order:1; }
 
