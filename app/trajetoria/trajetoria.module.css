@@ -60,3 +60,199 @@
     transparent 12px 20px
   );
 }
+
+/* ── Content ── */
+.content {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 130px 32px 200px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(224, 219, 209, 0.68);
+  text-decoration: none;
+  margin-bottom: 64px;
+  transition: color 0.25s var(--motion-ease), gap 0.3s var(--motion-ease);
+}
+.back:hover {
+  color: #ece7dd;
+  gap: 12px;
+}
+
+.titleBlock {
+  margin-bottom: 56px;
+}
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(224, 219, 209, 0.6);
+  margin-bottom: 18px;
+}
+.title {
+  font-family: var(--font-franie), var(--font-inter), sans-serif;
+  font-weight: 40;
+  font-size: clamp(48px, 8vw, 96px);
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  color: #f4f1ea;
+  margin: 0;
+}
+
+/* ── Manifesto: literary opening statement, serif italic ── */
+.manifesto {
+  margin-bottom: 96px;
+}
+.manifestoP {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: clamp(19px, 2.4vw, 25px);
+  line-height: 1.6;
+  color: rgba(244, 241, 234, 0.88);
+  max-width: 58ch;
+  margin: 0 0 26px;
+}
+.manifestoCloser {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-weight: bold;
+  font-size: clamp(22px, 2.8vw, 30px);
+  line-height: 1.4;
+  color: #f4f1ea;
+  max-width: 46ch;
+  margin: 40px 0 0;
+  padding-top: 32px;
+  border-top: 1px solid rgba(244, 241, 234, 0.18);
+}
+
+.blocks {
+  display: flex;
+  flex-direction: column;
+}
+
+.bodyP {
+  font-size: 16px;
+  line-height: 1.9;
+  color: rgba(224, 219, 209, 0.82);
+  max-width: 62ch;
+  margin: 0 0 28px;
+}
+
+/* ── Chapter divider: torn-edge/textured break between eras of the
+   story — kept dark and desaturated so it doesn't fight the blueprint
+   blue that stays dominant across the page. ── */
+.chapter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 40px 0 44px;
+  padding: 18px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.025) 0 2px,
+    transparent 2px 5px
+  );
+}
+.chapter span {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: rgba(244, 241, 234, 0.75);
+  white-space: nowrap;
+}
+.chapter::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ── Quote card: dark "editor" card floating on the blue field, with a
+   small toolbar-like accent bar up top — this is the component the
+   dark-editor screenshot reference maps to. ── */
+.quoteCard {
+  position: relative;
+  background: rgba(9, 13, 22, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 30px 32px 32px;
+  margin: 12px 0 40px;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+}
+.quoteBar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.quoteBar::before,
+.quoteBar::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+}
+.quoteBar::after {
+  background: #e8c94a;
+}
+.quoteText {
+  font-family: var(--font-franie), var(--font-inter), sans-serif;
+  font-weight: 40;
+  font-size: clamp(20px, 2.6vw, 28px);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: #f4f1ea;
+  margin: 0;
+}
+
+/* ── Stats row: bold graphic tiles, echoing the high-contrast carousel
+   reference — pulls the hard numbers out of the story as their own
+   moment. ── */
+.statsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 8px 0 40px;
+}
+.statChip {
+  flex: 1 1 140px;
+  background: rgba(244, 241, 234, 0.96);
+  border-radius: 10px;
+  padding: 20px 20px 18px;
+}
+.statValue {
+  font-family: var(--font-gcgrind), sans-serif;
+  font-size: clamp(26px, 3.4vw, 34px);
+  line-height: 1;
+  color: #142850;
+  margin-bottom: 8px;
+}
+.statLabel {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #3f4f6b;
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 110px 20px 140px;
+  }
+  .quoteCard {
+    padding: 24px 22px 26px;
+  }
+}
