@@ -7,19 +7,34 @@ type Project = {
   num: string;
   name: string;
   client: string;
+  year: string;
   desc: string;
   tags: string;
-  filter: "brand-film" | "bts" | "motion";
+  filter: "brand-film" | "bts" | "motion" | "institucional";
   vimeoId: string;
   orientation: "horizontal" | "vertical";
 };
 
-// Client/desc/tags are intentionally blank — real videos first, copy comes later.
+// Fixed card format (never vary): título, "Cliente • Ano", uma descrição
+// curta (a decisão de direção + o que ela resolveu), créditos. Entries
+// without copy yet are left blank on purpose.
 const PROJECTS: Project[] = [
-  { id: 1, num: "01", name: "Projeto de Motion para Websérie de Viagem", client: "", desc: "", tags: "", filter: "motion", vimeoId: "1218890209", orientation: "horizontal" },
-  { id: 2, num: "02", name: "Motion Outubro Gloss", client: "", desc: "", tags: "", filter: "motion", vimeoId: "1218434521", orientation: "horizontal" },
-  { id: 3, num: "03", name: "Vídeo Promo Gloss", client: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435106", orientation: "vertical" },
-  { id: 4, num: "04", name: "Vídeo LP", client: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435477", orientation: "horizontal" },
+  { id: 1, num: "01", name: "Projeto de Motion para Websérie de Viagem", client: "", year: "", desc: "", tags: "", filter: "motion", vimeoId: "1218890209", orientation: "horizontal" },
+  { id: 2, num: "02", name: "Motion Outubro Gloss", client: "", year: "", desc: "", tags: "", filter: "motion", vimeoId: "1218434521", orientation: "horizontal" },
+  {
+    id: 3,
+    num: "03",
+    name: "Institucional Retenção Day Toyota",
+    client: "Hai Toyota",
+    year: "2025",
+    desc: "Direção que priorizou a mobilização real das equipes — e transformou a ação em prova institucional.",
+    tags: "Direção, montagem, cor, captação",
+    filter: "institucional",
+    vimeoId: "1218901316",
+    orientation: "horizontal",
+  },
+  { id: 4, num: "04", name: "Vídeo Promo Gloss", client: "", year: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435106", orientation: "vertical" },
+  { id: 5, num: "05", name: "Vídeo LP", client: "", year: "", desc: "", tags: "", filter: "brand-film", vimeoId: "1218435477", orientation: "horizontal" },
 ];
 
 const GRADS = [
@@ -32,6 +47,7 @@ const GRADS = [
 const FILTERS: { label: string; value: "all" | Project["filter"] }[] = [
   { label: "Todos", value: "all" },
   { label: "Brand Film", value: "brand-film" },
+  { label: "Institucional", value: "institucional" },
   { label: "Making Of & BTS", value: "bts" },
   { label: "Motion", value: "motion" },
 ];
@@ -114,7 +130,7 @@ export default function WorkIntro() {
       frame!.classList.toggle("vertical", p.orientation === "vertical");
       numEl!.textContent = p.num + " — Projeto";
       titleEl!.textContent = p.name;
-      clientEl!.textContent = p.client;
+      clientEl!.textContent = [p.client, p.year].filter(Boolean).join(" • ");
       descEl!.textContent = p.desc;
       tagsEl!.textContent = p.tags;
       currEl!.textContent = pad(current + 1);
@@ -282,7 +298,7 @@ export default function WorkIntro() {
             <span id="cineCurr" ref={currRef}>
               01
             </span>{" "}
-            / <span id="cineTotal" ref={totalRef}>04</span>
+            / <span id="cineTotal" ref={totalRef}>05</span>
           </div>
           <button className="cine-arrow" id="cineNext" aria-label="Próximo" ref={nextBtnRef}>
             <svg width="15" viewBox="0 0 14 14" fill="none">
