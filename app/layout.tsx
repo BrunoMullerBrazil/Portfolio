@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { franie, gcgrind, inter } from "./fonts";
+import { franie, gcgrind, inter, anton, playfair, spaceMono } from "./fonts";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import Cursor from "@/components/Cursor";
@@ -20,7 +20,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className={`${franie.variable} ${gcgrind.variable} ${inter.variable}`}>
+    <html
+      lang="pt-BR"
+      className={`${franie.variable} ${gcgrind.variable} ${inter.variable} ${anton.variable} ${playfair.variable} ${spaceMono.variable}`}
+    >
       <body
         style={
           {
