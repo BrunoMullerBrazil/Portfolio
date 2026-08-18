@@ -1,7 +1,24 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import styles from "./trajetoria.module.css";
+import { withBasePath } from "@/lib/basePath";
 import { MANIFESTO_INTRO, MANIFESTO_PAPER, MANIFESTO_OUTRO, MANIFESTO_CLOSER, BLOCKS, FINAL_QUOTE } from "./content";
+
+const asset = (name: string) => withBasePath(`/assets/trajetoria/${name}`);
+
+// A torn-paper card gets one real tape-photo corner instead of a CSS shape —
+// sourced from a small rotating set so repeated cards don't look identical.
+function PaperTape({ variant = 0, className }: { variant?: number; className?: string }) {
+  const files = ["tape-1.png", "tape-3.png", "tape-4.png"];
+  return (
+    <img
+      className={className}
+      src={asset(files[variant % files.length])}
+      alt=""
+      aria-hidden="true"
+    />
+  );
+}
 
 // Splits "before **highlighted** after" into plain text with the marked
 // span wrapped for the highlighter/highlight-box treatment.
@@ -47,6 +64,7 @@ export default function Trajetoria() {
   return (
     <main className={styles.page}>
       <div className={styles.shadow} />
+      <div className={styles.lightBeam} />
       <div className={styles.rulerLeft} />
       <div className={styles.rulerBottom} />
 
@@ -56,6 +74,7 @@ export default function Trajetoria() {
         </Link>
 
         <div className={styles.titleZone}>
+          <img className={styles.penProp} src={asset("pen.png")} alt="" aria-hidden="true" />
           <div className={`${styles.stamp} reveal`}>MÜLLER — CASO 01</div>
           <div className={`${styles.eyebrowTyped} reveal`}>MINHA TRAJETÓRIA</div>
           <div className={`${styles.titleRow} reveal reveal-d1`}>
@@ -69,9 +88,12 @@ export default function Trajetoria() {
         <div className={styles.manifestoZone}>
           <p className={`${styles.manifestoP} reveal`}>{MANIFESTO_INTRO}</p>
 
-          <div className={`${styles.paperPlatform} reveal`}>
-            <div className={styles.paperTag}>// A PARTE QUE EU GOSTO</div>
-            <p>{MANIFESTO_PAPER}</p>
+          <div className={`${styles.paperWrap} reveal`}>
+            <PaperTape variant={1} className={styles.platformTape} />
+            <div className={styles.paperPlatform}>
+              <div className={styles.paperTag}>// A PARTE QUE EU GOSTO</div>
+              <p>{MANIFESTO_PAPER}</p>
+            </div>
           </div>
 
           <p className={`${styles.manifestoP} reveal`}>{MANIFESTO_OUTRO}</p>
@@ -87,11 +109,21 @@ export default function Trajetoria() {
           if (b.type === "chapter") {
             return (
               <div key={i} className={`${styles.chapterWrap} reveal`}>
+                <PaperTape variant={i} className={`${styles.chapterTapeImg} ${styles.chapterTapeTl}`} />
+                <PaperTape variant={i + 1} className={`${styles.chapterTapeImg} ${styles.chapterTapeBr}`} />
                 <div className={styles.chapterPaper}>
-                  <span className={`${styles.tape} ${styles.tapeTl}`} />
-                  <span className={`${styles.tape} ${styles.tapeBr}`} />
                   <div className={styles.chapterRow}>
-                    <div className={styles.chapterLabel}>{b.label}</div>
+                    <div className={styles.chapterLabelWrap}>
+                      <div className={styles.chapterLabel}>{b.label}</div>
+                      {b.underline && (
+                        <img
+                          className={styles.chapterUnderline}
+                          src={asset("marker-underline.png")}
+                          alt=""
+                          aria-hidden="true"
+                        />
+                      )}
+                    </div>
                     <div className={styles.chapterTag}>{b.num} / 06</div>
                   </div>
                 </div>
@@ -124,6 +156,14 @@ export default function Trajetoria() {
               <div key={i} className={`${styles.statsRow} reveal`}>
                 {b.items.map((s, j) => (
                   <div key={j} className={styles.statChip}>
+                    {b.circleIndex === j && (
+                      <img
+                        className={styles.statCircleMark}
+                        src={asset("marker-circle.png")}
+                        alt=""
+                        aria-hidden="true"
+                      />
+                    )}
                     <StatStar />
                     <div className={styles.statVal}>{s.value}</div>
                     <div className={styles.statLbl}>{s.label}</div>
@@ -134,11 +174,14 @@ export default function Trajetoria() {
           }
           if (b.type === "paper") {
             return (
-              <div key={i} className={`${styles.paperPlatform} reveal`}>
-                {b.tag && <div className={styles.paperTag}>{b.tag}</div>}
-                {b.paragraphs.map((p, j) => (
-                  <p key={j}>{p}</p>
-                ))}
+              <div key={i} className={`${styles.paperWrap} reveal`}>
+                <PaperTape variant={i} className={styles.platformTape} />
+                <div className={styles.paperPlatform}>
+                  {b.tag && <div className={styles.paperTag}>{b.tag}</div>}
+                  {b.paragraphs.map((p, j) => (
+                    <p key={j}>{p}</p>
+                  ))}
+                </div>
               </div>
             );
           }

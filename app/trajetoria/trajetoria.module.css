@@ -26,6 +26,24 @@
   mix-blend-mode: multiply;
 }
 
+/* Single light source, upper-left (matches .page's own corner falloff) —
+   a diagonal sweep from lit to shadowed, plus a vignette so the desk reads
+   as photographed rather than flat-lit. Every prop shadow below is cast
+   away from this same corner. */
+.lightBeam {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+      118deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      transparent 24%,
+      transparent 76%,
+      rgba(0, 0, 0, 0.24) 100%
+    ),
+    radial-gradient(120% 85% at 50% 42%, transparent 55%, rgba(4, 9, 22, 0.38) 100%);
+}
+
 .rulerLeft,
 .rulerBottom {
   position: absolute;
@@ -92,6 +110,24 @@
 .titleZone {
   position: relative;
   margin: 48px 0 64px;
+}
+/* A real pen render, thrown slightly out of focus — like the camera is
+   racked onto the paper in front of it, not the desk clutter behind. */
+.penProp {
+  position: absolute;
+  z-index: -1;
+  top: -34px;
+  right: -170px;
+  width: clamp(300px, 34vw, 460px);
+  transform: rotate(-21deg);
+  filter: blur(2.2px) drop-shadow(16px 24px 22px rgba(0, 0, 0, 0.55));
+  opacity: 0.9;
+  pointer-events: none;
+}
+@media (max-width: 960px) {
+  .penProp {
+    display: none;
+  }
 }
 .stamp {
   display: inline-block;
@@ -186,11 +222,10 @@
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
-.doodleArrow {
-  display: none;
-}
-
 /* ── White paper platform: a real breathing pause laid on the blue field ── */
+.paperWrap {
+  position: relative;
+}
 .paperPlatform {
   position: relative;
   background: #f4f1ea;
@@ -206,6 +241,15 @@
     50% 100%, 40% calc(100% - 7px), 30% 100%, 20% calc(100% - 4px), 10% 100%, 0% calc(100% - 6px)
   );
   box-shadow: 0 26px 50px -22px rgba(0, 0, 0, 0.5);
+}
+.platformTape {
+  position: absolute;
+  top: -5px;
+  left: 30px;
+  width: 100px;
+  transform: rotate(-4deg);
+  filter: drop-shadow(4px 8px 8px rgba(0, 0, 0, 0.3));
+  pointer-events: none;
 }
 .paperPlatform p {
   font-size: 15px;
@@ -250,22 +294,20 @@
   );
   box-shadow: 0 30px 56px -22px rgba(0, 0, 0, 0.55);
 }
-.tape {
+.chapterTapeImg {
   position: absolute;
-  width: 56px;
-  height: 22px;
-  background: rgba(230, 220, 190, 0.55);
-  border: 1px solid rgba(20, 30, 60, 0.08);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  width: 84px;
+  pointer-events: none;
+  filter: drop-shadow(3px 6px 6px rgba(0, 0, 0, 0.3));
 }
-.tapeTl {
-  top: -10px;
-  left: 36px;
+.chapterTapeTl {
+  top: -4px;
+  left: 34px;
   transform: rotate(-7deg);
 }
-.tapeBr {
-  bottom: -10px;
-  right: 46px;
+.chapterTapeBr {
+  bottom: -4px;
+  right: 44px;
   transform: rotate(6deg);
 }
 .chapterRow {
@@ -275,6 +317,10 @@
   gap: 20px;
   flex-wrap: wrap;
 }
+.chapterLabelWrap {
+  position: relative;
+  display: inline-block;
+}
 .chapterLabel {
   font-family: var(--font-franie), sans-serif;
   font-weight: 700;
@@ -282,6 +328,13 @@
   letter-spacing: -0.005em;
   color: #142850;
   text-transform: uppercase;
+}
+.chapterUnderline {
+  position: absolute;
+  left: -6px;
+  bottom: -9px;
+  width: calc(100% + 14px);
+  pointer-events: none;
 }
 .chapterTag {
   font-size: 11px;
@@ -312,7 +365,6 @@
   position: relative;
   flex: 0 0 auto;
   padding: 20px 22px 18px;
-  overflow: hidden;
   width: 168px;
 }
 .statChip:nth-child(3n + 1) {
@@ -337,6 +389,15 @@
   top: 12px;
   right: 14px;
   opacity: 0.9;
+}
+.statCircleMark {
+  position: absolute;
+  inset: -22px -26px -18px -20px;
+  width: calc(100% + 46px);
+  height: calc(100% + 40px);
+  pointer-events: none;
+  opacity: 0.85;
+  z-index: 2;
 }
 .statVal {
   font-family: var(--font-anton), sans-serif;
@@ -480,5 +541,16 @@
   .chapterPaper {
     padding-left: 24px;
     padding-right: 24px;
+  }
+  .chapterTapeImg {
+    width: 56px;
+  }
+  .platformTape {
+    width: 72px;
+  }
+  .statCircleMark {
+    inset: -14px -16px -12px -16px;
+    width: calc(100% + 32px);
+    height: calc(100% + 26px);
   }
 }

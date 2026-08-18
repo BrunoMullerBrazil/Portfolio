@@ -5,8 +5,8 @@ export type Block =
   | { type: "body"; text: string }
   | { type: "quoteHighlight"; text: string }
   | { type: "quoteSerif"; text: string }
-  | { type: "stats"; items: { value: string; label: string }[] }
-  | { type: "chapter"; label: string; num: string }
+  | { type: "stats"; items: { value: string; label: string }[]; circleIndex?: number }
+  | { type: "chapter"; label: string; num: string; underline?: boolean }
   | { type: "paper"; tag?: string; paragraphs: string[] };
 
 export const MANIFESTO_INTRO =
@@ -21,7 +21,7 @@ export const MANIFESTO_OUTRO =
 export const MANIFESTO_CLOSER = "Se você tem um **negócio bom** e uma imagem genérica, esse é o meu assunto.";
 
 export const BLOCKS: Block[] = [
-  { type: "chapter", label: "Origem", num: "01" },
+  { type: "chapter", label: "Origem", num: "01", underline: true },
   {
     type: "body",
     text: "Aos dez anos eu gravava a mim mesmo jogando. Igual a alguns milhões de crianças naquela época. O canal chegou a duzentos inscritos, número que na ocasião me pareceu enorme.",
@@ -90,6 +90,7 @@ export const BLOCKS: Block[] = [
       { value: "5.000", label: "Ligações" },
       { value: "+400", label: "Retenções" },
     ],
+    circleIndex: 1,
   },
   {
     type: "quoteSerif",
