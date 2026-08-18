@@ -157,18 +157,20 @@
 .titleBig {
   font-family: var(--font-franie), sans-serif;
   font-weight: 700;
-  font-size: clamp(38px, 11vw, 92px);
+  font-size: clamp(25px, 9.2vw, 92px);
   line-height: 0.92;
   letter-spacing: -0.01em;
   color: #f4f1ea;
   margin: 0;
   transform: rotate(-1deg);
   transform-origin: left top;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 .titleBig .hl {
   color: #142850;
-  background: #f5d90a;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   padding: 0 6px;
@@ -429,7 +431,9 @@
 }
 .quoteHighlightText .hl {
   color: #142850;
-  background: #f5d90a;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-position: center;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   padding: 2px 5px;

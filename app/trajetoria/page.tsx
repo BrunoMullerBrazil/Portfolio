@@ -20,13 +20,24 @@ function PaperTape({ variant = 0, className }: { variant?: number; className?: s
   );
 }
 
+// Real highlighter-pen strokes (photographed, tinted yellow) stand in for a
+// flat CSS box behind grifado text — cycled so repeated marks don't look
+// identical.
+const MARKER_FILES = ["marker-hl-1.png", "marker-hl-2.png", "marker-hl-3.png"];
+let markerSeed = 0;
+function nextMarker() {
+  const file = MARKER_FILES[markerSeed % MARKER_FILES.length];
+  markerSeed += 1;
+  return asset(file);
+}
+
 // Splits "before **highlighted** after" into plain text with the marked
 // span wrapped for the highlighter/highlight-box treatment.
 function withHighlight(text: string): ReactNode {
   const parts = text.split(/\*\*(.+?)\*\*/g);
   return parts.map((part, i) =>
     i % 2 === 1 ? (
-      <span className={styles.hl} key={i}>
+      <span className={styles.hl} key={i} style={{ backgroundImage: `url(${nextMarker()})` }}>
         {part}
       </span>
     ) : (
@@ -79,7 +90,10 @@ export default function Trajetoria() {
           <div className={`${styles.eyebrowTyped} reveal`}>MINHA TRAJETÓRIA</div>
           <div className={`${styles.titleRow} reveal reveal-d1`}>
             <h1 className={styles.titleBig}>
-              PROFISS<span className={styles.hl}>IONAL</span>
+              PROFISS
+              <span className={styles.hl} style={{ backgroundImage: `url(${asset("marker-hl-2.png")})` }}>
+                IONAL
+              </span>
             </h1>
             <span className={styles.blackBar} />
           </div>
