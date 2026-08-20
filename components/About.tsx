@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
 import { withBasePath } from "@/lib/basePath";
 import { useLanguage, t as tr } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
@@ -69,18 +68,6 @@ export default function About() {
             <strong>{tr(dict.aboutText2Strong, lang)}</strong>
             {tr(dict.aboutText2Rest, lang)}
           </div>
-          <Link href="/trajetoria" className="about-traj reveal reveal-d3">
-            {tr(dict.aboutTrajButton, lang)}
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path
-                d="M2.5 6H9.5M6.5 3L9.5 6L6.5 9"
-                stroke="currentColor"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Link>
         </div>
         <div className="about-stats" ref={statsWrapRef}>
           <div className="stat reveal reveal-d1">
