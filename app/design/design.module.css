@@ -91,6 +91,27 @@
 }
 
 /* ── Grid ── */
+.gridWrap {
+  position: relative;
+}
+.arrow {
+  position: absolute;
+  width: 78px;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: drop-shadow(3px 6px 8px rgba(0, 0, 0, 0.35));
+}
+.arrowLeft {
+  top: -54px;
+  left: -30px;
+  transform: rotate(-18deg);
+}
+.arrowRight {
+  top: -60px;
+  right: -14px;
+  transform: scaleX(-1) rotate(-30deg);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -141,6 +162,24 @@
 }
 
 /* ── Lightbox ── */
+@keyframes backdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
 .lightboxBackdrop {
   position: fixed;
   inset: 0;
@@ -152,6 +191,10 @@
   background: rgba(8, 14, 30, 0.6);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  animation: backdropIn 0.22s ease both;
+}
+.lightboxBackdrop.closing {
+  animation: backdropIn 0.2s ease both reverse;
 }
 .lightboxPanel {
   position: relative;
@@ -162,6 +205,10 @@
   color: #1d2b45;
   border-radius: 4px;
   box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.6);
+  animation: panelIn 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.lightboxPanel.closing {
+  animation: panelIn 0.2s ease both reverse;
 }
 .lightboxClose {
   position: absolute;
@@ -251,5 +298,8 @@
   }
   .titleBig {
     transform: none;
+  }
+  .arrow {
+    display: none;
   }
 }
