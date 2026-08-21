@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import styles from "./trajetoria.module.css";
+import blueprint from "../blueprint.module.css";
 import { withBasePath } from "@/lib/basePath";
 import { SITE_URL, SITE_NAME, OG_IMAGE } from "@/lib/seo";
 import { MANIFESTO_INTRO, MANIFESTO_PAPER, MANIFESTO_OUTRO, MANIFESTO_CLOSER, BLOCKS, FINAL_QUOTE } from "./content";
@@ -103,11 +104,11 @@ function StatStar() {
 
 export default function Trajetoria() {
   return (
-    <main className={styles.page}>
-      <div className={styles.shadow} />
-      <div className={styles.lightBeam} />
-      <div className={styles.rulerLeft} />
-      <div className={styles.rulerBottom} />
+    <main className={`${blueprint.page} ${styles.pageTall}`}>
+      <div className={blueprint.shadow} />
+      <div className={blueprint.lightBeam} />
+      <div className={blueprint.rulerLeft} />
+      <div className={blueprint.rulerBottom} />
 
       <div className={styles.content}>
         <Link href="/" className={`${styles.back} reveal`}>

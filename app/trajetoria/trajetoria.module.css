@@ -1,84 +1,8 @@
-.page {
-  position: relative;
+/* .page/.shadow/.lightBeam/.rulerLeft/.rulerBottom now live in the shared
+   ../blueprint.module.css (also used by /design). This page is much
+   taller than a single viewport, so it adds that on top via .pageTall. */
+.pageTall {
   min-height: 260vh;
-  overflow: hidden;
-  background:
-    /* fine grid */
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.12) 0 1px, transparent 1px 20px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 1px, transparent 1px 20px),
-    /* bold grid, every 6th line */
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.26) 0 1.5px, transparent 1.5px 120px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.26) 0 1.5px, transparent 1.5px 120px),
-    /* soft light falloff, top-left */
-    radial-gradient(60% 40% at 8% 6%, rgba(255, 255, 255, 0.32), transparent 60%),
-    /* base blueprint blue */
-    linear-gradient(150deg, #3f6bab 0%, #2c4d85 32%, #1d3766 66%, #142850 100%);
-  font-family: var(--font-space-mono), monospace;
-  color: #f4f1ea;
-}
-
-.shadow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: var(--winshadow) center right / cover no-repeat;
-  opacity: 0.5;
-  mix-blend-mode: multiply;
-}
-
-/* Single light source, upper-left (matches .page's own corner falloff) —
-   a diagonal sweep from lit to shadowed, plus a vignette so the desk reads
-   as photographed rather than flat-lit. Every prop shadow below is cast
-   away from this same corner. */
-.lightBeam {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-      118deg,
-      rgba(255, 255, 255, 0.14) 0%,
-      transparent 24%,
-      transparent 76%,
-      rgba(0, 0, 0, 0.24) 100%
-    ),
-    radial-gradient(120% 85% at 50% 42%, transparent 55%, rgba(4, 9, 22, 0.38) 100%);
-}
-
-.rulerLeft,
-.rulerBottom {
-  position: absolute;
-  pointer-events: none;
-  background-color: rgba(10, 20, 45, 0.28);
-}
-
-.rulerLeft {
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 22px;
-  background-image: repeating-linear-gradient(
-    0deg,
-    rgba(255, 255, 255, 0.55) 0 1px,
-    transparent 1px 10px,
-    transparent 10px 11px,
-    rgba(255, 255, 255, 0.3) 11px 12px,
-    transparent 12px 20px
-  );
-}
-
-.rulerBottom {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 22px;
-  background-image: repeating-linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.55) 0 1px,
-    transparent 1px 10px,
-    transparent 10px 11px,
-    rgba(255, 255, 255, 0.3) 11px 12px,
-    transparent 12px 20px
-  );
 }
 
 /* ── Content ── */
