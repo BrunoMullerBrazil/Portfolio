@@ -101,6 +101,7 @@ export default function DesignPage() {
                 className={styles.tile}
                 onClick={() => setActiveId(item.id)}
                 aria-label={item.title}
+                data-cursor="click"
               >
                 <span className={styles.tilePlaceholder} data-tone={i % 3}>
                   <span className={styles.tileLabel}>{item.title}</span>

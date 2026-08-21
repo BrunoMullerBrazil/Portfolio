@@ -9,7 +9,7 @@ export default function FormatLinks() {
   return (
     <div id="format-links">
       <div className="format-links-wrap">
-        <Link href="/design" className="format-tile reveal">
+        <Link href="/design" className="format-tile reveal" data-cursor="click">
           <span className="format-tile-media" aria-hidden="true" />
           <span className="format-tile-label">Design</span>
         </Link>

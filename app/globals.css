@@ -23,21 +23,31 @@ a{color:inherit;text-decoration:none;cursor:none;}
 /* ── CURSOR ── */
 #cursor{position:fixed;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:9999;transition:width .25s,height .25s,background .2s,border .2s;}
 #cursor-ring{position:fixed;width:36px;height:36px;border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .4s,height .4s,border-color .2s,opacity .3s;}
-#cursor-label{position:fixed;pointer-events:none;z-index:10000;transform:translate(-50%,-50%);font-family:var(--font-gcgrind),sans-serif;font-size:10px;letter-spacing:.18em;opacity:0;transition:opacity .2s;white-space:nowrap;}
+/* "Click!" orbits the cursor on a circular SVG text path instead of sitting
+   centered — the dot itself (#cursor) keeps its normal dynamic squash/stretch,
+   it just grows a little like the hover state does. */
+#cursor-label{position:fixed;pointer-events:none;z-index:10000;width:120px;height:120px;transform:translate(-50%,-50%);opacity:0;transition:opacity .25s;}
+#cursor-label svg{display:block;width:100%;height:100%;animation:cursor-spin 6s linear infinite;}
+#cursor-label text{font-family:var(--font-gcgrind),sans-serif;font-size:10.5px;letter-spacing:.16em;}
+@keyframes cursor-spin{to{transform:rotate(360deg);}}
 body.hero-mode #cursor{background:#0c0c0b;}
 body.hero-mode #cursor-ring{border:1px solid rgba(12,12,11,.35);}
-body.hero-mode #cursor-label{color:#e0dbd1;}
+body.hero-mode #cursor-label text{fill:#0c0c0b;}
 body.hero-mode.cursor-hover #cursor{width:13px;height:13px;}
 body.hero-mode.cursor-hover #cursor-ring{width:56px;height:56px;border-color:rgba(12,12,11,.6);}
 body.dark-mode #cursor{background:#ffffff;}
 body.dark-mode #cursor-ring{border:1px solid rgba(255,255,255,.58);}
-body.dark-mode #cursor-label{color:#e0dbd1;}
+body.dark-mode #cursor-label text{fill:#e0dbd1;}
 body.dark-mode.cursor-hover #cursor{width:13px;height:13px;}
 body.dark-mode.cursor-hover #cursor-ring{width:56px;height:56px;border-color:rgba(224,219,209,.55);}
-body.cursor-play #cursor{width:80px;height:80px;background:rgba(224,219,209,.08)!important;border:1px solid rgba(224,219,209,.25)!important;}
-body.hero-mode.cursor-play #cursor{background:rgba(224,219,209,.08)!important;border:1px solid rgba(224,219,209,.25)!important;}
+body.cursor-play #cursor{width:13px;height:13px;}
 body.cursor-play #cursor-ring{opacity:0;}
 body.cursor-play #cursor-label{opacity:1;}
+/* Fixed cream fill + a dark drop-shadow (rather than inheriting the mode's
+   text color) keeps "Click!" readable over both dark tiles and /design's
+   light cream ones. */
+body.cursor-play #cursor-label text{fill:#f4f1ea;}
+body.cursor-play #cursor-label svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.75)) drop-shadow(0 0 6px rgba(0,0,0,.4));}
 
 /* ── HERO ── */
 #hero{position:relative;height:400vh;background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(150,168,110,.045) 27px 28px),repeating-linear-gradient(90deg,transparent 0 27px,rgba(150,168,110,.045) 27px 28px),repeating-linear-gradient(0deg,transparent 0 139px,rgba(150,168,110,.075) 139px 140px),repeating-linear-gradient(90deg,transparent 0 139px,rgba(150,168,110,.075) 139px 140px),radial-gradient(42% 32% at 72% 16%,rgba(190,205,150,.06),transparent 70%),radial-gradient(135% 108% at 26% 8%,#2b331e 0%,#1e2416 32%,#151a0f 62%,#0c0c0b 100%);}

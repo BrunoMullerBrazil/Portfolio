@@ -2,7 +2,12 @@
 
 import { useEffect, useRef } from "react";
 
-const HOVER_SELECTOR = "a,.svc,.work-card,.cine-filter,.cine-arrow,.cine-frame";
+const HOVER_SELECTOR = "a,.svc,.cine-filter,.cine-arrow";
+// Bigger "Click!" circle for card/media-style elements that open or play
+// something, as opposed to plain links/buttons (small ring only). A data
+// attribute survives CSS Modules' class-name hashing on /design and
+// /trajetoria, where a plain ".foo" selector wouldn't match.
+const CLICK_SELECTOR = '[data-cursor="click"],.work-card';
 
 export default function Cursor() {
   const dotRef = useRef<HTMLDivElement>(null);
@@ -61,8 +66,8 @@ export default function Cursor() {
 
     function onOver(e: MouseEvent) {
       const target = e.target as HTMLElement;
-      const card = target.closest(".work-card");
-      if (card) {
+      const clickEl = target.closest(CLICK_SELECTOR);
+      if (clickEl) {
         document.body.classList.remove("cursor-hover");
         document.body.classList.add("cursor-play");
         return;
@@ -74,8 +79,8 @@ export default function Cursor() {
     function onOut(e: MouseEvent) {
       const target = e.target as HTMLElement;
       const related = e.relatedTarget as HTMLElement | null;
-      const card = target.closest(".work-card");
-      if (card && (!related || !card.contains(related))) {
+      const clickEl = target.closest(CLICK_SELECTOR);
+      if (clickEl && (!related || !clickEl.contains(related))) {
         document.body.classList.remove("cursor-play");
       }
       const hoverEl = target.closest(HOVER_SELECTOR);
@@ -99,7 +104,16 @@ export default function Cursor() {
       <div id="cursor" ref={dotRef} />
       <div id="cursor-ring" ref={ringRef} />
       <div id="cursor-label" ref={labelRef}>
-        PLAY
+        <svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">
+          <defs>
+            <path id="cursorOrbitPath" d="M60,60 m-42,0 a42,42 0 1,1 84,0 a42,42 0 1,1 -84,0" />
+          </defs>
+          <text>
+            <textPath href="#cursorOrbitPath">
+              Click! &#8226; Click! &#8226; Click! &#8226; Click! &#8226;{" "}
+            </textPath>
+          </text>
+        </svg>
       </div>
     </>
   );

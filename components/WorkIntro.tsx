@@ -382,7 +382,7 @@ export default function WorkIntro() {
         </div>
 
         <div className="cine-stage reveal reveal-d2">
-          <div className="cine-frame" id="cineFrame" ref={frameRef}>
+          <div className="cine-frame" id="cineFrame" data-cursor="click" ref={frameRef}>
             <div className="cine-media" id="cineMedia" ref={mediaRef} />
             <button className="cine-play" aria-label={t(dict.ariaWatch, lang)} ref={playBtnRef}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

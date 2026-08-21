@@ -122,7 +122,7 @@
   aspect-ratio: 1 / 1;
   padding: 0;
   border: none;
-  cursor: pointer;
+  cursor: none;
   border-radius: 3px;
   overflow: hidden;
   box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.55);
