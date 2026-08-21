@@ -1,10 +1,40 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import styles from "./trajetoria.module.css";
 import { withBasePath } from "@/lib/basePath";
+import { SITE_URL, SITE_NAME, OG_IMAGE } from "@/lib/seo";
 import { MANIFESTO_INTRO, MANIFESTO_PAPER, MANIFESTO_OUTRO, MANIFESTO_CLOSER, BLOCKS, FINAL_QUOTE } from "./content";
 
 const asset = (name: string) => withBasePath(`/assets/trajetoria/${name}`);
+
+// Page-level openGraph/twitter fully replace the layout's (Next.js doesn't
+// deep-merge nested metadata fields), so everything needed for a correct
+// link preview has to be repeated here, not just title/description.
+const PAGE_TITLE = "Minha Trajetória Profissional";
+// The opening line of the manifesto, not a generic page blurb — it's the
+// strongest single sentence in the piece.
+const PAGE_DESCRIPTION = MANIFESTO_INTRO;
+
+export const metadata: Metadata = {
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: SITE_NAME,
+    title: `${PAGE_TITLE} — Bruno Müller`,
+    description: PAGE_DESCRIPTION,
+    url: `${SITE_URL}/trajetoria/`,
+    images: [{ ...OG_IMAGE, alt: PAGE_TITLE }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${PAGE_TITLE} — Bruno Müller`,
+    description: PAGE_DESCRIPTION,
+    images: [OG_IMAGE.url],
+  },
+};
 
 // A torn-paper card gets one real tape-photo corner instead of a CSS shape —
 // sourced from a small rotating set so repeated cards don't look identical.
