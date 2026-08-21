@@ -220,20 +220,21 @@ body.cursor-play #cursor-label{opacity:1;}
    galleries (Design, Ilustração) that live outside
    the video grid, each as its own page
 ═══════════════════════════════════════ */
-#format-links{position:relative;padding:0 48px 130px;background:#0c0c0b;}
-.format-links-wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;}
+#format-links{position:relative;padding:0 48px 64px;background:#0c0c0b;}
+.format-links-wrap{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:16px;}
 .format-tile{
   position:relative;
   display:flex;align-items:flex-end;
+  width:295px;
   aspect-ratio:21/9;
-  border-radius:18px;
+  border-radius:10px;
   overflow:hidden;
   text-decoration:none;
-  box-shadow:0 40px 80px -40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05);
+  box-shadow:0 14px 30px -18px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05);
   cursor:none;
   transition:transform .4s var(--motion-ease),box-shadow .4s var(--motion-ease);
 }
-.format-tile:hover{transform:translateY(-4px);box-shadow:0 50px 90px -36px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.09);}
+.format-tile:hover{transform:translateY(-3px);box-shadow:0 18px 36px -16px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.09);}
 .format-tile-media{
   position:absolute;inset:0;
   background:
@@ -246,11 +247,11 @@ body.cursor-play #cursor-label{opacity:1;}
   position:relative;z-index:1;
   font-family:var(--font-franie),var(--font-inter),sans-serif;
   font-weight:40;
-  font-size:clamp(26px,3vw,38px);
-  letter-spacing:-.01em;
+  font-size:15px;
+  letter-spacing:-.005em;
   color:#f4f1ea;
-  padding:24px 30px;
-  text-shadow:0 4px 18px rgba(0,0,0,.5);
+  padding:10px 14px;
+  text-shadow:0 3px 10px rgba(0,0,0,.5);
 }
 
 /* pasta clicável */
