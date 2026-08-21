@@ -215,6 +215,44 @@ body.cursor-play #cursor-label{opacity:1;}
 .cine-swap{opacity:.12 !important;}
 @media(max-width:820px){ .cine-stage{grid-template-columns:1fr;gap:26px;} .cine-meta{align-items:flex-start;} }
 
+/* ═══════════════════════════════════════
+   FORMAT LINKS — entry points to format-specific
+   galleries (Design, Ilustração) that live outside
+   the video grid, each as its own page
+═══════════════════════════════════════ */
+#format-links{position:relative;padding:0 48px 130px;background:#0c0c0b;}
+.format-links-wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;}
+.format-tile{
+  position:relative;
+  display:flex;align-items:flex-end;
+  aspect-ratio:21/9;
+  border-radius:18px;
+  overflow:hidden;
+  text-decoration:none;
+  box-shadow:0 40px 80px -40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05);
+  cursor:none;
+  transition:transform .4s var(--motion-ease),box-shadow .4s var(--motion-ease);
+}
+.format-tile:hover{transform:translateY(-4px);box-shadow:0 50px 90px -36px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.09);}
+.format-tile-media{
+  position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.1) 0 1px,transparent 1px 20px),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.1) 0 1px,transparent 1px 20px),
+    radial-gradient(60% 60% at 12% 10%,rgba(255,255,255,.28),transparent 60%),
+    linear-gradient(150deg,#3f6bab 0%,#2c4d85 32%,#1d3766 66%,#142850 100%);
+}
+.format-tile-label{
+  position:relative;z-index:1;
+  font-family:var(--font-franie),var(--font-inter),sans-serif;
+  font-weight:40;
+  font-size:clamp(26px,3vw,38px);
+  letter-spacing:-.01em;
+  color:#f4f1ea;
+  padding:24px 30px;
+  text-shadow:0 4px 18px rgba(0,0,0,.5);
+}
+
 /* pasta clicável */
 .folder-cta{
   position:relative;z-index:2;
