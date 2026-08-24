@@ -7,6 +7,9 @@ const WHATSAPP_NUMBER = "5548991879579";
 
 export default function WhatsAppButton() {
   const { lang } = useLanguage();
+  // WhatsApp is a Brazilian-first channel — the English audience gets
+  // Email/LinkedIn from Contact instead, no floating WhatsApp CTA.
+  if (lang !== "pt") return null;
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t(dict.whatsappMessage, lang))}`;
 
   return (

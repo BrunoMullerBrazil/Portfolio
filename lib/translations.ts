@@ -14,8 +14,11 @@ export const dict = {
   heroGreeting1: { pt: "Oi,", en: "Hi," },
   heroGreeting2: { pt: "eu sou", en: "I'm" },
   heroGreeting3: { pt: "Bruno", en: "Bruno" },
+  heroSubtitle: {
+    pt: "Direção audiovisual para marcas que valem mais do que parecem.",
+    en: "The gap between what a company is and how it reads.",
+  },
   heroRoleLine: { pt: "Florianópolis · Brasil", en: "Florianópolis · Brazil" },
-  heroRoleName: { pt: "Brand film para todos", en: "Brand film for all" },
   heroScrollCue: { pt: "role para baixo", en: "scroll down" },
 
   workIntroEyebrow: { pt: "Portfólio", en: "Portfolio" },
@@ -28,23 +31,22 @@ export const dict = {
   filterMotion: { pt: "Motion", en: "Motion" },
 
   aboutEyebrow: { pt: "Sobre", en: "About" },
-  aboutText1Strong: { pt: "Direção, câmera e edição", en: "Direction, camera and editing" },
-  aboutText1Rest: {
-    pt: " para marcas, empresas e projetos que precisam de presença audiovisual com critério.",
-    en: " for brands, companies and projects that need audiovisual presence done right.",
+  aboutPara1: {
+    pt: "Presença audiovisual com critério, para marcas, empresas e projetos.",
+    en: "I work on the gap between what a company is and how it reads. Most of it gets decided before the camera — in what the piece chooses not to say.",
   },
-  aboutText2Pre: {
-    pt: "Trabalho em Florianópolis e de forma remota em projetos de ",
-    en: "I work in Florianópolis and remotely on ",
+  aboutPara2: {
+    pt: "Direção, câmera e edição em projetos de brand film, making of, motion e editorial — do briefing à entrega. Florianópolis e remoto.",
+    en: "Brand film, motion and editorial work, from brief to delivery. In-house content strategy and direction at Gloss Express; previously marketing and audiovisual at a Toyota dealer group.",
   },
-  aboutText2Strong: { pt: "brand film", en: "brand film" },
-  aboutText2Rest: {
-    pt: ", making of, motion e editorial, do briefing à entrega.",
-    en: ", making of, motion and editorial projects — from brief to delivery.",
+  // PT stays two paragraphs — this third block only renders when non-empty.
+  aboutPara3: {
+    pt: "",
+    en: "Based in Florianópolis, Brazil — one hour ahead of EST. Available for remote contract work.",
   },
   aboutTrajButton: { pt: "Minha trajetória", en: "My journey" },
   statYears: { pt: "Anos de experiência", en: "Years of experience" },
-  statProjects: { pt: "Projetos entregues", en: "Projects delivered" },
+  statRemoteValue: { pt: "BR", en: "UTC-3" },
   statRemote: { pt: "Remoto disponível", en: "Remote available" },
 
   servicesEyebrow: { pt: "Serviços", en: "Services" },

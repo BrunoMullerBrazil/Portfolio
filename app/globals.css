@@ -61,9 +61,12 @@ body.cursor-play #cursor-label svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.75))
 .hero-nav-links a:hover{color:#e0dbd1;}
 
 /* ── Language switch ── */
-.lang-switch{display:flex;align-items:center;justify-content:center;width:24px;height:17px;padding:0;border:1px solid rgba(255,255,255,.14);border-radius:4px;background:rgba(255,255,255,.04);cursor:none;opacity:.75;line-height:0;transition:opacity .25s,border-color .25s,transform .25s;}
-.lang-switch:hover{opacity:1;border-color:rgba(255,255,255,.3);transform:translateY(-1px);}
-.lang-switch svg{display:block;border-radius:2px;overflow:hidden;width:18px;height:13px;}
+.lang-switch{display:flex;align-items:center;gap:5px;padding:0;border:none;background:none;opacity:.85;transition:opacity .25s;}
+.lang-switch:hover{opacity:1;}
+.lang-switch-opt{font-family:var(--font-inter),sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:none;border:none;padding:0;cursor:none;opacity:.45;transition:opacity .2s,color .2s;}
+.lang-switch-opt.active{opacity:1;}
+.lang-switch-opt:hover{opacity:.8;}
+.lang-switch-sep{font-size:10px;opacity:.3;}
 @keyframes navIn{to{opacity:1;}}
 .hero-text-wrap{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:0 48px;pointer-events:none;}
 .hero-greeting{font-family:var(--font-franie),var(--font-inter),sans-serif;font-weight:24;font-size:clamp(52px,9vw,118px);color:#ece7dd;letter-spacing:-.02em;line-height:.9;user-select:none;opacity:1;flex:0 0 auto;}
@@ -71,9 +74,9 @@ body.cursor-play #cursor-label svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.75))
 .hero-signature{flex:0 0 auto;width:clamp(180px,26vw,340px);display:flex;align-items:center;justify-content:flex-end;opacity:0;animation:fadeUpDark .9s .75s cubic-bezier(.22,1,.36,1) forwards;}
 .hero-signature img{width:100%;opacity:.55;filter:invert(1) brightness(1.1);mix-blend-mode:normal;}
 .hero-role{position:absolute;right:48px;bottom:80px;text-align:right;opacity:0;animation:fadeUpDark .8s .9s cubic-bezier(.22,1,.36,1) forwards;}
-.hero-role-line{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#888;margin-bottom:6px;}
-.hero-role-name{font-family:var(--font-gcgrind),sans-serif;font-size:clamp(18px,2.5vw,28px);letter-spacing:.06em;color:#e0dbd1;}
-.hero-role-name em{font-style:italic;font-family:Georgia,serif;letter-spacing:.02em;}
+.hero-role-line{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#888;}
+.hg-line-subtitle{margin-top:16px;}
+.hero-subtitle{font-family:Georgia,serif;font-style:italic;font-size:clamp(15px,1.7vw,21px);letter-spacing:.01em;line-height:1.4;color:#bcae95;max-width:480px;}
 @keyframes fadeUpDark{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeUpDarkCenter{from{opacity:0;transform:translate(-50%,18px);}to{opacity:1;transform:translate(-50%,0);}}
 .hero-scroll-cue{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;animation:fadeUpDarkCenter .6s 1.5s cubic-bezier(.22,1,.36,1) forwards;transition:opacity .6s ease;}
@@ -493,6 +496,7 @@ body.cursor-play #cursor-label svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.75))
 .about-eyebrow{font-size:9px;letter-spacing:.26em;text-transform:uppercase;color:#7a8256;margin-bottom:24px;}
 .about-text{font-size:clamp(14px,1.4vw,16px);line-height:1.85;color:#6a6460;text-wrap:pretty;}
 .about-text strong{color:#b0aaa1;font-weight:400;}
+.about-text + .about-text{margin-top:20px;}
 .about-stats{display:flex;flex-direction:column;}
 .stat{padding:28px 0;border-bottom:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:baseline;}
 .stat:first-child{border-top:1px solid rgba(255,255,255,.05);}
@@ -862,7 +866,12 @@ body.dark-mode #cursor-ring{
 .hero-scroll-label{mix-blend-mode:difference;color:#ffffff;}
 
 /* ── Hero nav links blend ── */
-.hero-nav-links a{mix-blend-mode:difference;color:#ffffff;}
+.hero-nav-links a,.hero-nav-links .lang-switch-opt,.hero-nav-links .lang-switch-sep{mix-blend-mode:difference;color:#ffffff;}
+
+/* ── Language toggle: readable colors outside the hero's blend trick ── */
+.nav-dark-links .lang-switch-opt{color:#555;}
+.nav-dark-links .lang-switch-opt.active,
+.nav-dark-links .lang-switch-opt:hover{color:#e0dbd1;}
 
 /* ── Pasta: animação squish + bolinha + abertura ── */
 :root{--bounce:cubic-bezier(0.16,1,0.3,1);}
@@ -1191,7 +1200,7 @@ body.site-ready .wa-float {
 }
 .about-stats{
   display:grid;
-  grid-template-columns:1fr 1fr 1fr;
+  grid-template-columns:1fr 1fr;
   border-top:1px solid rgba(255,255,255,.06);
   margin-top:0;
 }

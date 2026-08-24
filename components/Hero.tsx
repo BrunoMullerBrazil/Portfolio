@@ -247,7 +247,7 @@ export default function Hero() {
         <div className="hero-text-wrap" id="heroTexts" ref={heroTextsRef}>
           <div
             className="hero-greeting"
-            aria-label={`${t(dict.heroGreeting1, lang)} ${t(dict.heroGreeting2, lang)} ${t(dict.heroGreeting3, lang)}.`}
+            aria-label={`${t(dict.heroGreeting1, lang)} ${t(dict.heroGreeting2, lang)} ${t(dict.heroGreeting3, lang)}. ${t(dict.heroSubtitle, lang)}`}
           >
             <div className="hg-line">
               <span className="hg-w">{t(dict.heroGreeting1, lang)}</span>
@@ -263,6 +263,11 @@ export default function Hero() {
                 <em>.</em>
               </span>
             </div>
+            <div className="hg-line hg-line-subtitle">
+              <span className="hg-w hero-subtitle" style={{ transitionDelay: ".36s" }}>
+                {t(dict.heroSubtitle, lang)}
+              </span>
+            </div>
           </div>
           <div className="hero-signature">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -272,9 +277,6 @@ export default function Hero() {
 
         <div className="hero-role" id="heroRole" ref={heroRoleRef}>
           <div className="hero-role-line">{t(dict.heroRoleLine, lang)}</div>
-          <div className="hero-role-name">
-            <em>{t(dict.heroRoleName, lang)}</em>
-          </div>
         </div>
 
         <div id="heroMedia" ref={heroMediaRef}>

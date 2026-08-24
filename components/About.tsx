@@ -26,6 +26,7 @@ function ac(el: HTMLElement, t: number, s: string, d: number) {
 export default function About() {
   const { lang } = useLanguage();
   const statsWrapRef = useRef<HTMLDivElement>(null);
+  const para3 = tr(dict.aboutPara3, lang);
 
   useEffect(() => {
     const statsWrap = statsWrapRef.current;
@@ -59,15 +60,13 @@ export default function About() {
       <section id="about">
         <div>
           <div className="about-eyebrow reveal">{tr(dict.aboutEyebrow, lang)}</div>
-          <div className="about-text reveal reveal-d2">
-            <strong>{tr(dict.aboutText1Strong, lang)}</strong>
-            {tr(dict.aboutText1Rest, lang)}
-            <br />
-            <br />
-            {tr(dict.aboutText2Pre, lang)}
-            <strong>{tr(dict.aboutText2Strong, lang)}</strong>
-            {tr(dict.aboutText2Rest, lang)}
-          </div>
+          <div className="about-text reveal reveal-d2">{tr(dict.aboutPara1, lang)}</div>
+          <div className="about-text reveal reveal-d3">{tr(dict.aboutPara2, lang)}</div>
+          {/* No .reveal here: this block mounts on a language switch, not
+              a route change, and RevealObserver only re-scans on pathname
+              change — an element with .reveal that appears afterwards would
+              never get observed and would stay stuck at opacity:0. */}
+          {para3 && <div className="about-text">{para3}</div>}
         </div>
         <div className="about-stats" ref={statsWrapRef}>
           <div className="stat reveal reveal-d1">
@@ -78,14 +77,7 @@ export default function About() {
             <div className="stat-lbl">{tr(dict.statYears, lang)}</div>
           </div>
           <div className="stat reveal reveal-d2">
-            <div className="stat-num" data-count="40" data-suffix="+">
-              0
-            </div>
-            <div className="stat-accent" />
-            <div className="stat-lbl">{tr(dict.statProjects, lang)}</div>
-          </div>
-          <div className="stat reveal reveal-d3">
-            <div className="stat-num">BR</div>
+            <div className="stat-num">{tr(dict.statRemoteValue, lang)}</div>
             <div className="stat-accent" />
             <div className="stat-lbl">{tr(dict.statRemote, lang)}</div>
           </div>
