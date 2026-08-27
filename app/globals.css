@@ -709,6 +709,10 @@ footer{padding:22px 48px;border-top:1px solid rgba(255,255,255,.04);display:flex
   .hero-nav{padding:20px;}
   .hero-greeting{font-size:clamp(36px,10vw,64px);}
   .hero-signature{width:clamp(120px,30vw,180px);}
+  /* max-width:480px (the desktop value) is wider than the phone viewport
+     itself once the 48px side padding is out, so the subtitle overflowed
+     under #heroMedia instead of wrapping inside the text column. */
+  .hero-subtitle{max-width:clamp(140px,46vw,220px);font-size:13px;}
   #about,#contact{grid-template-columns:1fr;gap:48px;}
   .services-grid{grid-template-columns:1fr;}
   .work-card{border-left:2px solid transparent;}
@@ -968,6 +972,7 @@ body.dark-mode .hero-nav-logo svg path { fill: #e0dbd1; }
   .hero-nav{padding:20px;}
   .hero-greeting{font-size:clamp(36px,10vw,64px);}
   .hero-signature{width:clamp(120px,30vw,180px);}
+  .hero-subtitle{max-width:clamp(140px,46vw,220px);font-size:13px;}
   #about,#contact{grid-template-columns:1fr;gap:48px;}
   .services-grid{grid-template-columns:1fr;}
   .work-card{border-left:2px solid transparent;}
@@ -1272,9 +1277,22 @@ body.site-ready .wa-float {
      plenty of empty space below the hero media card to spare. */
   .hero-role{ bottom:150px; }
 
-  /* Adding the language-switch flag button pushed the nav past the
-     viewport edge on narrow screens (36px gap × 4 items no longer
-     fits) — tighten the gap so everything stays on one row. */
+  /* Adding the language switch pushed the nav past the viewport edge on
+     narrow phones (36px gap × 4 items no longer fits) — tighten the gaps
+     so everything stays on one row. The "EN / PT" text toggle is wider
+     than the flag icon it replaced, so #nav-dark's own logo↔links gap and
+     padding also need trimming, not just the inner link-to-link gap —
+     without this the whole pill was ~30px wider than the 390px viewport
+     it's centered in, clipping "PT" off the right edge.  */
   .hero-nav-links{ gap:14px; }
-  .nav-dark-links{ gap:14px; }
+  .nav-dark-links{ gap:6px; }
+  #nav-dark{ gap:12px; padding:8px 10px 8px 14px; }
+}
+@media(max-width:400px){
+  /* Same pill, even less room — the 768px trims above still don't leave
+     enough slack for the "EN / PT" toggle down at common small-phone
+     widths (360-390px), so cut further here. */
+  .nav-dark-links{ gap:4px; }
+  #nav-dark{ gap:8px; padding:7px 8px 7px 12px; }
+  .lang-switch{ gap:3px; }
 }

@@ -217,15 +217,30 @@ export default function Hero() {
         nd?.classList.remove("visible");
       }
     }
-    window.addEventListener("scroll", updH, { passive: true });
+    // Coalesce scroll events into one recompute per frame — updH() does
+    // several style writes (including !important ones on the video iframe),
+    // and running it once per raw 'scroll' event (which can fire many times
+    // per frame during fast or reversed/momentum scrolling, especially on
+    // mobile) was saturating the main thread and making the video visibly
+    // stutter/freeze instead of resizing smoothly.
+    let scrollRaf: number | null = null;
+    function onScroll() {
+      if (scrollRaf !== null) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = null;
+        updH();
+      });
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
     updH();
 
     return () => {
       cancelAnimationFrame(raf);
+      if (scrollRaf !== null) cancelAnimationFrame(scrollRaf);
+      window.removeEventListener("scroll", onScroll);
       revealObserver?.disconnect();
       document.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("resize", initM);
-      window.removeEventListener("scroll", updH);
     };
   }, []);
 
