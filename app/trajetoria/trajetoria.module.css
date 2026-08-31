@@ -105,35 +105,37 @@
   clip-path: polygon(0% 32%, 55% 32%, 55% 8%, 100% 50%, 55% 92%, 55% 68%, 0% 68%);
   filter: drop-shadow(3px 5px 4px rgba(0, 0, 0, 0.4));
 }
+/* Two parallel-stacked clusters of three, both pointing in toward the
+   title — not a radial fan — matching the reference's rhythm. */
 .arrowA {
-  top: -60px;
-  right: 6px;
-  transform: rotate(48deg);
+  top: -78px;
+  right: -6px;
+  transform: rotate(138deg);
 }
 .arrowB {
-  top: 4px;
-  right: -70px;
-  transform: rotate(78deg);
+  top: -32px;
+  right: -56px;
+  transform: rotate(138deg);
 }
 .arrowC {
-  top: 88px;
-  right: -84px;
-  transform: rotate(112deg);
+  top: 16px;
+  right: -100px;
+  transform: rotate(138deg);
 }
 .arrowD {
-  bottom: -6px;
-  left: -76px;
-  transform: rotate(-6deg) scaleX(-1);
+  bottom: 74px;
+  left: -20px;
+  transform: rotate(-42deg);
 }
 .arrowE {
-  bottom: 60px;
-  left: -100px;
-  transform: rotate(-38deg) scaleX(-1);
+  bottom: 30px;
+  left: -66px;
+  transform: rotate(-42deg);
 }
 .arrowF {
-  top: 30px;
-  left: -60px;
-  transform: rotate(-68deg) scaleX(-1);
+  bottom: -14px;
+  left: -112px;
+  transform: rotate(-42deg);
 }
 .profTagWrap {
   position: relative;
