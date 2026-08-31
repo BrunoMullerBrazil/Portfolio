@@ -37,11 +37,22 @@
    from the Figma node coords — see the comment above each JSX element for
    its source node id. Do not "neaten" these into flexbox; the numbers are
    the point. */
+/* Full-bleed: escapes .content's max-width so the collage (and the
+   glimmer-shadow overlay) reaches the actual viewport edges — the ruler
+   strips — like the reference, instead of sitting in a narrower text
+   column with visible margins either side. aspect-ratio locks height to
+   width at the Figma frame's own 1279:1888 ratio (1888 = the 1454px tall
+   glimmer overlay + the 434px top bleed), so every child below can be
+   positioned in plain percentages (of this box) instead of fixed px tied
+   to one specific rendered width — no more scale-assumption bugs. */
 .stage {
   position: relative;
-  width: 100%;
-  min-height: 1118px;
-  margin: 30px 0 60px;
+  width: 100vw;
+  max-width: 1279px;
+  margin: 30px auto 60px;
+  margin-left: max(calc(-50vw + 50%), calc(50% - 639.5px));
+  margin-right: max(calc(-50vw + 50%), calc(50% - 639.5px));
+  aspect-ratio: 1279 / 1888;
   overflow: visible;
 }
 /* Figma node 2027:2 "Glimmer Shadow Overlays 6 1" — a soft uneven-light
@@ -55,7 +66,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 1270px;
+  height: 77.01%;
   object-fit: cover;
   object-position: top;
   pointer-events: none;

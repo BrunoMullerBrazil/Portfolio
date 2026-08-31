@@ -138,12 +138,14 @@ export default function Trajetoria() {
           ← Voltar
         </Link>
 
-        {/* Stage: every child's left/top/width/height below is the Figma
-            node's own box (fileKey 3J2SniYtpoy9bcIdXhrt1C) scaled by 0.519
-            (664px usable content width — .content is 760px max-width but
-            border-box, so its 56+40px padding eats into that — divided by
-            the 1279px Figma frame), y-shifted +434px so the highest bleed
-            (glasses, node 2004:11, y=-434) lands at top:0. */}
+        {/* Stage: full-bleed (100vw), aspect-ratio-locked to the Figma
+            frame's own 1279:1888 ratio (1888 = the 1454px glimmer-overlay
+            height + the 434px top bleed). Every child's left/top/width/
+            height below is a PERCENTAGE of this box — width%% against the
+            1279 basis, height%% against the 1888 basis (different bases on
+            purpose: since the box's rendered height/width ratio is fixed,
+            this combination reproduces each node's real aspect ratio at
+            any viewport size instead of baking in one assumed px width. */}
         <div className={styles.stage}>
           {/* 2027:2 Glimmer Shadow Overlays 6 1 — the real photographed
               texture (window-blind light streaks), blended color-burn */}
@@ -158,7 +160,7 @@ export default function Trajetoria() {
               reported box; see CSS comment. */}
           <img
             className={`${styles.penProp} ${styles.stageItem} reveal`}
-            style={{ left: -125, top: 662, width: 799, height: 89 }}
+            style={{ left: "-18.76%", top: "67.58%", width: "120.5%", height: "9.13%" }}
             src={asset("pen.png")}
             alt=""
             aria-hidden="true"
@@ -167,7 +169,7 @@ export default function Trajetoria() {
               869x435 sized/rotated 45deg (not stretched); see CSS comment. */}
           <img
             className={`${styles.glasses} ${styles.stageItem} reveal`}
-            style={{ left: 273, top: 119, width: 425, height: 213 }}
+            style={{ left: "41.21%", top: "12.16%", width: "64.02%", height: "21.71%" }}
             src={asset2("glasses.png")}
             alt=""
             aria-hidden="true"
@@ -178,7 +180,7 @@ export default function Trajetoria() {
               asset itself, so no rotation/stretch needed here). */}
           <img
             className={`${styles.coffeeCup} ${styles.stageItem} reveal`}
-            style={{ left: 407, top: 4, width: 429, height: 533 }}
+            style={{ left: "61.30%", top: "0.48%", width: "64.66%", height: "54.40%" }}
             src={asset2("coffee-cup.png")}
             alt=""
             aria-hidden="true"
@@ -186,7 +188,7 @@ export default function Trajetoria() {
           {/* 2001:6 magnific_remover-fundo_iGW4Cq93uK — torn cloud sticker */}
           <img
             className={`${styles.cloudSticker} ${styles.stageItem} reveal`}
-            style={{ left: -17, top: 251, width: 209, height: 209 }}
+            style={{ left: "-2.66%", top: "25.64%", width: "31.51%", height: "21.35%" }}
             src={asset2("sticker-cloud-torn.png")}
             alt=""
             aria-hidden="true"
@@ -194,14 +196,14 @@ export default function Trajetoria() {
           {/* 2004:10 magnific_9_8auXEKBIrU — welcome bubble */}
           <img
             className={`${styles.welcomeBubble} ${styles.stageItem} reveal`}
-            style={{ left: 15, top: 192, width: 358, height: 358 }}
+            style={{ left: "2.27%", top: "19.65%", width: "54.03%", height: "36.60%" }}
             src={asset2("welcome-bubble.png")}
             alt="Welcome to my world (:"
           />
           {/* 2004:6 magnific_remover-fundo_3zc96dBREY 1 — arrow cluster (down-left) */}
           <img
             className={`${styles.arrowClusterTR} ${styles.stageItem}`}
-            style={{ left: 612, top: 550, width: 173, height: 191 }}
+            style={{ left: "92.26%", top: "56.14%", width: "26.04%", height: "19.49%" }}
             src={asset2("arrows-cluster-down-left.png")}
             alt=""
             aria-hidden="true"
@@ -209,7 +211,7 @@ export default function Trajetoria() {
           {/* 2004:7 magnific_remover-fundo_3zc96dBREY 2 — arrow cluster (up-right) */}
           <img
             className={`${styles.arrowClusterBL} ${styles.stageItem}`}
-            style={{ left: 76, top: 544, width: 175, height: 200 }}
+            style={{ left: "11.42%", top: "55.51%", width: "26.35%", height: "20.39%" }}
             src={asset2("arrows-cluster-up-right.png")}
             alt=""
             aria-hidden="true"
@@ -217,7 +219,7 @@ export default function Trajetoria() {
           {/* 2004:9 "Minha Trajetória" text */}
           <div
             className={`${styles.titleMinhaWrap} ${styles.stageItem} reveal reveal-d1`}
-            style={{ left: 189, top: 492, width: 312, height: 154 }}
+            style={{ left: "28.38%", top: "50.21%", width: "46.99%", height: "15.73%" }}
           >
             <h1 className={styles.titleMinha}>
               Minha
@@ -228,7 +230,7 @@ export default function Trajetoria() {
           {/* 2004:4 magnific_5_O6ZUHKmynm — falling person */}
           <img
             className={`${styles.fallingPerson} ${styles.stageItem}`}
-            style={{ left: 271, top: 465, width: 147, height: 147 }}
+            style={{ left: "40.81%", top: "47.41%", width: "22.13%", height: "14.94%" }}
             src={asset2("falling-person.png")}
             alt=""
             aria-hidden="true"
@@ -236,7 +238,7 @@ export default function Trajetoria() {
           {/* 2006:13 "PROFISSIONAL" text */}
           <div
             className={`${styles.profTagWrap} ${styles.stageItem} reveal`}
-            style={{ left: 282, top: 604, width: 274, height: 100 }}
+            style={{ left: "42.46%", top: "61.60%", width: "41.36%", height: "10.28%" }}
           >
             <span className={styles.profTag}>PROFISSIONAL</span>
             <span className={styles.profTagLine} aria-hidden="true" />
@@ -245,28 +247,28 @@ export default function Trajetoria() {
           {/* 2012:10 magnific_remover-fundo_YMdnbCtWeC (1) 1 — notebook paper + tape */}
           <div
             className={`${styles.deskNote} ${styles.stageItem} reveal`}
-            style={{ left: 294, top: 701, width: 382, height: 382 }}
+            style={{ left: "44.41%", top: "71.61%", width: "57.55%", height: "38.98%" }}
           >
             <img className={styles.deskNoteImg} src={asset2("notebook-paper-tape.png")} alt="" aria-hidden="true" />
           </div>
           {/* 2010:5/2010:6/2010:7 — the three tool icons pinned on the note */}
           <img
             className={`${styles.stageItem} reveal`}
-            style={{ left: 441, top: 825, width: 30, height: 30, zIndex: 2 }}
+            style={{ left: "66.46%", top: "84.16%", width: "4.59%", height: "3.11%", zIndex: 2 }}
             src={asset2("icon-tool-1.png")}
             alt=""
             aria-hidden="true"
           />
           <img
             className={`${styles.stageItem} reveal`}
-            style={{ left: 482, top: 797, width: 30, height: 30, zIndex: 2 }}
+            style={{ left: "72.63%", top: "81.36%", width: "4.46%", height: "3.02%", zIndex: 2 }}
             src={asset2("icon-monitor.png")}
             alt=""
             aria-hidden="true"
           />
           <img
             className={`${styles.stageItem} reveal`}
-            style={{ left: 513, top: 811, width: 44, height: 27, zIndex: 2 }}
+            style={{ left: "77.25%", top: "82.79%", width: "6.57%", height: "2.81%", zIndex: 2 }}
             src={asset2("icon-c4d.png")}
             alt=""
             aria-hidden="true"
