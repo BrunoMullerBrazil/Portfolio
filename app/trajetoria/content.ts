@@ -9,8 +9,16 @@ export type Block =
   | { type: "chapter"; label: string; num: string; underline?: boolean }
   | { type: "paper"; tag?: string; paragraphs: string[] };
 
-export const MANIFESTO_INTRO =
-  "Tenho 23 anos e treze de ofício. Comecei cedo demais pra ter currículo bonito e cedo o bastante pra ter feito quase tudo pelo menos uma vez.";
+export const MANIFESTO_INTRO_PARAGRAPHS = [
+  "Comecei a editar MUITO CEDO. Vídeo de jogo, porque era o que dava pra fazer com o computador de casa.",
+  "Aos catorze abri o After Effects pela primeira vez e não fechei mais.",
+  "Aos 23, isso vira uma conta estranha...",
+];
+
+export const TOOLS_QUOTE = "Tenho mais horas dentro dessas ferramentas do que **muita** gente com o **dobro** da minha idade";
+
+export const CAMERA_LEAD = "A câmera veio em";
+export const CAMERA_YEAR = "2020";
 
 export const MANIFESTO_PAPER =
   "Ainda não sei responder rápido. Cada empresa esconde a coisa real num lugar diferente e achar dá trabalho. É a parte de que eu gosto, e é por onde eu entro. A direção vem depois, e vem fácil quando a pergunta certa já foi feita.";

@@ -5,9 +5,20 @@ import styles from "./trajetoria.module.css";
 import blueprint from "../blueprint.module.css";
 import { withBasePath } from "@/lib/basePath";
 import { SITE_URL, SITE_NAME, OG_IMAGE } from "@/lib/seo";
-import { MANIFESTO_INTRO, MANIFESTO_PAPER, MANIFESTO_OUTRO, MANIFESTO_CLOSER, BLOCKS, FINAL_QUOTE } from "./content";
+import {
+  MANIFESTO_INTRO_PARAGRAPHS,
+  TOOLS_QUOTE,
+  CAMERA_LEAD,
+  CAMERA_YEAR,
+  MANIFESTO_PAPER,
+  MANIFESTO_OUTRO,
+  MANIFESTO_CLOSER,
+  BLOCKS,
+  FINAL_QUOTE,
+} from "./content";
 
 const asset = (name: string) => withBasePath(`/assets/trajetoria/${name}`);
+const asset2 = (name: string) => withBasePath(`/assets/trajetoria/v2/${name}`);
 
 // Page-level openGraph/twitter fully replace the layout's (Next.js doesn't
 // deep-merge nested metadata fields), so everything needed for a correct
@@ -15,7 +26,7 @@ const asset = (name: string) => withBasePath(`/assets/trajetoria/${name}`);
 const PAGE_TITLE = "Minha Trajetória Profissional";
 // The opening line of the manifesto, not a generic page blurb — it's the
 // strongest single sentence in the piece.
-const PAGE_DESCRIPTION = MANIFESTO_INTRO;
+const PAGE_DESCRIPTION = MANIFESTO_INTRO_PARAGRAPHS[0];
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
@@ -77,6 +88,11 @@ function withHighlight(text: string): ReactNode {
   );
 }
 
+function withBold(text: string): ReactNode {
+  const parts = text.split(/\*\*(.+?)\*\*/g);
+  return parts.map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part));
+}
+
 function withBlueHighlight(text: string): ReactNode {
   const parts = text.split(/\*\*(.+?)\*\*/g);
   return parts.map((part, i) =>
@@ -117,21 +133,99 @@ export default function Trajetoria() {
 
         <div className={styles.titleZone}>
           <img className={styles.penProp} src={asset("pen.png")} alt="" aria-hidden="true" />
-          <div className={`${styles.stamp} reveal`}>MÜLLER — CASO 01</div>
-          <div className={`${styles.eyebrowTyped} reveal`}>MINHA TRAJETÓRIA</div>
-          <div className={`${styles.titleRow} reveal reveal-d1`}>
-            <h1 className={styles.titleBig}>
-              PROFISS
-              <span className={styles.hl} style={{ backgroundImage: `url(${asset("marker-hl-2.png")})` }}>
-                IONAL
-              </span>
+          <img className={`${styles.glasses} reveal`} src={asset2("glasses.png")} alt="" aria-hidden="true" />
+          <img className={`${styles.coffeeCup} reveal`} src={asset2("coffee-cup.png")} alt="" aria-hidden="true" />
+          <img
+            className={`${styles.cloudSticker} reveal`}
+            src={asset2("sticker-cloud-torn.png")}
+            alt=""
+            aria-hidden="true"
+          />
+          <img
+            className={`${styles.welcomeBubble} reveal`}
+            src={asset2("welcome-bubble.png")}
+            alt="Welcome to my world (:"
+          />
+
+          <div className={`${styles.minhaTrajetoriaWrap} reveal reveal-d1`}>
+            <img
+              className={`${styles.arrowSketch} ${styles.arrowA}`}
+              src={asset2("arrow-sketch-black.png")}
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              className={`${styles.arrowSketch} ${styles.arrowB}`}
+              src={asset2("arrow-sketch-black.png")}
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              className={`${styles.arrowSketch} ${styles.arrowC}`}
+              src={asset2("arrow-sketch-black.png")}
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              className={`${styles.arrowSketch} ${styles.arrowD}`}
+              src={asset2("arrow-sketch-black.png")}
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              className={`${styles.arrowSketch} ${styles.arrowE}`}
+              src={asset2("arrow-sketch-black.png")}
+              alt=""
+              aria-hidden="true"
+            />
+            <h1 className={styles.titleMinha}>
+              Minha
+              <br />
+              Trajetória
             </h1>
-            <span className={styles.blackBar} />
+            <img className={styles.fallingPerson} src={asset2("falling-person.png")} alt="" aria-hidden="true" />
+            <span className={styles.profTag}>PROFISSIONAL</span>
+          </div>
+
+          <div className={`${styles.deskNote} reveal`}>
+            <div className={styles.deskNoteTape} />
+            <div className={styles.deskNotePaper}>
+              <div className={styles.deskNoteIcons}>
+                <img src={asset2("icon-tool-1.png")} alt="" aria-hidden="true" />
+                <img src={asset2("icon-monitor.png")} alt="" aria-hidden="true" />
+                <img src={asset2("icon-c4d.png")} alt="" aria-hidden="true" />
+              </div>
+            </div>
           </div>
         </div>
 
         <div className={styles.manifestoZone}>
-          <p className={`${styles.manifestoP} reveal`}>{MANIFESTO_INTRO}</p>
+          {MANIFESTO_INTRO_PARAGRAPHS.map((p, i) => (
+            <p key={i} className={`${styles.manifestoTyped} reveal`}>
+              {p}
+            </p>
+          ))}
+
+          <div className={`${styles.browserWindow} reveal`}>
+            <div className={styles.browserChrome}>
+              <span className={styles.browserDot} />
+              <span className={styles.browserDot} />
+              <span className={styles.browserDot} />
+            </div>
+            <div className={styles.browserBody}>
+              <p className={styles.browserQuote}>{withBold(TOOLS_QUOTE)}</p>
+            </div>
+          </div>
+
+          <div className={`${styles.cameraPanel} reveal`}>
+            <img className={styles.cameraLead} src={asset2("camera-veio-em.png")} alt={CAMERA_LEAD} />
+            <img className={styles.cameraYear} src={asset2("number-2020.png")} alt={CAMERA_YEAR} />
+            <div className={styles.atlasScene}>
+              <img className={styles.mountainsImg} src={asset2("mountains.png")} alt="" aria-hidden="true" />
+              <img className={styles.atlasFigure} src={asset2("atlas-figure.png")} alt="" aria-hidden="true" />
+              <img className={styles.cameraSony} src={asset2("camera-sony-1.png")} alt="" aria-hidden="true" />
+            </div>
+          </div>
 
           <div className={`${styles.paperWrap} reveal`}>
             <PaperTape variant={1} className={styles.platformTape} />

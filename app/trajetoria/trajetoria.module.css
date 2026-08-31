@@ -33,7 +33,143 @@
 /* ── Title zone ── */
 .titleZone {
   position: relative;
-  margin: 48px 0 64px;
+  margin: 90px 0 210px;
+  padding-top: 30px;
+}
+.glasses {
+  position: absolute;
+  top: -70px;
+  right: 60px;
+  width: clamp(160px, 24vw, 260px);
+  transform: rotate(-8deg);
+  filter: drop-shadow(8px 14px 14px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+  z-index: 1;
+}
+.coffeeCup {
+  position: absolute;
+  top: -76px;
+  right: -40px;
+  width: clamp(120px, 18vw, 200px);
+  pointer-events: none;
+  z-index: 1;
+}
+.cloudSticker {
+  position: absolute;
+  top: -18px;
+  left: -20px;
+  width: clamp(120px, 16vw, 170px);
+  transform: rotate(-6deg);
+  filter: drop-shadow(6px 10px 10px rgba(0, 0, 0, 0.4));
+  pointer-events: none;
+}
+.welcomeBubble {
+  position: absolute;
+  top: 58px;
+  left: -6px;
+  width: clamp(150px, 20vw, 190px);
+  transform: rotate(-3deg);
+  pointer-events: none;
+}
+.minhaTrajetoriaWrap {
+  position: relative;
+  margin: 170px 0 20px;
+  max-width: 440px;
+}
+.fallingPerson {
+  position: absolute;
+  top: 26%;
+  left: 40%;
+  width: 46px;
+  z-index: 2;
+  pointer-events: none;
+}
+.arrowSketch {
+  position: absolute;
+  width: 90px;
+  pointer-events: none;
+  opacity: 0.92;
+  filter: drop-shadow(2px 3px 3px rgba(0, 0, 0, 0.35));
+}
+.arrowA {
+  top: -46px;
+  right: -40px;
+  transform: rotate(96deg) scaleX(-1);
+}
+.arrowB {
+  top: 18px;
+  right: -78px;
+  transform: rotate(140deg) scaleX(-1);
+}
+.arrowC {
+  bottom: 18px;
+  right: -70px;
+  transform: rotate(-155deg);
+  width: 70px;
+}
+.arrowD {
+  bottom: -20px;
+  left: -20px;
+  transform: rotate(20deg);
+  width: 70px;
+}
+.arrowE {
+  bottom: 60px;
+  left: -70px;
+  transform: rotate(-10deg);
+}
+.profTag {
+  display: inline-block;
+  font-family: var(--font-franie), sans-serif;
+  font-weight: 700;
+  font-size: clamp(18px, 3vw, 26px);
+  letter-spacing: 0.01em;
+  color: #f4f1ea;
+  background: #2f5fd8;
+  padding: 6px 18px 8px;
+  margin-top: 10px;
+  transform: rotate(-1deg);
+}
+.deskNote {
+  position: absolute;
+  bottom: -190px;
+  right: 0;
+  width: min(260px, 60vw);
+  z-index: 1;
+  padding-top: 16px;
+}
+.deskNoteTape {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1deg);
+  width: 46%;
+  height: 24px;
+  background: #b98a52;
+  opacity: 0.9;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+}
+.deskNotePaper {
+  position: relative;
+  background: #ede6d8;
+  color: #1d2b45;
+  padding: 26px 18px 22px;
+  box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.6);
+}
+.deskNoteIcons {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+.deskNoteIcons img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+.deskNotePaper .deskNoteLine {
+  height: 1px;
+  background: rgba(29, 43, 69, 0.15);
+  margin: 14px 0;
 }
 /* A real pen render, thrown slightly out of focus — like the camera is
    racked onto the paper in front of it, not the desk clutter behind. */
@@ -90,6 +226,15 @@
   transform-origin: left top;
   white-space: nowrap;
 }
+.titleMinha {
+  font-family: var(--font-franie), sans-serif;
+  font-weight: 700;
+  font-size: clamp(40px, 10.5vw, 80px);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  color: #f4f1ea;
+  margin: 0;
+}
 .titleBig .hl {
   color: #142850;
   background-repeat: no-repeat;
@@ -112,6 +257,7 @@
 /* ── Manifesto ── */
 .manifestoZone {
   position: relative;
+  margin-top: 40px;
 }
 .manifestoP {
   font-size: 15px;
@@ -119,6 +265,120 @@
   color: rgba(244, 241, 234, 0.86);
   max-width: 60ch;
   margin: 0 0 26px;
+}
+.manifestoTyped {
+  font-family: var(--font-space-mono), monospace;
+  font-size: 15px;
+  line-height: 1.9;
+  color: rgba(244, 241, 234, 0.9);
+  max-width: 52ch;
+  margin: 0 0 22px;
+}
+
+/* ── Browser-window quote mockup ── */
+.browserWindow {
+  background: #f4f1ea;
+  color: #142850;
+  margin: 40px 0 60px;
+  max-width: 500px;
+  box-shadow: 0 26px 50px -22px rgba(0, 0, 0, 0.55);
+}
+.browserChrome {
+  display: flex;
+  gap: 7px;
+  padding: 12px 14px;
+}
+.browserDot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.browserDot:nth-child(1) {
+  background: #ec6a5e;
+}
+.browserDot:nth-child(2) {
+  background: #f4bf4f;
+}
+.browserDot:nth-child(3) {
+  background: #61c454;
+}
+.browserBody {
+  padding: 26px 30px 46px;
+  text-align: center;
+}
+.browserQuote {
+  font-family: var(--font-franie), sans-serif;
+  font-weight: 600;
+  font-size: clamp(18px, 3.2vw, 25px);
+  line-height: 1.4;
+  color: #142850;
+  text-decoration: underline;
+  text-decoration-color: #2f5fd8;
+  text-underline-offset: 5px;
+}
+.browserQuote strong {
+  font-weight: 700;
+  box-shadow: inset 0 -3px 0 #2f5fd8;
+}
+
+/* ── "A câmera veio em 2020" reveal ── */
+.cameraPanel {
+  position: relative;
+  background: #ede6d8;
+  background-image: linear-gradient(rgba(29, 43, 69, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 43, 69, 0.06) 1px, transparent 1px);
+  background-size: 26px 26px;
+  margin: 10px calc(-1 * 56px) 60px -56px;
+  padding: 56px 40px 0;
+  overflow: hidden;
+}
+@media (max-width: 720px) {
+  .cameraPanel {
+    margin: 10px -20px 60px -24px;
+    padding: 40px 20px 0;
+  }
+}
+.cameraLead {
+  display: block;
+  width: min(320px, 60%);
+  height: auto;
+  margin-bottom: -14px;
+}
+.cameraYear {
+  display: block;
+  width: min(560px, 92%);
+  height: auto;
+}
+.atlasScene {
+  position: relative;
+  margin-top: -30px;
+  height: clamp(260px, 44vw, 420px);
+}
+.mountainsImg {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  max-width: none;
+  object-fit: contain;
+  object-position: bottom;
+}
+.atlasFigure {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-64%);
+  width: clamp(140px, 22vw, 210px);
+  z-index: 2;
+}
+.cameraSony {
+  position: absolute;
+  bottom: 38%;
+  left: 50%;
+  transform: translateX(-30%) rotate(-6deg);
+  width: clamp(90px, 13vw, 130px);
+  z-index: 3;
 }
 
 .closerWrap {
