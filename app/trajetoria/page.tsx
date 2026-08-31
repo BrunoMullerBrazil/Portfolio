@@ -143,8 +143,14 @@ export default function Trajetoria() {
             (760px content / 1279px Figma frame), y-shifted +434px so the
             highest bleed (glasses, node 2004:11, y=-434) lands at top:0. */}
         <div className={styles.stage}>
-          {/* 2027:2 Glimmer Shadow Overlays 6 1 — see CSS comment */}
-          <div className={styles.glimmerOverlay} aria-hidden="true" />
+          {/* 2027:2 Glimmer Shadow Overlays 6 1 — the real photographed
+              texture (window-blind light streaks), blended color-burn */}
+          <img
+            className={styles.glimmerOverlay}
+            src={asset2("glimmer-shadow-overlay.png")}
+            alt=""
+            aria-hidden="true"
+          />
           {/* 2033:6 Design sem nome (30) 2 — pen */}
           <img
             className={`${styles.penProp} ${styles.stageItem} reveal`}
