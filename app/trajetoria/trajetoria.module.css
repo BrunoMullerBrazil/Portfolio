@@ -33,14 +33,15 @@
 /* ── Title zone ── */
 .titleZone {
   position: relative;
-  margin: 90px 0 210px;
-  padding-top: 30px;
+  margin: 30px 0 200px;
+  padding-top: 60px;
+  overflow: visible;
 }
 .glasses {
   position: absolute;
-  top: -70px;
-  right: 60px;
-  width: clamp(160px, 24vw, 260px);
+  top: -84px;
+  right: 40px;
+  width: clamp(190px, 30vw, 320px);
   transform: rotate(-8deg);
   filter: drop-shadow(8px 14px 14px rgba(0, 0, 0, 0.45));
   pointer-events: none;
@@ -48,75 +49,96 @@
 }
 .coffeeCup {
   position: absolute;
-  top: -76px;
-  right: -40px;
-  width: clamp(120px, 18vw, 200px);
+  top: -60px;
+  right: -56px;
+  width: clamp(140px, 22vw, 240px);
   pointer-events: none;
   z-index: 1;
 }
 .cloudSticker {
   position: absolute;
-  top: -18px;
-  left: -20px;
-  width: clamp(120px, 16vw, 170px);
+  top: -30px;
+  left: -30px;
+  width: clamp(150px, 21vw, 230px);
   transform: rotate(-6deg);
   filter: drop-shadow(6px 10px 10px rgba(0, 0, 0, 0.4));
   pointer-events: none;
+  z-index: 1;
 }
 .welcomeBubble {
   position: absolute;
-  top: 58px;
-  left: -6px;
-  width: clamp(150px, 20vw, 190px);
+  top: 62px;
+  left: -14px;
+  width: clamp(160px, 22vw, 210px);
   transform: rotate(-3deg);
   pointer-events: none;
+  z-index: 2;
 }
 .minhaTrajetoriaWrap {
   position: relative;
-  margin: 170px 0 20px;
-  max-width: 440px;
+  margin: 92px 0 14px;
+  max-width: 480px;
+  z-index: 2;
 }
 .fallingPerson {
   position: absolute;
-  top: 26%;
-  left: 40%;
-  width: 46px;
-  z-index: 2;
+  top: 22%;
+  left: 38%;
+  width: 50px;
+  z-index: 3;
   pointer-events: none;
 }
-.arrowSketch {
+/* Thick paper-cutout arrows (CSS shape, not an image) fanning around the
+   title — matches the collage's hand-cut tan arrows, not thin sketch lines. */
+.arrowShape {
   position: absolute;
-  width: 90px;
+  width: 74px;
+  height: 34px;
   pointer-events: none;
-  opacity: 0.92;
-  filter: drop-shadow(2px 3px 3px rgba(0, 0, 0, 0.35));
+  z-index: 1;
+}
+.arrowShape::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #cbb28c;
+  clip-path: polygon(0% 32%, 55% 32%, 55% 8%, 100% 50%, 55% 92%, 55% 68%, 0% 68%);
+  filter: drop-shadow(3px 5px 4px rgba(0, 0, 0, 0.4));
 }
 .arrowA {
-  top: -46px;
-  right: -40px;
-  transform: rotate(96deg) scaleX(-1);
+  top: -60px;
+  right: 6px;
+  transform: rotate(48deg);
 }
 .arrowB {
-  top: 18px;
-  right: -78px;
-  transform: rotate(140deg) scaleX(-1);
+  top: 4px;
+  right: -70px;
+  transform: rotate(78deg);
 }
 .arrowC {
-  bottom: 18px;
-  right: -70px;
-  transform: rotate(-155deg);
-  width: 70px;
+  top: 88px;
+  right: -84px;
+  transform: rotate(112deg);
 }
 .arrowD {
-  bottom: -20px;
-  left: -20px;
-  transform: rotate(20deg);
-  width: 70px;
+  bottom: -6px;
+  left: -76px;
+  transform: rotate(-6deg) scaleX(-1);
 }
 .arrowE {
   bottom: 60px;
-  left: -70px;
-  transform: rotate(-10deg);
+  left: -100px;
+  transform: rotate(-38deg) scaleX(-1);
+}
+.arrowF {
+  top: 30px;
+  left: -60px;
+  transform: rotate(-68deg) scaleX(-1);
+}
+.profTagWrap {
+  position: relative;
+  display: inline-block;
+  margin-top: 4px;
 }
 .profTag {
   display: inline-block;
@@ -127,16 +149,33 @@
   color: #f4f1ea;
   background: #2f5fd8;
   padding: 6px 18px 8px;
-  margin-top: 10px;
   transform: rotate(-1deg);
+}
+.profTagLine {
+  position: absolute;
+  bottom: -34px;
+  right: 22px;
+  width: 2px;
+  height: 32px;
+  background: #2f5fd8;
+}
+.profTagDot {
+  position: absolute;
+  bottom: -42px;
+  right: 15px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2f5fd8;
 }
 .deskNote {
   position: absolute;
-  bottom: -190px;
-  right: 0;
-  width: min(260px, 60vw);
+  bottom: -178px;
+  right: -20px;
+  width: min(240px, 58vw);
   z-index: 1;
-  padding-top: 16px;
+  padding-top: 14px;
+  transform: rotate(2deg);
 }
 .deskNoteTape {
   position: absolute;
@@ -144,7 +183,7 @@
   left: 50%;
   transform: translateX(-50%) rotate(-1deg);
   width: 46%;
-  height: 24px;
+  height: 22px;
   background: #b98a52;
   opacity: 0.9;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
@@ -153,7 +192,7 @@
   position: relative;
   background: #ede6d8;
   color: #1d2b45;
-  padding: 26px 18px 22px;
+  padding: 24px 18px 20px;
   box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.6);
 }
 .deskNoteIcons {
@@ -162,14 +201,9 @@
   justify-content: center;
 }
 .deskNoteIcons img {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
-}
-.deskNotePaper .deskNoteLine {
-  height: 1px;
-  background: rgba(29, 43, 69, 0.15);
-  margin: 14px 0;
 }
 /* A real pen render, thrown slightly out of focus — like the camera is
    racked onto the paper in front of it, not the desk clutter behind. */

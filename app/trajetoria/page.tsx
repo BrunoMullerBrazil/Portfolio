@@ -148,43 +148,23 @@ export default function Trajetoria() {
           />
 
           <div className={`${styles.minhaTrajetoriaWrap} reveal reveal-d1`}>
-            <img
-              className={`${styles.arrowSketch} ${styles.arrowA}`}
-              src={asset2("arrow-sketch-black.png")}
-              alt=""
-              aria-hidden="true"
-            />
-            <img
-              className={`${styles.arrowSketch} ${styles.arrowB}`}
-              src={asset2("arrow-sketch-black.png")}
-              alt=""
-              aria-hidden="true"
-            />
-            <img
-              className={`${styles.arrowSketch} ${styles.arrowC}`}
-              src={asset2("arrow-sketch-black.png")}
-              alt=""
-              aria-hidden="true"
-            />
-            <img
-              className={`${styles.arrowSketch} ${styles.arrowD}`}
-              src={asset2("arrow-sketch-black.png")}
-              alt=""
-              aria-hidden="true"
-            />
-            <img
-              className={`${styles.arrowSketch} ${styles.arrowE}`}
-              src={asset2("arrow-sketch-black.png")}
-              alt=""
-              aria-hidden="true"
-            />
+            <span className={`${styles.arrowShape} ${styles.arrowA}`} aria-hidden="true" />
+            <span className={`${styles.arrowShape} ${styles.arrowB}`} aria-hidden="true" />
+            <span className={`${styles.arrowShape} ${styles.arrowC}`} aria-hidden="true" />
+            <span className={`${styles.arrowShape} ${styles.arrowD}`} aria-hidden="true" />
+            <span className={`${styles.arrowShape} ${styles.arrowE}`} aria-hidden="true" />
+            <span className={`${styles.arrowShape} ${styles.arrowF}`} aria-hidden="true" />
             <h1 className={styles.titleMinha}>
               Minha
               <br />
               Trajetória
             </h1>
             <img className={styles.fallingPerson} src={asset2("falling-person.png")} alt="" aria-hidden="true" />
-            <span className={styles.profTag}>PROFISSIONAL</span>
+            <span className={styles.profTagWrap}>
+              <span className={styles.profTag}>PROFISSIONAL</span>
+              <span className={styles.profTagLine} aria-hidden="true" />
+              <span className={styles.profTagDot} aria-hidden="true" />
+            </span>
           </div>
 
           <div className={`${styles.deskNote} reveal`}>
