@@ -120,7 +120,14 @@ function StatStar() {
 
 export default function Trajetoria() {
   return (
-    <main className={`${blueprint.page} ${styles.pageTall}`}>
+    <main
+      className={`${blueprint.page} ${styles.pageTall}`}
+      style={{
+        backgroundImage: `url(${asset2("bg-blueprint-photo.png")})`,
+        backgroundRepeat: "repeat",
+        backgroundSize: "640px auto",
+      }}
+    >
       <div className={blueprint.shadow} />
       <div className={blueprint.lightBeam} />
       <div className={blueprint.rulerLeft} />
@@ -197,7 +204,10 @@ export default function Trajetoria() {
             </div>
           </div>
 
-          <div className={`${styles.cameraPanel} reveal`}>
+          <div
+            className={`${styles.cameraPanel} reveal`}
+            style={{ backgroundImage: `url(${asset2("bg-cream-paper-photo.png")})` }}
+          >
             <img className={styles.cameraLead} src={asset2("camera-veio-em.png")} alt={CAMERA_LEAD} />
             <img className={styles.cameraYear} src={asset2("number-2020.png")} alt={CAMERA_YEAR} />
             <div className={styles.atlasScene}>

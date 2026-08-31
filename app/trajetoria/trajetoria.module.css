@@ -357,10 +357,10 @@
 /* ── "A câmera veio em 2020" reveal ── */
 .cameraPanel {
   position: relative;
-  background: #ede6d8;
-  background-image: linear-gradient(rgba(29, 43, 69, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(29, 43, 69, 0.06) 1px, transparent 1px);
-  background-size: 26px 26px;
+  background-color: #ede6d8;
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+  background-position: top center;
   margin: 10px calc(-1 * 56px) 60px -56px;
   padding: 56px 40px 0;
   overflow: hidden;
