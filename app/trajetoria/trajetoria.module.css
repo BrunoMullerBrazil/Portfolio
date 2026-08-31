@@ -30,96 +30,74 @@
   gap: 12px;
 }
 
-/* ── Title zone ── */
-.titleZone {
+/* ── Title zone ──
+   Positioned as a 1:1 scaled stage of the Figma source (frame width
+   1279px, scale 0.594 → 760px = .content's max-width). Every child below
+   carries an inline style with its exact left/top/width/height computed
+   from the Figma node coords — see the comment above each JSX element for
+   its source node id. Do not "neaten" these into flexbox; the numbers are
+   the point. */
+.stage {
   position: relative;
-  margin: 30px 0 200px;
-  padding-top: 60px;
+  width: 100%;
+  min-height: 1280px;
+  margin: 30px 0 60px;
   overflow: visible;
 }
-.glasses {
+.stageItem {
   position: absolute;
-  top: -84px;
-  right: 40px;
-  width: clamp(190px, 30vw, 320px);
+}
+/* Visual-only now — position/size come from inline style (exact Figma
+   coords) on the stageItem element itself. */
+.glasses {
   transform: rotate(-8deg);
   filter: drop-shadow(8px 14px 14px rgba(0, 0, 0, 0.45));
   pointer-events: none;
   z-index: 1;
 }
 .coffeeCup {
-  position: absolute;
-  top: -60px;
-  right: -56px;
-  width: clamp(140px, 22vw, 240px);
   pointer-events: none;
   z-index: 1;
 }
 .cloudSticker {
-  position: absolute;
-  top: -30px;
-  left: -30px;
-  width: clamp(150px, 21vw, 230px);
   transform: rotate(-6deg);
   filter: drop-shadow(6px 10px 10px rgba(0, 0, 0, 0.4));
   pointer-events: none;
   z-index: 1;
 }
 .welcomeBubble {
-  position: absolute;
-  top: 62px;
-  left: -14px;
-  width: clamp(160px, 22vw, 210px);
   transform: rotate(-3deg);
   pointer-events: none;
   z-index: 2;
 }
-.minhaTrajetoriaWrap {
-  position: relative;
-  margin: 92px 0 14px;
-  max-width: 620px;
-  z-index: 2;
-}
 .fallingPerson {
-  position: absolute;
-  top: 22%;
-  left: 38%;
-  width: 50px;
   z-index: 3;
   pointer-events: none;
 }
-/* The real paper-cutout arrow clusters (photographed stickers), not a CSS
-   approximation — one 3-arrow group top-right pointing down-left at the
-   title, a mirrored group bottom-left pointing up-right. */
 .arrowClusterTR {
-  position: absolute;
-  top: -86px;
-  right: -78px;
-  width: 150px;
   pointer-events: none;
   z-index: 1;
   filter: drop-shadow(4px 6px 6px rgba(0, 0, 0, 0.35));
 }
 .arrowClusterBL {
-  position: absolute;
-  bottom: -34px;
-  left: -108px;
-  width: 150px;
   pointer-events: none;
   z-index: 1;
   filter: drop-shadow(4px 6px 6px rgba(0, 0, 0, 0.35));
 }
+.titleMinhaWrap {
+  z-index: 2;
+}
 .profTagWrap {
-  position: relative;
-  display: inline-block;
-  margin-top: 4px;
+  z-index: 2;
 }
 .profTag {
   display: inline-block;
-  font-family: var(--font-franie), sans-serif;
-  font-weight: 92;
-  font-size: clamp(18px, 3vw, 26px);
-  letter-spacing: 0.01em;
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 900;
+  font-size: 26.7px;
+  line-height: 0.898;
+  letter-spacing: -0.8px;
+  text-align: center;
   color: #f4f1ea;
   background: #2f5fd8;
   padding: 6px 18px 8px;
@@ -143,52 +121,34 @@
   background: #2f5fd8;
 }
 .deskNote {
-  position: absolute;
-  bottom: -178px;
-  right: -20px;
-  width: min(240px, 58vw);
   z-index: 1;
-  padding-top: 14px;
-  transform: rotate(2deg);
 }
-.deskNoteTape {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%) rotate(-1deg);
-  width: 46%;
-  height: 22px;
-  background: #b98a52;
-  opacity: 0.9;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-}
-.deskNotePaper {
-  position: relative;
-  background: #ede6d8;
-  color: #1d2b45;
-  padding: 24px 18px 20px;
-  box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.6);
+.deskNoteImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.5));
 }
 .deskNoteIcons {
+  position: absolute;
   display: flex;
-  gap: 14px;
-  justify-content: center;
+  gap: 6%;
+  top: 18%;
+  left: 12%;
+  width: 60%;
 }
 .deskNoteIcons img {
-  width: 28px;
-  height: 28px;
+  width: 100%;
+  height: auto;
   object-fit: contain;
 }
 /* A real pen render, thrown slightly out of focus — like the camera is
    racked onto the paper in front of it, not the desk clutter behind. */
 .penProp {
-  position: absolute;
   z-index: -1;
-  top: -34px;
-  right: -170px;
-  width: clamp(300px, 34vw, 460px);
-  transform: rotate(-21deg);
-  filter: blur(2.2px) drop-shadow(16px 24px 22px rgba(0, 0, 0, 0.55));
+  transform: rotate(-8deg);
+  filter: blur(2px) drop-shadow(16px 24px 22px rgba(0, 0, 0, 0.55));
   opacity: 0.9;
   pointer-events: none;
 }
@@ -235,12 +195,13 @@
   white-space: nowrap;
 }
 .titleMinha {
-  font-family: var(--font-franie), sans-serif;
-  font-weight: 92;
-  font-size: clamp(52px, 13.5vw, 108px);
-  line-height: 0.93;
-  letter-spacing: -0.015em;
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 900;
+  font-size: 66.5px;
+  line-height: 0.898;
+  letter-spacing: -2px;
   color: #f4f1ea;
+  text-align: center;
   margin: 0;
 }
 .titleBig .hl {

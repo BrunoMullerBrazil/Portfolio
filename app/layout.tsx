@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { franie, gcgrind, inter, anton, playfair, spaceMono } from "./fonts";
+import { franie, gcgrind, inter, anton, playfair, spaceMono, montserrat } from "./fonts";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import Cursor from "@/components/Cursor";
@@ -55,7 +55,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${franie.variable} ${gcgrind.variable} ${inter.variable} ${anton.variable} ${playfair.variable} ${spaceMono.variable}`}
+      className={`${franie.variable} ${gcgrind.variable} ${inter.variable} ${anton.variable} ${playfair.variable} ${spaceMono.variable} ${montserrat.variable}`}
     >
       <body
         style={

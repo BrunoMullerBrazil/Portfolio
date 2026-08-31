@@ -138,58 +138,123 @@ export default function Trajetoria() {
           ← Voltar
         </Link>
 
-        <div className={styles.titleZone}>
-          <img className={styles.penProp} src={asset("pen.png")} alt="" aria-hidden="true" />
-          <img className={`${styles.glasses} reveal`} src={asset2("glasses.png")} alt="" aria-hidden="true" />
-          <img className={`${styles.coffeeCup} reveal`} src={asset2("coffee-cup.png")} alt="" aria-hidden="true" />
+        {/* Stage: every child's left/top/width/height below is the Figma
+            node's own box (fileKey 3J2SniYtpoy9bcIdXhrt1C) scaled by 0.594
+            (760px content / 1279px Figma frame), y-shifted +434px so the
+            highest bleed (glasses, node 2004:11, y=-434) lands at top:0. */}
+        <div className={styles.stage}>
+          {/* 2033:6 Design sem nome (30) 2 — pen */}
           <img
-            className={`${styles.cloudSticker} reveal`}
+            className={`${styles.penProp} ${styles.stageItem} reveal`}
+            style={{ left: -85, top: 498, width: 800, height: 622 }}
+            src={asset("pen.png")}
+            alt=""
+            aria-hidden="true"
+          />
+          {/* 2004:11 magnific_deixe-o-oculos-um-pouco-m — glasses */}
+          <img
+            className={`${styles.glasses} ${styles.stageItem} reveal`}
+            style={{ left: 298, top: 0, width: 516, height: 516 }}
+            src={asset2("glasses.png")}
+            alt=""
+            aria-hidden="true"
+          />
+          {/* 2033:8 magnific_quero-um-cafe-com-leite — coffee */}
+          <img
+            className={`${styles.coffeeCup} ${styles.stageItem} reveal`}
+            style={{ left: 486, top: 93, width: 546, height: 451 }}
+            src={asset2("coffee-cup.png")}
+            alt=""
+            aria-hidden="true"
+          />
+          {/* 2001:6 magnific_remover-fundo_iGW4Cq93uK — torn cloud sticker */}
+          <img
+            className={`${styles.cloudSticker} ${styles.stageItem} reveal`}
+            style={{ left: -20, top: 287, width: 239, height: 239 }}
             src={asset2("sticker-cloud-torn.png")}
             alt=""
             aria-hidden="true"
           />
+          {/* 2004:10 magnific_9_8auXEKBIrU — welcome bubble */}
           <img
-            className={`${styles.welcomeBubble} reveal`}
+            className={`${styles.welcomeBubble} ${styles.stageItem} reveal`}
+            style={{ left: 17, top: 220, width: 410, height: 410 }}
             src={asset2("welcome-bubble.png")}
             alt="Welcome to my world (:"
           />
-
-          <div className={`${styles.minhaTrajetoriaWrap} reveal reveal-d1`}>
-            <img
-              className={styles.arrowClusterTR}
-              src={asset2("arrows-cluster-down-left.png")}
-              alt=""
-              aria-hidden="true"
-            />
-            <img
-              className={styles.arrowClusterBL}
-              src={asset2("arrows-cluster-up-right.png")}
-              alt=""
-              aria-hidden="true"
-            />
+          {/* 2004:6 magnific_remover-fundo_3zc96dBREY 1 — arrow cluster (down-left) */}
+          <img
+            className={`${styles.arrowClusterTR} ${styles.stageItem}`}
+            style={{ left: 701, top: 629, width: 198, height: 219 }}
+            src={asset2("arrows-cluster-down-left.png")}
+            alt=""
+            aria-hidden="true"
+          />
+          {/* 2004:7 magnific_remover-fundo_3zc96dBREY 2 — arrow cluster (up-right) */}
+          <img
+            className={`${styles.arrowClusterBL} ${styles.stageItem}`}
+            style={{ left: 87, top: 623, width: 200, height: 229 }}
+            src={asset2("arrows-cluster-up-right.png")}
+            alt=""
+            aria-hidden="true"
+          />
+          {/* 2004:9 "Minha Trajetória" text */}
+          <div
+            className={`${styles.titleMinhaWrap} ${styles.stageItem} reveal reveal-d1`}
+            style={{ left: 216, top: 563, width: 357, height: 176 }}
+          >
             <h1 className={styles.titleMinha}>
               Minha
               <br />
               Trajetória
             </h1>
-            <img className={styles.fallingPerson} src={asset2("falling-person.png")} alt="" aria-hidden="true" />
-            <span className={styles.profTagWrap}>
-              <span className={styles.profTag}>PROFISSIONAL</span>
-              <span className={styles.profTagLine} aria-hidden="true" />
-              <span className={styles.profTagDot} aria-hidden="true" />
-            </span>
           </div>
-
-          <div className={`${styles.deskNote} reveal`}>
-            <div className={styles.deskNoteTape} />
-            <div className={styles.deskNotePaper}>
-              <div className={styles.deskNoteIcons}>
-                <img src={asset2("icon-tool-1.png")} alt="" aria-hidden="true" />
-                <img src={asset2("icon-monitor.png")} alt="" aria-hidden="true" />
-                <img src={asset2("icon-c4d.png")} alt="" aria-hidden="true" />
-              </div>
-            </div>
+          {/* 2004:4 magnific_5_O6ZUHKmynm — falling person */}
+          <img
+            className={`${styles.fallingPerson} ${styles.stageItem}`}
+            style={{ left: 310, top: 532, width: 168, height: 168 }}
+            src={asset2("falling-person.png")}
+            alt=""
+            aria-hidden="true"
+          />
+          {/* 2006:13 "PROFISSIONAL" text */}
+          <div
+            className={`${styles.profTagWrap} ${styles.stageItem} reveal`}
+            style={{ left: 323, top: 691, width: 314, height: 115 }}
+          >
+            <span className={styles.profTag}>PROFISSIONAL</span>
+            <span className={styles.profTagLine} aria-hidden="true" />
+            <span className={styles.profTagDot} aria-hidden="true" />
           </div>
+          {/* 2012:10 magnific_remover-fundo_YMdnbCtWeC (1) 1 — notebook paper + tape */}
+          <div
+            className={`${styles.deskNote} ${styles.stageItem} reveal`}
+            style={{ left: 337, top: 803, width: 437, height: 437 }}
+          >
+            <img className={styles.deskNoteImg} src={asset2("notebook-paper-tape.png")} alt="" aria-hidden="true" />
+          </div>
+          {/* 2010:5/2010:6/2010:7 — the three tool icons pinned on the note */}
+          <img
+            className={`${styles.stageItem} reveal`}
+            style={{ left: 505, top: 944, width: 34, height: 34, zIndex: 2 }}
+            src={asset2("icon-tool-1.png")}
+            alt=""
+            aria-hidden="true"
+          />
+          <img
+            className={`${styles.stageItem} reveal`}
+            style={{ left: 552, top: 912, width: 34, height: 34, zIndex: 2 }}
+            src={asset2("icon-monitor.png")}
+            alt=""
+            aria-hidden="true"
+          />
+          <img
+            className={`${styles.stageItem} reveal`}
+            style={{ left: 587, top: 928, width: 50, height: 31, zIndex: 2 }}
+            src={asset2("icon-c4d.png")}
+            alt=""
+            aria-hidden="true"
+          />
         </div>
 
         <div className={styles.manifestoZone}>
