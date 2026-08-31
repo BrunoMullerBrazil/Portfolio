@@ -135,6 +135,18 @@ const PROJECTS: Project[] = [
     vimeoId: "1222795141",
     orientation: "vertical",
   },
+  {
+    id: 9,
+    num: "09",
+    name: { pt: "WhatsApp Bundle", en: "WhatsApp Bundle" },
+    client: "",
+    year: "",
+    desc: { pt: "", en: "" },
+    tags: { pt: "", en: "" },
+    filter: "brand-film",
+    vimeoId: "1222803437",
+    orientation: "horizontal",
+  },
 ];
 
 const GRADS = [
