@@ -40,7 +40,7 @@
 .stage {
   position: relative;
   width: 100%;
-  min-height: 1280px;
+  min-height: 1118px;
   margin: 30px 0 60px;
   overflow: visible;
 }
@@ -55,7 +55,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 1454px;
+  height: 1270px;
   object-fit: cover;
   object-position: top;
   pointer-events: none;
@@ -117,9 +117,9 @@
   display: inline-block;
   font-family: var(--font-montserrat), sans-serif;
   font-weight: 900;
-  font-size: 26.7px;
+  font-size: 23.3px;
   line-height: 0.898;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.7px;
   text-align: center;
   color: #f4f1ea;
   background: #2f5fd8;
@@ -223,9 +223,9 @@
 .titleMinha {
   font-family: var(--font-montserrat), sans-serif;
   font-weight: 900;
-  font-size: 66.5px;
+  font-size: 58.1px;
   line-height: 0.898;
-  letter-spacing: -2px;
+  letter-spacing: -1.75px;
   color: #f4f1ea;
   text-align: center;
   margin: 0;

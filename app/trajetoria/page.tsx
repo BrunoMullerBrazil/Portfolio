@@ -139,9 +139,11 @@ export default function Trajetoria() {
         </Link>
 
         {/* Stage: every child's left/top/width/height below is the Figma
-            node's own box (fileKey 3J2SniYtpoy9bcIdXhrt1C) scaled by 0.594
-            (760px content / 1279px Figma frame), y-shifted +434px so the
-            highest bleed (glasses, node 2004:11, y=-434) lands at top:0. */}
+            node's own box (fileKey 3J2SniYtpoy9bcIdXhrt1C) scaled by 0.519
+            (664px usable content width — .content is 760px max-width but
+            border-box, so its 56+40px padding eats into that — divided by
+            the 1279px Figma frame), y-shifted +434px so the highest bleed
+            (glasses, node 2004:11, y=-434) lands at top:0. */}
         <div className={styles.stage}>
           {/* 2027:2 Glimmer Shadow Overlays 6 1 — the real photographed
               texture (window-blind light streaks), blended color-burn */}
@@ -156,7 +158,7 @@ export default function Trajetoria() {
               reported box; see CSS comment. */}
           <img
             className={`${styles.penProp} ${styles.stageItem} reveal`}
-            style={{ left: -143, top: 758, width: 915, height: 102 }}
+            style={{ left: -125, top: 662, width: 799, height: 89 }}
             src={asset("pen.png")}
             alt=""
             aria-hidden="true"
@@ -165,7 +167,7 @@ export default function Trajetoria() {
               869x435 sized/rotated 45deg (not stretched); see CSS comment. */}
           <img
             className={`${styles.glasses} ${styles.stageItem} reveal`}
-            style={{ left: 313, top: 136, width: 486, height: 244 }}
+            style={{ left: 273, top: 119, width: 425, height: 213 }}
             src={asset2("glasses.png")}
             alt=""
             aria-hidden="true"
@@ -176,7 +178,7 @@ export default function Trajetoria() {
               asset itself, so no rotation/stretch needed here). */}
           <img
             className={`${styles.coffeeCup} ${styles.stageItem} reveal`}
-            style={{ left: 466, top: 5, width: 491, height: 610 }}
+            style={{ left: 407, top: 4, width: 429, height: 533 }}
             src={asset2("coffee-cup.png")}
             alt=""
             aria-hidden="true"
@@ -184,7 +186,7 @@ export default function Trajetoria() {
           {/* 2001:6 magnific_remover-fundo_iGW4Cq93uK — torn cloud sticker */}
           <img
             className={`${styles.cloudSticker} ${styles.stageItem} reveal`}
-            style={{ left: -20, top: 287, width: 239, height: 239 }}
+            style={{ left: -17, top: 251, width: 209, height: 209 }}
             src={asset2("sticker-cloud-torn.png")}
             alt=""
             aria-hidden="true"
@@ -192,14 +194,14 @@ export default function Trajetoria() {
           {/* 2004:10 magnific_9_8auXEKBIrU — welcome bubble */}
           <img
             className={`${styles.welcomeBubble} ${styles.stageItem} reveal`}
-            style={{ left: 17, top: 220, width: 410, height: 410 }}
+            style={{ left: 15, top: 192, width: 358, height: 358 }}
             src={asset2("welcome-bubble.png")}
             alt="Welcome to my world (:"
           />
           {/* 2004:6 magnific_remover-fundo_3zc96dBREY 1 — arrow cluster (down-left) */}
           <img
             className={`${styles.arrowClusterTR} ${styles.stageItem}`}
-            style={{ left: 701, top: 629, width: 198, height: 219 }}
+            style={{ left: 612, top: 550, width: 173, height: 191 }}
             src={asset2("arrows-cluster-down-left.png")}
             alt=""
             aria-hidden="true"
@@ -207,7 +209,7 @@ export default function Trajetoria() {
           {/* 2004:7 magnific_remover-fundo_3zc96dBREY 2 — arrow cluster (up-right) */}
           <img
             className={`${styles.arrowClusterBL} ${styles.stageItem}`}
-            style={{ left: 87, top: 623, width: 200, height: 229 }}
+            style={{ left: 76, top: 544, width: 175, height: 200 }}
             src={asset2("arrows-cluster-up-right.png")}
             alt=""
             aria-hidden="true"
@@ -215,7 +217,7 @@ export default function Trajetoria() {
           {/* 2004:9 "Minha Trajetória" text */}
           <div
             className={`${styles.titleMinhaWrap} ${styles.stageItem} reveal reveal-d1`}
-            style={{ left: 216, top: 563, width: 357, height: 176 }}
+            style={{ left: 189, top: 492, width: 312, height: 154 }}
           >
             <h1 className={styles.titleMinha}>
               Minha
@@ -226,7 +228,7 @@ export default function Trajetoria() {
           {/* 2004:4 magnific_5_O6ZUHKmynm — falling person */}
           <img
             className={`${styles.fallingPerson} ${styles.stageItem}`}
-            style={{ left: 310, top: 532, width: 168, height: 168 }}
+            style={{ left: 271, top: 465, width: 147, height: 147 }}
             src={asset2("falling-person.png")}
             alt=""
             aria-hidden="true"
@@ -234,7 +236,7 @@ export default function Trajetoria() {
           {/* 2006:13 "PROFISSIONAL" text */}
           <div
             className={`${styles.profTagWrap} ${styles.stageItem} reveal`}
-            style={{ left: 323, top: 691, width: 314, height: 115 }}
+            style={{ left: 282, top: 604, width: 274, height: 100 }}
           >
             <span className={styles.profTag}>PROFISSIONAL</span>
             <span className={styles.profTagLine} aria-hidden="true" />
@@ -243,28 +245,28 @@ export default function Trajetoria() {
           {/* 2012:10 magnific_remover-fundo_YMdnbCtWeC (1) 1 — notebook paper + tape */}
           <div
             className={`${styles.deskNote} ${styles.stageItem} reveal`}
-            style={{ left: 337, top: 803, width: 437, height: 437 }}
+            style={{ left: 294, top: 701, width: 382, height: 382 }}
           >
             <img className={styles.deskNoteImg} src={asset2("notebook-paper-tape.png")} alt="" aria-hidden="true" />
           </div>
           {/* 2010:5/2010:6/2010:7 — the three tool icons pinned on the note */}
           <img
             className={`${styles.stageItem} reveal`}
-            style={{ left: 505, top: 944, width: 34, height: 34, zIndex: 2 }}
+            style={{ left: 441, top: 825, width: 30, height: 30, zIndex: 2 }}
             src={asset2("icon-tool-1.png")}
             alt=""
             aria-hidden="true"
           />
           <img
             className={`${styles.stageItem} reveal`}
-            style={{ left: 552, top: 912, width: 34, height: 34, zIndex: 2 }}
+            style={{ left: 482, top: 797, width: 30, height: 30, zIndex: 2 }}
             src={asset2("icon-monitor.png")}
             alt=""
             aria-hidden="true"
           />
           <img
             className={`${styles.stageItem} reveal`}
-            style={{ left: 587, top: 928, width: 50, height: 31, zIndex: 2 }}
+            style={{ left: 513, top: 811, width: 44, height: 27, zIndex: 2 }}
             src={asset2("icon-c4d.png")}
             alt=""
             aria-hidden="true"
