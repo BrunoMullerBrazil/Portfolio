@@ -155,12 +155,18 @@ export default function Trajetoria() {
           />
 
           <div className={`${styles.minhaTrajetoriaWrap} reveal reveal-d1`}>
-            <span className={`${styles.arrowShape} ${styles.arrowA}`} aria-hidden="true" />
-            <span className={`${styles.arrowShape} ${styles.arrowB}`} aria-hidden="true" />
-            <span className={`${styles.arrowShape} ${styles.arrowC}`} aria-hidden="true" />
-            <span className={`${styles.arrowShape} ${styles.arrowD}`} aria-hidden="true" />
-            <span className={`${styles.arrowShape} ${styles.arrowE}`} aria-hidden="true" />
-            <span className={`${styles.arrowShape} ${styles.arrowF}`} aria-hidden="true" />
+            <img
+              className={styles.arrowClusterTR}
+              src={asset2("arrows-cluster-down-left.png")}
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              className={styles.arrowClusterBL}
+              src={asset2("arrows-cluster-up-right.png")}
+              alt=""
+              aria-hidden="true"
+            />
             <h1 className={styles.titleMinha}>
               Minha
               <br />
