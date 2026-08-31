@@ -68,8 +68,12 @@
 }
 /* Visual-only now — position/size come from inline style (exact Figma
    coords) on the stageItem element itself. */
+/* Native aspect ratio (869x435) preserved and rotated 45deg, rather than
+   stretched to Figma's axis-aligned bounding box — solved from the node's
+   own unrotated size vs its reported (square) bbox: a plain box-stretch
+   was squishing this to half width. */
 .glasses {
-  transform: rotate(-8deg);
+  transform: rotate(45deg);
   filter: drop-shadow(8px 14px 14px rgba(0, 0, 0, 0.45));
   pointer-events: none;
   z-index: 1;
@@ -164,9 +168,12 @@
 }
 /* A real pen render, thrown slightly out of focus — like the camera is
    racked onto the paper in front of it, not the desk clutter behind. */
+/* Native aspect ratio (1100x123, a thin diagonal strip) preserved and
+   rotated ~36deg instead of stretched into the bbox — same fix as
+   .glasses, solved from this asset's own dimensions. */
 .penProp {
-  z-index: -1;
-  transform: rotate(-8deg);
+  z-index: 1;
+  transform: rotate(36deg);
   filter: blur(2px) drop-shadow(16px 24px 22px rgba(0, 0, 0, 0.55));
   opacity: 0.9;
   pointer-events: none;

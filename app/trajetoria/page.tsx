@@ -151,26 +151,32 @@ export default function Trajetoria() {
             alt=""
             aria-hidden="true"
           />
-          {/* 2033:6 Design sem nome (30) 2 — pen */}
+          {/* 2033:6 Design sem nome (30) 2 — pen. Native 1100x123 sized/
+              rotated (not stretched) so its rotated bbox matches Figma's
+              reported box; see CSS comment. */}
           <img
             className={`${styles.penProp} ${styles.stageItem} reveal`}
-            style={{ left: -85, top: 498, width: 800, height: 622 }}
+            style={{ left: -143, top: 758, width: 915, height: 102 }}
             src={asset("pen.png")}
             alt=""
             aria-hidden="true"
           />
-          {/* 2004:11 magnific_deixe-o-oculos-um-pouco-m — glasses */}
+          {/* 2004:11 magnific_deixe-o-oculos-um-pouco-m — glasses. Native
+              869x435 sized/rotated 45deg (not stretched); see CSS comment. */}
           <img
             className={`${styles.glasses} ${styles.stageItem} reveal`}
-            style={{ left: 298, top: 0, width: 516, height: 516 }}
+            style={{ left: 313, top: 136, width: 486, height: 244 }}
             src={asset2("glasses.png")}
             alt=""
             aria-hidden="true"
           />
-          {/* 2033:8 magnific_quero-um-cafe-com-leite — coffee */}
+          {/* 2002:7 magnific_quero-um-cafe-com-leite-n_iGW4Ho53uK 1 — the
+              sharp coffee cup (not the blurred glow duplicate, 2033:8,
+              which I'd wrongly used before — its bbox is portrait like the
+              asset itself, so no rotation/stretch needed here). */}
           <img
             className={`${styles.coffeeCup} ${styles.stageItem} reveal`}
-            style={{ left: 486, top: 93, width: 546, height: 451 }}
+            style={{ left: 466, top: 5, width: 491, height: 610 }}
             src={asset2("coffee-cup.png")}
             alt=""
             aria-hidden="true"
