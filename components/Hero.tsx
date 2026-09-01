@@ -25,10 +25,15 @@ function vimeoSrc(id: string) {
 // mobile gets its own, smaller floor.
 function baseMediaSize(vw: number, vh: number) {
   if (vw <= 768) {
-    return {
-      W0: Math.min(Math.max(80, vw * 0.22), 150),
-      H0: Math.min(Math.max(160, vh * 0.3), 280),
-    };
+    // Same fix as the desktop branch below: W0 used to come from an
+    // independent vw * 0.22 formula, which only coincidentally matched the
+    // intended 80x160 (1:2) ratio at the clamp floor/ceiling — across real
+    // phone sizes (which vary a lot more in height than in width) the
+    // container ratio actually drifted from ~0.33 to ~0.46, shifting the
+    // 9:16 video's crop device to device. Deriving W0 from H0 keeps it
+    // constant.
+    const H0 = Math.min(Math.max(160, vh * 0.3), 280);
+    return { W0: H0 * 0.5, H0 };
   }
   // W0 used to be computed independently from vw (Math.min(Math.max(200,
   // vw * 0.28), 370)). Since H0 is computed independently from vh, the two
