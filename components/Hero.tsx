@@ -30,10 +30,17 @@ function baseMediaSize(vw: number, vh: number) {
       H0: Math.min(Math.max(160, vh * 0.3), 280),
     };
   }
-  return {
-    W0: Math.min(Math.max(200, vw * 0.28), 370),
-    H0: Math.min(Math.max(280, vh * 0.54), 640),
-  };
+  // W0 used to be computed independently from vw (Math.min(Math.max(200,
+  // vw * 0.28), 370)). Since H0 is computed independently from vh, the two
+  // formulas only coincidentally matched the intended 200x280 (5:7) card
+  // ratio on tall-viewport screens like MacBooks — on shorter-viewport
+  // "smaller notebook" panels (1366x768, 1280x720 etc.) the container came
+  // out noticeably more square, which changed how the 16:9 video gets
+  // cropped to cover it and broke the designed composition. Deriving W0
+  // from H0 keeps the card's ratio (and therefore the video crop) constant
+  // across every desktop screen size.
+  const H0 = Math.min(Math.max(280, vh * 0.54), 640);
+  return { W0: H0 * (200 / 280), H0 };
 }
 
 export default function Hero() {
