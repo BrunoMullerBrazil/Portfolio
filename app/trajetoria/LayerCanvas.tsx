@@ -210,7 +210,7 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
 
   // ── adding images: drop or paste ─────────────────────────────────────
   const addFiles = useCallback(
-    (files: FileList | File[], at?: { x: number; y: number }) => {
+    (files: FileList | File[], at?: { x: number; y: number }, origin: "arrastado" | "colado" = "arrastado") => {
       Array.from(files)
         .filter((f) => f.type.startsWith("image/"))
         .forEach((f, k) => {
@@ -220,10 +220,16 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
             const img = new Image();
             img.onload = () => {
               const id = uid();
-              if (!hasAlpha(img)) {
+              const alpha = hasAlpha(img);
+              // diagnostic line: shows exactly what reached the browser
+              const kind = (f.type.split("/")[1] || "?").toUpperCase();
+              const diag = `${f.name || "imagem"} · ${kind} ${img.naturalWidth}×${img.naturalHeight} · ${origin} · transparência: ${alpha ? "sim" : "não"}`;
+              if (!alpha) {
                 setOpaque((o) => ({ ...o, [id]: true }));
-                setStatus("Essa imagem não tem fundo transparente. Selecione e aperte R para remover o fundo.");
-              }
+                setStatus(
+                  diag + (origin === "colado" ? " — colar de outro app costuma perder a transparência; arraste o arquivo." : " — R remove o fundo.")
+                );
+              } else setStatus(diag);
               const w = Math.min(img.naturalWidth / u, 320);
               const pos = at ?? toUnits(window.innerWidth / 2, window.innerHeight / 2);
               setPreview((p) => ({ ...p, [id]: dataUrl }));
@@ -264,7 +270,7 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
     };
     const paste = (e: ClipboardEvent) => {
       const files = Array.from(e.clipboardData?.files || []);
-      if (files.length) addFiles(files);
+      if (files.length) addFiles(files, undefined, "colado");
     };
     window.addEventListener("dragover", over);
     window.addEventListener("dragleave", leave);
