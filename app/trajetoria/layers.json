@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "id": "musltyjo1b5g",
+    "src": "/assets/trajetoria/layers/musltyjo1b5g.png",
+    "x": -39.3,
+    "y": 7.1,
+    "w": 377.9,
+    "rot": 0,
+    "z": 1
+  },
+  {
+    "id": "musltyl8ruff",
+    "src": "/assets/trajetoria/layers/musltyl8ruff.png",
+    "x": 280.4,
+    "y": 329.3,
+    "w": 379.8,
+    "rot": 0,
+    "z": 6
+  },
+  {
+    "id": "muslzaglix5h",
+    "src": "/assets/trajetoria/layers/muslzaglix5h.png",
+    "x": 640.6,
+    "y": -359.1,
+    "w": 630.1,
+    "rot": 0,
+    "z": 16
+  },
+  {
+    "id": "musm0yr7eq08",
+    "src": "/assets/trajetoria/layers/musm0yr7eq08.png",
+    "x": 450.1,
+    "y": -182,
+    "w": 616.5,
+    "rot": 0,
+    "z": 14
+  },
+  {
+    "id": "musm5yrxxzd6",
+    "src": "/assets/trajetoria/layers/musm5yrxxzd6.png",
+    "x": -307.9,
+    "y": -23.1,
+    "w": 1325.8,
+    "rot": 0,
+    "z": 4
+  }
+]
