@@ -1731,3 +1731,22 @@ body.traj-drop::after{content:'Solte a imagem';position:fixed;inset:14px;z-index
   font:11px/1.6 var(--font-space-mono),monospace;letter-spacing:.14em;text-transform:uppercase;color:#c8cfa8;text-align:center;}
 .traj-badge{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:9500;padding:6px 14px;border-radius:100px;
   background:#c8cfa8;color:#12140e;font:10px/1 var(--font-inter),sans-serif;letter-spacing:.2em;text-transform:uppercase;pointer-events:none;}
+
+/* ═══ Gallery editor (WorksArchive at /#editar) ═══ */
+.arc-cell{position:relative;}
+.arc-tools{position:absolute;top:10px;right:10px;z-index:3;display:flex;gap:4px;}
+.arc-tools button{width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(12,14,10,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#e0dbd1;font-size:12px;line-height:1;cursor:pointer;}
+.arc-tools button:hover{background:rgba(40,44,32,.9);}
+.arc-tools button.on{color:#e6cf6e;border-color:rgba(230,207,110,.5);}
+.arc-add .arc-thumb{background:transparent;border:1px dashed rgba(200,207,168,.45);box-shadow:none;display:flex;align-items:center;justify-content:center;}
+.arc-add-plus{font:300 46px/1 var(--font-inter),sans-serif;color:#c8cfa8;}
+.arc-add:hover .arc-thumb{border-color:#c8cfa8;background:rgba(200,207,168,.05);}
+.arc-form{width:min(640px,94vw);max-height:90vh;overflow:auto;padding:26px;border-radius:18px;background:#101210;border:1px solid rgba(255,255,255,.1);color:#d8d2c7;font:12px/1.5 var(--font-inter),sans-serif;display:flex;flex-direction:column;gap:14px;}
+.arc-form h3{font:500 16px/1.2 var(--font-inter),sans-serif;color:#ece7dd;}
+.arc-form label{display:flex;flex-direction:column;gap:6px;flex:1;letter-spacing:.04em;color:#a39d93;}
+.arc-form input,.arc-form textarea,.arc-form select{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:#0b0c0a;color:#ece7dd;font:13px/1.4 var(--font-inter),sans-serif;resize:vertical;}
+.arc-form input:focus,.arc-form textarea:focus,.arc-form select:focus{outline:none;border-color:#c8cfa8;}
+.arc-form-row{display:flex;gap:12px;}
+.arc-form-note{color:#c8cfa8;font-size:11px;}
+.arc-form-check{flex-direction:row !important;align-items:center;gap:10px !important;color:#d8d2c7 !important;}
+@media(max-width:620px){.arc-form-row{flex-direction:column;}}
