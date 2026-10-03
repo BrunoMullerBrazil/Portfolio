@@ -5,6 +5,11 @@
   min-height: 260vh;
 }
 
+/* ── Blank canvas: room for the editor's free layers ── */
+.canvas {
+  min-height: 300vh;
+}
+
 /* ── Content ── */
 .content {
   position: relative;
