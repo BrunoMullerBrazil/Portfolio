@@ -29,7 +29,7 @@ const REST_Y = 905; // top of the lowercase — capsule's upper edge
 
 // timeline (seconds)
 const T_WRITE0 = 0.2;
-const WRITE_DUR = 1.6; // the whole name, lifts included
+const WRITE_DUR = 1.75; // the whole name, lifts included
 const NIB_FLY = 0.4; // nib: end of the r → ü
 const LAND = 0.12;
 const SPLIT = 0.2; // second dot hops out of the first
@@ -96,7 +96,7 @@ function planHand(paths: SVGPathElement[]): StrokePlan[] {
     const nx = raw[i + 1];
     if (!nx) return 0;
     const gap = Math.hypot(nx.a.x - r.b.x, nx.a.y - r.b.y);
-    return gap < 30 ? 6 : 40 + gap * 0.35;
+    return gap < 30 ? 25 : 120 + gap * 0.9; // the pen travels in the air, not teleports
   });
   const total = raw.reduce((acc, r, i) => acc + r.dur + lifts[i], 0);
   const k = WRITE_DUR / total;
