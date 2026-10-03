@@ -1750,3 +1750,5 @@ body.traj-drop::after{content:'Solte a imagem';position:fixed;inset:14px;z-index
 .arc-form-note{color:#c8cfa8;font-size:11px;}
 .arc-form-check{flex-direction:row !important;align-items:center;gap:10px !important;color:#d8d2c7 !important;}
 @media(max-width:620px){.arc-form-row{flex-direction:column;}}
+.traj-layers.editing .traj-layer.opaque{outline:1px dashed #e6a16e;}
+.traj-layers.editing .traj-layer.opaque::after{content:'sem transparência · R';position:absolute;left:0;top:-22px;font:10px/1 var(--font-inter),sans-serif;letter-spacing:.1em;color:#e6a16e;white-space:nowrap;}
