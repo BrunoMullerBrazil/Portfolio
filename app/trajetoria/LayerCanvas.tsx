@@ -120,6 +120,27 @@ async function removeBackground(src: string): Promise<string> {
   return c.toDataURL("image/png");
 }
 
+/*
+ * Before publishing, every new image is capped at 2400px on its long side
+ * and re-encoded as WebP (alpha kept). A 6MB PNG becomes a few hundred KB.
+ * Browsers that can't encode WebP (Safari) keep the original PNG.
+ */
+async function compressForWeb(dataUrl: string): Promise<string> {
+  try {
+    const img = await loadImg(dataUrl);
+    const k = Math.min(1, 2400 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth * k);
+    c.height = Math.round(img.naturalHeight * k);
+    c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
+    const webp = c.toDataURL("image/webp", 0.88);
+    if (webp.startsWith("data:image/webp") && webp.length < dataUrl.length) return webp;
+    return dataUrl;
+  } catch {
+    return dataUrl;
+  }
+}
+
 type Gh = (path: string, init?: RequestInit) => Promise<any>;
 function github(token: string): Gh {
   return async (path, init) => {
@@ -391,7 +412,7 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
       const out: Layer[] = [];
       for (const L of layers) {
         if (!L.src && preview[L.id]) {
-          const data = preview[L.id];
+          const data = await compressForWeb(preview[L.id]);
           const ext = extOf(data);
           const blob = await gh(`/git/blobs`, {
             method: "POST",

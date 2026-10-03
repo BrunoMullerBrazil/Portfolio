@@ -16,6 +16,7 @@ export const anton = Anton({
   weight: "400",
   variable: "--font-anton",
   display: "swap",
+  preload: false, // subpages only — the home never downloads it
 });
 
 export const playfair = Playfair_Display({
@@ -24,6 +25,7 @@ export const playfair = Playfair_Display({
   style: ["italic"],
   variable: "--font-playfair",
   display: "swap",
+  preload: false, // subpages only
 });
 
 export const spaceMono = Space_Mono({
@@ -31,6 +33,7 @@ export const spaceMono = Space_Mono({
   weight: ["400", "700"],
   variable: "--font-space-mono",
   display: "swap",
+  preload: false, // subpages + editors only
 });
 
 export const franie = localFont({

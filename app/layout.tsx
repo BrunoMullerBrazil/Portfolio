@@ -38,15 +38,8 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     images: [OG_IMAGE.url],
   },
-  // TEMPORARY — the site still has pending content (e.g. /trajetoria isn't
-  // linked from anywhere yet), so indexing is intentionally off until Bruno
-  // approves going live in search. To re-enable: delete this whole `robots`
-  // block (Next.js defaults to index/follow without it) AND update
-  // app/robots.ts to match — see the comment there.
-  robots: {
-    index: false,
-    follow: false,
-  },
+  // Live in search since Oct 2026 (approved by Bruno). /design stays out:
+  // it's placeholder-only — see app/design/layout.tsx and app/robots.ts.
 };
 
 export default function RootLayout({
@@ -64,7 +57,7 @@ export default function RootLayout({
           {
             // Overrides globals.css's static `/assets/...` value so the
             // window-shadow asset still resolves under a GitHub Pages basePath.
-            "--winshadow": `url(${withBasePath("/assets/window-shadow.png")})`,
+            "--winshadow": `url(${withBasePath("/assets/window-shadow.webp")})`,
           } as React.CSSProperties
         }
       >

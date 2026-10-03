@@ -266,7 +266,28 @@ export default function Loader() {
       if (t < T_END) raf = requestAnimationFrame(tick);
       else handOff();
     }
-    raf = requestAnimationFrame(tick);
+    // Returning in the same session: the name is already written — show the
+    // finished mark for a beat and go straight to the capsule → video handoff.
+    // The full writing plays once per session.
+    let quick = false;
+    try {
+      quick = sessionStorage.getItem("muller-intro") === "1";
+      sessionStorage.setItem("muller-intro", "1");
+    } catch {}
+    let quickTimer: ReturnType<typeof setTimeout> | undefined;
+    if (quick) {
+      plan.forEach((st) => {
+        st.path.style.visibility = "visible";
+        st.path.style.strokeDashoffset = "0";
+      });
+      fill.removeAttribute("mask");
+      put(nib, C0, C0, 1, 1, 1);
+      put(twin, C1, C1, 1, 1, 1);
+      pct.firstChild!.nodeValue = "100";
+      quickTimer = setTimeout(handOff, 380);
+    } else {
+      raf = requestAnimationFrame(tick);
+    }
 
     // ── 3. capsule → hero card ──────────────────────────────────────
     function handOff() {
@@ -350,6 +371,7 @@ export default function Loader() {
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(failsafe);
+      if (quickTimer) clearTimeout(quickTimer);
     };
   }, []);
 

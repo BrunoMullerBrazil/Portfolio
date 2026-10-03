@@ -50,7 +50,7 @@ export default function Contact() {
         <img
           data-depth="0.06"
           className="contact-hl-img"
-          src={withBasePath("/assets/logos/vamos.png")}
+          src={withBasePath("/assets/logos/vamos.webp")}
           alt="Vamos trabalhar juntos."
         />
       </div>

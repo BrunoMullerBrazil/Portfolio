@@ -21,6 +21,9 @@ export default function Cursor() {
     const ring = ringRef.current;
     const lbl = labelRef.current;
     if (!cur || !ring || !lbl) return;
+    // Touch screens never show the custom cursor (hidden in CSS) — don't
+    // run its animation loop there either.
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
     let mx = 0,
       my = 0,

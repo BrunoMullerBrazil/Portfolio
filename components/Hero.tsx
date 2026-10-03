@@ -113,16 +113,31 @@ export default function Hero() {
       heroMX = e.clientX / window.innerWidth - 0.5;
       heroMY = e.clientY / window.innerHeight - 0.5;
     }
-    document.addEventListener("mousemove", onMouseMove);
-
-    let raf: number;
+    // Mouse parallax: pointer devices only, and the loop only runs while the
+    // hero is on screen and the text is still easing — it used to spin every
+    // frame forever, on phones too.
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    let raf = 0;
+    let looping = false;
     function parallaxLoop() {
       heroLX += (heroMX - heroLX) * 0.07;
       heroLY += (heroMY - heroLY) * 0.07;
-      if (document.body.classList.contains("hero-mode")) applyHeroTransform();
+      const inHero = document.body.classList.contains("hero-mode");
+      if (inHero) applyHeroTransform();
+      if (inHero && (Math.abs(heroMX - heroLX) > 0.0005 || Math.abs(heroMY - heroLY) > 0.0005)) {
+        raf = requestAnimationFrame(parallaxLoop);
+      } else looping = false;
+    }
+    function kickParallax() {
+      if (looping || !finePointer) return;
+      looping = true;
       raf = requestAnimationFrame(parallaxLoop);
     }
-    raf = requestAnimationFrame(parallaxLoop);
+    function onMouseMoveKick(e: MouseEvent) {
+      onMouseMove(e);
+      kickParallax();
+    }
+    if (finePointer) document.addEventListener("mousemove", onMouseMoveKick);
 
     // ── Sticky hero media resize + scroll-driven state ──
     function setM(w: number, h: number, r: number, top: number) {
@@ -171,8 +186,23 @@ export default function Hero() {
     // rotating past the 768px breakpoint) — resize fires continuously while
     // dragging a window, and resetting src on every tick would restart
     // playback each time.
+    // The hero video (Vimeo player — the heaviest thing on the page) starts
+    // loading only once the page itself has finished loading. The loader is
+    // still on screen then, so it's ready by the time the capsule lands.
+    let videoAllowed = false;
+    function allowVideo() {
+      if (videoAllowed) return;
+      videoAllowed = true;
+      lastIsMobile = null;
+      syncVideoSrc();
+    }
+    const onLoad = () => setTimeout(allowVideo, 150);
+    if (document.readyState === "complete") onLoad();
+    else window.addEventListener("load", onLoad, { once: true });
+
     let lastIsMobile: boolean | null = null;
     function syncVideoSrc() {
+      if (!videoAllowed) return;
       const isMobile = window.innerWidth <= 768;
       if (isMobile === lastIsMobile) return;
       lastIsMobile = isMobile;
@@ -252,7 +282,8 @@ export default function Hero() {
       if (scrollRaf !== null) cancelAnimationFrame(scrollRaf);
       window.removeEventListener("scroll", onScroll);
       revealObserver?.disconnect();
-      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mousemove", onMouseMoveKick);
+      window.removeEventListener("load", onLoad);
       window.removeEventListener("resize", initM);
     };
   }, []);
@@ -305,7 +336,7 @@ export default function Hero() {
           </div>
           <div className="hero-signature">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={withBasePath("/assets/signature.png")} alt="" />
+            <img src={withBasePath("/assets/signature.webp")} alt="" />
           </div>
         </div>
 
@@ -316,7 +347,7 @@ export default function Hero() {
         <div id="heroMedia" ref={heroMediaRef}>
           <div className="hero-media-inner">
             <iframe
-              src={vimeoSrc(DESKTOP_VIMEO_ID)}
+              title="Showreel"
               frameBorder="0"
               allow="autoplay; fullscreen"
               allowFullScreen
