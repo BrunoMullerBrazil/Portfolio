@@ -5,6 +5,8 @@ import SmoothScroll from "@/components/SmoothScroll";
 import Cursor from "@/components/Cursor";
 import Loader from "@/components/Loader";
 import MotionSystem from "@/components/MotionSystem";
+import Timecode from "@/components/Timecode";
+import FilmGrain from "@/components/FilmGrain";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { withBasePath } from "@/lib/basePath";
 import { LanguageProvider } from "@/lib/LanguageContext";
@@ -74,6 +76,8 @@ export default function RootLayout({
           <Cursor />
           <SmoothScroll />
           <MotionSystem />
+          <Timecode />
+          <FilmGrain />
           <WhatsAppButton />
           {children}
         </LanguageProvider>

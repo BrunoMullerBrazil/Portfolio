@@ -257,7 +257,12 @@ export default function Hero() {
   }, []);
 
   return (
-    <section id="hero" ref={rootRef}>
+    <section
+      id="hero"
+      ref={rootRef}
+      data-scene="01"
+      data-scene-label={t({ pt: "Abertura", en: "Opening" }, lang)}
+    >
       <div id="hero-sticky" ref={heroStickyRef}>
         <div className="hero-nav" id="heroNav" ref={heroNavRef}>
           <div className="hero-nav-logo">
@@ -274,6 +279,7 @@ export default function Hero() {
         <div className="hero-text-wrap" id="heroTexts" ref={heroTextsRef}>
           <div
             className="hero-greeting"
+            data-kinetic-block
             aria-label={`${t(dict.heroGreeting1, lang)} ${t(dict.heroGreeting2, lang)} ${t(dict.heroGreeting3, lang)}. ${t(dict.heroSubtitle, lang)}`}
           >
             <div className="hg-line">

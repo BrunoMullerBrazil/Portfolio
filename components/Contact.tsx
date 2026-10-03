@@ -40,7 +40,11 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact">
+    <section
+      id="contact"
+      data-scene="05"
+      data-scene-label={t({ pt: "Contato", en: "Contact" }, lang)}
+    >
       <div className="reveal">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

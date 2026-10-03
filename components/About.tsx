@@ -23,6 +23,24 @@ function ac(el: HTMLElement, t: number, s: string, d: number) {
   requestAnimationFrame(step);
 }
 
+// Scroll-scrubbed reading: each word lights up as the paragraph travels
+// through the viewport (MotionSystem writes --prog on the wrapper, CSS maps
+// it against each word's --i). The real sentence lives in .sr-only for
+// screen readers; the per-word spans are presentation only.
+function Scrub({ text, className, range }: { text: string; className: string; range: string }) {
+  const words = text.split(/\s+/).filter(Boolean);
+  return (
+    <div className={className} data-progress={range} style={{ "--n": words.length } as React.CSSProperties}>
+      <span className="sr-only">{text}</span>
+      {words.map((w, i) => (
+        <span key={i} className="rw" aria-hidden="true" style={{ "--i": i } as React.CSSProperties}>
+          {w}{" "}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export default function About() {
   const { lang } = useLanguage();
   const statsWrapRef = useRef<HTMLDivElement>(null);
@@ -57,14 +75,18 @@ export default function About() {
 
   return (
     <>
-      <section id="about">
+      <section
+        id="about"
+        data-scene="03"
+        data-scene-label={tr({ pt: "Sobre", en: "About" }, lang)}
+      >
         <div>
           <div className="about-eyebrow reveal">{tr(dict.aboutEyebrow, lang)}</div>
-          <div className="about-text reveal reveal-d2">{tr(dict.aboutPara1, lang)}</div>
-          <div className="about-text reveal reveal-d3">{tr(dict.aboutPara2, lang)}</div>
+          <Scrub className="about-lead" range=".88 .5" text={tr(dict.aboutPara1, lang)} />
+          <Scrub className="about-text" range=".92 .5" text={tr(dict.aboutPara2, lang)} />
           {/* MotionSystem watches for nodes mounted later (this one only
-              exists in one language), so it can carry .reveal now. */}
-          {para3 && <div className="about-text reveal reveal-d3">{para3}</div>}
+              exists in one language), so late blocks get scrubbed too. */}
+          {para3 && <Scrub className="about-text" range=".92 .5" text={para3} />}
         </div>
         <div className="about-stats" ref={statsWrapRef}>
           <div className="stat reveal reveal-d1">

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useLanguage, t } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
+import { SplitText } from "./SplitText";
 
 const SERVICES = [
   {
@@ -58,7 +59,11 @@ export default function Services() {
   }, []);
 
   return (
-    <section id="services">
+    <section
+      id="services"
+      data-scene="04"
+      data-scene-label={t({ pt: "Serviços", en: "Services" }, lang)}
+    >
       <div
         className="section-head reveal m-head"
         style={{
@@ -72,14 +77,14 @@ export default function Services() {
       >
         <div className="section-title">
           <span className="mline">
-            <span>{t(dict.servicesEyebrow, lang)}</span>
+            <SplitText text={t(dict.servicesEyebrow, lang)} />
           </span>
         </div>
       </div>
 
       <div className="services-grid" ref={gridRef}>
         {SERVICES.map((s) => (
-          <div className="svc" key={s.n}>
+          <div className="svc" key={s.n} data-spot>
             <div className="svc-n" data-depth="-0.02">
               {s.n}
             </div>

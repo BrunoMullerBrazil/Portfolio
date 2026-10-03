@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const HOVER_SELECTOR = "a,.svc,.cine-filter,.cine-arrow";
 // Bigger "Click!" circle for card/media-style elements that open or play
@@ -10,6 +11,7 @@ const HOVER_SELECTOR = "a,.svc,.cine-filter,.cine-arrow";
 const CLICK_SELECTOR = '[data-cursor="click"],.work-card';
 
 export default function Cursor() {
+  const { lang } = useLanguage();
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLDivElement>(null);
@@ -110,7 +112,9 @@ export default function Cursor() {
           </defs>
           <text>
             <textPath href="#cursorOrbitPath">
-              Click! &#8226; Click! &#8226; Click! &#8226; Click! &#8226;{" "}
+              {lang === "en"
+                ? "Watch \u2022 Watch \u2022 Watch \u2022 Watch \u2022 "
+                : "Assistir \u2022 Assistir \u2022 Assistir \u2022 "}
             </textPath>
           </text>
         </svg>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage, t, type Translated } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
+import { SplitText } from "./SplitText";
 
 type Project = {
   id: number;
@@ -167,6 +168,35 @@ const FILTERS: { label: Translated; value: "all" | Project["filter"] }[] = [
   { label: dict.filterMotion, value: "motion" },
 ];
 
+// The project title is painted imperatively (this whole stage is driven
+// outside React state), so it gets the same char split as <SplitText>
+// here: readable copy in .sr-only, aria-hidden glyphs with a --i stagger
+// index. New spans on every swap means the CSS entrance replays per cut.
+function setSplitTitle(el: HTMLElement, text: string) {
+  el.textContent = "";
+  const sr = document.createElement("span");
+  sr.className = "sr-only";
+  sr.textContent = text;
+  el.appendChild(sr);
+  let i = 0;
+  text.split(" ").forEach((word, wi) => {
+    const wrap = document.createElement("span");
+    wrap.setAttribute("aria-hidden", "true");
+    if (wi > 0) wrap.appendChild(document.createTextNode(" "));
+    const sw = document.createElement("span");
+    sw.className = "sw";
+    Array.from(word).forEach((c) => {
+      const ch = document.createElement("span");
+      ch.className = "ch";
+      ch.style.setProperty("--i", String(i++));
+      ch.textContent = c;
+      sw.appendChild(ch);
+    });
+    wrap.appendChild(sw);
+    el.appendChild(wrap);
+  });
+}
+
 function pad(n: number) {
   return ("0" + n).slice(-2);
 }
@@ -264,7 +294,7 @@ export default function WorkIntro() {
       media!.style.background = GRADS[(p.id - 1) % GRADS.length];
       frame!.classList.toggle("vertical", p.orientation === "vertical");
       numEl!.textContent = p.num + t(dict.workIntroNumSuffix, currentLang);
-      titleEl!.textContent = t(p.name, currentLang);
+      setSplitTitle(titleEl!, t(p.name, currentLang));
       clientEl!.textContent = [p.client, p.year].filter(Boolean).join(" • ");
       descEl!.textContent = t(p.desc, currentLang);
       tagsEl!.textContent = t(p.tags, currentLang);
@@ -423,12 +453,17 @@ export default function WorkIntro() {
   }, []);
 
   return (
-    <section id="work-intro" ref={sectionRef}>
+    <section
+      id="work-intro"
+      ref={sectionRef}
+      data-scene="02"
+      data-scene-label={t({ pt: "Trabalho", en: "Work" }, lang)}
+    >
       <div className="cine-wrap">
         <div className="wi-eyebrow reveal">{t(dict.workIntroEyebrow, lang)}</div>
         <h2 className="wi-line reveal reveal-d1 m-head">
           <span className="mline">
-            <span>{t(dict.workIntroHeading, lang)}</span>
+            <SplitText text={t(dict.workIntroHeading, lang)} />
           </span>
         </h2>
 
@@ -449,7 +484,7 @@ export default function WorkIntro() {
 
         <div className="cine-stage reveal reveal-d2">
           <div className="cine-frame" id="cineFrame" data-cursor="click" data-dolly ref={frameRef}>
-            <div className="cine-media" id="cineMedia" ref={mediaRef} />
+            <div className="cine-media" id="cineMedia" data-lens ref={mediaRef} />
             <button className="cine-play" aria-label={t(dict.ariaWatch, lang)} ref={playBtnRef}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M6 4L15 10L6 16V4Z" fill="rgba(255,255,255,.9)" />
@@ -503,7 +538,7 @@ export default function WorkIntro() {
             <div className="cine-num" id="cineNum" ref={numRef}>
               01 — Projeto
             </div>
-            <h3 className="cine-title" id="cineTitle" ref={titleRef}>
+            <h3 className="cine-title" id="cineTitle" data-kinetic="40" ref={titleRef}>
               Projeto 01
             </h3>
             <div className="cine-client" id="cineClient" ref={clientRef} />
