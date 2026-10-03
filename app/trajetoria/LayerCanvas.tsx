@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { withBasePath } from "@/lib/basePath";
 
 /*
@@ -87,7 +88,9 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
   }, []);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).has("editar")) setEditing(true);
+    // ?editar, or #editar (a fragment survives any trailing-slash redirect)
+    const on = new URLSearchParams(window.location.search).has("editar") || window.location.hash === "#editar";
+    if (on) setEditing(true);
   }, []);
 
   // click on empty space deselects
@@ -381,7 +384,11 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
           );
         })}
 
-      {editing && (
+      {editing &&
+        createPortal(
+          <>
+            <div className="traj-badge">Modo edição</div>
+            {layers.length === 0 && <div className="traj-empty">Arraste um PNG para cá<br />ou cole com ⌘V / Ctrl+V</div>}
         <div className="traj-bar" onPointerDown={(e) => e.stopPropagation()}>
           <span className="traj-hint">Arraste ou cole um PNG · Del · setas · [ ] · B fundo · M celular · D duplicar · ⌘Z</span>
           <span className="traj-status">{status || (dirty ? "Alterações não publicadas" : "Tudo publicado")}</span>
@@ -390,9 +397,12 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
             {busy ? "Publicando…" : "Publicar"}
           </button>
         </div>
-      )}
+          </>,
+          document.body
+        )}
 
-      {askToken && (
+      {askToken &&
+        createPortal(
         <TokenDialog
           onClose={() => setAskToken(false)}
           onSave={(t) => {
@@ -402,8 +412,9 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
             setAskToken(false);
             setStatus("Chave salva neste navegador.");
           }}
-        />
-      )}
+        />,
+          document.body
+        )}
     </div>
   );
 }
