@@ -116,8 +116,14 @@ export default function MotionSystem() {
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            e.target.classList.add("visible");
             revealIO.unobserve(e.target);
+            // [data-guided] headings wait for the guide dot to land on their
+            // marker (components/Guide.tsx adds .visible); the timeout is a
+            // safety net so a heading can never stay hidden.
+            if (e.target.hasAttribute("data-guided")) {
+              const el = e.target;
+              setTimeout(() => el.classList.add("visible"), 1800);
+            } else e.target.classList.add("visible");
           }
         });
       },

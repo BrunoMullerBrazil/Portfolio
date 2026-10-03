@@ -1578,3 +1578,25 @@ body:not(.media-ready) #heroMedia{box-shadow:none !important;}
   stroke-dashoffset:calc(1 - var(--sp));
   stroke-opacity:min(1, calc(var(--sp) * 60));
 }
+
+/* ═══ GUIDE — o ponto que conduz (components/Guide.tsx) ═══
+   The umlaut dot as the page's conductor. .gmark is where it lands: a
+   small slanted dash in the trema's own angle, hidden until the dot
+   arrives and becomes it. */
+.gmark{
+  display:inline-block;width:.95em;height:.4em;margin-right:.8em;vertical-align:.12em;
+  background:#c8cfa8;transform:skewX(-21deg);opacity:0;
+}
+.gmark.on{opacity:1;}
+.gmark-lg{width:.42em;height:.18em;margin-right:.35em;vertical-align:.3em;}
+.gmark-stop{margin:0 0 0 .3em;vertical-align:0;width:.7em;height:.32em;}
+.section-title{display:flex;align-items:baseline;}
+#guide{
+  position:fixed;left:0;top:0;width:16px;height:6px;z-index:8990;pointer-events:none;
+  background:#c8cfa8;opacity:0;will-change:transform;border-radius:1px;
+}
+.guide-trail{position:fixed;inset:0;width:100vw;height:100vh;z-index:8989;pointer-events:none;}
+@media (prefers-reduced-motion: reduce){
+  .gmark{opacity:1;}
+  #guide,.guide-trail{display:none;}
+}

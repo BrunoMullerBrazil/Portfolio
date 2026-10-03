@@ -69,7 +69,11 @@ export default function Footer() {
 
       <div className="credits-row">
         <div className="footer-copy">© {YEAR} Bruno Müller</div>
-        <div className="footer-copy credits-end">{t({ pt: "Fim", en: "The End" }, lang)}</div>
+        <div className="footer-copy credits-end">
+          {t({ pt: "Fim", en: "The End" }, lang)}
+          {/* the guide's last landing: the film's full stop */}
+          <span className="gmark gmark-stop" data-guide-mark />
+        </div>
       </div>
     </footer>
   );

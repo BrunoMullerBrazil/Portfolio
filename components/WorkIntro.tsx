@@ -327,6 +327,10 @@ export default function WorkIntro() {
         void frame!.offsetWidth;
         frame!.classList.remove("cine-swap", "cine-swap-in");
         meta!.classList.remove("cine-swap");
+        // the guide dot rides the edge of the incoming wipe
+        window.dispatchEvent(
+          new CustomEvent("guide:cut", { detail: { rect: mediaRef.current!.getBoundingClientRect(), dir: d } })
+        );
       }, 250); // 6 frames @24fps — matches the CSS exit
     }
 
@@ -460,8 +464,11 @@ export default function WorkIntro() {
       data-scene-label={t({ pt: "Trabalho", en: "Work" }, lang)}
     >
       <div className="cine-wrap">
-        <div className="wi-eyebrow reveal">{t(dict.workIntroEyebrow, lang)}</div>
-        <h2 className="wi-line reveal reveal-d1 m-head">
+        <div className="wi-eyebrow reveal">
+          <span className="gmark" data-guide-mark data-guide-reveal="#work-intro .wi-line" />
+          {t(dict.workIntroEyebrow, lang)}
+        </div>
+        <h2 className="wi-line reveal reveal-d1 m-head" data-guided>
           <span className="mline">
             <SplitText text={t(dict.workIntroHeading, lang)} />
           </span>

@@ -7,6 +7,7 @@ import Loader from "@/components/Loader";
 import MotionSystem from "@/components/MotionSystem";
 import Timecode from "@/components/Timecode";
 import FilmGrain from "@/components/FilmGrain";
+import Guide from "@/components/Guide";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { withBasePath } from "@/lib/basePath";
 import { LanguageProvider } from "@/lib/LanguageContext";
@@ -78,6 +79,7 @@ export default function RootLayout({
           <MotionSystem />
           <Timecode />
           <FilmGrain />
+          <Guide />
           <WhatsAppButton />
           {children}
         </LanguageProvider>

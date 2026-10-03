@@ -81,7 +81,10 @@ export default function About() {
         data-scene-label={tr({ pt: "Sobre", en: "About" }, lang)}
       >
         <div>
-          <div className="about-eyebrow reveal">{tr(dict.aboutEyebrow, lang)}</div>
+          <div className="about-eyebrow reveal">
+            <span className="gmark" data-guide-mark />
+            {tr(dict.aboutEyebrow, lang)}
+          </div>
           <Scrub className="about-lead" range=".88 .5" text={tr(dict.aboutPara1, lang)} />
           <Scrub className="about-text" range=".92 .5" text={tr(dict.aboutPara2, lang)} />
           {/* MotionSystem watches for nodes mounted later (this one only

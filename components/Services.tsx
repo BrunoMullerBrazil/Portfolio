@@ -66,6 +66,7 @@ export default function Services() {
     >
       <div
         className="section-head reveal m-head"
+        data-guided
         style={{
           display: "flex",
           justifyContent: "space-between",
@@ -76,6 +77,7 @@ export default function Services() {
         }}
       >
         <div className="section-title">
+          <span className="gmark gmark-lg" data-guide-mark data-guide-reveal="#services .section-head" />
           <span className="mline">
             <SplitText text={t(dict.servicesEyebrow, lang)} />
           </span>
