@@ -5,6 +5,8 @@ import styles from "./trajetoria.module.css";
 import blueprint from "../blueprint.module.css";
 import { withBasePath } from "@/lib/basePath";
 import { SITE_URL, SITE_NAME, OG_IMAGE } from "@/lib/seo";
+import LayerCanvas, { type Layer } from "./LayerCanvas";
+import layers from "./layers.json";
 import { MANIFESTO_INTRO, MANIFESTO_PAPER, MANIFESTO_OUTRO, MANIFESTO_CLOSER, BLOCKS, FINAL_QUOTE } from "./content";
 
 const asset = (name: string) => withBasePath(`/assets/trajetoria/${name}`);
@@ -111,6 +113,8 @@ export default function Trajetoria() {
       <div className={blueprint.rulerBottom} />
 
       <div className={styles.content}>
+        {/* free image layers — edit visually at /trajetoria?editar */}
+        <LayerCanvas initial={layers as Layer[]} />
         <Link href="/" className={`${styles.back} reveal`}>
           ← Voltar
         </Link>
