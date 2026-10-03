@@ -34,7 +34,7 @@ import { usePathname } from "next/navigation";
  * Everything is skipped under prefers-reduced-motion.
  */
 
-const MAG_SELECTOR = ".about-traj, .svc-cta-btn, .cine-arrow, .cine-filter, .cine-play";
+const MAG_SELECTOR = ".about-traj, .svc-cta-btn, .cine-arrow, .cine-filter, .cine-play, .arc-open";
 const MAG_DIST = 90;
 const MAG_FORCE = 0.32;
 const DEPTH_CLAMP = 90;
