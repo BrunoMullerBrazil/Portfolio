@@ -1690,7 +1690,15 @@ html.arc-lock{overflow:hidden;}
 .traj-h.scale{right:-11px;bottom:-11px;cursor:nwse-resize;}
 .traj-h.rotate{left:50%;top:-34px;margin-left:-7px;cursor:grab;}
 .traj-h.rotate::after{content:'';position:absolute;left:50%;top:12px;width:1px;height:18px;background:#c8cfa8;}
-body.traj-editing,body.traj-editing a{cursor:auto;}
+/* The site hides the system cursor everywhere (cursor:none on body and on
+   many elements) in favour of the custom one. The editor needs a precise
+   native pointer, so it forces it back on every element. */
+body.traj-editing,body.traj-editing *{cursor:auto !important;}
+body.traj-editing a,body.traj-editing button{cursor:pointer !important;}
+body.traj-editing .traj-layers.editing .traj-layer{cursor:move !important;}
+body.traj-editing .traj-h.scale{cursor:nwse-resize !important;}
+body.traj-editing .traj-h.rotate{cursor:grab !important;}
+body.traj-editing .traj-modal-card input{cursor:text !important;}
 body.traj-editing #cursor,body.traj-editing #cursor-ring,body.traj-editing #cursor-label{display:none;}
 body.traj-drop::after{content:'Solte a imagem';position:fixed;inset:14px;z-index:9600;border:2px dashed #c8cfa8;border-radius:18px;display:flex;align-items:center;justify-content:center;font:12px/1 var(--font-space-mono),monospace;letter-spacing:.2em;text-transform:uppercase;color:#c8cfa8;background:rgba(20,40,80,.35);pointer-events:none;}
 .traj-bar{
