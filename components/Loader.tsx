@@ -26,17 +26,23 @@ import { WRITE_STROKES } from "./logoWriting";
  */
 
 const VB = { x: 160, y: 720, w: 1700, h: 480 };
+const F = 1000 / 24; // one frame at 24fps, in ms
 const REST_Y = 905; // top of the lowercase — capsule's upper edge
 const LAG = 0.08; // second dot trails the first (s)
 
 // timeline (seconds)
 const T_WRITE0 = 0.15;
-const WRITE_DUR = 1.35; // pen-on-paper time for the whole name
+const WRITE_DUR = 32 / 24; // pen-on-paper time for the whole name (32 frames)
 const LIFT = 0.025; // pen lift between strokes
 const T_WRITE1 = T_WRITE0 + WRITE_DUR + LIFT * (WRITE_STROKES.length - 1);
 const T_DOT0 = T_WRITE1 + 0.08;
 const FALL = 0.26;
-const SETTLE = 0.15;
+// land → rebound → land: the one real bounce on the site (the dots are a character)
+const SQ1 = 0.07; // first contact squash
+const HOP = 0.17; // rebound airtime
+const HOP_H = 30; // rebound height (viewBox units)
+const SQ2 = 0.12; // second, softer contact
+const SETTLE = SQ1 + HOP + SQ2;
 const T_DOTS_DONE = T_DOT0 + LAG + FALL + SETTLE;
 const T_END = T_DOTS_DONE + 0.12; // hand over to the capsule (WAAPI)
 
@@ -58,7 +64,16 @@ function dotPose(t: number) {
     const u = t / FALL;
     return { dy: -260 * (1 - u * u), sx: 0.88, sy: 1.16, vis: 1 };
   }
-  const sq = squash(t - FALL, SETTLE);
+  const tl = t - FALL;
+  if (tl < SQ1) {
+    const sq = squash(tl, SQ1, 0.42);
+    return { dy: 0, sx: sq.sx, sy: sq.sy, vis: 1 };
+  }
+  if (tl < SQ1 + HOP) {
+    const u = (tl - SQ1) / HOP;
+    return { dy: -4 * HOP_H * u * (1 - u), sx: 0.94, sy: 1.07, vis: 1 };
+  }
+  const sq = squash(tl - SQ1 - HOP, SQ2, 0.18);
   return { dy: 0, sx: sq.sx, sy: sq.sy, vis: 1 };
 }
 
@@ -179,7 +194,7 @@ export default function Loader() {
       const ease = "cubic-bezier(.16,1,.3,1)";
       const swallow = morph!.animate(
         [{ clipPath: "inset(0 50% 0 50% round 999px)" }, { clipPath: "inset(0 0% 0 0% round 999px)" }],
-        { duration: 360, easing: ease, fill: "forwards" }
+        { duration: F * 8, easing: ease, fill: "forwards" }
       );
       svg!.animate([{ opacity: 1, transform: "scaleX(1)" }, { opacity: 0, transform: "scaleX(.94)" }], {
         duration: 260,
@@ -219,12 +234,12 @@ export default function Loader() {
             { left: cap.left + "px", top: cap.top + "px", width: cap.width + "px", height: cap.height + "px", borderRadius: cap.height / 2 + "px" },
             { left: hr.left + "px", top: hr.top + "px", width: hr.width + "px", height: hr.height + "px", borderRadius: "20px" },
           ],
-          { duration: 820, easing: "cubic-bezier(.76,0,.24,1)", fill: "forwards" }
+          { duration: F * 18, easing: "cubic-bezier(.76,0,.24,1)", fill: "forwards" }
         );
         fly.onfinish = () => {
           // card is exactly under the capsule now: reveal the video, dissolve the capsule
           document.body.classList.add("media-ready");
-          morph!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 480, easing: ease, fill: "forwards" }).onfinish =
+          morph!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: F * 10, easing: ease, fill: "forwards" }).onfinish =
             () => {
               finished = true;
               clearTimeout(failsafe);

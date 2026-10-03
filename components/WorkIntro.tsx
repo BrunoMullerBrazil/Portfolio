@@ -327,7 +327,7 @@ export default function WorkIntro() {
         void frame!.offsetWidth;
         frame!.classList.remove("cine-swap", "cine-swap-in");
         meta!.classList.remove("cine-swap");
-      }, 260);
+      }, 250); // 6 frames @24fps — matches the CSS exit
     }
 
     function go(d: number) {

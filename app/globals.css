@@ -18,9 +18,15 @@
      No overshoot/spring curves anywhere: bounce reads playful, not senior. */
   --ease: cubic-bezier(.16,1,.3,1);
   --ease-in: cubic-bezier(.7,0,.84,0);
-  --dur-1: .35s;
-  --dur-2: .8s;
-  --dur-3: 1.2s;
+  /* --settle: a camera settling, not a spring — passes the mark by ~2%
+     and comes back. Only on movement (transform), never on opacity/blur. */
+  --settle: cubic-bezier(.18,1.22,.32,1.02);
+  /* Rhythm: every duration and delay is a whole number of frames at 24fps
+     (1f = 41.7ms), so the page cuts like an edit, not like a UI. */
+  --f: 41.667ms;
+  --dur-1: calc(var(--f) * 8);   /* 8f  ≈ .33s */
+  --dur-2: calc(var(--f) * 18);  /* 18f = .75s */
+  --dur-3: calc(var(--f) * 30);  /* 30f = 1.25s */
 }
 
 /* ── BASE RESET ── */
@@ -124,10 +130,10 @@ body.cursor-play #cursor-label svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.75))
   opacity:0;
   transform:translateY(28px);
   filter:blur(6px);
-  transition:opacity 1s var(--ease), transform var(--dur-3) var(--ease), filter 1s var(--ease);
+  transition:opacity calc(var(--f) * 24) var(--ease), transform var(--dur-3) var(--settle), filter calc(var(--f) * 24) var(--ease);
 }
 .reveal.visible{opacity:1;transform:none;filter:none;}
-.reveal-d1{transition-delay:.1s;}.reveal-d2{transition-delay:.22s;}.reveal-d3{transition-delay:.36s;}
+.reveal-d1{transition-delay:calc(var(--f) * 3);}.reveal-d2{transition-delay:calc(var(--f) * 6);}.reveal-d3{transition-delay:calc(var(--f) * 9);}
 
 /* ═══════════════════════════════════════
    WORK INTRO — pasta centralizada
@@ -1329,7 +1335,7 @@ body.site-ready .wa-float {
   transition:transform 1.1s var(--ease), opacity .7s var(--ease), filter 1s var(--ease);
 }
 .m-head.visible .mline > span{transform:none;opacity:1;filter:none;}
-.m-head.reveal-d1 .mline > span{transition-delay:.1s;}
+.m-head.reveal-d1 .mline > span{transition-delay:calc(var(--f) * 3);}
 .m-head.reveal-d2 .mline > span{transition-delay:.22s;}
 
 /* ── corte: project swap in the cinema stage ──
@@ -1338,9 +1344,9 @@ body.site-ready .wa-float {
    The meta column does a focus pull in sync. */
 .cine-media{
   clip-path:inset(0 0 0 0);
-  transition:clip-path .75s var(--ease);
+  transition:clip-path var(--dur-2) var(--ease);
 }
-.cine-frame.cine-swap .cine-media{transition:clip-path .26s var(--ease-in);}
+.cine-frame.cine-swap .cine-media{transition:clip-path calc(var(--f) * 6) var(--ease-in);}
 .cine-frame.cine-swap[data-dir="next"] .cine-media{clip-path:inset(0 100% 0 0);}
 .cine-frame.cine-swap[data-dir="prev"] .cine-media{clip-path:inset(0 0 0 100%);}
 .cine-frame.cine-swap-in .cine-media{transition:none;}
@@ -1348,10 +1354,10 @@ body.site-ready .wa-float {
 .cine-frame.cine-swap-in[data-dir="prev"] .cine-media{clip-path:inset(0 100% 0 0);}
 .cine-frame.cine-swap .cine-play{opacity:0;}
 .cine-play{transition:transform .4s var(--ease),background .3s,opacity .4s var(--ease) .25s;}
-.cine-meta{transition:opacity .6s var(--ease),transform .7s var(--ease),filter .6s var(--ease);}
+.cine-meta{transition:opacity calc(var(--f) * 14) var(--ease),transform var(--dur-2) var(--settle),filter calc(var(--f) * 14) var(--ease);}
 .cine-meta.cine-swap{
   opacity:0;filter:blur(6px);
-  transition:opacity .22s var(--ease-in),transform .26s var(--ease-in),filter .22s var(--ease-in);
+  transition:opacity calc(var(--f) * 5) var(--ease-in),transform calc(var(--f) * 6) var(--ease-in),filter calc(var(--f) * 5) var(--ease-in);
 }
 .cine-meta.cine-swap[data-dir="next"]{transform:translateX(-14px);}
 .cine-meta.cine-swap[data-dir="prev"]{transform:translateX(14px);}
@@ -1372,7 +1378,7 @@ body.site-ready .wa-float {
 .clink.visible::after{transform:scaleX(1);}
 .clink:hover::after{background:rgba(255,255,255,.2);}
 .clink.reveal{
-  transition:opacity 1s var(--ease), transform var(--dur-3) var(--ease), filter 1s var(--ease),
+  transition:opacity calc(var(--f) * 24) var(--ease), transform var(--dur-3) var(--settle), filter calc(var(--f) * 24) var(--ease),
              border-color .3s, gap .4s var(--ease);
 }
 .clink.reveal-d2::after{transition-delay:.22s;}
@@ -1422,18 +1428,19 @@ footer.visible .footer-logo{transform:none;opacity:1;}
   opacity:0;
   filter:blur(6px);
   transition:
-    transform 1.05s var(--ease) calc(var(--i) * 26ms),
-    opacity .6s var(--ease) calc(var(--i) * 26ms),
-    filter .9s var(--ease) calc(var(--i) * 26ms);
+    transform calc(var(--f) * 26) var(--settle) calc(var(--i) * var(--f) * .75),
+    opacity calc(var(--f) * 14) var(--ease) calc(var(--i) * var(--f) * .75),
+    filter calc(var(--f) * 22) var(--ease) calc(var(--i) * var(--f) * .75);
 }
 .m-head.visible .mline .split .ch{transform:none;opacity:1;filter:none;}
 
 /* project title: every cut replays the glyph entrance */
 @keyframes chIn{
-  from{transform:translateY(.5em);opacity:0;filter:blur(6px);}
-  to{transform:none;opacity:1;filter:none;}
+  0%{transform:translateY(.55em);opacity:0;filter:blur(6px);}
+  62%{transform:translateY(-.03em);opacity:1;filter:none;}
+  100%{transform:none;opacity:1;filter:none;}
 }
-.cine-title .ch{animation:chIn .9s var(--ease) both;animation-delay:calc(var(--i) * 16ms + .05s);}
+.cine-title .ch{animation:chIn calc(var(--f) * 22) var(--ease) both;animation-delay:calc(var(--i) * var(--f) * .5 + var(--f) * 2);}
 
 /* ── Timecode HUD ── */
 #tc{
@@ -1453,15 +1460,15 @@ body.dark-mode #tc{opacity:1;transform:none;}
 #tc-num{color:#889063;}
 .tc-label-wrap{display:inline-block;overflow:hidden;line-height:1.2;}
 #tc-label{display:inline-block;color:#c9c3ba;}
-#tc-label.roll{animation:tcRoll .7s var(--ease) both;}
-@keyframes tcRoll{from{transform:translateY(110%);opacity:0;filter:blur(4px);}to{transform:none;opacity:1;filter:none;}}
+#tc-label.roll{animation:tcRoll calc(var(--f) * 17) var(--ease) both;}
+@keyframes tcRoll{0%{transform:translateY(110%);opacity:0;filter:blur(4px);}65%{transform:translateY(-6%);opacity:1;filter:none;}100%{transform:none;opacity:1;filter:none;}}
 @media(max-width:900px){#tc{display:none;}}
 
 /* ── Nav: active scene marker ── */
 .nav-ind{
   position:absolute;left:0;bottom:5px;width:4px;height:4px;margin-left:-2px;border-radius:50%;
   background:#c8cfa8;opacity:0;pointer-events:none;
-  transition:transform .8s var(--ease),opacity .4s var(--ease);
+  transition:transform calc(var(--f) * 20) var(--settle),opacity calc(var(--f) * 10) var(--ease);
 }
 .nav-dark-links a.active{color:#e0dbd1;}
 

@@ -47,6 +47,7 @@ type Track = {
   dolly: boolean;
   y: number;
   s: number;
+  vs: number; // dolly scale velocity (spring)
   prog: boolean;
   pa: number;
   pb: number;
@@ -66,13 +67,31 @@ type Kin = {
   active: boolean;
 };
 
-type Mag = { el: HTMLElement; x: number; y: number; tx: number; ty: number };
-type Lens = { el: HTMLElement; host: HTMLElement; x: number; y: number; s: number };
+type Mag = { el: HTMLElement; x: number; y: number; vx: number; vy: number; tx: number; ty: number };
+type Lens = { el: HTMLElement; host: HTMLElement; x: number; y: number; s: number; vx: number; vy: number; vs: number };
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 const pad2 = (n: number) => (n < 10 ? "0" : "") + n;
+
+/*
+ * Damped spring, integrated per frame (semi-implicit Euler, sub-stepped so
+ * a long frame can't blow it up). zeta < 1 overshoots a little and settles:
+ *   magnets  k 220, ζ .5  — tactile, ~15% overshoot, the only "bouncy" one
+ *   lens     k  90, ζ .7  — a handheld camera drifting and settling
+ *   dolly    k 120, ζ .78 — a dolly-in that lands with ~2% settle
+ */
+function spring(x: number, v: number, target: number, dt: number, k: number, zeta: number): [number, number] {
+  const c = 2 * Math.sqrt(k) * zeta;
+  const steps = Math.ceil(dt / (1 / 120));
+  const h = dt / steps;
+  for (let i = 0; i < steps; i++) {
+    v += (-k * (x - target) - c * v) * h;
+    x += v * h;
+  }
+  return [x, v];
+}
 
 function timecode(sec: number) {
   const s = Math.max(0, sec);
@@ -144,6 +163,7 @@ export default function MotionSystem() {
         dolly,
         y: 0,
         s: dolly ? DOLLY_FROM : 1,
+        vs: 0,
         prog,
         pa: Number.isFinite(pa) ? pa : 1,
         pb: Number.isFinite(pb) ? pb : 0,
@@ -166,7 +186,7 @@ export default function MotionSystem() {
     function registerLens(el: HTMLElement) {
       if (reduced || isTouch || lenses.has(el)) return;
       const host = (el.closest("[data-cursor]") as HTMLElement) || el.parentElement || el;
-      lenses.set(el, { el, host, x: 0, y: 0, s: 1 });
+      lenses.set(el, { el, host, x: 0, y: 0, s: 1, vx: 0, vy: 0, vs: 0 });
     }
 
     function scan(scope: ParentNode) {
@@ -207,7 +227,7 @@ export default function MotionSystem() {
     function refreshMagnets() {
       if (reduced || isTouch) return;
       const els = Array.from(document.querySelectorAll<HTMLElement>(MAG_SELECTOR));
-      magnets = els.map((el) => magnets.find((m) => m.el === el) || { el, x: 0, y: 0, tx: 0, ty: 0 });
+      magnets = els.map((el) => magnets.find((m) => m.el === el) || { el, x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0 });
     }
     refreshMagnets();
 
@@ -355,6 +375,7 @@ export default function MotionSystem() {
       const vw = window.innerWidth;
       const sy = window.scrollY;
       const dt = Math.max(1, now - lastT);
+      const dts = Math.min(dt, 50) / 1000; // seconds, capped for springs
       const dy = sy - lastY;
       lastT = now;
       lastY = sy;
@@ -437,7 +458,11 @@ export default function MotionSystem() {
 
       // ── Lens: reads
       const lensReads: [Lens, number, number, number][] = [];
-      if (lenses.size && (pointerDirty || scrolled || frameNo % 4 === 0)) {
+      let lensMoving = false;
+      lenses.forEach((l) => {
+        if (l.vx || l.vy || l.vs || l.x || l.y || l.s !== 1) lensMoving = true;
+      });
+      if (lenses.size && (pointerDirty || scrolled || lensMoving || frameNo % 4 === 0)) {
         lenses.forEach((l) => {
           if (!l.el.isConnected) {
             lenses.delete(l.el);
@@ -459,7 +484,7 @@ export default function MotionSystem() {
 
       // ── Magnets: reads
       let magRects: DOMRect[] | null = null;
-      if (magnets.length && (pointerDirty || scrolled || magnets.some((m) => m.x || m.y))) {
+      if (magnets.length && (pointerDirty || scrolled || magnets.some((m) => m.x || m.y || m.vx || m.vy))) {
         magRects = magnets.map((m) => m.el.getBoundingClientRect());
       }
       pointerDirty = false;
@@ -471,8 +496,9 @@ export default function MotionSystem() {
       });
       writes.forEach(([t, ty, ts]) => {
         const ny = lerp(t.y, ty, 0.18);
-        const ns = lerp(t.s, ts, 0.14);
-        if (Math.abs(ny - t.y) > 0.01 || Math.abs(ns - t.s) > 0.0001) {
+        let ns = t.s;
+        if (t.dolly) [ns, t.vs] = spring(t.s, t.vs, ts, dts, 120, 0.78);
+        if (Math.abs(ny - t.y) > 0.01 || Math.abs(ns - t.s) > 0.00005) {
           t.y = ny;
           t.s = ns;
           if (t.depth) t.el.style.setProperty("translate", `0 ${ny.toFixed(2)}px`);
@@ -506,11 +532,12 @@ export default function MotionSystem() {
       });
 
       lensReads.forEach(([l, tx, ty, ts]) => {
-        l.x = lerp(l.x, tx, 0.08);
-        l.y = lerp(l.y, ty, 0.08);
-        l.s = lerp(l.s, ts, 0.08);
-        if (Math.abs(l.x) < 0.02 && Math.abs(l.y) < 0.02 && Math.abs(l.s - 1) < 0.0005 && ts === 1) {
-          l.x = l.y = 0;
+        [l.x, l.vx] = spring(l.x, l.vx, tx, dts, 90, 0.7);
+        [l.y, l.vy] = spring(l.y, l.vy, ty, dts, 90, 0.7);
+        [l.s, l.vs] = spring(l.s, l.vs, ts, dts, 90, 0.7);
+        const still = Math.abs(l.vx) + Math.abs(l.vy) + Math.abs(l.vs) * 100 < 0.05;
+        if (Math.abs(l.x) < 0.02 && Math.abs(l.y) < 0.02 && Math.abs(l.s - 1) < 0.0005 && ts === 1 && still) {
+          l.x = l.y = l.vx = l.vy = l.vs = 0;
           l.s = 1;
           l.el.style.removeProperty("translate");
           l.el.style.removeProperty("scale");
@@ -536,11 +563,10 @@ export default function MotionSystem() {
             m.tx = 0;
             m.ty = 0;
           }
-          m.x = lerp(m.x, m.tx, 0.2);
-          m.y = lerp(m.y, m.ty, 0.2);
-          if (Math.abs(m.x) < 0.05 && Math.abs(m.y) < 0.05 && !m.tx && !m.ty) {
-            m.x = 0;
-            m.y = 0;
+          [m.x, m.vx] = spring(m.x, m.vx, m.tx, dts, 220, 0.5);
+          [m.y, m.vy] = spring(m.y, m.vy, m.ty, dts, 220, 0.5);
+          if (Math.abs(m.x) < 0.05 && Math.abs(m.y) < 0.05 && Math.abs(m.vx) + Math.abs(m.vy) < 0.5 && !m.tx && !m.ty) {
+            m.x = m.y = m.vx = m.vy = 0;
             m.el.style.removeProperty("translate");
           } else {
             m.el.style.setProperty("translate", `${m.x.toFixed(2)}px ${m.y.toFixed(2)}px`);

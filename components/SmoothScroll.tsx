@@ -12,8 +12,9 @@ declare global {
 export default function SmoothScroll() {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 0.9,
-      easing: (t: number) => 1 - Math.pow(1 - t, 3),
+      // a heavier glide: expo-out over 1.1s reads like a dolly with weight
+      duration: 1.1,
+      easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
       smoothWheel: true,
       wheelMultiplier: 0.8,
       touchMultiplier: 1.2,
