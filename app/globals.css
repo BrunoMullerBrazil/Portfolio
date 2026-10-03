@@ -1522,7 +1522,7 @@ footer.credits{display:block;padding:130px 48px 26px;border-top:1px solid rgba(2
 .credits-mark{position:relative;width:100%;}
 .credits-mark svg{display:block;width:100%;height:auto;}
 .credits-ghost{fill:rgba(224,219,209,.045);}
-.credits-ink{position:absolute;inset:0;clip-path:inset(0 calc((1 - var(--prog, 0)) * 100%) 0 0);}
+.credits-ink{position:absolute;inset:0;}
 .credits-ink path{fill:#e0dbd1;}
 .credits-row{display:flex;justify-content:space-between;align-items:center;margin-top:30px;}
 .credits-end{color:#889063 !important;}
@@ -1559,4 +1559,15 @@ body:not(.media-ready) #heroMedia{box-shadow:none !important;}
   --land:clamp(0, (var(--prog, 0) - .86) * 9 - var(--k) * .25, 1);
   transform:translateY(calc((1 - var(--land)) * -160px));
   opacity:var(--land);
+}
+
+/* Créditos: the name is written by scroll (writing = 0→.86 of --prog,
+   the trema lands in the last stretch). Strokes use pathLength=1, so a
+   dashoffset of 1 hides a stroke and 0 shows it whole. */
+.credits-ink .cw{
+  fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:1 1;
+  --sp:clamp(0, (var(--prog, 0) / .86 - var(--a)) / var(--len), 1);
+  stroke-dashoffset:calc(1 - var(--sp));
+  stroke-opacity:min(1, calc(var(--sp) * 60));
 }
