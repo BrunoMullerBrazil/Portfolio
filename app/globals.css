@@ -1540,3 +1540,23 @@ footer.credits{display:block;padding:130px 48px 26px;border-top:1px solid rgba(2
   .rw{opacity:1;}
   #tc-label.roll,#tc[data-state="play"] .tc-dot{animation:none;}
 }
+
+/* ═══ LOADER — o trema (components/Loader.tsx) ═══ */
+.ld-dot{fill:#ffffff;}
+#ld-morph{position:absolute;left:0;top:0;width:0;height:0;background:#ffffff;opacity:0;pointer-events:none;will-change:left,top,width,height,border-radius;}
+
+/* Hero video stays hidden until the loader's capsule lands on its card.
+   Gated on the inner element: #heroMedia's own inline style is rewritten
+   by Hero.tsx on every scroll frame. */
+.hero-media-inner{transition:opacity .35s ease;}
+body:not(.media-ready) .hero-media-inner{opacity:0;}
+body:not(.media-ready) #heroMedia{box-shadow:none !important;}
+
+/* ═══ Créditos: the trema drops in over the last stretch ═══ */
+.credits-dots{position:absolute;inset:0;overflow:visible;}
+.credits-dots path{
+  fill:#e0dbd1;
+  --land:clamp(0, (var(--prog, 0) - .86) * 9 - var(--k) * .25, 1);
+  transform:translateY(calc((1 - var(--land)) * -160px));
+  opacity:var(--land);
+}

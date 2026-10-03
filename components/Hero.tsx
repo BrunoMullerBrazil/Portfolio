@@ -186,8 +186,9 @@ export default function Hero() {
       const { W0: W, H0: H } = baseMediaSize(vw, vh);
       syncVideoSrc();
       setM(W, H, 20, (vh - H) / 2);
-      hm!.style.opacity = "0";
-      hm!.style.filter = "blur(16px)";
+      // Visibility before the loader hands over is gated in CSS
+      // (body:not(.media-ready)). Setting opacity inline here used to hide
+      // the video again on every window resize after load.
     }
     initM();
     window.addEventListener("resize", initM);

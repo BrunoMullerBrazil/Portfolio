@@ -1,6 +1,6 @@
 "use client";
 
-import { LOGO_PATH } from "./Logo";
+import { LOGO_PATH, LOGO_BODY, LOGO_DOTS } from "./Logo";
 import { useLanguage, t } from "@/lib/LanguageContext";
 
 /*
@@ -8,7 +8,8 @@ import { useLanguage, t } from "@/lib/LanguageContext";
  * left → right; it closes on the same mark filling again as you reach the
  * end — the film's first and last frame are the signature. MotionSystem
  * writes --prog on .credits-mark (data-progress); CSS turns it into the
- * ink's clip. At the very bottom the mark is complete.
+ * ink's clip, and in the last stretch the two umlaut dots drop onto the ü,
+ * as they do in the loader. At the very bottom the mark is complete.
  */
 const CREDITS = [
   { k: { pt: "Direção, motion e montagem", en: "Direction, motion & editing" }, v: "Bruno Müller" },
@@ -39,7 +40,13 @@ export default function Footer() {
           <path className="credits-ghost" d={LOGO_PATH} />
         </svg>
         <svg className="credits-ink" viewBox="160 720 1700 480" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d={LOGO_PATH} />
+          <path d={LOGO_BODY} />
+        </svg>
+        {/* the trema lands last, echoing the loader */}
+        <svg className="credits-dots" viewBox="160 720 1700 480" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          {LOGO_DOTS.map((d, i) => (
+            <path key={i} d={d} style={{ "--k": i } as React.CSSProperties} />
+          ))}
         </svg>
       </div>
 
