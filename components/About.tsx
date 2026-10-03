@@ -62,11 +62,9 @@ export default function About() {
           <div className="about-eyebrow reveal">{tr(dict.aboutEyebrow, lang)}</div>
           <div className="about-text reveal reveal-d2">{tr(dict.aboutPara1, lang)}</div>
           <div className="about-text reveal reveal-d3">{tr(dict.aboutPara2, lang)}</div>
-          {/* No .reveal here: this block mounts on a language switch, not
-              a route change, and RevealObserver only re-scans on pathname
-              change — an element with .reveal that appears afterwards would
-              never get observed and would stay stuck at opacity:0. */}
-          {para3 && <div className="about-text">{para3}</div>}
+          {/* MotionSystem watches for nodes mounted later (this one only
+              exists in one language), so it can carry .reveal now. */}
+          {para3 && <div className="about-text reveal reveal-d3">{para3}</div>}
         </div>
         <div className="about-stats" ref={statsWrapRef}>
           <div className="stat reveal reveal-d1">

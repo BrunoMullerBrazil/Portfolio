@@ -44,6 +44,7 @@ export default function Contact() {
       <div className="reveal">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          data-depth="0.06"
           className="contact-hl-img"
           src={withBasePath("/assets/logos/vamos.png")}
           alt="Vamos trabalhar juntos."

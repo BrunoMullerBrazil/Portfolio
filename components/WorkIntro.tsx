@@ -276,24 +276,35 @@ export default function WorkIntro() {
     }
     paintRef.current = paint;
 
+    // "Corte": the outgoing project is wiped off in the travel direction,
+    // the new one wiped on from the opposite edge (see .cine-swap /
+    // .cine-swap-in in globals.css). swap-in snaps the mask to the far
+    // edge with transitions off, a forced reflow commits it, then removing
+    // both classes lets the incoming wipe animate.
     let swapTimer: ReturnType<typeof setTimeout>;
-    function render() {
+    function render(dir = 1) {
       if (filtered.length === 0) return;
+      clearTimeout(swapTimer);
       unmountVideo();
+      const d = dir < 0 ? "prev" : "next";
+      frame!.dataset.dir = d;
+      meta!.dataset.dir = d;
       frame!.classList.add("cine-swap");
       meta!.classList.add("cine-swap");
       swapTimer = setTimeout(() => {
         paint();
-        frame!.classList.remove("cine-swap");
+        frame!.classList.add("cine-swap-in");
+        void frame!.offsetWidth;
+        frame!.classList.remove("cine-swap", "cine-swap-in");
         meta!.classList.remove("cine-swap");
-      }, 210);
+      }, 260);
     }
 
     function go(d: number) {
       const N = filtered.length;
       if (!N) return;
       current = (current + d + N) % N;
-      render();
+      render(d);
     }
 
     function onNext() {
@@ -415,7 +426,11 @@ export default function WorkIntro() {
     <section id="work-intro" ref={sectionRef}>
       <div className="cine-wrap">
         <div className="wi-eyebrow reveal">{t(dict.workIntroEyebrow, lang)}</div>
-        <h2 className="wi-line reveal reveal-d1">{t(dict.workIntroHeading, lang)}</h2>
+        <h2 className="wi-line reveal reveal-d1 m-head">
+          <span className="mline">
+            <span>{t(dict.workIntroHeading, lang)}</span>
+          </span>
+        </h2>
 
         <div className="cine-filters reveal reveal-d1">
           {FILTERS.map((f, i) => (
@@ -433,7 +448,7 @@ export default function WorkIntro() {
         </div>
 
         <div className="cine-stage reveal reveal-d2">
-          <div className="cine-frame" id="cineFrame" data-cursor="click" ref={frameRef}>
+          <div className="cine-frame" id="cineFrame" data-cursor="click" data-dolly ref={frameRef}>
             <div className="cine-media" id="cineMedia" ref={mediaRef} />
             <button className="cine-play" aria-label={t(dict.ariaWatch, lang)} ref={playBtnRef}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

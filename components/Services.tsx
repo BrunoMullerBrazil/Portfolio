@@ -52,28 +52,15 @@ export default function Services() {
     );
     sio.observe(svcGrid);
 
-    function onScroll() {
-      const vh = window.innerHeight;
-      svcGrid!.querySelectorAll<HTMLElement>(".svc").forEach((card) => {
-        const r = card.getBoundingClientRect();
-        const mid = r.top + r.height / 2;
-        const rel = (mid - vh / 2) / vh;
-        const num = card.querySelector<HTMLElement>(".svc-n");
-        if (num) num.style.transform = "translateY(" + rel * 18 + "px)";
-      });
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      sio.disconnect();
-      window.removeEventListener("scroll", onScroll);
-    };
+    // The service numbers' scroll drift now lives in MotionSystem
+    // (data-depth on .svc-n) instead of a per-section scroll listener.
+    return () => sio.disconnect();
   }, []);
 
   return (
     <section id="services">
       <div
-        className="section-head reveal"
+        className="section-head reveal m-head"
         style={{
           display: "flex",
           justifyContent: "space-between",
@@ -83,13 +70,19 @@ export default function Services() {
           margin: "0 0 0 0",
         }}
       >
-        <div className="section-title">{t(dict.servicesEyebrow, lang)}</div>
+        <div className="section-title">
+          <span className="mline">
+            <span>{t(dict.servicesEyebrow, lang)}</span>
+          </span>
+        </div>
       </div>
 
       <div className="services-grid" ref={gridRef}>
         {SERVICES.map((s) => (
           <div className="svc" key={s.n}>
-            <div className="svc-n">{s.n}</div>
+            <div className="svc-n" data-depth="-0.02">
+              {s.n}
+            </div>
             <div className="svc-name">{t(s.name, lang)}</div>
             <div className="svc-desc">{t(s.desc, lang)}</div>
           </div>
