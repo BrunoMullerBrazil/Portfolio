@@ -181,7 +181,7 @@ function lengthAt(p: StrokePlan, t: number) {
  * nearest-neighbour search). Pixels are kept sorted by that time, so each
  * frame only touches the ones whose ink is still arriving.
  */
-const INK_SOFT = 0.045; // seconds: how long a pixel takes to fill — the wet front
+const INK_SOFT = 0.14; // seconds: how long a pixel takes to fill — a long, smoky wet front
 
 type Ink = {
   ctx: CanvasRenderingContext2D;
@@ -300,7 +300,7 @@ function paintInk(ink: Ink, t: number) {
   let i = ink.head;
   while (i < n && T[i] <= t) {
     const f = (t - T[i]) / INK_SOFT;
-    d[idx[i] * 4 + 3] = f >= 1 ? cov[i] : cov[i] * f;
+    d[idx[i] * 4 + 3] = f >= 1 ? cov[i] : cov[i] * f * f * (3 - 2 * f); // eased, so the front smokes in
     i++;
   }
   // everything before the soft front is done for good
@@ -347,7 +347,7 @@ export default function Loader() {
         for (let i = 0; i < img.data.length; i += 4) {
           const v = Math.random() < 0.5 ? 0 : 255;
           img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-          img.data[i + 3] = Math.random() * 56;
+          img.data[i + 3] = Math.random() * 22;
         }
         ctx.putImageData(img, 0, 0);
         noise.style.backgroundImage = `url(${c.toDataURL("image/png")})`;
