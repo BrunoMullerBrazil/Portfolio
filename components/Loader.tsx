@@ -9,35 +9,43 @@ import { WRITE_STROKES } from "./logoWriting";
  *
  * The umlaut dot is shaped like a broad calligraphy nib (slanted, flat), so
  * it becomes the pen: it writes "Müller" at a fixed nib angle, then flies
- * up and lands on the ü, and the second dot splits out of it. The mark is
- * complete the moment the trema is whole. Then the name is swallowed into
- * a capsule that flies into the hero's video card (last frame of the
- * loader = first frame of the site).
+ * up and lands on the ü, and the second dot splits out of it. Then the name
+ * is swallowed into a capsule that flies into the hero's video card (last
+ * frame of the loader = first frame of the site).
  *
- * What keeps it from reading as a procedural wipe:
- *   - one continuous hand: speed comes from the path itself — the pen slows
- *     into tight curves and runs on straights, eases only where it lands or
- *     lifts, and travels through the air between strokes (no 11 full stops);
- *   - ink, not a mask: the reveal edge is softened (blurred mask), so the
- *     leading edge bleeds like ink; the mask comes off once the name is done;
- *   - someone is holding the pen: the nib is visible, with a soft glow.
+ * Shot like one continuous take, not a sequence of steps:
+ *   - one master clock drives everything, writing and hand-off included;
+ *     no phase waits for another to finish (no onfinish chains), each one
+ *     starts while the previous is still moving;
+ *   - velocity is never broken: the pen leaves a stroke at the speed it was
+ *     writing and carries it through the air (Hermite curves, not lerps), the
+ *     flight to the ü inherits the r's exit and only brakes as it lands;
+ *   - nothing bounces (no squash, no overshoot — same rule as the site's
+ *     motion tokens): arrivals decelerate and settle;
+ *   - a slow camera push-in under the whole take, so no frame is static;
+ *   - ink, not a mask: the reveal edge is blurred so it bleeds like ink.
  */
 
 const VB = { x: 160, y: 720, w: 1700, h: 480 };
-const F = 1000 / 24; // one frame at 24fps, in ms
 const REST_Y = 905; // top of the lowercase — capsule's upper edge
 
 // timeline (seconds)
-const T_WRITE0 = 0.2;
-const WRITE_DUR = 1.75; // the whole name, lifts included
-const NIB_FLY = 0.4; // nib: end of the r → ü
-const LAND = 0.12;
-const SPLIT = 0.2; // second dot hops out of the first
-const SPLIT_LAND = 0.12;
+const T_WRITE0 = 0.25;
+const WRITE_DUR = 1.8; // the whole name, lifts included
+const NIB_FLY = 0.62; // nib: end of the r → ü, one arc
 const T_WRITE1 = T_WRITE0 + WRITE_DUR;
 const T_LAND = T_WRITE1 + NIB_FLY;
-const T_SPLIT = T_LAND + LAND * 0.6;
-const T_END = T_SPLIT + SPLIT + SPLIT_LAND + 0.12;
+const T_SPLIT = T_LAND - 0.1; // twin leaves before the nib has fully settled
+const SPLIT = 0.42;
+const T_HAND = T_SPLIT + SPLIT * 0.75; // the twin is visually home by now; camera still moving
+
+// hand-off (seconds after T_HAND)
+const H_SWALLOW = 0.5;
+const H_FLY0 = 0.2;
+const H_FLY = 0.95;
+const H_MEDIA = H_FLY0 + H_FLY * 0.62; // video starts appearing under the capsule while it glides in
+const H_DISSOLVE = 0.5;
+const H_END = Math.max(H_FLY0 + H_FLY, H_MEDIA + H_DISSOLVE) + 0.05;
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -45,17 +53,50 @@ const smoothstep = (a: number, b: number, x: number) => {
   const u = clamp01((x - a) / (b - a));
   return u * u * (3 - 2 * u);
 };
-const inOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const span = (t: number, a: number, d: number) => clamp01((t - a) / d);
+const outExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
+const outQuart = (t: number) => 1 - Math.pow(1 - t, 4);
+const outSine = (t: number) => Math.sin((t * Math.PI) / 2);
 
-function squash(since: number, d: number, k = 0.4) {
-  if (since < 0 || since > d) return { sx: 1, sy: 1 };
-  const v = since / d;
-  const a = Math.sin(Math.PI * v) * (1 - v * 0.4) * k;
-  return { sx: 1 + a * 0.7, sy: 1 - a };
+// CSS-style cubic-bezier(x1,y1,x2,y2) as a function of t ∈ [0,1]
+function bezier(x1: number, y1: number, x2: number, y2: number) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const X = (u: number) => ((ax * u + bx) * u + cx) * u;
+  const dX = (u: number) => (3 * ax * u + 2 * bx) * u + cx;
+  return (x: number) => {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let u = x;
+    for (let i = 0; i < 6; i++) {
+      const d = dX(u);
+      if (Math.abs(d) < 1e-6) break;
+      u -= (X(u) - x) / d;
+    }
+    u = clamp01(u);
+    return ((ay * u + by) * u + cy) * u;
+  };
 }
+// soft departure (the swallow is still moving when the fly starts), long glide in
+const flyEase = bezier(0.3, 0, 0.08, 1);
 
 type Pt = { x: number; y: number };
-type StrokePlan = { path: SVGPathElement; L: number; t0: number; t1: number; ts: number[]; ls: number[]; a: Pt; b: Pt };
+
+// cubic Hermite: position from endpoints and end tangents (tangents already × duration)
+function hermite(p0: Pt, m0: Pt, p1: Pt, m1: Pt, u: number): Pt {
+  const u2 = u * u, u3 = u2 * u;
+  const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
+  return { x: h00 * p0.x + h10 * m0.x + h01 * p1.x + h11 * m1.x, y: h00 * p0.y + h10 * m0.y + h01 * p1.y + h11 * m1.y };
+}
+const capLen = (v: Pt, max: number) => {
+  const l = Math.hypot(v.x, v.y);
+  return l > max ? { x: (v.x / l) * max, y: (v.y / l) * max } : v;
+};
+
+type StrokePlan = {
+  path: SVGPathElement; L: number; t0: number; t1: number; ts: number[]; ls: number[];
+  a: Pt; b: Pt; va: Pt; vb: Pt; // entry / exit velocity, units per second
+};
 
 /*
  * Time plan for the hand. Each path is sampled every ~6 units; local speed
@@ -90,13 +131,13 @@ function planHand(paths: SVGPathElement[]): StrokePlan[] {
       ts.push(t);
       ls.push(s);
     }
-    return { path, L, dur: t, ts, ls, a: pts[0], b: pts[n] };
+    return { path, L, dur: t, ts, ls, pts, a: pts[0], b: pts[n] };
   });
   const lifts = raw.map((r, i) => {
     const nx = raw[i + 1];
     if (!nx) return 0;
     const gap = Math.hypot(nx.a.x - r.b.x, nx.a.y - r.b.y);
-    return gap < 30 ? 25 : 120 + gap * 0.9; // the pen travels in the air, not teleports
+    return gap < 30 ? 30 : 130 + gap * 0.9; // the pen travels in the air, not teleports
   });
   const total = raw.reduce((acc, r, i) => acc + r.dur + lifts[i], 0);
   const k = WRITE_DUR / total;
@@ -105,7 +146,15 @@ function planHand(paths: SVGPathElement[]): StrokePlan[] {
     const t0 = clock;
     const t1 = t0 + r.dur * k;
     clock = t1 + lifts[i] * k;
-    return { path: r.path, L: r.L, t0, t1, ts: r.ts.map((v) => t0 + v * k), ls: r.ls, a: r.a, b: r.b };
+    const n = r.pts.length - 1;
+    const vel = (i0: number, i1: number): Pt => {
+      const dt = (r.ts[i1] - r.ts[i0]) * k || 1e-3;
+      return { x: (r.pts[i1].x - r.pts[i0].x) / dt, y: (r.pts[i1].y - r.pts[i0].y) / dt };
+    };
+    return {
+      path: r.path, L: r.L, t0, t1, ts: r.ts.map((v) => t0 + v * k), ls: r.ls,
+      a: r.a, b: r.b, va: vel(0, 1), vb: vel(n - 1, n),
+    };
   });
 }
 
@@ -124,6 +173,7 @@ function lengthAt(p: StrokePlan, t: number) {
 
 export default function Loader() {
   const loaderRef = useRef<HTMLDivElement>(null);
+  const centerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const fillRef = useRef<SVGPathElement>(null);
   const strokeRefs = useRef<(SVGPathElement | null)[]>([]);
@@ -134,14 +184,14 @@ export default function Loader() {
 
   useEffect(() => {
     const loader = loaderRef.current;
+    const center = centerRef.current;
     const svg = svgRef.current;
     const fill = fillRef.current;
     const pct = pctRef.current;
     const morph = morphRef.current;
     const grid = gridRef.current;
-    if (!loader || !svg || !fill || !pct || !morph || !grid) return;
+    if (!loader || !center || !svg || !fill || !pct || !morph || !grid) return;
 
-    const heroMedia = () => document.getElementById("heroMedia");
     let finished = false;
 
     // Hard fallback: everything visible, loader gone.
@@ -175,11 +225,12 @@ export default function Loader() {
     const C1 = LOGO_DOT_CENTERS[1];
     const nib = dotRefs.current[0]!;
     const twin = dotRefs.current[1]!;
+    const last = plan[plan.length - 1];
 
-    function put(el: SVGPathElement, c: Pt, p: Pt, sx: number, sy: number, op: number) {
+    function put(el: SVGPathElement, c: Pt, p: Pt, s: number, op: number) {
       el.setAttribute(
         "transform",
-        `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) scale(${sx.toFixed(3)} ${sy.toFixed(3)}) translate(${-c.x} ${-c.y})`
+        `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) scale(${s.toFixed(4)}) translate(${-c.x} ${-c.y})`
       );
       el.style.opacity = op.toFixed(3);
     }
@@ -191,24 +242,134 @@ export default function Loader() {
         if (t < s.t0) {
           const prev = plan[i - 1];
           if (!prev) return { p: s.a, air: 1 };
-          const u = smoothstep(prev.t1, s.t0, t);
+          const dur = s.t0 - prev.t1;
+          const u = clamp01((t - prev.t1) / dur);
           const gap = Math.hypot(s.a.x - prev.b.x, s.a.y - prev.b.y);
-          return {
-            p: { x: lerp(prev.b.x, s.a.x, u), y: lerp(prev.b.y, s.a.y, u) - Math.sin(Math.PI * u) * Math.min(70, gap * 0.25) },
-            air: Math.sin(Math.PI * u),
-          };
+          // leave at the writing speed, arrive at the next stroke's speed
+          const max = gap * 1.4 + 24;
+          const m0 = capLen({ x: prev.vb.x * dur, y: prev.vb.y * dur }, max);
+          const m1 = capLen({ x: s.va.x * dur, y: s.va.y * dur }, max);
+          const p = hermite(prev.b, m0, s.a, m1, u);
+          const lift = Math.pow(Math.sin(Math.PI * u), 2);
+          p.y -= lift * Math.min(60, gap * 0.22);
+          return { p, air: lift };
         }
         if (t <= s.t1) {
           const q = s.path.getPointAtLength(lengthAt(s, t));
           return { p: { x: q.x, y: q.y }, air: 0 };
         }
       }
-      return { p: plan[plan.length - 1].b, air: 0 };
+      return { p: last.b, air: 0 };
+    }
+
+    // ── hand-off state (measured once, when the capsule appears) ──
+    type Rect = { l: number; t: number; w: number; h: number };
+    let cap: Rect | null = null;
+    let hero: Rect | null = null;
+    let handStarted = false;
+    let flyStarted = false;
+    let mediaShown = false;
+    let svgOut: Animation | null = null;
+
+    function startHand() {
+      handStarted = true;
+      const sr = svg!.getBoundingClientRect();
+      const s = sr.width / VB.w;
+      // capsule = the lowercase band of the wordmark
+      cap = {
+        l: sr.left + (173 - VB.x) * s,
+        t: sr.top + (REST_Y - VB.y) * s,
+        w: (1854 - 173) * s,
+        h: (1186 - REST_Y) * s,
+      };
+      morph!.style.opacity = "1";
+      const ease = "cubic-bezier(.16,1,.3,1)";
+      // the name dissolves into the capsule: a little defocus, not a cut
+      svgOut = svg!.animate(
+        [
+          { opacity: 1, transform: "scaleX(1)", filter: "blur(0px)" },
+          { opacity: 0, transform: "scaleX(.95)", filter: "blur(6px)" },
+        ],
+        { duration: 420, delay: 60, easing: ease, fill: "forwards" }
+      );
+      pct!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: ease, fill: "forwards" });
+    }
+
+    function startFly() {
+      flyStarted = true;
+      const hm = document.getElementById("heroMedia");
+      const r = hm?.getBoundingClientRect();
+      const onScreen =
+        r && r.width > 0 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
+      hero = onScreen && r ? { l: r.left, t: r.top, w: r.width, h: r.height } : null;
+
+      // the site starts arriving underneath while the capsule travels
+      document.body.classList.add("site-ready");
+      const ease = "cubic-bezier(.16,1,.3,1)";
+      loader!.animate([{ backgroundColor: "rgba(14,16,12,1)" }, { backgroundColor: "rgba(14,16,12,0)" }], {
+        duration: 900,
+        delay: 120,
+        easing: ease,
+        fill: "forwards",
+      });
+      grid!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 700, easing: ease, fill: "forwards" });
+    }
+
+    function setClip(r: Rect, radius: number) {
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const rad = Math.min(radius, r.h / 2, r.w / 2);
+      morph!.style.clipPath = `inset(${r.t.toFixed(2)}px ${(vw - r.l - r.w).toFixed(2)}px ${(vh - r.t - r.h).toFixed(2)}px ${r.l.toFixed(2)}px round ${rad.toFixed(2)}px)`;
+    }
+
+    function handFrame(h: number) {
+      if (!handStarted) startHand();
+      if (!flyStarted && h >= H_FLY0) startFly();
+      const c = cap!;
+
+      // swallow: the capsule opens from the centre of the name
+      const sw = outExpo(span(h, 0, H_SWALLOW));
+      let r: Rect = { l: c.l + (c.w * (1 - sw)) / 2, t: c.t, w: c.w * sw, h: c.h };
+      let radius = c.h / 2;
+
+      if (hero) {
+        // fly: one glide on a slight arc, no stop between swallow and travel
+        const e = flyEase(span(h, H_FLY0, H_FLY));
+        const arc = Math.sin(Math.PI * e) * Math.min(90, window.innerHeight * 0.08);
+        r = {
+          l: lerp(r.l, hero.l, e),
+          t: lerp(r.t, hero.t, e) - arc,
+          w: lerp(r.w, hero.w, e),
+          h: lerp(r.h, hero.h, e),
+        };
+        radius = lerp(c.h / 2, 20, outSine(e));
+        if (!mediaShown && h >= H_MEDIA) {
+          mediaShown = true;
+          document.body.classList.add("media-ready"); // video fades in under the capsule
+        }
+        morph!.style.opacity = (1 - smoothstep(H_MEDIA, H_MEDIA + H_DISSOLVE, h)).toFixed(3);
+      } else if (flyStarted) {
+        // hero card not on screen (scrolled / tiny viewport): just dissolve
+        morph!.style.opacity = (1 - smoothstep(H_FLY0, H_FLY0 + 0.45, h)).toFixed(3);
+      }
+      setClip(r, radius);
+    }
+
+    function done() {
+      if (finished) return;
+      finished = true;
+      clearTimeout(failsafe);
+      document.body.classList.add("site-ready", "media-ready");
+      svgOut?.cancel();
+      loader!.remove();
     }
 
     function tick(ts: number) {
       if (t0 === null) t0 = ts;
       const t = (ts - t0) / 1000;
+
+      // camera: a slow push-in for the whole take, so no frame is ever static
+      const cam = outSine(clamp01(t / (T_HAND + 0.5)));
+      center!.style.transform = `translate(-50%,-50%) scale(${lerp(0.94, 1, cam).toFixed(4)})`;
 
       // ink
       let written = 0;
@@ -225,36 +386,32 @@ export default function Loader() {
 
       // the nib
       if (t < T_WRITE0) {
-        put(nib, C0, plan[0].a, 0.9, 0.9, 0);
+        put(nib, C0, plan[0].a, 0.86, 0);
       } else if (t <= T_WRITE1) {
         const { p, air } = penAt(t);
-        const fadeIn = smoothstep(T_WRITE0, T_WRITE0 + 0.12, t);
-        put(nib, C0, p, 0.86 + air * 0.08, 0.86 + air * 0.08, fadeIn);
+        const fadeIn = smoothstep(T_WRITE0, T_WRITE0 + 0.18, t);
+        put(nib, C0, p, 0.86 + air * 0.06, fadeIn);
         nib.classList.add("nib");
       } else if (t < T_LAND) {
-        // flies up from the end of the r and lands on the ü
+        // carries the r's exit speed up into one arc and brakes onto the ü
         const u = (t - T_WRITE1) / NIB_FLY;
-        const e = inOutCubic(u);
-        const from = plan[plan.length - 1].b;
-        const p = { x: lerp(from.x, C0.x, e), y: lerp(from.y, C0.y, e) - Math.sin(Math.PI * u) * 230 };
-        put(nib, C0, p, lerp(0.86, 1, e), lerp(0.86, 1, e), 1);
+        const m0 = capLen({ x: last.vb.x * NIB_FLY, y: last.vb.y * NIB_FLY }, 420);
+        const p = hermite(last.b, m0, C0, { x: 0, y: 40 }, u);
+        p.y -= Math.pow(Math.sin(Math.PI * u), 2) * 210;
+        put(nib, C0, p, lerp(0.86, 1, smoothstep(0.2, 1, u)), 1);
       } else {
         nib.classList.remove("nib");
-        const sq = squash(t - T_LAND, LAND, 0.42);
-        put(nib, C0, C0, sq.sx, sq.sy, 1);
+        put(nib, C0, C0, 1, 1);
       }
 
-      // the second dot splits out of the first and hops to its place
+      // the second dot slides out of the first and settles in its place
       if (t < T_SPLIT) {
-        put(twin, C1, C0, 1, 1, 0);
-      } else if (t < T_SPLIT + SPLIT) {
-        const u = (t - T_SPLIT) / SPLIT;
-        const e = inOutCubic(u);
-        const p = { x: lerp(C0.x, C1.x, e), y: lerp(C0.y, C1.y, e) - Math.sin(Math.PI * u) * 46 };
-        put(twin, C1, p, 0.94, 1.06, smoothstep(0, 0.2, u));
+        put(twin, C1, C0, 1, 0);
       } else {
-        const sq = squash(t - T_SPLIT - SPLIT, SPLIT_LAND, 0.3);
-        put(twin, C1, C1, sq.sx, sq.sy, 1);
+        const v = clamp01((t - T_SPLIT) / SPLIT);
+        const dx = C1.x - C0.x;
+        const p = hermite(C0, { x: dx * 0.9, y: -70 }, C1, { x: dx * 0.15, y: 0 }, outQuart(v));
+        put(twin, C1, p, 1, smoothstep(0, 0.3, v));
       }
 
       const pc = Math.round(clamp01(written / totalLen) * 100);
@@ -263,89 +420,12 @@ export default function Loader() {
         lastPct = pc;
       }
 
-      if (t < T_END) raf = requestAnimationFrame(tick);
-      else handOff();
+      if (t >= T_HAND) handFrame(t - T_HAND);
+
+      if (t < T_HAND + H_END) raf = requestAnimationFrame(tick);
+      else done();
     }
     raf = requestAnimationFrame(tick);
-
-    // ── 3. capsule → hero card ──────────────────────────────────────
-    function handOff() {
-      if (finished) return;
-      const sr = svg!.getBoundingClientRect();
-      const s = sr.width / VB.w;
-      // capsule = the lowercase band of the wordmark
-      const cap = {
-        left: sr.left + (173 - VB.x) * s,
-        top: sr.top + (REST_Y - VB.y) * s,
-        width: (1854 - 173) * s,
-        height: (1186 - REST_Y) * s,
-      };
-      Object.assign(morph!.style, {
-        left: cap.left + "px",
-        top: cap.top + "px",
-        width: cap.width + "px",
-        height: cap.height + "px",
-        borderRadius: cap.height / 2 + "px",
-        opacity: "1",
-      });
-
-      const ease = "cubic-bezier(.16,1,.3,1)";
-      const swallow = morph!.animate(
-        [{ clipPath: "inset(0 50% 0 50% round 999px)" }, { clipPath: "inset(0 0% 0 0% round 999px)" }],
-        { duration: F * 8, easing: ease, fill: "forwards" }
-      );
-      svg!.animate([{ opacity: 1, transform: "scaleX(1)" }, { opacity: 0, transform: "scaleX(.94)" }], {
-        duration: 260,
-        delay: 90,
-        easing: ease,
-        fill: "forwards",
-      });
-      pct!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: "forwards" });
-
-      swallow.onfinish = () => {
-        morph!.style.clipPath = "none";
-        swallow.cancel();
-        const hm = heroMedia();
-        const hr = hm?.getBoundingClientRect();
-        const onScreen =
-          hr && hr.width > 0 && hr.bottom > 0 && hr.top < window.innerHeight && hr.right > 0 && hr.left < window.innerWidth;
-
-        // the site starts arriving underneath while the capsule travels
-        document.body.classList.add("site-ready");
-        loader!.animate([{ backgroundColor: "rgba(14,16,12,1)" }, { backgroundColor: "rgba(14,16,12,0)" }], {
-          duration: 760,
-          easing: ease,
-          fill: "forwards",
-        });
-        grid!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 640, easing: ease, fill: "forwards" });
-
-        if (!onScreen || !hm || !hr) {
-          morph!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, fill: "forwards" }).onfinish = () => {
-            clearTimeout(failsafe);
-            finishPlain();
-          };
-          return;
-        }
-
-        const fly = morph!.animate(
-          [
-            { left: cap.left + "px", top: cap.top + "px", width: cap.width + "px", height: cap.height + "px", borderRadius: cap.height / 2 + "px" },
-            { left: hr.left + "px", top: hr.top + "px", width: hr.width + "px", height: hr.height + "px", borderRadius: "20px" },
-          ],
-          { duration: F * 18, easing: "cubic-bezier(.76,0,.24,1)", fill: "forwards" }
-        );
-        fly.onfinish = () => {
-          // card is exactly under the capsule now: reveal the video, dissolve the capsule
-          document.body.classList.add("media-ready");
-          morph!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: F * 10, easing: ease, fill: "forwards" }).onfinish =
-            () => {
-              finished = true;
-              clearTimeout(failsafe);
-              loader!.remove();
-            };
-        };
-      };
-    }
 
     return () => {
       cancelAnimationFrame(raf);
@@ -356,7 +436,7 @@ export default function Loader() {
   return (
     <div id="loader" ref={loaderRef} aria-hidden="true">
       <div id="ld-grid" ref={gridRef} />
-      <div id="ld-center">
+      <div id="ld-center" ref={centerRef}>
         <svg
           id="ld-logo"
           ref={svgRef}

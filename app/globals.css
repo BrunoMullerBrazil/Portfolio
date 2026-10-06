@@ -1007,7 +1007,7 @@ body.dark-mode .hero-nav-logo svg path { fill: #e0dbd1; }
     repeating-linear-gradient(45deg,rgba(255,255,255,.014) 0 1px,transparent 1px 7px),
     radial-gradient(120% 92% at 50% 46%,#191c13 0%,#111309 56%,#0c0d09 100%);
 }
-#ld-center{ position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+#ld-center{ position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.94);will-change:transform;
   width:clamp(280px,42vw,560px);display:flex;flex-direction:column;align-items:center;gap:24px; }
 #ld-logo{ width:100%;height:auto;display:block;overflow:visible;
   filter:drop-shadow(0 0 26px rgba(255,255,255,.06)); }
@@ -1550,7 +1550,7 @@ footer.credits{display:block;padding:110px 48px 26px;border-top:1px solid rgba(2
 
 /* ═══ LOADER — o trema (components/Loader.tsx) ═══ */
 .ld-dot{fill:#ffffff;}
-#ld-morph{position:absolute;left:0;top:0;width:0;height:0;background:#ffffff;opacity:0;pointer-events:none;will-change:left,top,width,height,border-radius;}
+#ld-morph{position:absolute;inset:0;background:#ffffff;opacity:0;pointer-events:none;clip-path:inset(50% 50% 50% 50%);will-change:clip-path,opacity;}
 
 /* Hero video stays hidden until the loader's capsule lands on its card.
    Gated on the inner element: #heroMedia's own inline style is rewritten
