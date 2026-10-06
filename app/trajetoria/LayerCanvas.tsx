@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { withBasePath } from "@/lib/basePath";
 
 /*
@@ -44,6 +45,102 @@ const extOf = (dataUrl: string) => {
   return t === "jpeg" ? "jpg" : t === "svg+xml" ? "svg" : t;
 };
 
+/*
+ * Transparency helpers. Many "transparent PNGs" from the web are actually
+ * flat images with a white/black (or baked checkerboard) background. On
+ * drop we check for real alpha; R removes a solid background by flood-
+ * filling from the edges with the dominant border colour (connected region
+ * only, so the same colour inside the artwork survives), with a soft edge.
+ */
+function loadImg(src: string): Promise<HTMLImageElement> {
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.crossOrigin = "anonymous";
+    im.onload = () => res(im);
+    im.onerror = rej;
+    im.src = src;
+  });
+}
+function hasAlpha(img: HTMLImageElement): boolean {
+  const w = Math.min(img.naturalWidth, 400), h = Math.round((w * img.naturalHeight) / img.naturalWidth) || 1;
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const x = c.getContext("2d", { willReadFrequently: true })!;
+  x.drawImage(img, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data;
+  for (let i = 3; i < d.length; i += 4) if (d[i] < 250) return true;
+  return false;
+}
+async function removeBackground(src: string): Promise<string> {
+  const img = await loadImg(src);
+  const w = img.naturalWidth, h = img.naturalHeight;
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const x = c.getContext("2d", { willReadFrequently: true })!;
+  x.drawImage(img, 0, 0);
+  const id = x.getImageData(0, 0, w, h);
+  const d = id.data;
+  // dominant border colour (quantised)
+  const counts = new Map<number, number>();
+  const at = (px: number, py: number) => (py * w + px) * 4;
+  const q = (i: number) => ((d[i] >> 4) << 8) | ((d[i + 1] >> 4) << 4) | (d[i + 2] >> 4);
+  for (let px = 0; px < w; px += 2) [0, h - 1].forEach((py) => { const k = q(at(px, py)); counts.set(k, (counts.get(k) || 0) + 1); });
+  for (let py = 0; py < h; py += 2) [0, w - 1].forEach((px) => { const k = q(at(px, py)); counts.set(k, (counts.get(k) || 0) + 1); });
+  let best = 0, bk = 0;
+  counts.forEach((v, k) => { if (v > best) { best = v; bk = k; } });
+  const br = ((bk >> 8) & 15) * 16 + 8, bg = ((bk >> 4) & 15) * 16 + 8, bb = (bk & 15) * 16 + 8;
+  const TOL = 42;
+  const dist = (i: number) => Math.hypot(d[i] - br, d[i + 1] - bg, d[i + 2] - bb);
+  // flood fill from every edge pixel that matches
+  const seen = new Uint8Array(w * h);
+  const stack: number[] = [];
+  const push = (px: number, py: number) => {
+    const n = py * w + px;
+    if (seen[n]) return;
+    seen[n] = 1;
+    if (dist(n * 4) <= TOL) stack.push(n);
+  };
+  for (let px = 0; px < w; px++) { push(px, 0); push(px, h - 1); }
+  for (let py = 0; py < h; py++) { push(0, py); push(w - 1, py); }
+  while (stack.length) {
+    const n = stack.pop()!;
+    const px = n % w, py = (n / w) | 0;
+    const i = n * 4;
+    // soft edge: fully clear in the core, fade near the tolerance limit
+    const t = dist(i) / TOL;
+    d[i + 3] = Math.round(d[i + 3] * Math.min(1, Math.max(0, (t - 0.55) / 0.45)));
+    if (px > 0) push(px - 1, py);
+    if (px < w - 1) push(px + 1, py);
+    if (py > 0) push(px, py - 1);
+    if (py < h - 1) push(px, py + 1);
+  }
+  x.putImageData(id, 0, 0);
+  return c.toDataURL("image/png");
+}
+
+/*
+ * Before publishing, every new image is capped at 2400px on its long side
+ * and re-encoded as WebP (alpha kept). A 6MB PNG becomes a few hundred KB.
+ * Browsers that can't encode WebP (Safari) keep the original PNG.
+ */
+async function compressForWeb(dataUrl: string): Promise<string> {
+  try {
+    const img = await loadImg(dataUrl);
+    const k = Math.min(1, 2400 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.naturalWidth * k);
+    c.height = Math.round(img.naturalHeight * k);
+    c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
+    const webp = c.toDataURL("image/webp", 0.88);
+    if (webp.startsWith("data:image/webp") && webp.length < dataUrl.length) return webp;
+    return dataUrl;
+  } catch {
+    return dataUrl;
+  }
+}
+
 type Gh = (path: string, init?: RequestInit) => Promise<any>;
 function github(token: string): Gh {
   return async (path, init) => {
@@ -69,6 +166,7 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
   const [editing, setEditing] = useState(false);
   const [sel, setSel] = useState<string | null>(null);
   const [status, setStatus] = useState("");
+  const [opaque, setOpaque] = useState<Record<string, boolean>>({}); // id → image has no transparency
   const [busy, setBusy] = useState(false);
   const [askToken, setAskToken] = useState(false);
   const history = useRef<Layer[][]>([]);
@@ -87,7 +185,9 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
   }, []);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).has("editar")) setEditing(true);
+    // ?editar, or #editar (a fragment survives any trailing-slash redirect)
+    const on = new URLSearchParams(window.location.search).has("editar") || window.location.hash === "#editar";
+    if (on) setEditing(true);
   }, []);
 
   // click on empty space deselects
@@ -131,7 +231,7 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
 
   // ── adding images: drop or paste ─────────────────────────────────────
   const addFiles = useCallback(
-    (files: FileList | File[], at?: { x: number; y: number }) => {
+    (files: FileList | File[], at?: { x: number; y: number }, origin: "arrastado" | "colado" = "arrastado") => {
       Array.from(files)
         .filter((f) => f.type.startsWith("image/"))
         .forEach((f, k) => {
@@ -141,6 +241,16 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
             const img = new Image();
             img.onload = () => {
               const id = uid();
+              const alpha = hasAlpha(img);
+              // diagnostic line: shows exactly what reached the browser
+              const kind = (f.type.split("/")[1] || "?").toUpperCase();
+              const diag = `${f.name || "imagem"} · ${kind} ${img.naturalWidth}×${img.naturalHeight} · ${origin} · transparência: ${alpha ? "sim" : "não"}`;
+              if (!alpha) {
+                setOpaque((o) => ({ ...o, [id]: true }));
+                setStatus(
+                  diag + (origin === "colado" ? " — colar de outro app costuma perder a transparência; arraste o arquivo." : " — R remove o fundo.")
+                );
+              } else setStatus(diag);
               const w = Math.min(img.naturalWidth / u, 320);
               const pos = at ?? toUnits(window.innerWidth / 2, window.innerHeight / 2);
               setPreview((p) => ({ ...p, [id]: dataUrl }));
@@ -181,7 +291,7 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
     };
     const paste = (e: ClipboardEvent) => {
       const files = Array.from(e.clipboardData?.files || []);
-      if (files.length) addFiles(files);
+      if (files.length) addFiles(files, undefined, "colado");
     };
     window.addEventListener("dragover", over);
     window.addEventListener("dragleave", leave);
@@ -225,7 +335,20 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
       else if (k === "[") patch(sel, { z: L.z - 1 }, true);
       else if (k.toLowerCase() === "b") patch(sel, { back: !L.back }, true);
       else if (k.toLowerCase() === "m") patch(sel, { hideMobile: !L.hideMobile }, true);
-      else if (k.toLowerCase() === "d") {
+      else if (k.toLowerCase() === "r") {
+        const src = preview[L.id] || (L.src ? withBasePath(L.src) : "");
+        if (!src) return;
+        setStatus("Removendo o fundo…");
+        removeBackground(src)
+          .then((png) => {
+            setPreview((p) => ({ ...p, [L.id]: png }));
+            setOpaque((o) => ({ ...o, [L.id]: false }));
+            // the processed PNG replaces the original on the next publish
+            commit((l) => l.map((x) => (x.id === L.id ? { ...x, src: "" } : x)));
+            setStatus("Fundo removido. R de novo tira mais; ⌘Z desfaz.");
+          })
+          .catch(() => setStatus("Não consegui processar essa imagem."));
+      } else if (k.toLowerCase() === "d") {
         const id = uid();
         if (preview[L.id]) setPreview((p) => ({ ...p, [id]: p[L.id] }));
         commit((l) => [...l, { ...L, id, x: L.x + 20, y: L.y + 20, z: L.z + 1 }]);
@@ -289,7 +412,7 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
       const out: Layer[] = [];
       for (const L of layers) {
         if (!L.src && preview[L.id]) {
-          const data = preview[L.id];
+          const data = await compressForWeb(preview[L.id]);
           const ext = extOf(data);
           const blob = await gh(`/git/blobs`, {
             method: "POST",
@@ -359,7 +482,7 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
           return (
             <div
               key={L.id}
-              className={"traj-layer" + (sel === L.id ? " sel" : "") + (L.back ? " back" : "") + (L.hideMobile ? " nomobile" : "")}
+              className={"traj-layer" + (sel === L.id ? " sel" : "") + (L.back ? " back" : "") + (L.hideMobile ? " nomobile" : "") + (opaque[L.id] ? " opaque" : "")}
               style={{
                 left: L.x * u,
                 top: L.y * u,
@@ -381,18 +504,25 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
           );
         })}
 
-      {editing && (
+      {editing &&
+        createPortal(
+          <>
+            <div className="traj-badge">Modo edição</div>
+            {layers.length === 0 && <div className="traj-empty">Arraste um PNG para cá<br />ou cole com ⌘V / Ctrl+V</div>}
         <div className="traj-bar" onPointerDown={(e) => e.stopPropagation()}>
-          <span className="traj-hint">Arraste ou cole um PNG · Del · setas · [ ] · B fundo · M celular · D duplicar · ⌘Z</span>
+          <span className="traj-hint">Arraste ou cole um PNG · R remove fundo · Del · setas · [ ] · B atrás · M celular · D duplicar · ⌘Z</span>
           <span className="traj-status">{status || (dirty ? "Alterações não publicadas" : "Tudo publicado")}</span>
           <button type="button" onClick={() => setAskToken(true)}>Chave</button>
           <button type="button" className="go" disabled={busy || !dirty} onClick={publish}>
             {busy ? "Publicando…" : "Publicar"}
           </button>
         </div>
-      )}
+          </>,
+          document.body
+        )}
 
-      {askToken && (
+      {askToken &&
+        createPortal(
         <TokenDialog
           onClose={() => setAskToken(false)}
           onSave={(t) => {
@@ -402,8 +532,9 @@ export default function LayerCanvas({ initial }: { initial: Layer[] }) {
             setAskToken(false);
             setStatus("Chave salva neste navegador.");
           }}
-        />
-      )}
+        />,
+          document.body
+        )}
     </div>
   );
 }

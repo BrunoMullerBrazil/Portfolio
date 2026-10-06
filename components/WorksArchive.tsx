@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage, t, type Translated } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
-import { PROJECTS, type Project } from "@/lib/projects";
+import { PROJECT_DATA, PROJECTS, vimeoPageUrl, vimeoPlayerUrl, type Project, type ProjectData } from "@/lib/projects";
+import { commitFiles, getToken, setToken } from "@/lib/ghPublish";
 import { SplitText } from "./SplitText";
 
 /*
@@ -40,19 +41,33 @@ const L = {
   closePlayer: { pt: "Fechar vídeo", en: "Close video" },
 };
 
-const thumbCache = new Map<string, string>();
-async function vimeoThumb(id: string): Promise<string | null> {
-  if (thumbCache.has(id)) return thumbCache.get(id)!;
+type VimeoInfo = { thumb: string | null; title: string; vertical: boolean };
+const infoCache = new Map<string, VimeoInfo>();
+async function vimeoInfo(p: Pick<ProjectData, "vimeoId" | "vimeoHash">): Promise<VimeoInfo | null> {
+  const key = p.vimeoId + (p.vimeoHash || "");
+  if (infoCache.has(key)) return infoCache.get(key)!;
   try {
-    const r = await fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}&width=960`);
+    const r = await fetch(`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(vimeoPageUrl(p))}&width=960`);
     if (!r.ok) return null;
     const j = await r.json();
-    const url = typeof j.thumbnail_url === "string" ? j.thumbnail_url : null;
-    if (url) thumbCache.set(id, url);
-    return url;
+    const info = {
+      thumb: typeof j.thumbnail_url === "string" ? j.thumbnail_url : null,
+      title: typeof j.title === "string" ? j.title : "",
+      vertical: Number(j.height) > Number(j.width),
+    };
+    infoCache.set(key, info);
+    return info;
   } catch {
     return null;
   }
+}
+
+// vimeo.com/123, vimeo.com/123/abcd (unlisted), player.vimeo.com/video/123?h=abcd
+function parseVimeo(link: string): { vimeoId: string; vimeoHash?: string } | null {
+  const m = /vimeo\.com\/(?:video\/)?(\d+)(?:\/([0-9a-f]{6,}))?/i.exec(link);
+  if (!m) return null;
+  const h = /[?&]h=([0-9a-f]{6,})/i.exec(link)?.[1] || m[2];
+  return h ? { vimeoId: m[1], vimeoHash: h } : { vimeoId: m[1] };
 }
 
 const pad = (n: number) => (n < 10 ? "0" : "") + n;
@@ -77,23 +92,93 @@ export default function WorksArchive() {
   const tileRectRef = useRef<DOMRect | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => setMounted(true), []);
+  // ── gallery editor (/#editar): same publish flow as the trajetória editor
+  const [editing, setEditing] = useState(false);
+  const [list, setList] = useState<ProjectData[]>(PROJECT_DATA);
+  const [form, setForm] = useState<ProjectData | null>(null);
+  const [status, setStatus] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [askToken, setAskToken] = useState(false);
+  const published = useRef(JSON.stringify(PROJECT_DATA));
 
-  const items = filter === "all" ? PROJECTS : PROJECTS.filter((p) => p.filter === filter);
-  const usedFilters = FILTERS.filter((f) => f.value === "all" || PROJECTS.some((p) => p.filter === f.value));
+  useEffect(() => {
+    setMounted(true);
+    const on = new URLSearchParams(window.location.search).has("editar") || window.location.hash === "#editar";
+    if (on) setEditing(true);
+  }, []);
 
-  // thumbnails, once, when the archive first opens
+  useEffect(() => {
+    document.body.classList.toggle("traj-editing", editing && open);
+  }, [editing, open]);
+
+  const ALL: Project[] = editing ? list.map((p, i) => ({ ...p, num: pad(i + 1) })) : PROJECTS;
+  const items = filter === "all" || editing ? ALL : ALL.filter((p) => p.filter === filter);
+  const usedFilters = FILTERS.filter((f) => f.value === "all" || ALL.some((p) => p.filter === f.value));
+
+  // thumbnails, when the archive opens (and for videos added in the editor)
+  const idsKey = ALL.map((p) => p.vimeoId + (p.vimeoHash || "")).join(",");
   useEffect(() => {
     if (!open) return;
     let alive = true;
-    PROJECTS.forEach(async (p) => {
-      const url = await vimeoThumb(p.vimeoId);
-      if (alive && url) setThumbs((s) => (s[p.vimeoId] ? s : { ...s, [p.vimeoId]: url }));
+    ALL.forEach(async (p) => {
+      const info = await vimeoInfo(p);
+      if (alive && info?.thumb) setThumbs((s) => (s[p.vimeoId] ? s : { ...s, [p.vimeoId]: info.thumb! }));
     });
     return () => {
       alive = false;
     };
-  }, [open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, idsKey]);
+
+  const moveItem = (id: number, d: number) =>
+    setList((l) => {
+      const i = l.findIndex((x) => x.id === id);
+      const j = i + d;
+      if (i < 0 || j < 0 || j >= l.length) return l;
+      const n = [...l];
+      [n[i], n[j]] = [n[j], n[i]];
+      return n;
+    });
+  const toggleFeatured = (id: number) =>
+    setList((l) => l.map((x) => (x.id === id ? { ...x, featured: x.featured === false ? undefined : false } : x)));
+  const removeItem = (id: number) => {
+    if (window.confirm("Remover este trabalho da galeria?")) setList((l) => l.filter((x) => x.id !== id));
+  };
+  const saveItem = (p: ProjectData) => {
+    setList((l) => (l.some((x) => x.id === p.id) ? l.map((x) => (x.id === p.id ? p : x)) : [p, ...l]));
+    setForm(null);
+  };
+  const newItem = (): ProjectData => ({
+    id: list.reduce((m, x) => Math.max(m, x.id), 0) + 1,
+    name: { pt: "", en: "" },
+    client: "",
+    year: String(new Date().getFullYear()),
+    desc: { pt: "", en: "" },
+    tags: { pt: "", en: "" },
+    filter: "brand-film",
+    vimeoId: "",
+    orientation: "horizontal",
+  });
+  const dirty = JSON.stringify(list) !== published.current;
+
+  async function publish() {
+    const token = getToken();
+    if (!token) return setAskToken(true);
+    setBusy(true);
+    setStatus("Publicando…");
+    try {
+      await commitFiles(token, "Galeria: trabalhos editados no site", [
+        { path: "lib/projects.json", text: JSON.stringify(list, null, 2) + "\n" },
+      ]);
+      published.current = JSON.stringify(list);
+      setStatus("Publicado. No ar em ~1 min.");
+    } catch (err) {
+      setStatus(String((err as Error).message || err));
+      if (/401|403/.test(String(err))) setAskToken(true);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   // ── open / close the archive ─────────────────────────────────────────
   const doOpen = useCallback(() => {
@@ -212,8 +297,8 @@ export default function WorksArchive() {
     <>
       <div className="arc-open-wrap">
         <button ref={btnRef} type="button" className="arc-open" onClick={doOpen} data-cursor="click">
-          <span>{t(L.open, lang)}</span>
-          <span className="arc-count">{pad(PROJECTS.length)}</span>
+          <span>{editing ? "Editar galeria" : t(L.open, lang)}</span>
+          <span className="arc-count">{pad(ALL.length)}</span>
           <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path d="M2 2h8v8M2 10l8-8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -228,7 +313,7 @@ export default function WorksArchive() {
               <div className="arc-head">
                 <div>
                   <div className="arc-eyebrow">
-                    {t(L.eyebrow, lang)} · {pad(PROJECTS.length)}
+                    {t(L.eyebrow, lang)} · {pad(ALL.length)}
                   </div>
                   <h2 className="arc-title">
                     <SplitText text={t(L.title, lang)} />
@@ -255,13 +340,36 @@ export default function WorksArchive() {
               </div>
 
               <div className="arc-grid">
+                {editing && (
+                  <button type="button" className="arc-tile arc-add" style={{ "--i": 0 } as React.CSSProperties} onClick={() => setForm(newItem())}>
+                    <span className="arc-thumb">
+                      <span className="arc-add-plus">+</span>
+                    </span>
+                    <span className="arc-meta">
+                      <span className="arc-name">Adicionar vídeo</span>
+                      <span className="arc-client">Cole o link do Vimeo</span>
+                    </span>
+                  </button>
+                )}
                 {items.map((p, i) => (
+                  <div key={p.id + filter} className="arc-cell" style={{ "--i": i + (editing ? 1 : 0) } as React.CSSProperties}>
+                  {editing && (
+                    <div className="arc-tools">
+                      <button type="button" title="Destaque na home" className={p.featured === false ? "" : "on"} onClick={() => toggleFeatured(p.id)}>★</button>
+                      <button type="button" title="Mover para trás" onClick={() => moveItem(p.id, -1)}>↑</button>
+                      <button type="button" title="Mover para frente" onClick={() => moveItem(p.id, 1)}>↓</button>
+                      <button type="button" title="Editar" onClick={() => setForm(list.find((x) => x.id === p.id) || null)}>✎</button>
+                      <button type="button" title="Remover" onClick={() => removeItem(p.id)}>✕</button>
+                    </div>
+                  )}
                   <button
-                    key={p.id + filter}
                     type="button"
                     className="arc-tile"
-                    style={{ "--i": i } as React.CSSProperties}
-                    onClick={(e) => play(p, e.currentTarget.querySelector(".arc-thumb") as HTMLElement)}
+                    onClick={(e) =>
+                      editing
+                        ? setForm(list.find((x) => x.id === p.id) || null)
+                        : play(p, e.currentTarget.querySelector(".arc-thumb") as HTMLElement)
+                    }
                     data-cursor="click"
                   >
                     <span className="arc-thumb" data-orient={p.orientation}>
@@ -276,9 +384,44 @@ export default function WorksArchive() {
                       <span className="arc-client">{[p.client, p.year].filter(Boolean).join(" • ")}</span>
                     </span>
                   </button>
+                  </div>
                 ))}
               </div>
             </div>
+
+            {editing && (
+              <div className="traj-bar">
+                <span className="traj-hint">★ destaque na home · ↑↓ ordem · ✎ editar · ✕ remover</span>
+                <span className="traj-status">{status || (dirty ? "Alterações não publicadas" : "Tudo publicado")}</span>
+                <button type="button" onClick={() => setAskToken(true)}>Chave</button>
+                <button type="button" className="go" disabled={busy || !dirty} onClick={publish}>
+                  {busy ? "Publicando…" : "Publicar"}
+                </button>
+              </div>
+            )}
+
+            {form && (
+              <ProjectForm
+                initial={form}
+                lang={lang}
+                onCancel={() => setForm(null)}
+                onSave={saveItem}
+                onThumb={(id, url) => setThumbs((s) => ({ ...s, [id]: url }))}
+              />
+            )}
+
+            {askToken && (
+              <div className="traj-modal">
+                <TokenCard
+                  onClose={() => setAskToken(false)}
+                  onSave={(tk) => {
+                    setToken(tk);
+                    setAskToken(false);
+                    setStatus("Chave salva neste navegador.");
+                  }}
+                />
+              </div>
+            )}
 
             {playing && (
               <div className="arc-player" onClick={stopPlaying}>
@@ -289,7 +432,7 @@ export default function WorksArchive() {
                   )}
                   {videoOn && (
                     <iframe
-                      src={`https://player.vimeo.com/video/${playing.vimeoId}?autoplay=1&title=0&byline=0&portrait=0`}
+                      src={vimeoPlayerUrl(playing, "autoplay=1&title=0&byline=0&portrait=0")}
                       allow="autoplay; fullscreen; picture-in-picture"
                       allowFullScreen
                       title={t(playing.name, lang)}
@@ -312,5 +455,177 @@ export default function WorksArchive() {
           document.body
         )}
     </>
+  );
+}
+
+const CATS: { v: ProjectData["filter"]; l: string }[] = [
+  { v: "brand-film", l: "Brand film" },
+  { v: "institucional", l: "Institucional" },
+  { v: "bts", l: "Making of / BTS" },
+  { v: "motion", l: "Motion" },
+];
+
+function ProjectForm({
+  initial,
+  onCancel,
+  onSave,
+  onThumb,
+}: {
+  initial: ProjectData;
+  lang: string;
+  onCancel: () => void;
+  onSave: (p: ProjectData) => void;
+  onThumb: (vimeoId: string, url: string) => void;
+}) {
+  const [p, setP] = useState<ProjectData>(initial);
+  const [link, setLink] = useState(initial.vimeoId ? vimeoPageUrl(initial) : "");
+  const [note, setNote] = useState("");
+  const set = (patch: Partial<ProjectData>) => setP((x) => ({ ...x, ...patch }));
+
+  async function readLink(v: string) {
+    const parsed = parseVimeo(v);
+    if (!parsed) {
+      setNote(v ? "Link do Vimeo não reconhecido." : "");
+      return;
+    }
+    const next = { ...p, ...parsed, vimeoHash: parsed.vimeoHash };
+    setP(next);
+    setNote("Lendo o vídeo…");
+    const info = await vimeoInfo(next);
+    if (!info) {
+      setNote("Não consegui ler esse vídeo. Se ele for privado, use o link de compartilhamento (não listado).");
+      return;
+    }
+    if (info.thumb) onThumb(next.vimeoId, info.thumb);
+    setP((x) => ({
+      ...x,
+      orientation: info.vertical ? "vertical" : "horizontal",
+      name: x.name.pt ? x.name : { pt: info.title, en: info.title },
+    }));
+    setNote(info.vertical ? "Vídeo vertical detectado." : "Vídeo horizontal detectado.");
+  }
+
+  const ok = !!p.vimeoId && !!p.name.pt.trim();
+  const tx = (k: "name" | "desc" | "tags", lng: "pt" | "en", v: string) => set({ [k]: { ...p[k], [lng]: v } } as Partial<ProjectData>);
+
+  return (
+    <div className="traj-modal" onClick={onCancel}>
+      <form
+        className="arc-form"
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!ok) return;
+          onSave({
+            ...p,
+            name: { pt: p.name.pt.trim(), en: (p.name.en || p.name.pt).trim() },
+            desc: { pt: p.desc.pt, en: p.desc.en || p.desc.pt },
+            tags: { pt: p.tags.pt, en: p.tags.en || p.tags.pt },
+            vimeoHash: p.vimeoHash || undefined,
+          });
+        }}
+      >
+        <h3>{initial.vimeoId ? "Editar trabalho" : "Adicionar vídeo"}</h3>
+        <label>
+          Link do Vimeo
+          <input value={link} onChange={(e) => setLink(e.target.value)} onBlur={() => readLink(link)} placeholder="https://vimeo.com/…" autoFocus />
+        </label>
+        {note && <p className="arc-form-note">{note}</p>}
+        <div className="arc-form-row">
+          <label>
+            Título
+            <input value={p.name.pt} onChange={(e) => tx("name", "pt", e.target.value)} />
+          </label>
+          <label>
+            Title (EN, opcional)
+            <input value={p.name.en} onChange={(e) => tx("name", "en", e.target.value)} />
+          </label>
+        </div>
+        <div className="arc-form-row">
+          <label>
+            Cliente
+            <input value={p.client} onChange={(e) => set({ client: e.target.value })} />
+          </label>
+          <label>
+            Ano
+            <input value={p.year} onChange={(e) => set({ year: e.target.value })} inputMode="numeric" />
+          </label>
+        </div>
+        <label>
+          Descrição (a decisão de direção + o que resolveu)
+          <textarea value={p.desc.pt} onChange={(e) => tx("desc", "pt", e.target.value)} rows={2} />
+        </label>
+        <label>
+          Description (EN, opcional)
+          <textarea value={p.desc.en} onChange={(e) => tx("desc", "en", e.target.value)} rows={2} />
+        </label>
+        <div className="arc-form-row">
+          <label>
+            Créditos / tags
+            <input value={p.tags.pt} onChange={(e) => tx("tags", "pt", e.target.value)} />
+          </label>
+          <label>
+            Credits (EN, opcional)
+            <input value={p.tags.en} onChange={(e) => tx("tags", "en", e.target.value)} />
+          </label>
+        </div>
+        <div className="arc-form-row">
+          <label>
+            Categoria
+            <select value={p.filter} onChange={(e) => set({ filter: e.target.value as ProjectData["filter"] })}>
+              {CATS.map((c) => (
+                <option key={c.v} value={c.v}>
+                  {c.l}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Formato
+            <select value={p.orientation} onChange={(e) => set({ orientation: e.target.value as ProjectData["orientation"] })}>
+              <option value="horizontal">Horizontal</option>
+              <option value="vertical">Vertical</option>
+            </select>
+          </label>
+        </div>
+        <label className="arc-form-check">
+          <input type="checkbox" checked={p.featured !== false} onChange={(e) => set({ featured: e.target.checked ? undefined : false })} />
+          Destaque na galeria da home
+        </label>
+        <div className="traj-modal-row">
+          <button type="button" onClick={onCancel}>
+            Cancelar
+          </button>
+          <button type="submit" className="go" disabled={!ok}>
+            Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function TokenCard({ onClose, onSave }: { onClose: () => void; onSave: (t: string) => void }) {
+  const [v, setV] = useState("");
+  return (
+    <div className="traj-modal-card">
+      <h3>Chave do GitHub</h3>
+      <p>
+        A mesma chave do editor da trajetória: <b>fine-grained</b>, só o repositório <b>Portfolio</b>,{" "}
+        <b>Contents: Read and write</b>. Fica salva só neste navegador.
+      </p>
+      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">
+        Criar chave no GitHub ↗
+      </a>
+      <input type="password" placeholder="github_pat_…" value={v} onChange={(e) => setV(e.target.value.trim())} autoFocus />
+      <div className="traj-modal-row">
+        <button type="button" onClick={onClose}>
+          Cancelar
+        </button>
+        <button type="button" className="go" disabled={!v} onClick={() => onSave(v)}>
+          Salvar chave
+        </button>
+      </div>
+    </div>
   );
 }

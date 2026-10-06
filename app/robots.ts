@@ -1,18 +1,14 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
 
-// TEMPORARY — mirrors the `robots: { index: false, follow: false }` block
-// in app/layout.tsx. The site still has pending content (e.g. /trajetoria
-// isn't linked from anywhere yet), so crawling is blocked entirely for now.
-//
-// To go live in search once approved: replace the `disallow: "/"` rule
-// below with `allow: "/"`, and delete the `robots` block in
-// app/layout.tsx (Next.js defaults to index/follow without it).
+// Search indexing is on. /design is excluded: it only holds placeholder
+// layout content for now (it also carries a noindex in app/design/layout.tsx).
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      disallow: "/",
+      allow: "/",
+      disallow: "/design/",
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };

@@ -379,11 +379,20 @@ export default function Loader() {
     const plan = planHand(strokes);
     const totalLen = plan.reduce((a, p) => a + p.L, 0) || 1;
 
+    // Returning in the same session: the name is already written — show the
+    // finished mark for a beat and go straight to the capsule → video handoff.
+    // The full writing plays once per session.
+    let quick = false;
+    try {
+      quick = sessionStorage.getItem("muller-intro") === "1";
+    } catch {}
+    const QUICK_BEAT = 0.38;
+
     // ink canvas, laid exactly over the svg at device resolution
     const inkCanvas = inkRef.current;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const cssW = svg.clientWidth, cssH = (cssW * VB.h) / VB.w;
-    const ink = inkCanvas && cssW ? buildInk(inkCanvas, plan, Math.round(cssW * dpr), Math.round(cssH * dpr)) : null;
+    const ink = !quick && inkCanvas && cssW ? buildInk(inkCanvas, plan, Math.round(cssW * dpr), Math.round(cssH * dpr)) : null;
     if (ink && inkCanvas) {
       inkCanvas.style.height = cssH + "px";
     } else {
@@ -527,6 +536,10 @@ export default function Loader() {
     function done() {
       if (finished) return;
       finished = true;
+      // marked only once the intro has really played to the end
+      try {
+        sessionStorage.setItem("muller-intro", "1");
+      } catch {}
       clearTimeout(failsafe);
       document.body.classList.add("site-ready", "media-ready");
       svgOut?.cancel();
@@ -535,7 +548,9 @@ export default function Loader() {
 
     function tick(ts: number) {
       if (t0 === null) t0 = ts;
-      const t = (ts - t0) / 1000;
+      const el = (ts - t0) / 1000;
+      // quick: the clock waits just before the hand-off, then runs it
+      const t = quick ? T_HAND + Math.max(-1e-3, el - QUICK_BEAT) : el;
 
       // camera: a slow push-in for the whole take, so no frame is ever static
       const cam = outSine(clamp01(t / (T_HAND + 0.5)));
@@ -575,7 +590,9 @@ export default function Loader() {
       }
 
       // the second dot slides out of the first and settles in its place
-      if (t < T_SPLIT) {
+      if (quick) {
+        put(twin, C1, C1, 1, 1);
+      } else if (t < T_SPLIT) {
         put(twin, C1, C0, 1, 0);
       } else {
         const v = clamp01((t - T_SPLIT) / SPLIT);

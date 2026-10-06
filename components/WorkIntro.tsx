@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useLanguage, t, type Translated } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
 import { SplitText } from "./SplitText";
-import { PROJECTS as ALL_PROJECTS, type Project } from "@/lib/projects";
+import { FEATURED, vimeoPlayerUrl, type Project } from "@/lib/projects";
 import WorksArchive from "./WorksArchive";
 
 // The stage shows the featured cut; the archive (WorksArchive) shows everything.
-const PROJECTS = ALL_PROJECTS.filter((p) => p.featured !== false);
+const PROJECTS = FEATURED;
 
 const GRADS = [
   "radial-gradient(120% 120% at 30% 18%,#232a2c 0%,#12161a 60%,#0a0b0d 100%)",
@@ -134,9 +134,9 @@ export default function WorkIntro() {
     // muted=1 is required for the iframe to autoplay without a prior user
     // gesture (browser autoplay policy) — native Vimeo controls still let
     // the visitor unmute.
-    function mountVideo(vimeoId: string) {
+    function mountVideo(p: Project) {
       const iframe = document.createElement("iframe");
-      iframe.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&title=0&byline=0&portrait=0`;
+      iframe.src = vimeoPlayerUrl(p, "autoplay=1&muted=1&title=0&byline=0&portrait=0");
       iframe.allow = "autoplay; fullscreen; picture-in-picture";
       iframe.allowFullscreen = true;
       iframe.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;";
@@ -159,7 +159,7 @@ export default function WorkIntro() {
       totalEl!.textContent = pad(filtered.length);
       if (fsCurrRef.current) fsCurrRef.current.textContent = pad(current + 1);
       if (fsTotalRef.current) fsTotalRef.current.textContent = pad(filtered.length);
-      if (inView) mountVideo(p.vimeoId);
+      if (inView) mountVideo(p);
     }
     paintRef.current = paint;
 
@@ -236,7 +236,7 @@ export default function WorkIntro() {
 
     function onPlayClick() {
       const p = filtered[current];
-      if (p) mountVideo(p.vimeoId);
+      if (p) mountVideo(p);
     }
     playBtn.addEventListener("click", onPlayClick);
 
@@ -284,7 +284,7 @@ export default function WorkIntro() {
           inView = entries[0].isIntersecting;
           if (inView && !wasInView) {
             const p = filtered[current];
-            if (p) mountVideo(p.vimeoId);
+            if (p) mountVideo(p);
           } else if (!inView && wasInView) {
             unmountVideo();
           }
