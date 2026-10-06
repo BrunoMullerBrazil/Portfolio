@@ -23,7 +23,10 @@ import { WRITE_STROKES } from "./logoWriting";
  *   - nothing bounces (no squash, no overshoot — same rule as the site's
  *     motion tokens): arrivals decelerate and settle;
  *   - a slow camera push-in under the whole take, so no frame is static;
- *   - ink, not a mask: the reveal edge is blurred so it bleeds like ink.
+ *   - ink, not a mask: every pixel of the name belongs to the nearest point
+ *     of the hand's path and appears the moment the pen passes it, with a
+ *     soft front — so ink follows the nib along the stroke, never ahead of
+ *     it and never in blocks (see buildInk).
  */
 
 const VB = { x: 160, y: 720, w: 1700, h: 480 };
@@ -95,6 +98,7 @@ const capLen = (v: Pt, max: number) => {
 
 type StrokePlan = {
   path: SVGPathElement; L: number; t0: number; t1: number; ts: number[]; ls: number[];
+  pts: Pt[]; // the samples behind ts/ls, logo units
   a: Pt; b: Pt; va: Pt; vb: Pt; // entry / exit velocity, units per second
 };
 
@@ -125,8 +129,8 @@ function planHand(paths: SVGPathElement[]): StrokePlan[] {
       if (turn > Math.PI) turn = 2 * Math.PI - turn;
       const curv = turn / ds;
       const s = (i * L) / n;
-      const ends = 0.5 + 0.5 * smoothstep(0, 45, s) * smoothstep(0, 45, L - s);
-      const speed = ends / (1 + 60 * curv);
+      const ends = 0.62 + 0.38 * smoothstep(0, 45, s) * smoothstep(0, 45, L - s);
+      const speed = ends / (1 + 45 * curv);
       t += ds / speed;
       ts.push(t);
       ls.push(s);
@@ -152,7 +156,7 @@ function planHand(paths: SVGPathElement[]): StrokePlan[] {
       return { x: (r.pts[i1].x - r.pts[i0].x) / dt, y: (r.pts[i1].y - r.pts[i0].y) / dt };
     };
     return {
-      path: r.path, L: r.L, t0, t1, ts: r.ts.map((v) => t0 + v * k), ls: r.ls,
+      path: r.path, L: r.L, t0, t1, ts: r.ts.map((v) => t0 + v * k), ls: r.ls, pts: r.pts,
       a: r.a, b: r.b, va: vel(0, 1), vb: vel(n - 1, n),
     };
   });
@@ -171,11 +175,145 @@ function lengthAt(p: StrokePlan, t: number) {
   return lerp(p.ls[lo], p.ls[hi], u);
 }
 
+/*
+ * The ink field. The name is rasterised once; every covered pixel gets the
+ * time the pen passes the nearest sample of its centre-line path (bucketed
+ * nearest-neighbour search). Pixels are kept sorted by that time, so each
+ * frame only touches the ones whose ink is still arriving.
+ */
+const INK_SOFT = 0.045; // seconds: how long a pixel takes to fill — the wet front
+
+type Ink = {
+  ctx: CanvasRenderingContext2D;
+  img: ImageData;
+  idx: Int32Array; // pixel index, sorted by time
+  cov: Uint8Array; // anti-aliased coverage
+  T: Float32Array; // arrival time
+  head: number; // first pixel not yet fully inked
+};
+
+function buildInk(canvas: HTMLCanvasElement, plan: StrokePlan[], wPx: number, hPx: number): Ink | null {
+  canvas.width = wPx;
+  canvas.height = hPx;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  const k = wPx / VB.w;
+
+  // coverage of the body
+  const off = document.createElement("canvas");
+  off.width = wPx;
+  off.height = hPx;
+  const octx = off.getContext("2d");
+  if (!octx) return null;
+  octx.setTransform(k, 0, 0, k, -VB.x * k, -VB.y * k);
+  octx.fillStyle = "#fff";
+  octx.fill(new Path2D(LOGO_BODY));
+  const cover = octx.getImageData(0, 0, wPx, hPx).data;
+
+  // path samples (px) into a bucket grid
+  const CELL = 24;
+  const gw = Math.ceil(wPx / CELL), gh = Math.ceil(hPx / CELL);
+  const buckets: number[][] = Array.from({ length: gw * gh }, () => []);
+  const sx: number[] = [], sy: number[] = [], st: number[] = [];
+  plan.forEach((p) =>
+    p.pts.forEach((q, j) => {
+      const x = (q.x - VB.x) * k, y = (q.y - VB.y) * k;
+      const n = sx.length;
+      sx.push(x); sy.push(y); st.push(p.ts[j]);
+      const cx = Math.min(gw - 1, Math.max(0, Math.floor(x / CELL)));
+      const cy = Math.min(gh - 1, Math.max(0, Math.floor(y / CELL)));
+      buckets[cy * gw + cx].push(n);
+    })
+  );
+
+  // arrival time per block of F×F pixels (the field is smooth; full-res
+  // search would cost F² more for no visible difference)
+  const F = Math.max(1, Math.round(wPx / 640));
+  const lw = Math.ceil(wPx / F), lh = Math.ceil(hPx / F);
+  const tLow = new Float32Array(lw * lh).fill(-1);
+  for (let by = 0; by < lh; by++) {
+    for (let bx = 0; bx < lw; bx++) {
+      let any = false;
+      for (let yy = by * F; yy < Math.min(hPx, by * F + F) && !any; yy++)
+        for (let xx = bx * F; xx < Math.min(wPx, bx * F + F); xx++)
+          if (cover[(yy * wPx + xx) * 4 + 3]) { any = true; break; }
+      if (!any) continue;
+      const x = bx * F + F / 2, y = by * F + F / 2;
+      const cx = Math.min(gw - 1, Math.floor(x / CELL)), cy = Math.min(gh - 1, Math.floor(y / CELL));
+      let best = -1, bd = Infinity;
+      for (let r = 0; r < Math.max(gw, gh); r++) {
+        for (let yy = cy - r; yy <= cy + r; yy++) {
+          if (yy < 0 || yy >= gh) continue;
+          for (let xx = cx - r; xx <= cx + r; xx++) {
+            if (xx < 0 || xx >= gw) continue;
+            if (r && Math.abs(xx - cx) < r && Math.abs(yy - cy) < r) continue; // ring only
+            for (const n of buckets[yy * gw + xx]) {
+              const d = (sx[n] - x) ** 2 + (sy[n] - y) ** 2;
+              if (d < bd) { bd = d; best = n; }
+            }
+          }
+        }
+        // anything outside this ring is at least r·CELL away
+        if (best >= 0 && bd <= (r * CELL) ** 2) break;
+      }
+      if (best >= 0) tLow[by * lw + bx] = st[best];
+    }
+  }
+
+  const pix: number[] = [], cov: number[] = [], tim: number[] = [];
+  for (let y = 0; y < hPx; y++) {
+    for (let x = 0; x < wPx; x++) {
+      const i = y * wPx + x;
+      const a = cover[i * 4 + 3];
+      if (!a) continue;
+      const T = tLow[Math.floor(y / F) * lw + Math.floor(x / F)];
+      if (T < 0) continue;
+      pix.push(i); cov.push(a); tim.push(T);
+    }
+  }
+  // order by arrival: counting sort on 1 ms buckets (a comparison sort of
+  // ~160k pixels costs more than everything above)
+  const n = pix.length;
+  let tMin = Infinity, tMax = -Infinity;
+  for (let i = 0; i < n; i++) { if (tim[i] < tMin) tMin = tim[i]; if (tim[i] > tMax) tMax = tim[i]; }
+  const nb = Math.max(1, Math.ceil((tMax - tMin) * 1000) + 1);
+  const start = new Int32Array(nb + 1);
+  const key = new Int32Array(n);
+  for (let i = 0; i < n; i++) { key[i] = Math.floor((tim[i] - tMin) * 1000); start[key[i] + 1]++; }
+  for (let b = 0; b < nb; b++) start[b + 1] += start[b];
+  const idx = new Int32Array(n), cv = new Uint8Array(n), T = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const o = start[key[i]]++;
+    idx[o] = pix[i]; cv[o] = cov[i]; T[o] = tim[i];
+  }
+  const ink: Ink = { ctx, img: ctx.createImageData(wPx, hPx), idx, cov: cv, T, head: 0 };
+  const d = ink.img.data;
+  for (let i = 0; i < d.length; i += 4) d[i] = d[i + 1] = d[i + 2] = 255;
+  return ink;
+}
+
+// paint the ink that has arrived by time t
+function paintInk(ink: Ink, t: number) {
+  const { idx, cov, T, img } = ink;
+  const d = img.data;
+  const n = idx.length;
+  let i = ink.head;
+  while (i < n && T[i] <= t) {
+    const f = (t - T[i]) / INK_SOFT;
+    d[idx[i] * 4 + 3] = f >= 1 ? cov[i] : cov[i] * f;
+    i++;
+  }
+  // everything before the soft front is done for good
+  while (ink.head < n && T[ink.head] <= t - INK_SOFT) ink.head++;
+  ink.ctx.putImageData(img, 0, 0);
+}
+
 export default function Loader() {
   const loaderRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const fillRef = useRef<SVGPathElement>(null);
+  const inkRef = useRef<HTMLCanvasElement>(null);
   const strokeRefs = useRef<(SVGPathElement | null)[]>([]);
   const dotRefs = useRef<(SVGPathElement | null)[]>([]);
   const pctRef = useRef<HTMLDivElement>(null);
@@ -240,10 +378,17 @@ export default function Loader() {
     const strokes = strokeRefs.current.filter(Boolean) as SVGPathElement[];
     const plan = planHand(strokes);
     const totalLen = plan.reduce((a, p) => a + p.L, 0) || 1;
-    plan.forEach((p) => {
-      p.path.style.strokeDasharray = `${p.L} ${p.L}`;
-      p.path.style.strokeDashoffset = String(p.L);
-    });
+
+    // ink canvas, laid exactly over the svg at device resolution
+    const inkCanvas = inkRef.current;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const cssW = svg.clientWidth, cssH = (cssW * VB.h) / VB.w;
+    const ink = inkCanvas && cssW ? buildInk(inkCanvas, plan, Math.round(cssW * dpr), Math.round(cssH * dpr)) : null;
+    if (ink && inkCanvas) {
+      inkCanvas.style.height = cssH + "px";
+    } else {
+      fill.style.opacity = "1"; // no canvas: show the name as is
+    }
 
     const C0 = LOGO_DOT_CENTERS[0];
     const C1 = LOGO_DOT_CENTERS[1];
@@ -398,15 +543,15 @@ export default function Loader() {
 
       // ink
       let written = 0;
-      plan.forEach((s) => {
-        const len = lengthAt(s, t);
-        s.path.style.visibility = t >= s.t0 ? "visible" : "hidden";
-        s.path.style.strokeDashoffset = (s.L - len).toFixed(1);
-        written += len;
-      });
-      if (!unmasked && t >= T_WRITE1 + 0.05) {
-        fill!.removeAttribute("mask"); // crisp final edges
-        unmasked = true;
+      plan.forEach((s) => (written += lengthAt(s, t)));
+      if (!unmasked) {
+        if (ink) paintInk(ink, t);
+        if (t >= T_WRITE1 + INK_SOFT + 0.03) {
+          // dry: hand over to the vector body for crisp edges
+          fill!.style.opacity = "1";
+          if (inkCanvas) inkCanvas.style.display = "none";
+          unmasked = true;
+        }
       }
 
       // the nib
@@ -462,6 +607,7 @@ export default function Loader() {
     <div id="loader" ref={loaderRef} aria-hidden="true">
       <div id="ld-grid" ref={gridRef} />
       <div id="ld-center" ref={centerRef}>
+        <canvas id="ld-ink" ref={inkRef} />
         <svg
           id="ld-logo"
           ref={svgRef}
@@ -470,9 +616,6 @@ export default function Loader() {
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
-            <filter id="ld-soft" x="-5%" y="-10%" width="110%" height="120%">
-              <feGaussianBlur stdDeviation="4" />
-            </filter>
             <filter id="ld-glow" x="-100%" y="-200%" width="300%" height="500%">
               <feGaussianBlur stdDeviation="14" result="b" />
               <feMerge>
@@ -480,27 +623,18 @@ export default function Loader() {
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            <mask id="ld-write" maskUnits="userSpaceOnUse" x="80" y="640" width="1860" height="620">
-              <g filter="url(#ld-soft)">
-              {WRITE_STROKES.map((st, i) => (
-                <path
-                  key={i}
-                  d={st.d}
-                  fill="none"
-                  stroke="#fff"
-                  strokeWidth={st.w}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ visibility: "hidden" }}
-                  ref={(el) => {
-                    strokeRefs.current[i] = el;
-                  }}
-                />
-              ))}
-              </g>
-            </mask>
+            {/* the hand's centre-lines: geometry only, never drawn */}
+            {WRITE_STROKES.map((st, i) => (
+              <path
+                key={i}
+                d={st.d}
+                ref={(el) => {
+                  strokeRefs.current[i] = el;
+                }}
+              />
+            ))}
           </defs>
-          <path id="ld-logo-fill" ref={fillRef} d={LOGO_BODY} mask="url(#ld-write)" />
+          <path id="ld-logo-fill" ref={fillRef} d={LOGO_BODY} style={{ opacity: 0 }} />
           {LOGO_DOTS.map((d, i) => (
             <path
               key={i}
