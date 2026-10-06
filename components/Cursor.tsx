@@ -22,46 +22,76 @@ export default function Cursor() {
     const lbl = labelRef.current;
     if (!cur || !ring || !lbl) return;
 
+    /*
+     * Both pieces are masses on springs following the pointer, integrated
+     * on real time (same feel at 60, 120 or 144 Hz):
+     *   dot  — stiff, near-critical: stays on the pointer, only rounds off
+     *          the jitter of raw mouse events;
+     *   ring — soft, a little underdamped: it trails on a curve, swings
+     *          past on a sharp turn and settles back.
+     * The dot's squash/stretch and angle come from its own smooth velocity,
+     * and the angle turns the short way round, so it never snaps.
+     */
+    const dot = { x: 0, y: 0, vx: 0, vy: 0 };
+    const rng = { x: 0, y: 0, vx: 0, vy: 0 };
     let mx = 0,
       my = 0,
-      rx = 0,
-      ry = 0,
-      pvx = 0,
-      pvy = 0,
-      curAng = 0;
+      seen = false,
+      ang = 0,
+      rAng = 0,
+      last = 0;
 
     function onMouseMove(e: MouseEvent) {
-      pvx = e.clientX - mx;
-      pvy = e.clientY - my;
       mx = e.clientX;
       my = e.clientY;
-      lbl!.style.left = mx + "px";
-      lbl!.style.top = my + "px";
+      if (!seen) {
+        // first contact: start where the pointer is, not flying in from 0,0
+        seen = true;
+        dot.x = rng.x = mx;
+        dot.y = rng.y = my;
+      }
     }
     document.addEventListener("mousemove", onMouseMove);
 
+    function step(b: typeof dot, w: number, z: number, h: number) {
+      b.vx += (w * w * (mx - b.x) - 2 * z * w * b.vx) * h;
+      b.vy += (w * w * (my - b.y) - 2 * z * w * b.vy) * h;
+      b.x += b.vx * h;
+      b.y += b.vy * h;
+    }
+    // ease an angle (deg) towards a target the short way round
+    function turn(a: number, target: number, k: number) {
+      const d = ((target - a + 540) % 360) - 180;
+      return a + d * k;
+    }
+
     let raf: number;
-    function animate() {
-      cur!.style.left = mx + "px";
-      cur!.style.top = my + "px";
-      const spd = Math.sqrt(pvx * pvx + pvy * pvy);
-      pvx *= 0.76;
-      pvy *= 0.76;
-      const str = Math.min(1 + spd * 0.12, 2.8);
-      const sq = Math.max(1 / str, 0.36);
-      if (spd > 0.6) curAng = (Math.atan2(pvy, pvx) * 180) / Math.PI;
+    function animate(ts: number) {
+      const dt = last ? Math.min(0.05, (ts - last) / 1000) : 0;
+      last = ts;
+      const H = 1 / 240;
+      for (let t = 0; t < dt; t += H) {
+        const h = Math.min(H, dt - t);
+        step(dot, 55, 0.82, h);
+        step(rng, 13, 0.58, h);
+      }
+
+      // dot: stretch along its travel, squash across it
+      const spd = Math.hypot(dot.vx, dot.vy);
+      const str = Math.min(1 + spd * 0.0019, 2.6);
+      const sq = Math.max(1 / str, 0.38);
+      if (spd > 40) ang = turn(ang, (Math.atan2(dot.vy, dot.vx) * 180) / Math.PI, 1 - Math.exp(-dt * 22));
       cur!.style.transform =
-        "translate(-50%,-50%) rotate(" +
-        curAng.toFixed(1) +
-        "deg) scaleX(" +
-        str.toFixed(2) +
-        ") scaleY(" +
-        sq.toFixed(2) +
-        ")";
-      rx += (mx - rx) * 0.12;
-      ry += (my - ry) * 0.12;
-      ring!.style.left = rx + "px";
-      ring!.style.top = ry + "px";
+        `translate3d(${dot.x.toFixed(2)}px,${dot.y.toFixed(2)}px,0) translate(-50%,-50%) rotate(${ang.toFixed(1)}deg) scale(${str.toFixed(3)},${sq.toFixed(3)})`;
+
+      // ring: a softer, jelly version of the same
+      const rs = Math.hypot(rng.vx, rng.vy);
+      const rst = Math.min(1 + rs * 0.00028, 1.22);
+      if (rs > 30) rAng = turn(rAng, (Math.atan2(rng.vy, rng.vx) * 180) / Math.PI, 1 - Math.exp(-dt * 14));
+      ring!.style.transform =
+        `translate3d(${rng.x.toFixed(2)}px,${rng.y.toFixed(2)}px,0) translate(-50%,-50%) rotate(${rAng.toFixed(1)}deg) scale(${rst.toFixed(3)},${(1 / Math.sqrt(rst)).toFixed(3)})`;
+
+      lbl!.style.transform = `translate3d(${dot.x.toFixed(2)}px,${dot.y.toFixed(2)}px,0) translate(-50%,-50%)`;
       raf = requestAnimationFrame(animate);
     }
     raf = requestAnimationFrame(animate);
