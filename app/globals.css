@@ -1158,7 +1158,9 @@ html.arc-lock{overflow:hidden;}
 .arc-close:hover{background:rgba(255,255,255,.09);transform:rotate(90deg);}
 .arc-filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px;}
 .arc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px 22px;}
-.arc-tile{display:flex;flex-direction:column;gap:14px;text-align:left;background:none;border:0;padding:0;color:inherit;cursor:none;}
+/* width:100% — a <button> shrinks to its content, and the thumb has no width
+   of its own, so every card took the width of its title */
+.arc-tile{display:flex;flex-direction:column;gap:14px;width:100%;text-align:left;background:none;border:0;padding:0;color:inherit;cursor:none;}
 .arc-thumb{
   position:relative;display:block;aspect-ratio:16/10;border-radius:14px;overflow:hidden;
   background:radial-gradient(120% 120% at 30% 18%,#232a2c 0%,#12161a 60%,#0a0b0d 100%);
