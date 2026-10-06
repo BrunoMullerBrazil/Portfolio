@@ -2,50 +2,47 @@
 
 import { useEffect, useRef } from "react";
 import { LOGO_BODY, LOGO_DOTS, LOGO_DOT_CENTERS } from "./Logo";
-import { WRITE_STROKES } from "./logoWriting";
 
 /*
- * Loader — a pena.
+ * Loader — o trema como semente.
  *
- * The umlaut dot is shaped like a broad calligraphy nib (slanted, flat), so
- * it becomes the pen: it writes "Müller" at a fixed nib angle, then flies
- * up and lands on the ü, and the second dot splits out of it. Then the name
- * is swallowed into a capsule that flies into the hero's video card (last
- * frame of the loader = first frame of the site).
+ * One object, one camera, no cuts (after rerun / SHIFT):
+ *   1. seed: the umlaut dot is born alone and pops in; the second dot springs
+ *      out of it — the trema assembles itself;
+ *   2. dive: the camera rushes into the dot until it fills the screen white;
+ *   3. pull-back: from inside the dot the camera pulls out on an exponential
+ *      curve — the ü, then "Mü", then "Müller" appear *around* the dot. The
+ *      dot never moves on screen: it is the anchor the world zooms out from;
+ *   4. bar: while the camera is still settling, the name collapses down into
+ *      a capsule that sweeps across it (left → right), and that capsule flies
+ *      into the hero's video card (last frame of the loader = first frame of
+ *      the site).
  *
- * Shot like one continuous take, not a sequence of steps:
- *   - one master clock drives everything, writing and hand-off included;
- *     no phase waits for another to finish (no onfinish chains), each one
- *     starts while the previous is still moving;
- *   - velocity is never broken: the pen leaves a stroke at the speed it was
- *     writing and carries it through the air (Hermite curves, not lerps), the
- *     flight to the ü inherits the r's exit and only brakes as it lands;
- *   - nothing bounces (no squash, no overshoot — same rule as the site's
- *     motion tokens): arrivals decelerate and settle;
- *   - a slow camera push-in under the whole take, so no frame is static;
- *   - ink, not a mask: the reveal edge is blurred so it bleeds like ink.
+ * Motion vocabulary: exponential camera (fast start, long settle — it never
+ * stops dead), damped springs only where something is born (the dot, the
+ * twin, the capsule landing in the card). Every phase starts while the
+ * previous one is still moving.
  */
 
-const VB = { x: 160, y: 720, w: 1700, h: 480 };
-const REST_Y = 905; // top of the lowercase — capsule's upper edge
+const L_CENTER = { x: 1010, y: 960 }; // centre of the wordmark, logo units
+const LOGO_W = 1700; // wordmark width, logo units
+const BAND = { x0: 173, x1: 1854, y0: 905, y1: 1186 }; // lowercase band → capsule
+const C0 = LOGO_DOT_CENTERS[0];
+const C1 = LOGO_DOT_CENTERS[1];
 
 // timeline (seconds)
-const T_WRITE0 = 0.25;
-const WRITE_DUR = 1.8; // the whole name, lifts included
-const NIB_FLY = 0.62; // nib: end of the r → ü, one arc
-const T_WRITE1 = T_WRITE0 + WRITE_DUR;
-const T_LAND = T_WRITE1 + NIB_FLY;
-const T_SPLIT = T_LAND - 0.1; // twin leaves before the nib has fully settled
-const SPLIT = 0.42;
-const T_HAND = T_SPLIT + SPLIT * 0.75; // the twin is visually home by now; camera still moving
-
-// hand-off (seconds after T_HAND)
-const H_SWALLOW = 0.5;
-const H_FLY0 = 0.2;
-const H_FLY = 0.95;
-const H_MEDIA = H_FLY0 + H_FLY * 0.62; // video starts appearing under the capsule while it glides in
-const H_DISSOLVE = 0.5;
-const H_END = Math.max(H_FLY0 + H_FLY, H_MEDIA + H_DISSOLVE) + 0.05;
+const T_POP = 0.12; // the dot is born
+const T_SPLIT = 0.46; // the twin springs out of it
+const T_DIVE = 0.86; // camera rushes into the dot
+const DIVE = 0.42;
+const T_PULL = T_DIVE + DIVE; // hidden cut: inside the dot, all white
+const PULL = 1.75; // exponential pull-back to rest
+const T_BAR = T_PULL + 1.3; // camera still settling when the bar starts
+const BAR = 0.44;
+const T_FLY = T_BAR + 0.34; // flight leaves before the sweep has finished
+const T_MEDIA = T_FLY + 0.42; // video appears under the capsule as it lands
+const DISSOLVE = 0.42;
+const T_END = T_MEDIA + DISSOLVE + 0.04;
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -54,9 +51,9 @@ const smoothstep = (a: number, b: number, x: number) => {
   return u * u * (3 - 2 * u);
 };
 const span = (t: number, a: number, d: number) => clamp01((t - a) / d);
+const inExpo = (t: number) => (t <= 0 ? 0 : Math.pow(2, 10 * t - 10));
 const outExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
-const outQuart = (t: number) => 1 - Math.pow(1 - t, 4);
-const outSine = (t: number) => Math.sin((t * Math.PI) / 2);
+const inOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 // CSS-style cubic-bezier(x1,y1,x2,y2) as a function of t ∈ [0,1]
 function bezier(x1: number, y1: number, x2: number, y2: number) {
@@ -77,106 +74,24 @@ function bezier(x1: number, y1: number, x2: number, y2: number) {
     return ((ay * u + by) * u + cy) * u;
   };
 }
-// soft departure (the swallow is still moving when the fly starts), long glide in
-const flyEase = bezier(0.3, 0, 0.08, 1);
-
-type Pt = { x: number; y: number };
-
-// cubic Hermite: position from endpoints and end tangents (tangents already × duration)
-function hermite(p0: Pt, m0: Pt, p1: Pt, m1: Pt, u: number): Pt {
-  const u2 = u * u, u3 = u2 * u;
-  const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
-  return { x: h00 * p0.x + h10 * m0.x + h01 * p1.x + h11 * m1.x, y: h00 * p0.y + h10 * m0.y + h01 * p1.y + h11 * m1.y };
-}
-const capLen = (v: Pt, max: number) => {
-  const l = Math.hypot(v.x, v.y);
-  return l > max ? { x: (v.x / l) * max, y: (v.y / l) * max } : v;
-};
-
-type StrokePlan = {
-  path: SVGPathElement; L: number; t0: number; t1: number; ts: number[]; ls: number[];
-  a: Pt; b: Pt; va: Pt; vb: Pt; // entry / exit velocity, units per second
-};
+const sweepEase = bezier(0.7, 0, 0.2, 1);
 
 /*
- * Time plan for the hand. Each path is sampled every ~6 units; local speed
- * drops with curvature (turning angle per unit) and near the stroke's ends
- * (pen landing / lifting, never to zero). Air time between strokes grows
- * with the jump. Everything is then scaled to WRITE_DUR.
+ * Damped spring, closed form (underdamped, 0 < z < 1), starting at rest:
+ * 0 → 1 with overshoot, settling in a swing or two.
  */
-function planHand(paths: SVGPathElement[]): StrokePlan[] {
-  const raw = paths.map((path) => {
-    const L = path.getTotalLength();
-    const n = Math.max(10, Math.ceil(L / 6));
-    const pts: Pt[] = [];
-    for (let i = 0; i <= n; i++) {
-      const q = path.getPointAtLength((L * i) / n);
-      pts.push({ x: q.x, y: q.y });
-    }
-    const ds = L / n;
-    const ts = [0];
-    const ls = [0];
-    let t = 0;
-    for (let i = 1; i <= n; i++) {
-      const p0 = pts[Math.max(0, i - 2)], p1 = pts[i - 1], p2 = pts[i];
-      const a1 = Math.atan2(p1.y - p0.y, p1.x - p0.x);
-      const a2 = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-      let turn = Math.abs(a2 - a1);
-      if (turn > Math.PI) turn = 2 * Math.PI - turn;
-      const curv = turn / ds;
-      const s = (i * L) / n;
-      const ends = 0.5 + 0.5 * smoothstep(0, 45, s) * smoothstep(0, 45, L - s);
-      const speed = ends / (1 + 60 * curv);
-      t += ds / speed;
-      ts.push(t);
-      ls.push(s);
-    }
-    return { path, L, dur: t, ts, ls, pts, a: pts[0], b: pts[n] };
-  });
-  const lifts = raw.map((r, i) => {
-    const nx = raw[i + 1];
-    if (!nx) return 0;
-    const gap = Math.hypot(nx.a.x - r.b.x, nx.a.y - r.b.y);
-    return gap < 30 ? 30 : 130 + gap * 0.9; // the pen travels in the air, not teleports
-  });
-  const total = raw.reduce((acc, r, i) => acc + r.dur + lifts[i], 0);
-  const k = WRITE_DUR / total;
-  let clock = T_WRITE0;
-  return raw.map((r, i) => {
-    const t0 = clock;
-    const t1 = t0 + r.dur * k;
-    clock = t1 + lifts[i] * k;
-    const n = r.pts.length - 1;
-    const vel = (i0: number, i1: number): Pt => {
-      const dt = (r.ts[i1] - r.ts[i0]) * k || 1e-3;
-      return { x: (r.pts[i1].x - r.pts[i0].x) / dt, y: (r.pts[i1].y - r.pts[i0].y) / dt };
-    };
-    return {
-      path: r.path, L: r.L, t0, t1, ts: r.ts.map((v) => t0 + v * k), ls: r.ls,
-      a: r.a, b: r.b, va: vel(0, 1), vb: vel(n - 1, n),
-    };
-  });
-}
-
-function lengthAt(p: StrokePlan, t: number) {
-  if (t <= p.t0) return 0;
-  if (t >= p.t1) return p.L;
-  let lo = 0, hi = p.ts.length - 1;
-  while (hi - lo > 1) {
-    const mid = (lo + hi) >> 1;
-    if (p.ts[mid] < t) lo = mid;
-    else hi = mid;
-  }
-  const u = (t - p.ts[lo]) / (p.ts[hi] - p.ts[lo] || 1);
-  return lerp(p.ls[lo], p.ls[hi], u);
+function spring(t: number, w: number, z: number) {
+  if (t <= 0) return 0;
+  const d = w * Math.sqrt(1 - z * z);
+  return 1 - Math.exp(-z * w * t) * (Math.cos(d * t) + ((z * w) / d) * Math.sin(d * t));
 }
 
 export default function Loader() {
   const loaderRef = useRef<HTMLDivElement>(null);
-  const centerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const fillRef = useRef<SVGPathElement>(null);
-  const strokeRefs = useRef<(SVGPathElement | null)[]>([]);
+  const camRef = useRef<SVGGElement>(null);
+  const markRef = useRef<SVGGElement>(null);
+  const bodyRef = useRef<SVGPathElement>(null);
   const dotRefs = useRef<(SVGPathElement | null)[]>([]);
   const pctRef = useRef<HTMLDivElement>(null);
   const morphRef = useRef<HTMLDivElement>(null);
@@ -184,13 +99,16 @@ export default function Loader() {
 
   useEffect(() => {
     const loader = loaderRef.current;
-    const center = centerRef.current;
     const svg = svgRef.current;
-    const fill = fillRef.current;
+    const cam = camRef.current;
+    const mark = markRef.current;
+    const body = bodyRef.current;
     const pct = pctRef.current;
     const morph = morphRef.current;
     const grid = gridRef.current;
-    if (!loader || !center || !svg || !fill || !pct || !morph || !grid) return;
+    const dot = dotRefs.current[0];
+    const twin = dotRefs.current[1];
+    if (!loader || !svg || !cam || !mark || !body || !pct || !morph || !grid || !dot || !twin) return;
 
     let finished = false;
 
@@ -211,89 +129,71 @@ export default function Loader() {
     let raf = 0;
     let t0: number | null = null;
     let lastPct = -1;
-    let unmasked = false;
 
-    const strokes = strokeRefs.current.filter(Boolean) as SVGPathElement[];
-    const plan = planHand(strokes);
-    const totalLen = plan.reduce((a, p) => a + p.L, 0) || 1;
-    plan.forEach((p) => {
-      p.path.style.strokeDasharray = `${p.L} ${p.L}`;
-      p.path.style.strokeDashoffset = String(p.L);
-    });
+    // ── camera ──────────────────────────────────────────────────────
+    let vw = 0, vh = 0, sRest = 1, sSeed = 1, sMax = 1;
+    const dotBox = dot.getBBox();
+    function measure() {
+      vw = window.innerWidth;
+      vh = window.innerHeight;
+      svg!.setAttribute("viewBox", `0 0 ${vw} ${vh}`);
+      sRest = Math.min(560, Math.max(280, vw * 0.42)) / LOGO_W; // px per logo unit at rest
+      sSeed = sRest * 4.6; // the seed is seen close: the dots read as shapes, not specks
+      // inside the dot = the dot's short side covers the whole screen from the anchor
+      sMax = (3.4 * Math.hypot(vw, vh)) / Math.min(dotBox.width, dotBox.height);
+    }
+    measure();
+    window.addEventListener("resize", measure);
 
-    const C0 = LOGO_DOT_CENTERS[0];
-    const C1 = LOGO_DOT_CENTERS[1];
-    const nib = dotRefs.current[0]!;
-    const twin = dotRefs.current[1]!;
-    const last = plan[plan.length - 1];
+    /*
+     * The anchor: the dot keeps the screen position it has in the final
+     * mark at every zoom level, so the world zooms around it. With focus
+     * f = C0 + (L_CENTER − C0) · (sRest / s), a point P lands on screen at
+     *   centre + (P − C0) · s + (C0 − L_CENTER) · sRest.
+     */
+    function toScreen(p: { x: number; y: number }, s: number) {
+      return {
+        x: vw / 2 + (p.x - C0.x) * s + (C0.x - L_CENTER.x) * sRest,
+        y: vh / 2 + (p.y - C0.y) * s + (C0.y - L_CENTER.y) * sRest,
+      };
+    }
+    function setCamera(s: number) {
+      const m = Math.min(1, sRest / s);
+      const fx = C0.x + (L_CENTER.x - C0.x) * m;
+      const fy = C0.y + (L_CENTER.y - C0.y) * m;
+      cam!.setAttribute("transform", `translate(${(vw / 2).toFixed(2)} ${(vh / 2).toFixed(2)}) scale(${s.toFixed(5)}) translate(${(-fx).toFixed(3)} ${(-fy).toFixed(3)})`);
+    }
+    function cameraAt(t: number) {
+      if (t < T_DIVE) {
+        // the seed: a slow push-in, never static
+        return sSeed * lerp(0.92, 1.08, smoothstep(0, T_DIVE, t));
+      }
+      if (t < T_PULL) {
+        // dive: accelerate into the dot (log space, so every e-fold takes the same "push")
+        const e = inExpo(span(t, T_DIVE, DIVE));
+        return Math.exp(lerp(Math.log(sSeed * 1.08), Math.log(sMax), e));
+      }
+      // pull-back: the fastest instant is the first — then a long settle that
+      // keeps drifting a hair past rest, so the mark is never frozen
+      const e = outExpo(span(t, T_PULL, PULL));
+      const s = Math.exp(lerp(Math.log(sMax), Math.log(sRest), e));
+      return s * (1 - 0.025 * smoothstep(T_PULL + PULL * 0.6, T_END, t));
+    }
 
-    function put(el: SVGPathElement, c: Pt, p: Pt, s: number, op: number) {
+    function putDot(el: SVGPathElement, c: { x: number; y: number }, at: { x: number; y: number }, sc: number, op: number) {
       el.setAttribute(
         "transform",
-        `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) scale(${s.toFixed(4)}) translate(${-c.x} ${-c.y})`
+        `translate(${at.x.toFixed(2)} ${at.y.toFixed(2)}) scale(${Math.max(0, sc).toFixed(4)}) translate(${-c.x} ${-c.y})`
       );
       el.style.opacity = op.toFixed(3);
     }
 
-    // where the pen is at time t while writing (on paper or in the air)
-    function penAt(t: number): { p: Pt; air: number } {
-      for (let i = 0; i < plan.length; i++) {
-        const s = plan[i];
-        if (t < s.t0) {
-          const prev = plan[i - 1];
-          if (!prev) return { p: s.a, air: 1 };
-          const dur = s.t0 - prev.t1;
-          const u = clamp01((t - prev.t1) / dur);
-          const gap = Math.hypot(s.a.x - prev.b.x, s.a.y - prev.b.y);
-          // leave at the writing speed, arrive at the next stroke's speed
-          const max = gap * 1.4 + 24;
-          const m0 = capLen({ x: prev.vb.x * dur, y: prev.vb.y * dur }, max);
-          const m1 = capLen({ x: s.va.x * dur, y: s.va.y * dur }, max);
-          const p = hermite(prev.b, m0, s.a, m1, u);
-          const lift = Math.pow(Math.sin(Math.PI * u), 2);
-          p.y -= lift * Math.min(60, gap * 0.22);
-          return { p, air: lift };
-        }
-        if (t <= s.t1) {
-          const q = s.path.getPointAtLength(lengthAt(s, t));
-          return { p: { x: q.x, y: q.y }, air: 0 };
-        }
-      }
-      return { p: last.b, air: 0 };
-    }
-
-    // ── hand-off state (measured once, when the capsule appears) ──
+    // ── hand-off ────────────────────────────────────────────────────
     type Rect = { l: number; t: number; w: number; h: number };
-    let cap: Rect | null = null;
     let hero: Rect | null = null;
-    let handStarted = false;
     let flyStarted = false;
     let mediaShown = false;
-    let svgOut: Animation | null = null;
-
-    function startHand() {
-      handStarted = true;
-      const sr = svg!.getBoundingClientRect();
-      const s = sr.width / VB.w;
-      // capsule = the lowercase band of the wordmark
-      cap = {
-        l: sr.left + (173 - VB.x) * s,
-        t: sr.top + (REST_Y - VB.y) * s,
-        w: (1854 - 173) * s,
-        h: (1186 - REST_Y) * s,
-      };
-      morph!.style.opacity = "1";
-      const ease = "cubic-bezier(.16,1,.3,1)";
-      // the name dissolves into the capsule: a little defocus, not a cut
-      svgOut = svg!.animate(
-        [
-          { opacity: 1, transform: "scaleX(1)", filter: "blur(0px)" },
-          { opacity: 0, transform: "scaleX(.95)", filter: "blur(6px)" },
-        ],
-        { duration: 420, delay: 60, easing: ease, fill: "forwards" }
-      );
-      pct!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, easing: ease, fill: "forwards" });
-    }
+    let pctOut = false;
 
     function startFly() {
       flyStarted = true;
@@ -307,51 +207,52 @@ export default function Loader() {
       document.body.classList.add("site-ready");
       const ease = "cubic-bezier(.16,1,.3,1)";
       loader!.animate([{ backgroundColor: "rgba(14,16,12,1)" }, { backgroundColor: "rgba(14,16,12,0)" }], {
-        duration: 900,
-        delay: 120,
+        duration: 820,
+        delay: 60,
         easing: ease,
         fill: "forwards",
       });
-      grid!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 700, easing: ease, fill: "forwards" });
+      grid!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 640, easing: ease, fill: "forwards" });
     }
 
     function setClip(r: Rect, radius: number) {
-      const vw = window.innerWidth, vh = window.innerHeight;
-      const rad = Math.min(radius, r.h / 2, r.w / 2);
-      morph!.style.clipPath = `inset(${r.t.toFixed(2)}px ${(vw - r.l - r.w).toFixed(2)}px ${(vh - r.t - r.h).toFixed(2)}px ${r.l.toFixed(2)}px round ${rad.toFixed(2)}px)`;
+      const w = Math.max(0, r.w), h = Math.max(0, r.h);
+      const rad = Math.min(radius, h / 2, w / 2);
+      morph!.style.clipPath = `inset(${r.t.toFixed(2)}px ${(vw - r.l - w).toFixed(2)}px ${(vh - r.t - h).toFixed(2)}px ${r.l.toFixed(2)}px round ${rad.toFixed(2)}px)`;
     }
 
-    function handFrame(h: number) {
-      if (!handStarted) startHand();
-      if (!flyStarted && h >= H_FLY0) startFly();
-      const c = cap!;
+    function handFrame(t: number, s: number) {
+      // the capsule: the lowercase band of the name, swept in from the left
+      const a = toScreen({ x: BAND.x0, y: BAND.y0 }, s);
+      const b = toScreen({ x: BAND.x1, y: BAND.y1 }, s);
+      const sw = sweepEase(span(t, T_BAR, BAR));
+      const band: Rect = { l: a.x, t: a.y, w: (b.x - a.x) * sw, h: b.y - a.y };
+      morph!.style.opacity = "1";
 
-      // swallow: the capsule opens from the centre of the name
-      const sw = outExpo(span(h, 0, H_SWALLOW));
-      let r: Rect = { l: c.l + (c.w * (1 - sw)) / 2, t: c.t, w: c.w * sw, h: c.h };
-      let radius = c.h / 2;
-
-      if (hero) {
-        // fly: one glide on a slight arc, no stop between swallow and travel
-        const e = flyEase(span(h, H_FLY0, H_FLY));
-        const arc = Math.sin(Math.PI * e) * Math.min(90, window.innerHeight * 0.08);
-        r = {
-          l: lerp(r.l, hero.l, e),
-          t: lerp(r.t, hero.t, e) - arc,
-          w: lerp(r.w, hero.w, e),
-          h: lerp(r.h, hero.h, e),
-        };
-        radius = lerp(c.h / 2, 20, outSine(e));
-        if (!mediaShown && h >= H_MEDIA) {
-          mediaShown = true;
-          document.body.classList.add("media-ready"); // video fades in under the capsule
-        }
-        morph!.style.opacity = (1 - smoothstep(H_MEDIA, H_MEDIA + H_DISSOLVE, h)).toFixed(3);
-      } else if (flyStarted) {
-        // hero card not on screen (scrolled / tiny viewport): just dissolve
-        morph!.style.opacity = (1 - smoothstep(H_FLY0, H_FLY0 + 0.45, h)).toFixed(3);
+      if (!flyStarted && t >= T_FLY) startFly();
+      if (!flyStarted || !hero) {
+        if (flyStarted) morph!.style.opacity = (1 - smoothstep(T_FLY, T_FLY + 0.45, t)).toFixed(3);
+        setClip(band, band.h / 2);
+        return;
       }
-      setClip(r, radius);
+
+      // flight: position barely overshoots, size settles into the card like jelly
+      const tf = t - T_FLY;
+      const ep = spring(tf, 9, 0.72);
+      const es = spring(tf, 9, 0.5);
+      const cx = band.l + band.w / 2, cy = band.t + band.h / 2;
+      const hx = hero.l + hero.w / 2, hy = hero.t + hero.h / 2;
+      const arc = Math.sin(Math.PI * clamp01(ep)) * Math.min(80, vh * 0.07);
+      const x = lerp(cx, hx, ep);
+      const y = lerp(cy, hy, ep) - arc;
+      const w = lerp(band.w, hero.w, es);
+      const h = lerp(band.h, hero.h, es);
+      if (!mediaShown && t >= T_MEDIA) {
+        mediaShown = true;
+        document.body.classList.add("media-ready"); // video fades in under the capsule
+      }
+      morph!.style.opacity = (1 - smoothstep(T_MEDIA, T_MEDIA + DISSOLVE, t)).toFixed(3);
+      setClip({ l: x - w / 2, t: y - h / 2, w, h }, lerp(band.h / 2, 20, clamp01(es)));
     }
 
     function done() {
@@ -359,70 +260,49 @@ export default function Loader() {
       finished = true;
       clearTimeout(failsafe);
       document.body.classList.add("site-ready", "media-ready");
-      svgOut?.cancel();
       loader!.remove();
     }
 
+    // ── one clock ───────────────────────────────────────────────────
     function tick(ts: number) {
       if (t0 === null) t0 = ts;
       const t = (ts - t0) / 1000;
 
-      // camera: a slow push-in for the whole take, so no frame is ever static
-      const cam = outSine(clamp01(t / (T_HAND + 0.5)));
-      center!.style.transform = `translate(-50%,-50%) scale(${lerp(0.94, 1, cam).toFixed(4)})`;
+      const s = cameraAt(t);
+      setCamera(s);
 
-      // ink
-      let written = 0;
-      plan.forEach((s) => {
-        const len = lengthAt(s, t);
-        s.path.style.visibility = t >= s.t0 ? "visible" : "hidden";
-        s.path.style.strokeDashoffset = (s.L - len).toFixed(1);
-        written += len;
-      });
-      if (!unmasked && t >= T_WRITE1 + 0.05) {
-        fill!.removeAttribute("mask"); // crisp final edges
-        unmasked = true;
+      // seed: the dot is born (spring from nothing), the twin springs out of it
+      const born = spring(t - T_POP, 20, 0.42);
+      putDot(dot!, C0, C0, born, t >= T_POP ? 1 : 0);
+      const k = spring(t - T_SPLIT, 15, 0.45);
+      const hop = Math.sin(Math.PI * span(t, T_SPLIT, 0.26)) * 34;
+      putDot(twin!, C1, { x: lerp(C0.x, C1.x, k), y: lerp(C0.y, C1.y, k) - hop }, lerp(0.7, 1, clamp01(k)), t >= T_SPLIT ? smoothstep(0, 0.06, t - T_SPLIT) : 0);
+
+      // the name exists only from the hidden cut on — it is revealed by the
+      // camera pulling out, never faded in
+      body!.style.opacity = t >= T_PULL ? "1" : "0";
+
+      // bar: the name collapses down into the band as the capsule sweeps over it
+      if (t >= T_BAR) {
+        const c = inOutCubic(span(t, T_BAR + 0.06, 0.32));
+        const yb = (BAND.y0 + BAND.y1) / 2;
+        mark!.setAttribute("transform", `translate(0 ${yb}) scale(1 ${(1 - 0.75 * c).toFixed(4)}) translate(0 ${-yb})`);
+        mark!.style.opacity = (1 - span(t, T_BAR + 0.22, 0.14)).toFixed(3);
+        handFrame(t, s);
       }
 
-      // the nib
-      if (t < T_WRITE0) {
-        put(nib, C0, plan[0].a, 0.86, 0);
-      } else if (t <= T_WRITE1) {
-        const { p, air } = penAt(t);
-        const fadeIn = smoothstep(T_WRITE0, T_WRITE0 + 0.18, t);
-        put(nib, C0, p, 0.86 + air * 0.06, fadeIn);
-        nib.classList.add("nib");
-      } else if (t < T_LAND) {
-        // carries the r's exit speed up into one arc and brakes onto the ü
-        const u = (t - T_WRITE1) / NIB_FLY;
-        const m0 = capLen({ x: last.vb.x * NIB_FLY, y: last.vb.y * NIB_FLY }, 420);
-        const p = hermite(last.b, m0, C0, { x: 0, y: 40 }, u);
-        p.y -= Math.pow(Math.sin(Math.PI * u), 2) * 210;
-        put(nib, C0, p, lerp(0.86, 1, smoothstep(0.2, 1, u)), 1);
-      } else {
-        nib.classList.remove("nib");
-        put(nib, C0, C0, 1, 1);
-      }
-
-      // the second dot slides out of the first and settles in its place
-      if (t < T_SPLIT) {
-        put(twin, C1, C0, 1, 0);
-      } else {
-        const v = clamp01((t - T_SPLIT) / SPLIT);
-        const dx = C1.x - C0.x;
-        const p = hermite(C0, { x: dx * 0.9, y: -70 }, C1, { x: dx * 0.15, y: 0 }, outQuart(v));
-        put(twin, C1, p, 1, smoothstep(0, 0.3, v));
-      }
-
-      const pc = Math.round(clamp01(written / totalLen) * 100);
+      // the counter rides the camera: 0 at the seed, 100 when the mark is home
+      const pc = Math.round(100 * (t < T_PULL ? 0.3 * span(t, 0, T_PULL) : 0.3 + 0.7 * outExpo(span(t, T_PULL, PULL))));
       if (pc !== lastPct) {
         pct!.firstChild!.nodeValue = String(pc);
         lastPct = pc;
       }
+      if (!pctOut && t >= T_BAR) {
+        pctOut = true;
+        pct!.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 240, fill: "forwards" });
+      }
 
-      if (t >= T_HAND) handFrame(t - T_HAND);
-
-      if (t < T_HAND + H_END) raf = requestAnimationFrame(tick);
+      if (t < T_END) raf = requestAnimationFrame(tick);
       else done();
     }
     raf = requestAnimationFrame(tick);
@@ -430,67 +310,33 @@ export default function Loader() {
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(failsafe);
+      window.removeEventListener("resize", measure);
     };
   }, []);
 
   return (
     <div id="loader" ref={loaderRef} aria-hidden="true">
       <div id="ld-grid" ref={gridRef} />
-      <div id="ld-center" ref={centerRef}>
-        <svg
-          id="ld-logo"
-          ref={svgRef}
-          viewBox="160 720 1700 480"
-          preserveAspectRatio="xMidYMid meet"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <filter id="ld-soft" x="-5%" y="-10%" width="110%" height="120%">
-              <feGaussianBlur stdDeviation="4" />
-            </filter>
-            <filter id="ld-glow" x="-100%" y="-200%" width="300%" height="500%">
-              <feGaussianBlur stdDeviation="14" result="b" />
-              <feMerge>
-                <feMergeNode in="b" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-            <mask id="ld-write" maskUnits="userSpaceOnUse" x="80" y="640" width="1860" height="620">
-              <g filter="url(#ld-soft)">
-              {WRITE_STROKES.map((st, i) => (
-                <path
-                  key={i}
-                  d={st.d}
-                  fill="none"
-                  stroke="#fff"
-                  strokeWidth={st.w}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ visibility: "hidden" }}
-                  ref={(el) => {
-                    strokeRefs.current[i] = el;
-                  }}
-                />
-              ))}
-              </g>
-            </mask>
-          </defs>
-          <path id="ld-logo-fill" ref={fillRef} d={LOGO_BODY} mask="url(#ld-write)" />
-          {LOGO_DOTS.map((d, i) => (
-            <path
-              key={i}
-              className="ld-dot"
-              d={d}
-              ref={(el) => {
-                dotRefs.current[i] = el;
-              }}
-              style={{ opacity: 0 }}
-            />
-          ))}
-        </svg>
-        <div id="ld-pct" ref={pctRef}>
-          0<span>%</span>
-        </div>
+      <svg id="ld-logo" ref={svgRef} xmlns="http://www.w3.org/2000/svg">
+        <g ref={camRef}>
+          <g ref={markRef}>
+            <path id="ld-logo-fill" ref={bodyRef} d={LOGO_BODY} style={{ opacity: 0 }} />
+            {LOGO_DOTS.map((d, i) => (
+              <path
+                key={i}
+                className="ld-dot"
+                d={d}
+                ref={(el) => {
+                  dotRefs.current[i] = el;
+                }}
+                style={{ opacity: 0 }}
+              />
+            ))}
+          </g>
+        </g>
+      </svg>
+      <div id="ld-pct" ref={pctRef}>
+        0<span>%</span>
       </div>
       <div id="ld-morph" ref={morphRef} />
     </div>
