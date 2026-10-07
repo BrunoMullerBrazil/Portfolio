@@ -90,7 +90,7 @@ body.cursor-play #cursor-label svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.75))
 .hero-greeting em{font-variation-settings:'wght' 24,'ital' 100;font-style:normal;color:#bcae95;}
 .hero-signature{flex:0 0 auto;width:clamp(180px,26vw,340px);display:flex;align-items:center;justify-content:flex-end;opacity:0;animation:fadeUpDark .9s .75s cubic-bezier(.22,1,.36,1) forwards;}
 /* the asset is already in the site's warm off-white (#e0dbd1) on transparent — no invert filter */
-.hero-signature img{width:100%;opacity:.62;}
+.hero-signature img{width:60%;opacity:.62;} /* taller, heavier stroke than the old one: shown smaller */
 .hero-role{position:absolute;right:48px;bottom:80px;text-align:right;opacity:0;animation:fadeUpDark .8s .9s cubic-bezier(.22,1,.36,1) forwards;}
 .hero-role-line{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#888;}
 .hg-line-subtitle{margin-top:16px;}
