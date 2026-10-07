@@ -336,7 +336,7 @@ export default function Hero() {
           </div>
           <div className="hero-signature">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={withBasePath("/assets/signature.webp")} alt="" />
+            <img src={withBasePath("/assets/signature-bruno.webp")} alt="" />
           </div>
         </div>
 
