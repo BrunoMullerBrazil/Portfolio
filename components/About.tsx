@@ -71,7 +71,8 @@ export default function About() {
     io.observe(statsWrap);
 
     return () => io.disconnect();
-  }, []);
+    // the block only exists in EN: re-arm when the language switches
+  }, [lang]);
 
   return (
     <>
@@ -91,6 +92,8 @@ export default function About() {
               exists in one language), so late blocks get scrubbed too. */}
           {para3 && <Scrub className="about-text" range=".92 .5" text={para3} />}
         </div>
+        {/* EN only: in PT the client logos below carry the proof on their own */}
+        {lang === "en" && (
         <div className="about-stats" ref={statsWrapRef}>
           <div className="stat reveal reveal-d1">
             <div className="stat-num" data-count="5" data-suffix="+">
@@ -105,6 +108,7 @@ export default function About() {
             <div className="stat-lbl">{tr(dict.statRemote, lang)}</div>
           </div>
         </div>
+        )}
       </section>
 
       {/* eslint-disable @next/next/no-img-element */}
