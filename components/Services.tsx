@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { WHATSAPP_NUMBER } from "./WhatsAppButton";
 import { useLanguage, t } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
 import { SplitText } from "./SplitText";
@@ -97,7 +98,7 @@ export default function Services() {
       </div>
 
       <div className="svc-cta-wrap reveal">
-        <a href="https://wa.me/5548991879579" target="_blank" rel="noopener" className="svc-cta-btn">
+        <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener" className="svc-cta-btn">
           {t(dict.servicesCta, lang)}
           <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path
