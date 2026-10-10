@@ -154,6 +154,63 @@ export default function Hero() {
       el.style.setProperty(prop, v, "important");
     }
     let mode = "";
+
+    /*
+     * Desktop composition (measured, so it holds at any width / language):
+     *   - the signature sits on the baseline of "Bruno." — it closes the
+     *     sentence instead of floating in the right third;
+     *   - the card is centred in the free space between the text block and
+     *   the signature (not on the viewport, where the wide headline crowded
+     *     it), and glides to the viewport centre as it grows to full screen.
+     * Layout offsets, not rects: they ignore the text's parallax transform
+     * and the entrance animations.
+     */
+    let cardCx: number | null = null;
+    function relBox(el: HTMLElement) {
+      let x = 0, y = 0;
+      let n: HTMLElement | null = el;
+      while (n && n !== ht) {
+        x += n.offsetLeft;
+        y += n.offsetTop;
+        n = n.offsetParent as HTMLElement | null;
+      }
+      return { x, y, w: el.offsetWidth, h: el.offsetHeight };
+    }
+    function layoutDesktop() {
+      const vw = window.innerWidth;
+      const sig = ht!.querySelector<HTMLElement>(".hero-signature");
+      const img = sig?.querySelector<HTMLElement>("img");
+      const greet = ht!.querySelector<HTMLElement>(".hero-greeting");
+      const base = ht!.querySelector<HTMLElement>(".hg-base");
+      if (vw <= 768 || !sig || !img || !greet || !base) {
+        if (sig) {
+          sig.style.translate = "";
+          sig.classList.remove("sig-off");
+        }
+        cardCx = null;
+        return;
+      }
+      // the body of the signature (its arches) sits ~78% down the image
+      const b = relBox(base), im = relBox(img);
+      sig.style.translate = "0 " + (b.y - (im.y + im.h * 0.78)).toFixed(1) + "px";
+      const g = relBox(greet);
+      const free0 = g.x + g.w;
+      const { W0 } = baseMediaSize(vw, window.innerHeight);
+      const need = W0 + 96; // the card plus a breath on each side
+      if (im.x - free0 >= need) {
+        sig.classList.remove("sig-off");
+        cardCx = (free0 + im.x) / 2;
+      } else if (vw - 48 - free0 >= need) {
+        // narrow desktops / tablets: no room for all three — the signature
+        // is the one that steps out, the card takes its space
+        sig.classList.add("sig-off");
+        cardCx = (free0 + vw - 48) / 2;
+      } else {
+        sig.classList.remove("sig-off");
+        cardCx = null;
+      }
+    }
+
     function setM(w: number, h: number, r: number, top: number) {
       const vw = window.innerWidth;
       const isMobile = vw <= 768;
@@ -171,6 +228,12 @@ export default function Hero() {
         const centeredLeft = (vw - w) / 2;
         const centerX = rightAnchoredLeft + (centeredLeft - rightAnchoredLeft) * expansion;
         leftVal = Math.max(0, centerX) + "px";
+        txVal = "none";
+      } else if (cardCx !== null) {
+        const { W0 } = baseMediaSize(vw, window.innerHeight);
+        const expansion = Math.max(0, Math.min((w - W0) / (vw - W0), 1));
+        const cx = cardCx + (vw / 2 - cardCx) * expansion;
+        leftVal = (cx - w / 2).toFixed(1) + "px";
         txVal = "none";
       } else {
         leftVal = "50%";
@@ -238,6 +301,7 @@ export default function Hero() {
         vw = window.innerWidth;
       const { W0: W, H0: H } = baseMediaSize(vw, vh);
       syncVideoSrc();
+      layoutDesktop();
       setM(W, H, 20, (vh - H) / 2);
       // Visibility before the loader hands over is gated in CSS
       // (body:not(.media-ready)). Setting opacity inline here used to hide
@@ -304,6 +368,27 @@ export default function Hero() {
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     updH();
+    // re-measure once the display font and the signature have their real size
+    function relayout() {
+      initM();
+      updH();
+    }
+    document.fonts?.ready.then(relayout);
+    // the text block changes width with the language and the display font
+    const greetEl = ht.querySelector<HTMLElement>(".hero-greeting");
+    let roW = 0;
+    const ro = new ResizeObserver(() => {
+      const w = greetEl?.offsetWidth || 0;
+      if (w && w !== roW) {
+        roW = w;
+        relayout();
+      }
+    });
+    if (greetEl) ro.observe(greetEl);
+    // late font swaps can move things without changing the block's width
+    window.addEventListener("load", relayout);
+    const sigImg = ht.querySelector<HTMLImageElement>(".hero-signature img");
+    if (sigImg && !sigImg.complete) sigImg.addEventListener("load", relayout, { once: true });
 
     return () => {
       cancelAnimationFrame(raf);
@@ -313,6 +398,8 @@ export default function Hero() {
       document.removeEventListener("mousemove", onMouseMoveKick);
       window.removeEventListener("load", onLoad);
       window.removeEventListener("resize", initM);
+      ro.disconnect();
+      window.removeEventListener("load", relayout);
     };
   }, []);
 
@@ -354,6 +441,7 @@ export default function Hero() {
               <span className="hg-w" style={{ transitionDelay: ".24s" }}>
                 {t(dict.heroGreeting3, lang)}
                 <em>.</em>
+                <span className="hg-base" aria-hidden="true" />
               </span>
             </div>
             <div className="hg-line hg-line-subtitle">

@@ -94,6 +94,9 @@ body.cursor-play #cursor-label svg{filter:drop-shadow(0 1px 3px rgba(0,0,0,.75))
 .hero-role{position:absolute;right:48px;bottom:80px;text-align:right;opacity:0;animation:fadeUpDark .8s .9s cubic-bezier(.22,1,.36,1) forwards;}
 .hero-role-line{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#888;}
 .hg-line-subtitle{margin-top:16px;}
+/* zero-size marker on the baseline of "Bruno." — the signature is aligned to it (Hero.tsx) */
+.hg-base{display:inline-block;width:0;height:0;vertical-align:baseline;}
+.hero-signature.sig-off{visibility:hidden;}
 .hero-subtitle{font-family:Georgia,serif;font-style:italic;font-size:clamp(15px,1.7vw,21px);letter-spacing:.01em;line-height:1.4;color:#bcae95;max-width:480px;}
 @keyframes fadeUpDark{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeUpDarkCenter{from{opacity:0;transform:translate(-50%,18px);}to{opacity:1;transform:translate(-50%,0);}}
