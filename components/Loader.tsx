@@ -97,7 +97,7 @@ const capLen = (v: Pt, max: number) => {
 };
 
 type StrokePlan = {
-  path: SVGPathElement; L: number; t0: number; t1: number; ts: number[]; ls: number[];
+  at: (len: number) => Pt; L: number; t0: number; t1: number; ts: number[]; ls: number[];
   pts: Pt[]; // the samples behind ts/ls, logo units
   a: Pt; b: Pt; va: Pt; vb: Pt; // entry / exit velocity, units per second
 };
@@ -108,15 +108,53 @@ type StrokePlan = {
  * (pen landing / lifting, never to zero). Air time between strokes grows
  * with the jump. Everything is then scaled to WRITE_DUR.
  */
-function planHand(paths: SVGPathElement[]): StrokePlan[] {
-  const raw = paths.map((path) => {
-    const L = path.getTotalLength();
+/*
+ * Point-at-length for an "M x y C …" path (all the hand's strokes use only
+ * absolute M and C), computed in plain math. getPointAtLength() walks the
+ * path from its start on every call — ~1000 calls cost ~0.8 s of main
+ * thread on a mid phone, before the loader could even start.
+ */
+function pathSampler(d: string): { L: number; at: (len: number) => Pt } {
+  const nums = (d.match(/-?\d*\.?\d+(?:e-?\d+)?/gi) || []).map(Number);
+  const xs: number[] = [nums[0]], ys: number[] = [nums[1]], cum: number[] = [0];
+  let x0 = nums[0], y0 = nums[1];
+  for (let i = 2; i + 5 < nums.length; i += 6) {
+    const [x1, y1, x2, y2, x3, y3] = nums.slice(i, i + 6);
+    const N = 24;
+    for (let k = 1; k <= N; k++) {
+      const u = k / N, v = 1 - u;
+      const x = v * v * v * x0 + 3 * v * v * u * x1 + 3 * v * u * u * x2 + u * u * u * x3;
+      const y = v * v * v * y0 + 3 * v * v * u * y1 + 3 * v * u * u * y2 + u * u * u * y3;
+      cum.push(cum[cum.length - 1] + Math.hypot(x - xs[xs.length - 1], y - ys[ys.length - 1]));
+      xs.push(x);
+      ys.push(y);
+    }
+    x0 = x3;
+    y0 = y3;
+  }
+  const L = cum[cum.length - 1];
+  return {
+    L,
+    at(len: number) {
+      const s = Math.max(0, Math.min(L, len));
+      let lo = 0, hi = cum.length - 1;
+      while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        if (cum[mid] < s) lo = mid;
+        else hi = mid;
+      }
+      const u = (s - cum[lo]) / (cum[hi] - cum[lo] || 1);
+      return { x: xs[lo] + (xs[hi] - xs[lo]) * u, y: ys[lo] + (ys[hi] - ys[lo]) * u };
+    },
+  };
+}
+
+function planHand(paths: string[]): StrokePlan[] {
+  const raw = paths.map((d) => {
+    const { L, at } = pathSampler(d);
     const n = Math.max(10, Math.ceil(L / 6));
     const pts: Pt[] = [];
-    for (let i = 0; i <= n; i++) {
-      const q = path.getPointAtLength((L * i) / n);
-      pts.push({ x: q.x, y: q.y });
-    }
+    for (let i = 0; i <= n; i++) pts.push(at((L * i) / n));
     const ds = L / n;
     const ts = [0];
     const ls = [0];
@@ -135,7 +173,7 @@ function planHand(paths: SVGPathElement[]): StrokePlan[] {
       ts.push(t);
       ls.push(s);
     }
-    return { path, L, dur: t, ts, ls, pts, a: pts[0], b: pts[n] };
+    return { at, L, dur: t, ts, ls, pts, a: pts[0], b: pts[n] };
   });
   const lifts = raw.map((r, i) => {
     const nx = raw[i + 1];
@@ -156,7 +194,7 @@ function planHand(paths: SVGPathElement[]): StrokePlan[] {
       return { x: (r.pts[i1].x - r.pts[i0].x) / dt, y: (r.pts[i1].y - r.pts[i0].y) / dt };
     };
     return {
-      path: r.path, L: r.L, t0, t1, ts: r.ts.map((v) => t0 + v * k), ls: r.ls, pts: r.pts,
+      at: r.at, L: r.L, t0, t1, ts: r.ts.map((v) => t0 + v * k), ls: r.ls, pts: r.pts,
       a: r.a, b: r.b, va: vel(0, 1), vb: vel(n - 1, n),
     };
   });
@@ -314,7 +352,6 @@ export default function Loader() {
   const svgRef = useRef<SVGSVGElement>(null);
   const fillRef = useRef<SVGPathElement>(null);
   const inkRef = useRef<HTMLCanvasElement>(null);
-  const strokeRefs = useRef<(SVGPathElement | null)[]>([]);
   const dotRefs = useRef<(SVGPathElement | null)[]>([]);
   const pctRef = useRef<HTMLDivElement>(null);
   const morphRef = useRef<HTMLDivElement>(null);
@@ -375,8 +412,7 @@ export default function Loader() {
     let lastPct = -1;
     let unmasked = false;
 
-    const strokes = strokeRefs.current.filter(Boolean) as SVGPathElement[];
-    const plan = planHand(strokes);
+    const plan = planHand(WRITE_STROKES.map((st) => st.d));
     const totalLen = plan.reduce((a, p) => a + p.L, 0) || 1;
 
     // Returning in the same session: the name is already written — show the
@@ -433,7 +469,7 @@ export default function Loader() {
           return { p, air: lift };
         }
         if (t <= s.t1) {
-          const q = s.path.getPointAtLength(lengthAt(s, t));
+          const q = s.at(lengthAt(s, t));
           return { p: { x: q.x, y: q.y }, air: 0 };
         }
       }
@@ -640,16 +676,6 @@ export default function Loader() {
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            {/* the hand's centre-lines: geometry only, never drawn */}
-            {WRITE_STROKES.map((st, i) => (
-              <path
-                key={i}
-                d={st.d}
-                ref={(el) => {
-                  strokeRefs.current[i] = el;
-                }}
-              />
-            ))}
           </defs>
           <path id="ld-logo-fill" ref={fillRef} d={LOGO_BODY} style={{ opacity: 0 }} />
           {LOGO_DOTS.map((d, i) => (

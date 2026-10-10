@@ -1272,3 +1272,20 @@ body.traj-drop::after{content:'Solte a imagem';position:fixed;inset:14px;z-index
 @media(max-width:620px){.arc-form-row{flex-direction:column;}}
 .traj-layers.editing .traj-layer.opaque{outline:1px dashed #e6a16e;}
 .traj-layers.editing .traj-layer.opaque::after{content:'sem transparência · R';position:absolute;left:0;top:-22px;font:10px/1 var(--font-inter),sans-serif;letter-spacing:.1em;color:#e6a16e;white-space:nowrap;}
+
+/* ═══ Mobile performance ═══
+   Phones paid for effects nobody sees at that size:
+   - the floating nav's backdrop blur re-blurs the page under it on every
+     scroll frame: a denser solid fill reads the same;
+   - the film grain was a 200%×200% layer (4× the screen, ~45 MB of GPU
+     texture at 3× density) translated 12 times a second: on phones it is a
+     static, screen-sized layer — still grain, no motion to composite. */
+@media (max-width:768px), (hover:none) and (pointer:coarse){
+  #nav-dark{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(18,18,16,.86);}
+  .film-grain{left:0;top:0;width:100%;height:100%;animation:none;}
+}
+
+/* The hero video is a background player (no controls): it never needs the
+   pointer. Without this a swipe that starts on it can be swallowed by the
+   cross-origin iframe on phones instead of scrolling the page. */
+#heroMedia iframe{pointer-events:none;}

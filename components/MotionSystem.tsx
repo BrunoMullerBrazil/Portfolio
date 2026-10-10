@@ -395,7 +395,9 @@ export default function MotionSystem() {
       const max = root.scrollHeight - vh;
       const p = max > 0 ? clamp(sy / max, 0, 1) : 0;
       if (Math.abs(p - lastP) > 0.0002) {
-        root.style.setProperty("--scroll-p", p.toFixed(4));
+        // on the nav, not on <html>: a custom property on the root is
+        // inherited by every element, so it restyled the whole page per frame
+        nav?.style.setProperty("--scroll-p", p.toFixed(4));
         if (tcTime) tcTime.textContent = timecode(p * runtime);
         lastP = p;
       }
@@ -439,7 +441,9 @@ export default function MotionSystem() {
       });
 
       // ── Kinetic type: reads
-      const italTarget = clamp(speed * 34, 0, 100);
+      // Touch: no speed-italics. Moving a variable-font axis re-shapes the
+      // text every frame, and on a phone it costs far more than it reads.
+      const italTarget = isTouch ? 0 : clamp(speed * 34, 0, 100);
       type KinRead = { k: Kin; rects: DOMRect[] | null };
       const kinReads: KinRead[] = [];
       kins.forEach((k) => {
