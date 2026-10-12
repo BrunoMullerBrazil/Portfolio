@@ -392,7 +392,7 @@ body.explore #hint,body.detail #hint,body.cutting #hint{opacity:0!important}
     <div class="eb">Ambientes</div>
     <div class="rooms" id="dRooms"></div>
     <p class="note" style="margin-top:14px" id="dNote"></p>
-    <div class="drow"><button class="cta solid" id="dCut">Ver o andar por dentro</button><button class="cta ghost" id="dShare">Compartilhar este apê</button><button class="cta ghost" id="dHome">Vista geral</button></div>
+    <div class="drow"><button class="cta solid" id="dCut">Ver o andar por dentro</button><a class="cta solid" id="dEnter" href="#" hidden style="text-decoration:none">Entrar no apê decorado</a><a class="cta solid" id="dEnter" href="#" hidden style="text-decoration:none;display:inline-flex;align-items:center">Entrar no apê decorado</a><button class="cta ghost" id="dShare">Compartilhar este apê</button><button class="cta ghost" id="dHome">Vista geral</button></div>
     <div class="msg" id="shareMsg" role="status"></div>
   </div>
 </aside>
@@ -1062,6 +1062,7 @@ function facadeInfo(ti,n){
   if(n===1||n===2){const north=t.mir>0; fac+=(north?' + norte':' + sul'); if(north) sunTxt+=' + norte'; view+=' e outra torre';}
   return {fac,sunTxt,view};
 }
+const DECORADOS={'B112':'b112/'};
 function openDetail(){
   const {ti,f,n}=sel; const u=U[n], t=TYPES[u.t]; const fi=facadeInfo(ti,n);
   $('dNum').textContent=aptNum(f,n); $('dSub').textContent='Bloco '+TOWERS[ti].id+' · '+f+'º andar ('+(f+2)+'º pavimento) · final '+String(n).padStart(2,'0');
@@ -1070,6 +1071,7 @@ function openDetail(){
   $('cArea').textContent=t.area; $('cSun').textContent=fi.sunTxt; $('cFac').textContent=fi.fac; $('cView').textContent=fi.view;
   $('dRooms').innerHTML=PLANS[u.t].labels.map(l=>`<span>${l[0]}</span><span>${l[1]} m²</span>`).join('');
   $('dNote').textContent='Planta esquemática da tipologia, redesenhada do book de vendas. Unidades vizinhas costumam ser espelhadas: use "Espelhar" se a sua for invertida.';
+  const cu=DECORADOS[TOWERS[ti].id+aptNum(f,n)]; $('dEnter').hidden=!cu; $('dEnter').style.display=cu?'inline-flex':'none'; if(cu){$('dEnter').href=cu;}
   document.body.classList.add('detail'); $('detail').setAttribute('aria-hidden','false'); resize();
 }
 function closeDetail(){document.body.classList.remove('detail');$('detail').setAttribute('aria-hidden','true');resize();}
