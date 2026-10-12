@@ -226,6 +226,56 @@ body.explore .foot{opacity:0}
   .dh{padding:20px 20px 6px}.dh h2{font-size:46px}.db{padding:4px 20px 26px}
   .vignette{background:linear-gradient(rgba(8,8,9,.55),transparent 45%),radial-gradient(120% 90% at 50% 60%,transparent 55%,rgba(0,0,0,.4) 100%)}
 }
+
+/* ---- legibilidade: todo elemento flutuante tem fundo ou véu próprio ---- */
+:root{--muted:rgba(241,235,225,.8);--faint:rgba(241,235,225,.62);--glass:rgba(14,13,12,.66)}
+.vignette{background:linear-gradient(0deg,rgba(8,8,9,.78) 0%,rgba(8,8,9,.35) 14%,transparent 26%),linear-gradient(90deg,rgba(8,8,9,.86) 0%,rgba(8,8,9,.62) 26%,rgba(8,8,9,.2) 44%,transparent 56%),radial-gradient(120% 90% at 60% 45%,transparent 60%,rgba(0,0,0,.35) 100%)}
+header{background:linear-gradient(rgba(8,8,9,.82),rgba(8,8,9,.45) 65%,transparent)}
+.brand b,.brand span,nav.main button,#hero h1,#hero p,.kicker,.foot,#tval,.lvl{text-shadow:0 1px 10px rgba(0,0,0,.7),0 0 2px rgba(0,0,0,.5)}
+nav.main button{color:rgba(241,235,225,.9)}
+.brand span{color:rgba(241,235,225,.75)}
+#hero p{color:rgba(241,235,225,.88)}
+.hero-search{background:rgba(10,10,10,.62)}
+.cta.ghost{background:rgba(10,10,10,.5);border-color:rgba(241,235,225,.45)}
+/* régua de andares em cápsula */
+#rail{right:22px;width:auto;min-width:74px;padding:12px 12px 14px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);align-items:center}
+#floorsRail{align-self:stretch;align-items:flex-end;padding-right:16px}
+#floorsRail button{color:var(--muted);font-size:12px}
+#floorsRail button:hover{color:var(--gold-2)}
+.rt{display:none}
+.lvl{text-align:center;align-self:stretch;border-top:1px solid var(--line);padding-top:10px;margin-top:12px}
+.lvl b{font-size:38px}
+.tw{margin-bottom:12px}
+/* régua do horário em barra */
+#time{left:22px;right:104px;bottom:14px;height:84px;padding:0 20px 8px 14px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);align-items:center}
+#time .season{margin:0;align-self:center}
+#time .tl{height:76px;align-self:flex-end}
+.ticks{font-size:10px;color:var(--muted)}
+.tl input::-webkit-slider-runnable-track{background:rgba(241,235,225,.5)}
+#compass{right:22px;bottom:20px;width:68px;height:68px}
+.foot{bottom:112px;color:var(--muted);font-size:9.5px}
+#cutBar{bottom:112px}
+#panel{bottom:112px}
+#hint{background:rgba(10,10,10,.72)}
+@media (max-width:900px){
+  .vignette{background:linear-gradient(rgba(8,8,9,.85) 0%,rgba(8,8,9,.6) 38%,rgba(8,8,9,.1) 60%,transparent 66%),linear-gradient(0deg,rgba(8,8,9,.7),transparent 22%)}
+  #time{left:10px;right:10px;bottom:10px;height:70px;padding:0 14px 6px}
+  #time .tl{height:64px}
+  #compass{right:12px;top:74px;bottom:auto;width:46px;height:46px}
+  #cutBar{bottom:88px}
+  #hint{bottom:96px}
+  #panel{bottom:0}
+}
+@media (max-width:900px) and (max-height:700px){#hero p{display:none}}
+
+#hint{top:auto;bottom:128px;left:62%;white-space:nowrap}
+body.explore #hint,body.detail #hint,body.cutting #hint{opacity:0!important}
+@media (max-width:900px){
+  #hint{left:50%;bottom:96px}
+  #compass{top:auto;bottom:90px;right:12px}
+  .ctas{flex-wrap:nowrap;gap:8px}
+  .ctas .cta{padding:11px 12px;font-size:10px;letter-spacing:.12em;white-space:nowrap}
+}
 </style>
 </head>
 <body>
