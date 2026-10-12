@@ -6,7 +6,7 @@
 <meta name="description" content="Guia não oficial, feito por um morador, sem vínculo com a construtora. Ache seu apartamento, veja a planta, o sol nas fachadas e o andamento da obra.">
 <meta property="og:title" content="Boulevard em 3D · guia não oficial feito por morador">
 <meta property="og:description" content="Feito por um morador, sem vínculo com a construtora. Ache o seu apê, veja a planta, o sol nas fachadas e a contagem para a entrega.">
-<meta property="og:image" content="https://aue.productions/boulevard/og.jpg?v=2">
+<meta property="og:image" content="https://aue.productions/boulevard/og.jpg?v=3">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://aue.productions/boulevard/">
@@ -15,14 +15,14 @@
 <title>Boulevard em 3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0d0f12; --ink:#F1EBE1; --muted:rgba(241,235,225,.62); --faint:rgba(241,235,225,.38); --line:rgba(241,235,225,.16);
   --glass:rgba(16,15,14,.58); --glass-2:rgba(24,22,20,.78); --gold:#C9A66B; --gold-2:#E2C58F; --gold-ink:#1a140c;
   --paper-a:#3a332b; --paper-b:#17140f; --plan:rgba(239,230,214,.86); --plan-2:rgba(239,230,214,.42);
   --t-laranja:#D49A4C; --t-verde:#86A77F; --t-vermelho:#C97A6C; --t-azul:#8399BC;
-  --f-display:'Cormorant Garamond',Georgia,serif; --f-ui:'Manrope',system-ui,sans-serif;
+  --f-display:'Manrope',system-ui,sans-serif; --f-ui:'Manrope',system-ui,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0f12}}
 :root[data-theme="dark"]{--bg:#0d0f12}
@@ -338,6 +338,18 @@ body.explore #hint,body.detail #hint,body.cutting #hint{opacity:0!important}
 @media (min-width:901px){#hero{top:92px;max-width:540px}#hero h1{font-size:clamp(34px,3.8vw,50px)}}
 @media (min-width:901px) and (max-height:900px){#hero p{display:none}}
 @media (min-width:901px) and (max-height:700px){.cdn{display:none}.cdrow b{font-size:42px}.cdrow .sep{font-size:36px}}
+
+/* tipografia sem serifa: títulos e números em Manrope leve */
+.brand b{font-weight:300;letter-spacing:.22em;font-size:22px}
+#hero h1{font-weight:300;letter-spacing:-.025em;line-height:1.02}
+.ph h2,.dh h2{font-weight:300;letter-spacing:-.02em}
+.dh h2{font-size:56px}
+.big b,.cards b,.fc b,.prog-h b,.lvl b,.cb-t b,#tval{font-weight:300;letter-spacing:-.01em}
+.cards b,.fc b{font-size:20px}
+#tval{font-size:15px;font-weight:400}
+#loading b{font-weight:300;letter-spacing:.3em}
+.cdrow b,.cd b{font-weight:300;letter-spacing:-.03em}
+@media (max-width:900px){.brand b{font-size:18px}.dh h2{font-size:42px}}
 </style>
 </head>
 <body>
@@ -1137,7 +1149,7 @@ function planSVG(type,flipped){
       if(bk==='N')s+=`<line x1="${a+6}" y1="${b+t2}" x2="${c-6}" y2="${b+t2}"/>`;}
   });
   s+='</g></g>';
-  s+=p.labels.map(l=>{const x=flipped?x0+x1-l[2]:l[2];return `<text x="${x}" y="${l[3]}" text-anchor="middle" font-family="Manrope,sans-serif" font-size="19" font-weight="700" letter-spacing="3" fill="rgba(239,230,214,.82)">${l[0].toUpperCase()}</text><text x="${x}" y="${l[3]+30}" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="30" fill="rgba(226,197,143,.95)">${l[1]} m²</text>`;}).join('');
+  s+=p.labels.map(l=>{const x=flipped?x0+x1-l[2]:l[2];return `<text x="${x}" y="${l[3]}" text-anchor="middle" font-family="Manrope,sans-serif" font-size="19" font-weight="700" letter-spacing="3" fill="rgba(239,230,214,.82)">${l[0].toUpperCase()}</text><text x="${x}" y="${l[3]+30}" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="300" font-size="25" fill="rgba(226,197,143,.95)">${l[1]} m²</text>`;}).join('');
   const m=100/p.cmpx; s+=`<g fill="rgba(239,230,214,.7)"><rect x="${x0}" y="${y1+pad+6}" width="${m}" height="3"/><rect x="${x0}" y="${y1+pad}" width="2" height="15"/><rect x="${x0+m-2}" y="${y1+pad}" width="2" height="15"/><text x="${x0+m+12}" y="${y1+pad+14}" font-family="Manrope,sans-serif" font-size="16" font-weight="700" letter-spacing="2">1 M</text></g>`;
   return s+'</svg>';
 }
@@ -1293,7 +1305,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){last=perf
 function loop(now){
   requestAnimationFrame(loop);
   if(document.hidden) return;
-  if(window.__lastAct>lastAct)lastAct=window.__lastAct; const busy=tw||now-lastAct<2500; const minGap=busy?0:(LITE?110:50);
+  if(window.__lastAct>lastAct)lastAct=window.__lastAct; const busy=tw||now-lastAct<2500; const minGap=busy?0:(LITE?32:0);
   if(now-lastDraw<minGap) return; lastDraw=now;
   const dt=Math.min(.12,(now-last)/1000); last=now;
   if(tw){const k=Math.min(1,(now-tw.s)/tw.d),e=ease(k);camera.position.lerpVectors(tw.p0,tw.p1,e);controls.target.lerpVectors(tw.t0,tw.t1,e);if(k>=1)tw=null;}
