@@ -276,6 +276,39 @@ body.explore #hint,body.detail #hint,body.cutting #hint{opacity:0!important}
   .ctas{flex-wrap:nowrap;gap:8px}
   .ctas .cta{padding:11px 12px;font-size:10px;letter-spacing:.12em;white-space:nowrap}
 }
+
+/* obra e entrega */
+.cdchip{display:inline-flex;align-items:center;gap:10px;margin:14px 0 4px;padding:8px 14px 8px 10px;background:rgba(10,10,10,.6);border:1px solid rgba(201,166,107,.55);color:var(--ink);cursor:pointer;font:500 12.5px var(--f-ui);text-shadow:none;max-width:100%;flex-wrap:wrap}
+.cdchip:hover{border-color:var(--gold);background:rgba(201,166,107,.14)}
+.cdchip b{font:500 22px/1 var(--f-display);color:var(--gold-2)}
+.cdchip em{font-style:normal;font:600 9.5px var(--f-ui);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);border-left:1px solid var(--line);padding-left:10px}
+.cd-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(201,166,107,.6);animation:cdp 2s infinite}
+@keyframes cdp{70%{box-shadow:0 0 0 8px rgba(201,166,107,0)}100%{box-shadow:0 0 0 0 rgba(201,166,107,0)}}
+@media (prefers-reduced-motion:reduce){.cd-dot{animation:none}}
+.cd{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.cd div{background:rgba(10,10,10,.4);padding:14px 4px 10px;text-align:center}
+.cd b{display:block;font:500 34px/1 var(--f-display);font-variant-numeric:tabular-nums;color:var(--ink)}
+.cd div:first-child b{color:var(--gold-2)}
+.cd span{font:600 9px var(--f-ui);letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
+.note.small{font-size:12px;line-height:1.55;margin:10px 0 0}
+.prog-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.prog-h b{font:500 30px/1 var(--f-display)}
+.prog-h span{font-size:11.5px;color:var(--muted);text-align:right}
+.prog-bar{height:6px;background:rgba(241,235,225,.12);overflow:hidden}
+.prog-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-2))}
+.obrachart{margin-top:14px}
+.obrachart svg{display:block;width:100%;height:auto}
+.oleg{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:11px;color:var(--muted)}
+.oleg span{display:flex;align-items:center;gap:6px}
+.oleg i{width:16px;height:0;border-top:2px solid var(--gold-2);display:block}
+.oleg i.l2{border-top:2px dashed var(--ink)}
+.oleg i.l3{border-top:2px dotted rgba(241,235,225,.5)}
+.fc{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line)}
+.fc div{background:rgba(10,10,10,.4);padding:12px 12px}
+.fc span{font:600 9px var(--f-ui);letter-spacing:.2em;text-transform:uppercase;color:var(--faint);display:block}
+.fc b{display:block;font:500 22px/1.1 var(--f-display);margin:6px 0 4px}
+.fc small{font-size:11px;line-height:1.4;color:var(--muted);display:block}
+@media (max-width:900px){.cdchip{margin-top:10px}.cdchip b{font-size:19px}}
 </style>
 </head>
 <body>
@@ -289,6 +322,7 @@ body.explore #hint,body.detail #hint,body.cutting #hint{opacity:0!important}
 <header>
   <button class="brand" id="brand" aria-label="Voltar ao início"><b>BOULEVARD</b><span>GUIA DO MORADOR</span></button>
   <nav class="main" aria-label="Seções">
+    <button data-sec="obra">Obra</button>
     <button data-sec="aptos">Apartamentos</button>
     <button data-sec="lazer">Lazer</button>
     <button data-sec="arredores">Arredores</button>
@@ -300,6 +334,7 @@ body.explore #hint,body.detail #hint,body.cutting #hint{opacity:0!important}
 
 <section id="hero">
   <div class="kicker">Pedra Branca · Palhoça</div>
+  <button class="cdchip" data-sec="obra" aria-label="Ver andamento da obra e contagem para a entrega"><span class="cd-dot"></span><b id="chipDays">—</b><span>dias para maio de 2027</span><em>Obra a 76%</em></button>
   <h1>288 casas.<br>Um só endereço.</h1>
   <p>Gire o prédio, ache o seu apartamento, abra a planta e veja como o sol passa pelas fachadas ao longo do dia.</p>
   <form class="search hero-search" id="heroFind"><input id="hq" inputmode="text" autocomplete="off" placeholder="Seu apê, ex.: B112" aria-label="Número do seu apartamento"><button type="submit">VER</button></form>
@@ -366,6 +401,24 @@ body.explore #hint,body.detail #hint,body.cutting #hint{opacity:0!important}
         <div class="row"><b>Florianópolis</b><span>22,1 km · 25 min</span></div>
       </div>
       <p class="note" style="margin-top:14px">O entorno foi modelado a partir das fotos aéreas do book e do site. Prédios, casas e morros são volumes de referência, não uma maquete exata do bairro.</p>
+    </div>
+    <div id="s-obra" hidden>
+      <div class="cd" role="timer" aria-live="off">
+        <div><b id="cdD">—</b><span>dias</span></div><div><b id="cdH">—</b><span>horas</span></div><div><b id="cdM">—</b><span>min</span></div><div><b id="cdS">—</b><span>seg</span></div>
+      </div>
+      <p class="note small">Contagem até <strong>1º de maio de 2027</strong>, data que os moradores estão usando como referência para a entrega. Não é uma data oficial: a contagem marca o primeiro dia do mês, e a entrega pode cair em qualquer dia de maio, ou em outro mês.</p>
+      <div class="eb">Andamento da obra</div>
+      <div class="prog"><div class="prog-h"><b>76,16%</b><span>medição da Caixa · 06/10/2026</span></div><div class="prog-bar"><i style="width:76.16%"></i></div></div>
+      <div class="obrachart"><svg id="obraSvg" viewBox="0 0 320 170" role="img" aria-label="Evolução da obra: executado até 76% em outubro de 2026, previsão da Caixa até 100% em dezembro de 2027 e projeção pelo ritmo atual"></svg>
+        <div class="oleg"><span><i class="l1"></i>Executado</span><span><i class="l2"></i>Ritmo atual</span><span><i class="l3"></i>Cronograma Caixa</span></div></div>
+      <div class="eb">Previsões</div>
+      <div class="fc">
+        <div><span>Primeira visita</span><b id="fcVisit">—</b><small>estimativa: cerca de um mês antes da conclusão no ritmo atual</small></div>
+        <div><span>Conclusão no ritmo atual</span><b id="fcPace">—</b><small id="fcPaceS">projeção pelas medições dos últimos 12 meses</small></div>
+        <div><span>Prazo do contrato</span><b>jan/2027</b><small>com tolerância de 180 dias: até jul/2027</small></div>
+        <div><span>Cronograma da Caixa</span><b>dez/2027</b><small>100% previsto para 27/12/2027</small></div>
+      </div>
+      <p class="note small">Fontes: medições e cronograma de obra da Caixa (emitido em 12/10/2026) e o contrato de compra. As previsões de visita e de conclusão são estimativas deste guia, não da construtora. O cronograma da Caixa costuma ser conservador: ele prevê só 0,01% de avanço por mês entre outubro e dezembro de 2026.</p>
     </div>
     <div id="s-sobre" hidden>
       <div class="big"><div><b>2</b><span>blocos</span></div><div><b>14</b><span>pavimentos</span></div><div><b>288</b><span>apartamentos</span></div><div><b>12</b><span>andares de aptos</span></div></div>
@@ -1095,13 +1148,47 @@ $('ctxList').innerHTML=CTX.map((c,i)=>`<button data-i="${i}"><b>${c.n}</b><span>
 $('ctxList').querySelectorAll('button').forEach(b=>b.onclick=()=>{flyCtx(CTX[+b.dataset.i]);sheetOpen(false);});
 
 // seções
-const SEC={aptos:['Residências','Apartamentos'],lazer:['Áreas comuns','Lazer'],arredores:['Entorno','Arredores'],sobre:['Guia do morador','Sobre']};
+const SEC={obra:['Andamento','Obra e entrega'],aptos:['Residências','Apartamentos'],lazer:['Áreas comuns','Lazer'],arredores:['Entorno','Arredores'],sobre:['Guia do morador','Sobre']};
+
+// ---------- obra e contagem ----------
+const SCHED=[["2024-08-30",8.21,1],["2024-10-02",8.92,1],["2024-11-04",9.86,1],["2024-12-05",10.61,1],["2025-01-09",12.25,1],["2025-02-12",13.71,1],["2025-03-11",15.08,1],["2025-04-23",16.49,1],["2025-05-14",17.72,1],["2025-06-23",20.03,1],["2025-07-21",23.26,1],["2025-08-22",27.52,1],["2025-09-26",33.22,1],["2025-10-28",38.01,1],["2025-11-25",43.72,1],["2025-12-30",47.49,1],["2026-03-12",51.09,1],["2026-04-14",54.00,1],["2026-04-28",56.40,1],["2026-06-08",59.64,1],["2026-06-30",65.17,1],["2026-07-31",67.79,1],["2026-09-01",73.58,1],["2026-10-06",76.16,1],["2026-10-28",76.17,0],["2026-11-25",76.18,0],["2026-12-23",76.19,0],["2027-01-06",77.69,0],["2027-02-10",79.65,0],["2027-03-10",80.85,0],["2027-04-14",81.02,0],["2027-05-12",81.18,0],["2027-06-16",83.09,0],["2027-07-21",84.81,0],["2027-08-18",86.81,0],["2027-09-22",88.90,0],["2027-10-06",88.91,0],["2027-10-20",91.95,0],["2027-11-03",93.63,0],["2027-12-01",95.00,0],["2027-12-27",100.0,0]];
+const DAY=864e5, dt=s=>new Date(s+'T12:00:00-03:00').getTime();
+const MESES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const fmtM=ms=>{const d=new Date(ms);return MESES[d.getMonth()]+'/'+d.getFullYear();};
+const EXEC=SCHED.filter(p=>p[2]), LASTE=EXEC[EXEC.length-1];
+// ritmo dos últimos 12 meses
+const PACE=(function(){const tL=dt(LASTE[0]);const ref=EXEC.reduce((b,p)=>Math.abs(dt(p[0])-(tL-365*DAY))<Math.abs(dt(b[0])-(tL-365*DAY))?p:b);
+  const perDay=(LASTE[1]-ref[1])/((tL-dt(ref[0]))/DAY); const done=tL+(100-LASTE[1])/perDay*DAY; return {perDay,done,ref};})();
+$('fcPace').textContent=fmtM(PACE.done); $('fcVisit').textContent=fmtM(PACE.done-30*DAY);
+$('fcPaceS').textContent='cerca de '+(PACE.perDay*30.4).toFixed(1).replace('.',',')+' pontos por mês nos últimos 12 meses';
+function drawObra(){const svg=$('obraSvg'); if(!svg) return; const W=320,H=170,L=30,R=8,T=10,B=24;
+  const t0=dt('2024-08-01'),t1=dt('2028-01-31'); const X=ms=>L+(ms-t0)/(t1-t0)*(W-L-R), Y=v=>T+(1-v/100)*(H-T-B);
+  let s='';
+  [0,50,100].forEach(v=>{s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="rgba(241,235,225,.12)"/><text x="${L-5}" y="${Y(v)+3}" text-anchor="end" font-size="8.5" fill="rgba(241,235,225,.6)" font-family="Manrope">${v}%</text>`;});
+  ['2025','2026','2027','2028'].forEach(y=>{const x=X(dt(y+'-01-01'));s+=`<line x1="${x}" x2="${x}" y1="${H-B}" y2="${H-B+3}" stroke="rgba(241,235,225,.4)"/><text x="${x}" y="${H-B+13}" text-anchor="middle" font-size="8.5" fill="rgba(241,235,225,.6)" font-family="Manrope">${y}</text>`;});
+  // janela de tolerância
+  s+=`<rect x="${X(dt('2027-01-15'))}" y="${T}" width="${X(dt('2027-07-15'))-X(dt('2027-01-15'))}" height="${H-T-B}" fill="rgba(201,166,107,.08)"/>`;
+  const may=X(dt('2027-05-01')); s+=`<line x1="${may}" x2="${may}" y1="${T}" y2="${H-B}" stroke="#C9A66B" stroke-width="1"/><text x="${may+3}" y="${T+8}" font-size="8" fill="#E2C58F" font-family="Manrope" font-weight="700">MAI/27</text>`;
+  const now=Date.now(); const xn=X(now); s+=`<line x1="${xn}" x2="${xn}" y1="${T}" y2="${H-B}" stroke="rgba(241,235,225,.45)" stroke-dasharray="2 3"/><text x="${xn-3}" y="${T+8}" text-anchor="end" font-size="8" fill="rgba(241,235,225,.7)" font-family="Manrope">hoje</text>`;
+  const pv=SCHED.filter(p=>!p[2]); pv.unshift(LASTE);
+  s+=`<polyline fill="none" stroke="rgba(241,235,225,.5)" stroke-width="1.4" stroke-dasharray="1.5 3" points="${pv.map(p=>X(dt(p[0]))+','+Y(p[1])).join(' ')}"/>`;
+  s+=`<line x1="${X(dt(LASTE[0]))}" y1="${Y(LASTE[1])}" x2="${X(PACE.done)}" y2="${Y(100)}" stroke="#F1EBE1" stroke-width="1.4" stroke-dasharray="5 4"/>`;
+  s+=`<polyline fill="none" stroke="#E2C58F" stroke-width="2.2" stroke-linejoin="round" points="${EXEC.map(p=>X(dt(p[0]))+','+Y(p[1])).join(' ')}"/>`;
+  s+=`<circle cx="${X(dt(LASTE[0]))}" cy="${Y(LASTE[1])}" r="3.2" fill="#E2C58F"/>`;
+  svg.innerHTML=s;}
+const TARGET=new Date('2027-05-01T00:00:00-03:00').getTime();
+const p2=n=>String(n).padStart(2,'0');
+function tick(){let ms=Math.max(0,TARGET-Date.now());const d=Math.floor(ms/DAY);ms-=d*DAY;const h=Math.floor(ms/36e5);ms-=h*36e5;const m=Math.floor(ms/6e4);const s=Math.floor((ms-m*6e4)/1e3);
+  $('chipDays').textContent=d; $('cdD').textContent=d; $('cdH').textContent=p2(h); $('cdM').textContent=p2(m); $('cdS').textContent=p2(s);}
+tick(); setInterval(tick,1000);
+
 function openSection(k,focus){
   section=k; document.body.classList.add('explore'); document.body.classList.toggle('sec-other',k!=='aptos'); sheetOpen(true);
   $('pk').textContent=SEC[k][0]; $('pt').textContent=SEC[k][1];
-  ['aptos','lazer','arredores','sobre'].forEach(s=>$('s-'+s).hidden=s!==k);
+  ['obra','aptos','lazer','arredores','sobre'].forEach(s=>$('s-'+s).hidden=s!==k); if(k==='obra') drawObra();
   document.querySelectorAll('nav.main button').forEach(b=>b.setAttribute('aria-current',String(b.dataset.sec===k)));
   buildLabels(); resize();
+  if(k==='obra') flyTo(new THREE.Vector3(60,60,175),new THREE.Vector3(-10,22,-15),1800);
   if(k==='lazer') flyTo(new THREE.Vector3(10,95,-175),new THREE.Vector3(25,0,-28),1800);
   if(k==='arredores') flyTo(new THREE.Vector3(420,300,640),new THREE.Vector3(-120,40,-260),2200);
   if(k==='aptos'&&!sel) flyTo(new THREE.Vector3(-70,40,140),new THREE.Vector3(0,20,-10),1700);
