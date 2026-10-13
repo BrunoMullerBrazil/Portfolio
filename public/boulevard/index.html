@@ -441,6 +441,7 @@ body.intro .brand{opacity:0;pointer-events:none}
 @media (max-width:900px){.i-lede{top:24px}}
 
 .i-over{margin-bottom:12px}
+.fside{font:600 9px var(--f-ui);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:6px 0}
 </style>
 </head>
 <body>
@@ -526,7 +527,9 @@ body.intro .brand{opacity:0;pointer-events:none}
       <div class="eb">Andar</div>
       <div class="floors" id="floors"></div>
       <div class="eb" id="fmapTitle">Pavimento</div>
+      <div class="fside">↑ Frente · avenida · sol da tarde</div>
       <div class="fmap" id="fmap"></div>
+      <div class="fside">↓ Fundos · lazer e morro · sol da manhã</div>
       <div class="eb">Tipologias</div>
       <div class="legend" id="legend"></div>
     </div>
@@ -573,7 +576,7 @@ body.intro .brand{opacity:0;pointer-events:none}
       <div class="eb">Como usar</div>
       <p class="note">Arraste para girar e use a pinça ou a roda do mouse para aproximar. Toque num apartamento, no prédio ou no mapa do andar, para abrir a planta. A régua de baixo muda a hora do dia.</p>
       <div class="eb">Sol e orientação</div>
-      <p class="note">A posição do sol foi calibrada com a informação de um morador: os finais 01 e 08 a 12 ficam na fachada leste, que pega <strong>sol da manhã</strong>. Os finais 02 a 07 ficam na fachada oeste, que pega <strong>sol da tarde</strong>.</p>
+      <p class="note">A posição do sol foi calibrada com a informação de um morador: os finais 01 e 08 a 12 ficam na fachada leste, que pega <strong>sol da manhã</strong>. Os finais 02 a 07 ficam na fachada oeste, voltada para a avenida, com as varandas maiores no centro (finais 04 e 05), e pegam <strong>sol da tarde</strong>. Os finais 01 e 08 a 12 dão para os fundos, onde ficam o lazer e o morro.</p>
       <div class="eb">Sobre este guia</div>
       <p class="note"><strong>Feito por um morador, sem vínculo com a construtora.</strong> As medidas são aproximadas, a partir do book de vendas, e os volumes são simplificados. Nada aqui substitui o memorial descritivo, o contrato ou a planta oficial. Em cada bloco, o 1º pavimento é comercial, o 2º é de área comum e os apartamentos vão do 3º ao 14º pavimento, numerados de 101 a 1212. O Bloco A fica do lado das lojas e o Bloco B do lado da piscina.</p>
     </div>
@@ -643,9 +646,10 @@ const PL=0.0301, SITE=0.1015, GH=4.2, CH=3.4, BASE=GH+CH, FH=2.88, NF=12;
 const TOWERS=[{id:'A',cx:936,cy:306,mir:1},{id:'B',cx:1560,cy:306,mir:-1}];
 const S=(x,y)=>[(x-1250)*SITE,(y-400)*SITE];
 TOWERS.forEach(t=>{const p=S(t.cx,t.cy);t.wx=p[0];t.wz=p[1];});
-const pw=(t,x,y)=>[t.wx+(x-1002.5)*PL*t.mir,t.wz+(y-605)*PL];
+const FY=-1; // planta do book espelhada em relação à implantação: a fileira dos finais 02–07 dá para a avenida
+const pw=(t,x,y)=>[t.wx+(x-1002.5)*PL*t.mir,t.wz+(y-605)*PL*FY];
 const aptNum=(f,n)=>String(f)+String(n).padStart(2,'0');
-// orientação: fachada dos finais 08–12/01 (+z) = leste (sol da manhã, informado por morador) → norte = +x
+// orientação: fachada dos finais 08–12/01 (-z, fundos) = leste (sol da manhã, informado por morador) → norte = -x
 const NORTH=Math.PI/2;
 
 // ---------- renderer ----------
@@ -1021,7 +1025,7 @@ TOWERS.forEach((t,ti)=>{
     const slabM=shadowed(new THREE.Mesh(merge(slab),matSlab)); slabM.userData.kind='slab'; fg.add(slabM);
     const core=[]; CORE.concat(CORR).forEach(r=>core.push(rectBox(t,r,y0,FH-.2,-0.02)));
     const coreM=shadowed(new THREE.Mesh(merge(core),matCore)); coreM.userData.kind='core'; coreM.userData.y0=y0; fg.add(coreM);
-    if(f%2===0){const yl=[];[3,4,5,6,9,10,11,12].forEach(n=>{const s=U[n].seg[0];const a=pw(t,s[0],s[1]),b=pw(t,s[2],s[3]);const dz=s[4]==='N'?-1:1;yl.push(boxW(Math.min(a[0],b[0]),a[1]+dz*.08,Math.max(a[0],b[0]),a[1]+dz*.11,y0+FH-.26,.05));});fg.add(new THREE.Mesh(merge(yl),matYellow));}
+    if(f%2===0){const yl=[];[3,4,5,6,9,10,11,12].forEach(n=>{const s=U[n].seg[0];const a=pw(t,s[0],s[1]),b=pw(t,s[2],s[3]);const dz=(s[4]==='N'?-1:1)*FY;yl.push(boxW(Math.min(a[0],b[0]),a[1]+dz*.08,Math.max(a[0],b[0]),a[1]+dz*.11,y0+FH-.26,.05));});fg.add(new THREE.Mesh(merge(yl),matYellow));}
     Object.keys(U).forEach(k=>{
       const n=+k,u=U[n]; const geos=u.r.map(r=>rectBox(t,r,y0,FH-.2,-0.01));
       const isEnd=(n===1||n===2||n===7||n===8);
@@ -1032,7 +1036,7 @@ TOWERS.forEach((t,ti)=>{
       const sac=u.sac;
       u.seg.forEach(s=>{
         const a=pw(t,s[0],s[1]),b=pw(t,s[2],s[3]); const Ln=Math.hypot(b[0]-a[0],b[1]-a[1]); if(Ln<1.2) return;
-        let nx=0,nz=0; if(s[4]==='N')nz=-1; if(s[4]==='S')nz=1; if(s[4]==='E')nx=t.mir; if(s[4]==='W')nx=-t.mir;
+        let nx=0,nz=0; if(s[4]==='N')nz=-FY; if(s[4]==='S')nz=FY; if(s[4]==='E')nx=t.mir; if(s[4]==='W')nx=-t.mir;
         const cnt=Math.max(1,Math.round(Ln/2.75));
         for(let i=0;i<cnt;i++){const tt=(i+.5)/cnt; const px=s[0]+(s[2]-s[0])*tt, py=s[1]+(s[3]-s[1])*tt; let door=false;
           if(sac&&sac[4]===s[4]){ if((s[4]==='N'||s[4]==='S')&&px>=sac[0]-10&&px<=sac[2]+10) door=true; if((s[4]==='W'||s[4]==='E')&&py>=sac[1]-6&&py<=sac[3]+6) door=true; }
@@ -1043,7 +1047,7 @@ TOWERS.forEach((t,ti)=>{
       if(sac){const a=pw(t,sac[0],sac[1]),b=pw(t,sac[2],sac[3]);const x0=Math.min(a[0],b[0]),x1=Math.max(a[0],b[0]),z0=Math.min(a[1],b[1]),z1=Math.max(a[1],b[1]);
         if(!u.rec) sacGeos.push({g:boxW(x0,z0,x1,z1,y0-.02,.16),fg});
         let gx0,gz0,gx1,gz1; const d=sac[4];
-        if(d==='N'){gx0=x0;gx1=x1;gz0=gz1=z0;} else if(d==='S'){gx0=x0;gx1=x1;gz0=gz1=z1;} else {const xe=(d==='W')===(t.mir>0)?x0:x1; gx0=gx1=xe; gz0=z0; gz1=z1;}
+        if(d==='N'){gx0=x0;gx1=x1;gz0=gz1=(FY>0?z0:z1);} else if(d==='S'){gx0=x0;gx1=x1;gz0=gz1=(FY>0?z1:z0);} else {const xe=(d==='W')===(t.mir>0)?x0:x1; gx0=gx1=xe; gz0=z0; gz1=z1;}
         guardData.push({x0:gx0,z0:gz0,x1:gx1,z1:gz1,y:y0+.14,fg});}
     });
   }
@@ -1206,7 +1210,7 @@ function setSun(hour){
   const dec=(season==='verao'?-23.44:23.44)*Math.PI/180, Ha=(hour-12)*15*Math.PI/180;
   const E=-Math.cos(dec)*Math.sin(Ha), N=Math.sin(dec)*Math.cos(LAT)-Math.cos(dec)*Math.cos(Ha)*Math.sin(LAT), Up=Math.sin(dec)*Math.sin(LAT)+Math.cos(dec)*Math.cos(Ha)*Math.cos(LAT);
   // mundo: norte=+x, leste=+z
-  const x=N, z=E;
+  const x=-N, z=-E; // leste = fachada dos finais 08–12 e 01 (sol da manhã)
   const elev=Math.asin(Math.max(-1,Math.min(1,Up)));
   const day=THREE.MathUtils.smoothstep(elev,-0.1,0.1); dayF=day;
   const golden=1-THREE.MathUtils.smoothstep(elev,0.02,0.45);
@@ -1326,11 +1330,11 @@ function openDoll(ti,f,n){
     const [x0,z0,x1,z1]=rect(it), cx=(x0+x1)/2, cz=(z0+z1)/2, wx=x1-x0, wz=z1-z0;
     if(k==='bed'){add(boxW(x0+.02,z0+.02,x1-.02,z1-.02,Y,.32),DM.wood);add(boxW(x0+.05,z0+.05,x1-.05,z1-.05,Y+.32,.2),DM.linen);
       const hd=it[5]; const pz=wx>wz; // travesseiros e cabeceira
-      if(hd==='N'||hd==='S'){const zz=hd==='N'?z0:z1;const s=hd==='N'?1:-1;add(boxW(x0,zz,x1,zz+s*.06,Y,1.0),DM.wood);add(boxW(x0+.12,zz+s*.1,cx-.06,zz+s*.45,Y+.52,.12),DM.white);add(boxW(cx+.06,zz+s*.1,x1-.12,zz+s*.45,Y+.52,.12),DM.white);add(boxW(x0+.04,cz,x1-.04,hd==='N'?z1-.04:z0+.04,Y+.53,.04),DM.rug);}
+      if(hd==='N'||hd==='S'){const top=(hd==='N')===(FY>0);const zz=top?z0:z1;const s=top?1:-1;add(boxW(x0,zz,x1,zz+s*.06,Y,1.0),DM.wood);add(boxW(x0+.12,zz+s*.1,cx-.06,zz+s*.45,Y+.52,.12),DM.white);add(boxW(cx+.06,zz+s*.1,x1-.12,zz+s*.45,Y+.52,.12),DM.white);add(boxW(x0+.04,cz,x1-.04,top?z1-.04:z0+.04,Y+.53,.04),DM.rug);}
       else {const xx=hd==='W'?x0:x1;const s=hd==='W'?1:-1;add(boxW(xx,z0,xx+s*.06,z1,Y,1.0),DM.wood);add(boxW(xx+s*.1,z0+.12,xx+s*.45,cz-.06,Y+.52,.12),DM.white);add(boxW(xx+s*.1,cz+.06,xx+s*.45,z1-.12,Y+.52,.12),DM.white);add(boxW(cx,z0+.04,hd==='W'?x1-.04:x0+.04,z1-.04,Y+.53,.04),DM.rug);}
       return;}
     if(k==='sofa'){add(boxW(x0,z0,x1,z1,Y+.1,.32),DM.sofa);const b=it[5];const th=.2;
-      if(b==='E')add(boxW(x1-th,z0,x1,z1,Y+.1,.72),DM.sofa); if(b==='W')add(boxW(x0,z0,x0+th,z1,Y+.1,.72),DM.sofa); if(b==='S')add(boxW(x0,z1-th,x1,z1,Y+.1,.72),DM.sofa); if(b==='N')add(boxW(x0,z0,x1,z0+th,Y+.1,.72),DM.sofa);
+      if(b==='E')add(boxW(x1-th,z0,x1,z1,Y+.1,.72),DM.sofa); if(b==='W')add(boxW(x0,z0,x0+th,z1,Y+.1,.72),DM.sofa); if(b==='S')add(FY>0?boxW(x0,z1-th,x1,z1,Y+.1,.72):boxW(x0,z0,x1,z0+th,Y+.1,.72),DM.sofa); if(b==='N')add(FY>0?boxW(x0,z0,x1,z0+th,Y+.1,.72):boxW(x0,z1-th,x1,z1,Y+.1,.72),DM.sofa);
       add(boxW(x0,z0,x1,z1,Y,.1),DM.dark); return;}
     if(k==='closet'){add(boxW(x0,z0,x1,z1,Y,2.2),DM.oak); return;}
     if(k==='r'){ // bancada ou móvel: altura conforme profundidade
@@ -1382,9 +1386,9 @@ const HOME_M={p:new THREE.Vector3(70,96,300),t:new THREE.Vector3(-18,20,-22)};
 const home=()=>MOBILE()?HOME_M:HOME;
 function viewUnit(ti,f,n){
   const m=unitIndex[ti+'-'+f+'-'+n]; const c=m.userData.center.clone(); const u=U[n]; const t=TOWERS[ti];
-  let dir=new THREE.Vector3(0,0,u.row==='cima'?-1:1);
-  if(n===1||n===2||n===7||n===8){const ex=(n===7||n===8)?-t.mir:t.mir; dir=new THREE.Vector3(ex*.8,0,u.row==='cima'?-.6:.6).normalize();}
-  if(cut){const yy=BASE+(f-1)*FH; const tx=c.x*.6+t.wx*.4; flyTo(new THREE.Vector3(tx,yy+36,t.wz+(u.row==='cima'?-30:30)),new THREE.Vector3(tx,yy,t.wz+(u.row==='cima'?-2:2)),1500);}
+  const rs=(u.row==='cima'?-1:1)*FY; let dir=new THREE.Vector3(0,0,rs);
+  if(n===1||n===2||n===7||n===8){const ex=(n===7||n===8)?-t.mir:t.mir; dir=new THREE.Vector3(ex*.8,0,.6*rs).normalize();}
+  if(cut){const yy=BASE+(f-1)*FH; const tx=c.x*.6+t.wx*.4; flyTo(new THREE.Vector3(tx,yy+36,t.wz+30*rs),new THREE.Vector3(tx,yy,t.wz+2*rs),1500);}
   else {const yy=BASE+(f-1)*FH; const ctr=new THREE.Vector3(c.x,yy+.9,c.z); flyTo(ctr.clone().add(dir.multiplyScalar(MOBILE()?17:12.5)).add(new THREE.Vector3(0,MOBILE()?2.6:2.0,0)),ctr.clone().add(dir.clone().normalize().multiplyScalar(-2.5)),1700);}
 }
 function viewFloor(ti,f){const t=TOWERS[ti];const y=BASE+(f-.5)*FH;flyTo(new THREE.Vector3(t.wx-30,y+16,t.wz+95),new THREE.Vector3(t.wx,y,t.wz),1500);}
@@ -1459,9 +1463,9 @@ function planSVG(type,flipped){
 }
 function facadeInfo(ti,n){
   const u=U[n], t=TOWERS[ti];
-  let fac=u.row==='cima'?'Oeste':'Leste', sunTxt=u.row==='cima'?'Tarde':'Manhã', view=u.row==='cima'?'Lazer e morros':'Avenida';
-  if(n===7||n===8){const south=t.mir>0; fac+=(south?' + sul':' + norte'); if(!south) sunTxt+=' + norte'; view+=south?' e lojas':' e mata';}
-  if(n===1||n===2){const north=t.mir>0; fac+=(north?' + norte':' + sul'); if(north) sunTxt+=' + norte'; view+=' e outra torre';}
+  let fac=u.row==='cima'?'Oeste':'Leste', sunTxt=u.row==='cima'?'Tarde':'Manhã', view=u.row==='cima'?'Avenida':'Lazer e morros';
+  if(n===7||n===8){const north=t.mir>0; fac+=(north?' + norte':' + sul'); if(north) sunTxt+=' + norte'; view+=t.mir>0?' e lojas':' e piscina';}
+  if(n===1||n===2){const north=t.mir<0; fac+=(north?' + norte':' + sul'); if(north) sunTxt+=' + norte'; view+=' e outra torre';}
   return {fac,sunTxt,view};
 }
 const DECORADOS={'B112':'b112/'};
