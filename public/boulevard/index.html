@@ -6,7 +6,7 @@
 <meta name="description" content="Guia não oficial, feito por um morador, sem vínculo com a construtora. Ache seu apartamento, veja a planta, o sol nas fachadas e o andamento da obra.">
 <meta property="og:title" content="Boulevard em 3D · guia não oficial feito por morador">
 <meta property="og:description" content="Feito por um morador, sem vínculo com a construtora. Ache o seu apê, veja a planta, o sol nas fachadas e a contagem para a entrega.">
-<meta property="og:image" content="https://aue.productions/boulevard/og.jpg?v=5">
+<meta property="og:image" content="https://aue.productions/boulevard/og.jpg?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://aue.productions/boulevard/">
@@ -735,7 +735,7 @@ function terrainH(x,z){
   g.computeVertexNormals(); const n=g.attributes.normal; const c=new THREE.Color();
   for(let i=0;i<p.count;i++){const y=p.getY(i),ny=n.getY(i),x=p.getX(i),z=p.getZ(i);const k=.5+.5*vn(x*2.3,z*2.3);
     if(ny<.55&&y>90) c.setRGB(.42+.06*k,.40+.05*k,.36+.04*k); // rocha
-    else if(y>18) c.setRGB(.1+.04*k,.16+.05*k,.08+.03*k); // mata
+    else if(y>14) c.setRGB(.07+.03*k,.11+.04*k,.05+.02*k); // mata
     else c.setRGB(.2+.06*k,.25+.05*k,.13+.03*k); // pasto/grama
     c.convertSRGBToLinear(); col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}
   g.setAttribute('color',new THREE.BufferAttribute(col,3));
@@ -874,16 +874,16 @@ const HOUSEZ=[]; // usado para evitar árvores sobre casas
     while(k<z.n&&guard++<z.n*40){const x=mx+rnd()*(Mx-mx),y=my+rnd()*(My-my);if(inPoly(x,y,z.p)){const w=S(x,y);pts.push([w[0],w[1],1]);k++;}}});
   [[880,70],[1010,60],[1250,70],[1600,60],[1830,40],[1120,40],[960,40]].forEach(p=>{const w=S(...p);pts.push([w[0],w[1],1]);});
   // mata nos morros (mundo)
-  let k=0,guard=0; while(k<(LITE?1600:4200)&&guard++<40000){const x=(rnd()-.5)*3000,z=(rnd()-.5)*3000;const d=Math.hypot(x*.85,(z-10)*1.1);if(d<200)continue;if(roadDist(x,z)<18)continue;
+  let k=0,guard=0; while(k<(LITE?2600:6500)&&guard++<60000){const x=(rnd()-.5)*3000,z=(rnd()-.5)*3000;const d=Math.hypot(x*.85,(z-10)*1.1);if(d<200)continue;if(roadDist(x,z)<18)continue;
     const h=terrainH(x,z); const dense=h>14?0.95:0.2; if(rnd()>dense)continue; pts.push([x,z,h>14?-1.5:1.1]);k++;}
   const n=pts.length;
   const trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(.16,.26,1,5),mat(0x4a3a2a),n);
   const crown=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1),mat(0xffffff,{roughness:.95,flatShading:true}),n*2);
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),s=new THREE.Vector3(),col=new THREE.Color();
   const greens=[0x34501f,0x3e5a24,0x2c461b,0x4a6528,0x2a3f1c,0x56702e];
-  pts.forEach((p,i)=>{const y0=Math.abs(p[0])<120&&Math.abs(p[1])<70?0:terrainH(p[0],p[1]); const hill=p[2]<0; const sc=Math.abs(p[2]); const h=hill?(1.5+rnd()*2):(3.5+rnd()*5)*sc, r=hill?(5+rnd()*4):(1.8+rnd()*2.4)*sc;
-    m4.compose(v.set(p[0],y0+h/2,p[1]),q.identity(),s.set(sc,h,sc)); trunk.setMatrixAt(i,m4);
-    for(let k=0;k<2;k++){e.set(rnd(),rnd()*6,rnd()); q.setFromEuler(e); const rr=r*(k?0.72:1); m4.compose(v.set(p[0]+(k?(rnd()-.5)*r:0),y0+h+rr*.35+(k?r*.45:0),p[1]+(k?(rnd()-.5)*r:0)),q,s.set(rr,rr*.82,rr)); crown.setMatrixAt(i*2+k,m4); col.setHex(greens[(rnd()*greens.length)|0]).convertSRGBToLinear(); crown.setColorAt(i*2+k,col);}
+  pts.forEach((p,i)=>{const y0=Math.abs(p[0])<120&&Math.abs(p[1])<70?0:terrainH(p[0],p[1]); const hill=p[2]<0; const sc=Math.abs(p[2]); const h=hill?.5:(3.5+rnd()*5)*sc, r=hill?(9+rnd()*7):(1.8+rnd()*2.4)*sc; const yb=hill?y0-r*.45:y0;
+    m4.compose(v.set(p[0],y0+h/2,p[1]),q.identity(),hill?s.set(0,0,0):s.set(sc,h,sc)); trunk.setMatrixAt(i,m4);
+    for(let k=0;k<2;k++){e.set(rnd(),rnd()*6,rnd()); q.setFromEuler(e); const rr=r*(k?0.72:1); m4.compose(v.set(p[0]+(k?(rnd()-.5)*r:0),(hill?yb:y0+h)+rr*.35+(k?r*.3:0),p[1]+(k?(rnd()-.5)*r:0)),q,s.set(rr,rr*(hill?.6:.82),rr)); crown.setMatrixAt(i*2+k,m4); col.setHex(greens[(rnd()*greens.length)|0]); if(hill)col.multiplyScalar(.72+rnd()*.18); col.convertSRGBToLinear(); crown.setColorAt(i*2+k,col);}
   });
   trunk.castShadow=crown.castShadow=true; crown.receiveShadow=true; scene.add(trunk,crown);
 })();
@@ -1180,14 +1180,14 @@ const clouds=[], flocks=[];
     sp.position.set(Math.cos(a)*d,230+rnd()*330,Math.sin(a)*d); sp.scale.set(sc,sc*.42,1); sp.userData.v=4+rnd()*6; sp.renderOrder=-1;
     scene.add(sp); clouds.push(sp);}
   // pássaros: pequenos bandos em V circulando o morro
-  const wingG=new THREE.BufferGeometry(); wingG.setAttribute('position',new THREE.Float32BufferAttribute([0,0,-.18, 0,0,.22, 1.25,0,.05],3)); wingG.computeVertexNormals();
-  const bm=new THREE.MeshBasicMaterial({color:L(0x16181b),side:THREE.DoubleSide});
+  const wingG=new THREE.BufferGeometry(); wingG.setAttribute('position',new THREE.Float32BufferAttribute([0,0,-.12, 0,0,.16, .7,.06,.02,  .7,.06,.02, 0,0,.16, 1.25,-.05,-.08],3)); wingG.computeVertexNormals();
+  const bm=new THREE.MeshBasicMaterial({color:0x101112,side:THREE.DoubleSide,fog:false,toneMapped:false});
   const nf=LITE?3:5;
   for(let f=0;f<nf;f++){const g=new THREE.Group(); scene.add(g);
     const fl={g,birds:[],R:110+rnd()*220,h:55+rnd()*55,w:(.05+rnd()*.05)*(rnd()<.5?-1:1),a:rnd()*6.28,cx:(rnd()-.5)*120,cz:-30+(rnd()-.5)*160};
     const k=4+((rnd()*5)|0);
     for(let i=0;i<k;i++){const b=new THREE.Group(); const side=i%2?1:-1, row=Math.ceil(i/2);
-      b.position.set(-row*2.6,(rnd()-.5)*1.2,side*row*2.2); const l=new THREE.Mesh(wingG,bm), r=new THREE.Mesh(wingG,bm); r.scale.x=-1; b.add(l,r); b.scale.setScalar(1.5);
+      b.position.set(-row*2.6,(rnd()-.5)*1.2,side*row*2.2); const l=new THREE.Mesh(wingG,bm), r=new THREE.Mesh(wingG,bm); r.scale.x=-1; const body=new THREE.Mesh(new THREE.ConeGeometry(.07,.55,5).rotateZ(Math.PI/2),bm); b.add(l,r,body); b.scale.setScalar(1.1);
       b.rotation.y=Math.PI/2; b.userData={l,r,ph:rnd()*6.28,sp:7+rnd()*3}; g.add(b); fl.birds.push(b);}
     flocks.push(fl);}
 })();
@@ -1197,7 +1197,7 @@ function updateSky(dt){skyT+=dt;
   const vis=skyDay>.25;
   flocks.forEach(f=>{f.g.visible=vis; if(!vis)return; f.a+=f.w*dt; const x=f.cx+Math.cos(f.a)*f.R, z=f.cz+Math.sin(f.a)*f.R;
     f.g.position.set(x,f.h+Math.sin(skyT*.4+f.R)*3,z); f.g.rotation.y=-f.a+(f.w>0?-Math.PI/2:Math.PI/2);
-    f.birds.forEach(b=>{const u=b.userData; const fl=Math.sin(skyT*u.sp+u.ph); const glide=Math.sin(skyT*.5+u.ph)>.3?.15:1; const ang=(.15+.55*fl)*glide;
+    f.birds.forEach(b=>{const u=b.userData; const fl=Math.sin(skyT*u.sp*.8+u.ph); const glide=Math.sin(skyT*.35+u.ph)>.2?.12:1; const ang=(.1+.45*fl)*glide;
       u.l.rotation.x=ang; u.r.rotation.x=-ang;});});}
 // ---------- sol ----------
 const LAT=-27.63*Math.PI/180; let season='verao'; let curHour=18.5, dayF=1;
