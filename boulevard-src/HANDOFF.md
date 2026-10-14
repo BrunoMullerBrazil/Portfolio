@@ -32,6 +32,10 @@ Guia 3D **não oficial**, feito por morador, do condomínio Scire Boulevard (Ped
 - "Ver o andar por dentro" (corte) com barra flutuante ↑↓.
 - Janelas com interior (shader), luz de dia/noite pela régua de horário, verão/inverno, nuvens, pássaros, trânsito.
 - Entorno: avenida em curva, rotatória, mata, prédio vizinho, bairro no morro, morro de pedra.
+- Luz do céu: `scene.environment` gerado do próprio céu (`envScene`, PMREM) e refeito quando a hora muda (`refreshEnv()`); ilumina e reflete em toda a cena. O shader do ambiente precisa de `#include <encodings_fragment>` (PMREM r128 grava em RGBE; sem isso a cena fica preta).
+- Oclusão de fachada barata (`facadeAO()`): escurece o encontro com a laje, o piso e o pé do prédio; roda também no celular.
+- Grading cinematográfico (só desktop, último passe do composer): saturação, curva suave, split-tone quente/frio, vinheta leve.
+- Árvores: copa de cartões de folhagem recortada (`leafTex`, `cardG`, normais esféricas, `alphaTest`, sombra com `customDepthMaterial`) sobre núcleo escuro pequeno. Cor vem da instância.
 - Mata do morro: textura de copa pintada no próprio terreno (shader no material do terreno, atributo `aForest` = peso da mata + variação de tom). Árvores individuais só na mata do lote e esparsas na baixada.
 - Apê aberto: à noite os materiais do interior (`DM_GLOW`) ganham luz própria quente + luzes pontuais; o guarda-corpo do apê e o do andar de cima viram vidro translúcido (`GUARD`, `ghostGuard()`), e voltam ao fechar.
 - Abas: Obra (contagem, gráfico, previsões), Apartamentos, Lazer, Arredores, Sobre.
@@ -40,7 +44,8 @@ Guia 3D **não oficial**, feito por morador, do condomínio Scire Boulevard (Ped
 
 ## Pendências e ideias
 - Interiores realistas no corte do andar inteiro (hoje: mobília genérica).
-- `og.jpg` (prévia do WhatsApp) ainda mostra o morro com a mata antiga em bolas: refazer a partir da abertura nova.
+- `og.jpg` (prévia do WhatsApp) ainda mostra a cena antiga (morro em bolas, árvores facetadas): refazer a partir da abertura nova.
+- Realismo, próximas etapas combinadas: 3) fachada (vidro refletindo o céu no lugar das sacadas pretas, leve variação/sujeira na pintura); 4) chão e entorno (gramado com textura, meio-fio, casas com mais forma); 5) interiores realistas por último. Alvo: realismo cinematográfico pela luz, não fotorrealismo.
 - Atualizar a % da obra a cada nova medição da Caixa (array `SCHED` no template).
 - Ideias: "Sol no meu apê", comparador de dois aptos, "Monte sua sala".
 - Não fazer: reivindicar apê ou foto de morador (risco de segurança/LGPD).
