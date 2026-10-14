@@ -36,6 +36,7 @@ Guia 3D **não oficial**, feito por morador, do condomínio Scire Boulevard (Ped
 - Oclusão de fachada barata (`facadeAO()`): escurece o encontro com a laje, o piso e o pé do prédio; roda também no celular.
 - Grading cinematográfico (só desktop, último passe do composer): saturação, curva suave, split-tone quente/frio, vinheta leve.
 - Árvores: copa de cartões de folhagem recortada (`leafTex`, `cardG`, normais esféricas, `alphaTest`, sombra com `customDepthMaterial`) sobre núcleo escuro pequeno. Cor vem da instância.
+- Nuvens: procedurais dentro do shader do céu (fbm projetado num plano alto, vento por `skyU.time`, sombra própria, somem no horizonte; cores `cLit`/`cDark` por horário em `setSun`). Os sprites antigos foram removidos (faziam mancha recortada sobre o morro). Hash sem `sin` (`h12`) para não gerar pontos coloridos em GPU de menor precisão; estrelas só com noite fechada. Celular usa 4 oitavas (`OCT`).
 - Mata do morro: textura de copa pintada no próprio terreno (shader no material do terreno, atributo `aForest` = peso da mata + variação de tom). Árvores individuais só na mata do lote e esparsas na baixada.
 - Apê aberto: à noite os materiais do interior (`DM_GLOW`) ganham luz própria quente + luzes pontuais; o guarda-corpo do apê e o do andar de cima viram vidro translúcido (`GUARD`, `ghostGuard()`), e voltam ao fechar.
 - Abas: Obra (contagem, gráfico, previsões), Apartamentos, Lazer, Arredores, Sobre.
