@@ -14,6 +14,9 @@ Guia 3D **não oficial**, feito por morador, do condomínio Scire Boulevard (Ped
 - `boulevard-src/fit.json`: encaixe de cada planta (finais 01–12) na planta do pavimento.
 - `boulevard-src/build.py`: gera `public/boulevard/index.html`. Rodar e dar push.
 - `boulevard-src/og.jpg`: imagem de prévia (cópia em `public/boulevard/og.jpg`; versão referenciada `og.jpg?v=5`).
+- `boulevard-src/obra.json`: Diário da obra, um item por relatório mensal da construtora (fotos, legendas, % e estado do 3D por bloco).
+- `boulevard-src/tools/relatorio.py`: lê os PDFs dos relatórios e gera fotos, miniaturas e o esqueleto do mês no `obra.json`.
+- `public/boulevard/obra/` (fotos) e `public/boulevard/obra/t/` (miniaturas da grade).
 - `boulevard-src/b112-source.html`: modelo realista do apto B112 (base de `public/boulevard/b112/index.html`).
 
 ## Fatos confirmados
@@ -39,15 +42,25 @@ Guia 3D **não oficial**, feito por morador, do condomínio Scire Boulevard (Ped
 - Nuvens: procedurais dentro do shader do céu (fbm projetado num plano alto, vento por `skyU.time`, sombra própria, somem no horizonte; cores `cLit`/`cDark` por horário em `setSun`). Os sprites antigos foram removidos (faziam mancha recortada sobre o morro). Hash sem `sin` (`h12`) para não gerar pontos coloridos em GPU de menor precisão; estrelas só com noite fechada. Celular usa 4 oitavas (`OCT`).
 - Mata do morro: textura de copa pintada no próprio terreno (shader no material do terreno, atributo `aForest` = peso da mata + variação de tom). Árvores individuais só na mata do lote e esparsas na baixada.
 - Apê aberto: à noite os materiais do interior (`DM_GLOW`) ganham luz própria quente + luzes pontuais; o guarda-corpo do apê e o do andar de cima viram vidro translúcido (`GUARD`, `ghostGuard()`), e voltam ao fechar.
-- Abas: Obra (contagem, gráfico, previsões), Apartamentos, Lazer, Arredores, Sobre.
+- Diário da obra (aba Obra): régua de meses; o 3D vira o prédio no estado daquele relatório (`setObra(mes)`), com legenda das fases, nota por bloco, fotos do mês e visualizador. "Ver o prédio pronto" volta ao modelo final; fechar a aba ou abrir um apê também volta. Ao entrar, se for fim de tarde ou noite, a hora vai para 15h30 para as fases ficarem legíveis. Durante o modo obra, `paintUnits`, `applyCut` e o clique nas unidades ficam inertes.
+- Abas: Obra (contagem, diário da obra, gráfico, previsões), Apartamentos, Lazer, Arredores, Sobre.
 - Modo leve automático no celular (`?leve` / `?completo` para testar).
 - Avisos de "não oficial · feito por morador · sem vínculo com a construtora" na página e na prévia.
+
+## Como adicionar relatórios ao Diário da obra
+1. `python3 boulevard-src/tools/relatorio.py caminho/*.pdf` (precisa de `pdfplumber`, `Pillow` e `pdfimages` do poppler). Cria ou atualiza os meses no `obra.json` pela "Data base" do relatório e grava as fotos.
+2. Conferir as fotos do mês novo. Relatórios com foto emoldurada (ex.: nov/2025) às vezes saem com moldura e legenda dentro da imagem: nesse caso trocar à mão e marcar `"revisado": true` para o script não sobrescrever.
+3. Revisar as legendas (o PDF quebra frases com "Torre A/B" no meio) e escrever `notaA`/`notaB` (uma frase por bloco).
+4. Preencher `A` e `B` do mês, em andares de apartamento 1–12 (andar = pavimento − 2): `S` estrutura, `W` alvenaria, `R` reboco externo (contado de cima), `L` selador (de cima), `E` esquadrias (de baixo), `G` guarda-corpo (de baixo), `top: 1` quando o ático estiver pronto. É estimativa a partir das legendas; manter coerente mês a mês (nunca regredir).
+5. `python3 boulevard-src/build.py`, testar a aba Obra e dar push.
+- Meses já carregados: set/2025 a ago/2026 (12 relatórios, 85 fotos). Faltam os relatórios anteriores a set/2025.
 
 ## Pendências e ideias
 - Interiores realistas no corte do andar inteiro (hoje: mobília genérica).
 - `og.jpg` (prévia do WhatsApp) ainda mostra a cena antiga (morro em bolas, árvores facetadas): refazer a partir da abertura nova.
 - Realismo, próximas etapas combinadas: 3) fachada (vidro refletindo o céu no lugar das sacadas pretas, leve variação/sujeira na pintura); 4) chão e entorno (gramado com textura, meio-fio, casas com mais forma); 5) interiores realistas por último. Alvo: realismo cinematográfico pela luz, não fotorrealismo.
-- Atualizar a % da obra a cada nova medição da Caixa (array `SCHED` no template).
+- Atualizar a % da obra a cada nova medição da Caixa (array `SCHED` no template) e o Diário da obra a cada relatório da construtora (seção acima).
+- Diário: as fotos são dos relatórios da construtora, enviados aos compradores. Se a construtora pedir, retirar `public/boulevard/obra/` e o diário continua só com o 3D.
 - Ideias: "Sol no meu apê", comparador de dois aptos, "Monte sua sala".
 - Não fazer: reivindicar apê ou foto de morador (risco de segurança/LGPD).
 

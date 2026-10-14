@@ -442,6 +442,43 @@ body.intro .brand{opacity:0;pointer-events:none}
 
 .i-over{margin-bottom:12px}
 .fside{font:600 9px var(--f-ui);letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin:6px 0}
+
+/* diário da obra */
+.dia{margin-bottom:6px}
+.dia-h{display:flex;align-items:center;gap:10px}
+.dia-m{flex:1;text-align:center}
+.dia-m b{display:block;font:700 19px/1.15 var(--f-ui);letter-spacing:-.01em}
+.dia-m span{font-size:11.5px;color:var(--muted)}
+.dia-nav{width:34px;height:34px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--ink);font-size:18px;cursor:pointer;flex:none}
+.dia-nav:disabled{opacity:.3;cursor:default}
+#diaR{width:100%;margin:12px 0 0;-webkit-appearance:none;appearance:none;background:transparent;height:22px;cursor:pointer}
+#diaR::-webkit-slider-runnable-track{height:2px;background:linear-gradient(90deg,var(--gold) var(--p,100%),rgba(241,235,225,.22) var(--p,100%))}
+#diaR::-moz-range-track{height:2px;background:rgba(241,235,225,.22)}
+#diaR::-moz-range-progress{height:2px;background:var(--gold)}
+#diaR::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold-2);margin-top:-6px;box-shadow:0 0 0 5px rgba(201,166,107,.22)}
+#diaR::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--gold-2);border:0}
+.dia-t{display:flex;justify-content:space-between;font:600 9.5px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.dia-leg{display:flex;flex-wrap:wrap;gap:6px 14px;margin:14px 0 10px;font:600 10.5px var(--f-ui);color:var(--muted)}
+.dia-leg span{display:flex;align-items:center;gap:6px}.dia-leg i{width:11px;height:11px;display:block}
+.dia-b{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line)}
+.dia-b div{background:rgba(10,10,10,.4);padding:10px 12px}
+.dia-b span{font:600 9px var(--f-ui);letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.dia-b p{margin:4px 0 0;font-size:12px;line-height:1.45;color:var(--ink)}
+.dia-f{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:10px}
+.dia-f button{position:relative;aspect-ratio:4/5;border:0;padding:0;background:#222 center/cover no-repeat;cursor:pointer}
+.dia-f button span{position:absolute;left:4px;top:4px;font:700 8.5px var(--f-ui);letter-spacing:.1em;padding:2px 5px;background:rgba(14,13,12,.8);color:var(--ink)}
+.dia-f button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.dia-pronto{margin-top:12px;width:100%;justify-content:center;text-align:center}
+#lb{position:fixed;inset:0;z-index:30;background:rgba(6,6,7,.94);display:flex;align-items:center;justify-content:center;padding:60px 70px 110px}
+#lb[hidden]{display:none}
+#lbI{max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.lb-x{position:absolute;right:20px;top:18px}
+.lb-n{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:1px solid var(--line);background:rgba(10,10,10,.6);color:var(--ink);font-size:20px;cursor:pointer}
+.lb-p{left:16px}.lb-nx{right:16px}
+.lb-c{position:absolute;left:0;right:0;bottom:24px;text-align:center;padding:0 20px}
+.lb-c span{font:700 10px var(--f-ui);letter-spacing:.24em;text-transform:uppercase;color:var(--gold-2)}
+.lb-c p{margin:6px auto 0;max-width:620px;font-size:14px;line-height:1.5}
+@media (max-width:900px){#lb{padding:56px 10px 120px}.lb-n{top:auto;bottom:70px;transform:none}}
 </style>
 </head>
 <body>
@@ -560,6 +597,17 @@ body.intro .brand{opacity:0;pointer-events:none}
       <p class="note small">Contagem até <strong>1º de maio de 2027</strong>, data que os moradores estão usando como referência para a entrega. Não é uma data oficial: a contagem marca o primeiro dia do mês, e a entrega pode cair em qualquer dia de maio, ou em outro mês.</p>
       <div class="eb">Andamento da obra</div>
       <div class="prog"><div class="prog-h"><b>76,16%</b><span>medição da Caixa · 06/10/2026</span></div><div class="prog-bar"><i style="width:76.16%"></i></div></div>
+      <div class="eb" id="diaTop">Diário da obra · o prédio mês a mês</div>
+      <div class="dia" id="dia">
+        <div class="dia-h"><button class="dia-nav" id="diaPrev" aria-label="Mês anterior">‹</button><div class="dia-m"><b id="diaMes">—</b><span id="diaSub"></span></div><button class="dia-nav" id="diaNext" aria-label="Próximo mês">›</button></div>
+        <input type="range" id="diaR" min="0" max="0" step="1" value="0" aria-label="Mês do relatório">
+        <div class="dia-t"><span id="diaT0"></span><span id="diaT1"></span></div>
+        <div class="dia-leg" id="diaLeg"></div>
+        <div class="dia-b"><div><span>Bloco A</span><p id="diaA"></p></div><div><span>Bloco B</span><p id="diaB"></p></div></div>
+        <div class="dia-f" id="diaF"></div>
+        <button class="cta ghost dia-pronto" id="diaPronto">Ver o prédio pronto</button>
+        <p class="note small">Fotos e legendas: relatórios mensais de acompanhamento enviados pela construtora aos compradores. O 3D mostra uma estimativa feita a partir das legendas, não um levantamento da obra.</p>
+      </div>
       <div class="obrachart"><svg id="obraSvg" viewBox="0 0 320 170" role="img" aria-label="Evolução da obra: executado até 76% em outubro de 2026, previsão da Caixa até 100% em dezembro de 2027 e projeção pelo ritmo atual"></svg>
         <div class="oleg"><span><i class="l1"></i>Executado</span><span><i class="l2"></i>Ritmo atual</span><span><i class="l3"></i>Cronograma Caixa</span></div></div>
       <div class="eb">Previsões</div>
@@ -601,6 +649,11 @@ body.intro .brand{opacity:0;pointer-events:none}
   </div>
 </aside>
 
+<div id="lb" hidden role="dialog" aria-modal="true" aria-label="Foto da obra">
+  <button class="x lb-x" id="lbX" aria-label="Fechar">×</button>
+  <button class="lb-n lb-p" id="lbP" aria-label="Foto anterior">‹</button><img id="lbI" alt=""><button class="lb-n lb-nx" id="lbN" aria-label="Próxima foto">›</button>
+  <div class="lb-c"><span id="lbK"></span><p id="lbT"></p></div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
@@ -1065,7 +1118,9 @@ function facadeAO(m){m.onBeforeCompile=sh=>{
 const winGeo=new THREE.BoxGeometry(1,1,.08); const winData=[]; const sacGeos=[], guardData=[], GUARD={};
 const matSlab=mat(0xeceae4,{roughness:.8}), matCore=mat(0xc9c5bd,{roughness:.9}), matYellow=mat(0xc9a533,{roughness:.6});
 const slatTex=canvasTex(64,64,(g,w,h)=>{g.fillStyle='#34373b';g.fillRect(0,0,w,h);g.fillStyle='#4e5257';for(let y=0;y<h;y+=8)g.fillRect(0,y,w,4);},true); slatTex.repeat.set(3,1);
+const TBASE=[[],[]]; // malhas do térreo e do 2º pavimento de cada bloco (modo obra)
 TOWERS.forEach((t,ti)=>{
+  const _n0=scene.children.length;
   const tg=[]; Object.values(U).forEach(u=>u.r.forEach(r=>tg.push(rectBox(t,r,0,GH,-0.9)))); CORE.concat(CORR).forEach(r=>tg.push(rectBox(t,r,0,GH,-0.9)));
   const lobby=shadowed(new THREE.Mesh(merge(tg),mat(0x1d2126,{roughness:.12,metalness:.6,emissive:0xffb46a,emissiveIntensity:0}))); scene.add(lobby); shopGlass.push(lobby.material);
   const cols=[]; for(let x=150;x<=1860;x+=170){[383,828].forEach(y=>{const w=pw(t,x,y);const g=new THREE.BoxGeometry(.45,GH,.45);g.translate(w[0],GH/2,w[1]);cols.push(g);});}
@@ -1130,6 +1185,7 @@ TOWERS.forEach((t,ti)=>{
   rg.add(shadowed(new THREE.Mesh(merge(ch),mat(0x222427,{roughness:.5,metalness:.4}))));
   // luz de topo (balizamento)
   const tw=pw(t,1002,565); rg.userData.beacon=new THREE.Vector3(tw[0],yT+7.3,tw[1]);
+  TBASE[ti]=scene.children.slice(_n0).filter(o=>o.isMesh);
 });
 (function(){
   const byFg=new Map(); sacGeos.forEach(s=>{if(!byFg.has(s.fg))byFg.set(s.fg,[]);byFg.get(s.fg).push(s.g);});
@@ -1241,6 +1297,52 @@ const glowMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opaci
 })();
 const beaconPts=(function(){const g=new THREE.BufferGeometry().setFromPoints(roofs.map(r=>r.userData.beacon));const m=new THREE.PointsMaterial({map:glowTex,color:L(0xff3b2a),size:3,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:0});scene.add(new THREE.Points(g,m));return m;})();
 
+// ---------- modo obra: o prédio no estado de cada relatório da construtora ----------
+// OBRA.meses[i].A/.B: andares (1-12) com S estrutura, W alvenaria, R reboco externo (de cima), L selador (de cima),
+// E esquadrias (de baixo), G guarda-corpo (de baixo), top = ático. Estimado a partir das legendas dos relatórios.
+const OBRA={"meses":[{"id":"202509","A":{"S":9,"W":3,"R":0,"L":0,"E":0,"G":0},"B":{"S":7,"W":0,"R":0,"L":0,"E":0,"G":0},"notaA":"Laje do 11º pavimento concretada. Alvenaria até o 5º.","notaB":"Laje do 9º pavimento. Alvenaria só no 1º e 2º.","pct":33.22,"envio":"20/10/2025","fotos":[{"f":"202509-1.jpg","bloco":"A","txt":"Forma e aço da laje do 11º pavimento. Alvenaria até o 5º pavimento."},{"f":"202509-2.jpg","bloco":"A","txt":"Reboco nas Áreas Comuns do pavimento da garagem."},{"f":"202509-3.jpg","bloco":"A","txt":"Aplicação de revestimento de gesso no teto. Rebocos internos no 1º, 2º e 3º pavimento."},{"f":"202509-4.jpg","bloco":"A","txt":"Aplicação de contrapiso no 2º e 3º pavimento."},{"f":"202509-5.jpg","bloco":"B","txt":"Forma e aço da laje do 9º pavimento. Alvenaria até o 2º pavimento."},{"f":"202509-6.jpg","bloco":"B","txt":"Alvenaria de tijolos cerâmicos no 1º e 2º pavimento."}],"revisado":true},{"id":"202510","A":{"S":10,"W":3,"R":0,"L":0,"E":0,"G":0},"B":{"S":9,"W":2,"R":0,"L":0,"E":0,"G":0},"notaA":"Estrutura subindo. Alvenaria até o 5º e reboco interno começando.","notaB":"Laje do 11º pavimento. Alvenaria do 2º ao 4º.","pct":38.01,"envio":"18/11/2025","fotos":[{"f":"202510-1.jpg","bloco":"A","txt":"Alvenaria de tijolos cerâmicos até o 5º pavimento."},{"f":"202510-2.jpg","bloco":"A","txt":"Aplicação de revestimento de gesso em teto até o 2º pavimento."},{"f":"202510-3.jpg","bloco":"A","txt":"Aplicação de revestimento de gesso em teto até o 2º pavimento."},{"f":"202510-4.jpg","bloco":"A","txt":"Reboco interno até o 2º pavimento."},{"f":"202510-5.jpg","bloco":"B","txt":"Forma e aço da laje do 11º pavimento."},{"f":"202510-6.jpg","bloco":"B","txt":"Alvenaria de tijolos cerâmicos no 2º, 3º e 4º."},{"f":"202510-7.jpg","bloco":"B","txt":"Alvenaria de tijolos cerâmicos 2º, 3º e 4º pavimento."},{"f":"202510-8.jpg","bloco":"B","txt":"Detalhamento e montagem da mocheta de shaft com sistema drywall."}],"revisado":true},{"id":"202511","A":{"S":12,"W":7,"R":0,"L":0,"E":0,"G":0},"B":{"S":12,"W":4,"R":0,"L":0,"E":0,"G":0},"notaA":"Estrutura de concreto finalizada. Alvenaria até o 9º pavimento.","notaB":"13ª laje concluída, estrutura completa. Alvenaria até o 6º.","pct":43.72,"envio":"17/12/2025","fotos":[{"f":"202511-1.jpg","bloco":"B","txt":"13ª laje executada, estrutura de concreto finalizada."},{"f":"202511-2.jpg","bloco":"A","txt":"Estrutura finalizada e alvenaria até o 9º pavimento."},{"f":"202511-3.jpg","bloco":"B","txt":"Alvenaria de tijolo cerâmico até o 6º pavimento."},{"f":"202511-4.jpg","bloco":"B","txt":"Contrapiso autonivelante no 1º e 2º pavimentos."},{"f":"202511-5.jpg","bloco":"B","txt":"Instalações hidrossanitárias e elétricas até o 3º pavimento."},{"f":"202511-6.jpg","bloco":"B","txt":"Reboco interno no 1º e 2º pavimentos."}],"revisado":true},{"id":"202512","A":{"S":12,"W":8,"R":0,"L":0,"E":0,"G":0},"B":{"S":12,"W":5,"R":0,"L":0,"E":0,"G":0},"notaA":"Estrutura pronta. Alvenaria até o 10º pavimento.","notaB":"Estrutura pronta. Alvenaria até o 7º, instalações até o 4º.","pct":47.49,"envio":"21/01/2026","fotos":[{"f":"202512-1.jpg","bloco":"AB","txt":"Estrutura de concreto finalizada no Bloco A e 13ª laje no Bloco B."},{"f":"202512-2.jpg","bloco":"B","txt":"Décima terceira laje de estrutura."},{"f":"202512-3.jpg","bloco":"A","txt":"Finalizado a estrutura de concreto armado. Alvenaria até o 10º pavimento."},{"f":"202512-4.jpg","bloco":"B","txt":"Alvenaria de tijolos Cerâmicos até o 7º pavimento."},{"f":"202512-5.jpg","bloco":"B","txt":"Instalações hidrossantárias e elétricas do 1º, 2º,3º e 4º pavimento."},{"f":"202512-6.jpg","bloco":"B","txt":"Reboco Interno do 1º, 2º e 3º pavimento."}],"revisado":true},{"id":"202601","A":{"S":12,"W":9,"R":0,"L":0,"E":0,"G":0},"B":{"S":12,"W":5,"R":0,"L":0,"E":0,"G":0},"notaA":"Alvenaria subindo. Revestimento cerâmico até o 3º.","notaB":"Alvenaria até o 7º. Instalações até o 5º.","pct":48.02,"envio":"20/02/2026","fotos":[{"f":"202601-1.jpg","bloco":"AB","txt":"Estrutura finalizada no Bloco A e laje do 13º pavimento no Bloco B."},{"f":"202601-2.jpg","bloco":"B","txt":"Laje do 13º pavimento."},{"f":"202601-3.jpg","bloco":"B","txt":"Alvenaria de tijolos cerâmicos até o 7º pavimento."},{"f":"202601-4.jpg","bloco":"B","txt":"Instalações hidrossanitárias e elétricas no 1º ao 5º pavimento."},{"f":"202601-5.jpg","bloco":"A","txt":"Execução de revestimento cerâmico no 1º ao 3º pavimento."}],"revisado":true},{"id":"202602","A":{"S":12,"W":10,"R":0,"L":0,"E":0,"G":0},"B":{"S":12,"W":7,"R":0,"L":0,"E":0,"G":0},"notaA":"Alvenaria até o 12º pavimento.","notaB":"Estrutura finalizada. Instalações até o 6º, reboco interno até o 5º.","pct":51.09,"envio":"27/03/2026","fotos":[{"f":"202602-1.jpg","bloco":"A","txt":"Estrutura de concreto finalizada e 13ª laje."},{"f":"202602-2.jpg","bloco":"A","txt":"Finalizado a estrutura de concreto armado e alvenaria até o 12º pavimento."},{"f":"202602-3.jpg","bloco":"B","txt":"Finalizado a 13º laje de estrutura."},{"f":"202602-4.jpg","bloco":"B","txt":"Instalações hidrossanitários e elétricas no 1º ao 6º pavimento."},{"f":"202602-5.jpg","bloco":"B","txt":"Reboco Interno no 1º ao 5º pavimento."},{"f":"202602-6.jpg","bloco":"A","txt":"Assentamento de revestimento cerâmico no 1º ao 4º pavimento."}],"revisado":true},{"id":"202603","A":{"S":12,"W":12,"R":0,"L":0,"E":0,"G":0,"top":1},"B":{"S":12,"W":10,"R":0,"L":0,"E":0,"G":0},"notaA":"Alvenaria concluída, inclusive o ático.","notaB":"Alvenaria até o 12º pavimento. O alto ainda é laje e pilar.","pct":54.0,"envio":"28/04/2026","fotos":[{"f":"202603-1.jpg","bloco":"A","txt":"Alvenaria até o ático."},{"f":"202603-2.jpg","bloco":"B","txt":"Alvenaria até o 12º pavimento."},{"f":"202603-3.jpg","bloco":"AB","txt":"Finalizado a estrutura de concreto armado."},{"f":"202603-4.jpg","bloco":"AB","txt":"Contrapiso autonivelante até o 9º pavimento no A e até o 7º no B."},{"f":"202603-5.jpg","bloco":"AB","txt":"Instalações hidrossanitárias, elétricas e de gás até o 10º pavimento no A e até o 7º no B."},{"f":"202603-6.jpg","bloco":"A","txt":"Reboco Interno até o 9º pavimento."},{"f":"202603-7.jpg","bloco":"A","txt":"Gesso no forro dos banheiros até o 3º pavimento."},{"f":"202603-8.jpg","bloco":"A","txt":"Revestimento cerâmico até o 5º pavimento."},{"f":"202603-9.jpg","bloco":"AB","txt":"Fiação até o 5º pavimento no A e até o 3º no B."}],"revisado":true},{"id":"202604","A":{"S":12,"W":12,"R":3,"L":0,"E":0,"G":0,"top":1},"B":{"S":12,"W":12,"R":0,"L":0,"E":0,"G":0,"top":1},"notaA":"Reboco externo começou pelo alto.","notaB":"Alvenaria concluída. Reboco interno até o 8º.","pct":56.4,"envio":"29/05/2026","fotos":[{"f":"202604-1.jpg","bloco":"A","txt":"Reboco externo iniciado."},{"f":"202604-2.jpg","bloco":"AB","txt":"Reboco interno até o 10º pavimento no A e até o 8º no B."},{"f":"202604-3.jpg","bloco":"AB","txt":"Alvenarias das torres finalizadas."},{"f":"202604-4.jpg","bloco":"B","txt":"Revestimento azulejos até o 2º pavimento."},{"f":"202604-5.jpg","bloco":"A","txt":"Revestimento azulejos até o 6 pavimento."},{"f":"202604-6.jpg","bloco":"AB","txt":"Gesso drywall até o 9º pavimento no A e até o 6º no B."},{"f":"202604-7.jpg","bloco":"AB","txt":"Gesso no forro dos banheiros até o 5º pavimento no A e até o 4º no B."},{"f":"202604-8.jpg","bloco":"AB","txt":"Fiação até o 5º pavimento no A e até o 3º no B."}],"revisado":true},{"id":"202605","A":{"S":12,"W":12,"R":5,"L":0,"E":0,"G":0,"top":1},"B":{"S":12,"W":12,"R":0,"L":0,"E":0,"G":0,"top":1},"notaA":"Reboco externo descendo. Pintura interna começou no 1º.","notaB":"Revestimento de banheiros até o 4º. Fachada ainda no tijolo.","pct":59.64,"envio":"23/06/2026","fotos":[{"f":"202605-1.jpg","bloco":"A","txt":"Reboco externo iniciado."},{"f":"202605-2.jpg","bloco":"AB","txt":"Alvenaria 100% executada nos dois blocos."},{"f":"202605-3.jpg","bloco":"AB","txt":"Shaft Corredor até o 5º."},{"f":"202605-4.jpg","bloco":"B","txt":"Revestimento azulejos até o 4º pavimento."},{"f":"202605-5.jpg","bloco":"A","txt":"Revestimento azulejos no 9º pavimento."},{"f":"202605-6.jpg","bloco":"A","txt":"Execução da pintura no 1º pavimento."},{"f":"202605-7.jpg","bloco":"A","txt":"Execução do revestimento de piso no 1º pavimento."},{"f":"202605-8.jpg","bloco":"AB","txt":"Fiação até o 8º pavimento no A e até o 6º no B."}],"revisado":true},{"id":"202606","A":{"S":12,"W":12,"R":9,"L":0,"E":0,"G":0,"top":1},"B":{"S":12,"W":12,"R":3,"L":0,"E":0,"G":0,"top":1},"notaA":"Reboco externo na maior parte da fachada.","notaB":"Reboco externo começou pelo alto.","pct":65.17,"envio":"17/07/2026","fotos":[{"f":"202606-1.jpg","bloco":"A","txt":"Revestimento piso no 2º pavimento."},{"f":"202606-2.jpg","bloco":"A","txt":"Pintura no 1º pavimento."},{"f":"202606-3.jpg","bloco":"A","txt":"Fiação elétrica até o 10º pavimento."},{"f":"202606-4.jpg","bloco":"A","txt":"Reboco externo."},{"f":"202606-5.jpg","bloco":"A","txt":"Shaft Corredor até o 10º pavimento."},{"f":"202606-6.jpg","bloco":"A","txt":"Revestimento de azulejos até 10º pavimento."},{"f":"202606-7.jpg","bloco":"B","txt":"Reboco externo iniciado."},{"f":"202606-8.jpg","bloco":"B","txt":"Revestimento de azulejos até o 6º pavimento."},{"f":"202606-9.jpg","bloco":"B","txt":"Fiação elétrica até o 09º pavimento."}],"revisado":true},{"id":"202607","A":{"S":12,"W":12,"R":12,"L":0,"E":0,"G":0,"top":1},"B":{"S":12,"W":12,"R":8,"L":0,"E":0,"G":0,"top":1},"notaA":"Reboco externo concluído. Pintura interna até o 4º.","notaB":"Reboco externo descendo. Forro até o 9º.","pct":67.79,"envio":"26/08/2026","fotos":[{"f":"202607-1.jpg","bloco":"A","txt":"Reboco externo."},{"f":"202607-2.jpg","bloco":"A","txt":"Execução de forro até o 9º pavimento."},{"f":"202607-3.jpg","bloco":"A","txt":"Execução de azulejos até o 10º pavimento."},{"f":"202607-4.jpg","bloco":"B","txt":"Reboco externo."},{"f":"202607-5.jpg","bloco":"B","txt":"Execução de forro até o 9º pavimento."},{"f":"202607-6.jpg","bloco":"B","txt":"Execução de azulejos até o 10º pavimento."},{"f":"202607-7.jpg","bloco":"A","txt":"Pintura interna até o 4º pavimento."},{"f":"202607-8.jpg","bloco":"AB","txt":"Piso até o 8º pavimento no A e até o 4º no B."}],"revisado":true},{"id":"202608","A":{"S":12,"W":12,"R":12,"L":12,"E":6,"G":5,"top":1},"B":{"S":12,"W":12,"R":12,"L":8,"E":0,"G":0,"top":1},"notaA":"Selador em toda a fachada. Esquadrias e guarda-corpo nos andares de baixo.","notaB":"Reboco externo concluído, selador começando pelo alto.","pct":73.58,"envio":"22/09/2026","fotos":[{"f":"202608-1.jpg","bloco":"A","txt":"Aplicação do selador na parte externa."},{"f":"202608-2.jpg","bloco":"A","txt":"Instalação de esquadrias."},{"f":"202608-3.jpg","bloco":"A","txt":"Guarda corpo na parte frontal até o 7º pavimento."},{"f":"202608-4.jpg","bloco":"B","txt":"Aplicação do selador na parte externa."},{"f":"202608-5.jpg","bloco":"AB","txt":"Piso até o 11º pavimento no A e até o 9º no B."},{"f":"202608-6.jpg","bloco":"AB","txt":"Massa corrida até o 9º pavimento no A e até o 4º no B."}],"revisado":true}]};
+const OB={on:null,mats:null,pil:new Map(),hoist:[]};
+function obraMats(){ if(OB.mats) return OB.mats;
+  const M={conc:mat(0x5f5d59,{roughness:.95}),reb:mat(0x57554f,{roughness:.95}),sel:mat(0x75736d,{roughness:.9}),
+    tij:[mat(0x7c3e22,{roughness:.95}),mat(0x723920,{roughness:.95}),mat(0x85452a,{roughness:.95})],vao:new THREE.MeshBasicMaterial({color:0x151311})};
+  [M.reb,M.sel].concat(M.tij).forEach(facadeAO); OB.mats=M; return M;}
+function obraPilares(fg){ let g=OB.pil.get(fg); if(g) return g; g=new THREE.Group(); const M=obraMats(); const geo=new THREE.BoxGeometry(.38,FH-.2,.38); const gs=[];
+  fg.children.forEach(c=>{ if(!c.userData.type) return; const b=c.geometry.boundingBox; [[b.min.x,b.min.z],[b.max.x,b.min.z],[b.min.x,b.max.z],[b.max.x,b.max.z]].forEach(p=>{const q=geo.clone(); q.translate(p[0],b.min.y+(FH-.2)/2,p[1]); gs.push(q);}); });
+  const m=new THREE.Mesh(merge(gs),M.conc); m.castShadow=m.receiveShadow=true; g.add(m); fg.add(g); OB.pil.set(fg,g); return g;}
+function setObra(m){
+  const M=obraMats();
+  if(m&&!OB.on){ if(sel){closeDoll(); sel=null; setTimeout(syncHash,0); closeDetail(); document.body.classList.remove('mini');} cut=false; Object.values(floorPlans).forEach(g=>g.visible=false); highlightUnit(); }
+  OB.on=m||null;
+  towerFloors.forEach((arr,ti)=>arr.forEach((fg,f)=>{ if(!fg) return; const s=m?m[ti?'B':'A']:null;
+    fg.visible=!s||f<=s.S;
+    const walls=!s||f<=s.W, reb=!!s&&walls&&f>12-s.R, sl=!!s&&walls&&f>12-s.L, esq=!s||f<=s.E, gc=!s||f<=s.G;
+    const pil=OB.pil.get(fg);
+    fg.children.forEach(c=>{ const u=c.userData; if(c===pil) return;
+      if(u.type){ if(!u.m0)u.m0=c.material; c.visible=walls; c.material=!s?u.m0:(sl?M.sel:reb?M.reb:M.tij[(f+u.n)%3]); return; }
+      if(u.kind==='slab'||u.kind==='core'){ if(!u.m0)u.m0=c.material; c.material=s?M.conc:u.m0; if(!s){c.visible=true;c.scale.y=1;c.position.y=0;} return; }
+      if(c.isInstancedMesh){ if(u.byN){ if(!u.m0)u.m0=c.material; c.visible=walls; c.material=(s&&!esq)?M.vao:u.m0; } else c.visible=!s; return; }
+      if(Array.isArray(c.material)){ c.visible=gc; return; }
+      if(c.material===matYellow){ c.visible=!s; return; }
+      if(c.material===matSlab){ if(!u.m0)u.m0=c.material; c.material=s?M.conc:u.m0; }
+    });
+    if(s&&!walls) obraPilares(fg).visible=true; else if(pil) pil.visible=false;
+  }));
+  roofs.forEach((rg,ti)=>{ const s=m?m[ti?'B':'A']:null; rg.visible=!s||s.S>=12;
+    rg.children.forEach((c,i)=>{ if(!c.userData.m0)c.userData.m0=c.material; c.material=s?M.conc:c.userData.m0; if(i>0)c.visible=!s||!!s.top; }); });
+  TBASE.forEach((arr,ti)=>arr.forEach(o=>{ if(!o.userData.m0)o.userData.m0=o.material; o.material=m?M.conc:o.userData.m0; }));
+  beaconPts.visible=!m;
+  TOWERS.forEach((t,ti)=>{ const s=m?m[ti?'B':'A']:null; let h=OB.hoist[ti];
+    if(!h){ h=new THREE.Group(); const mast=new THREE.Mesh(new THREE.BoxGeometry(.7,1,.7),mat(0x8a7a4a,{roughness:.7,metalness:.2})); mast.castShadow=true;
+      const cab=new THREE.Mesh(new THREE.BoxGeometry(1.6,2.2,1.3),mat(0x6d7275,{roughness:.6})); cab.position.z=1.2; h.add(mast,cab); h.userData={mast,cab};
+      h.position.set(t.wx+(ti?-17:17),0,t.wz+9.4); scene.add(h); OB.hoist[ti]=h; }
+    h.visible=!!s&&!(s.R>=12&&s.L>=12);
+    if(s){ const H=BASE+s.S*FH+3; h.userData.mast.scale.y=H; h.userData.mast.position.y=H/2; h.userData.cab.position.y=BASE+Math.min(s.S,6)*FH; }
+  });
+  [winMeshes,glowMeshes].forEach(a=>a.forEach(w=>{ if(!m&&w.isInstancedMesh&&!w.userData.byN) w.visible=true; }));
+  if(!m){ paintUnits(); applyCut(); }
+  window.__shadowDirty=true;
+}
+
 // ---------- nuvens e pássaros ----------
 const clouds=[], flocks=[];
 (function(){
@@ -1305,7 +1407,7 @@ function setSun(hour){
 // ---------- estado, seleção ----------
 let curTower=1, curFloor=null, sel=null, cut=false, flip=false, section=null;
 const typeColor=t=>L(cssv(TYPES[t].css)||'#888');
-function paintUnits(){
+function paintUnits(){ if(OB.on) return;
   unitMeshes.forEach(m=>{const d=m.userData; const isSel=sel&&sel.ti===d.tower&&sel.f===d.floor&&sel.n===d.n;
     const onCut=cut&&sel&&d.tower===sel.ti&&d.floor===sel.f; const onFloor=!sel&&curFloor&&d.tower===curTower&&d.floor===curFloor;
     if(isSel){m.material.color.copy(L(cssv('--gold')));m.material.emissive.copy(L(cssv('--gold')));m.material.emissiveIntensity=.55;}
@@ -1432,7 +1534,7 @@ function highlightUnit(){if(hl){scene.remove(hl);hl.geometry.dispose();hl=null;}
   hl=new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:L(cssv('--gold'))})); scene.add(hl);
   const s=new THREE.Shape(pts.map(v=>new THREE.Vector2(v.x,-v.z))); const geo=new THREE.ShapeGeometry(s); geo.rotateX(-Math.PI/2); geo.translate(0,y,0);
   hl.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:L(cssv('--gold')),transparent:true,opacity:.25,depthWrite:false,side:THREE.DoubleSide})));}
-function applyCut(){ setTimeout(syncCutBar,0); if(cut) closeDoll(); else if(sel) setTimeout(()=>openDoll(sel.ti,sel.f,sel.n),0); window.__shadowDirty=true;
+function applyCut(){ if(OB.on) return; setTimeout(syncCutBar,0); if(cut) closeDoll(); else if(sel) setTimeout(()=>openDoll(sel.ti,sel.f,sel.n),0); window.__shadowDirty=true;
   towerFloors.forEach((arr,ti)=>arr.forEach((fg,f)=>{if(!fg)return; fg.visible=!(cut&&sel&&ti===sel.ti&&f>sel.f);
     const on=cut&&sel&&ti===sel.ti&&f===sel.f; fg.children.forEach(c=>{if(c.userData.kind==='slab')c.visible=!on;if(c.userData.kind==='core'){c.scale.y=on?.45:1;c.position.y=on?c.userData.y0*(1-.45):0;}});}));
   roofs.forEach((r,ti)=>r.visible=!(cut&&sel&&ti===sel.ti));
@@ -1457,7 +1559,7 @@ function viewUnit(ti,f,n){
   else {const yy=BASE+(f-1)*FH; const ctr=new THREE.Vector3(c.x,yy+.9,c.z); flyTo(ctr.clone().add(dir.multiplyScalar(MOBILE()?17:12.5)).add(new THREE.Vector3(0,MOBILE()?2.6:2.0,0)),ctr.clone().add(dir.clone().normalize().multiplyScalar(-2.5)),1700);}
 }
 function viewFloor(ti,f){const t=TOWERS[ti];const y=BASE+(f-.5)*FH;flyTo(new THREE.Vector3(t.wx-30,y+16,t.wz+95),new THREE.Vector3(t.wx,y,t.wz),1500);}
-function select(ti,f,n,opts){opts=opts||{}; sel={ti,f,n}; setTimeout(()=>{if(sel&&sel.ti===ti&&sel.f===f&&sel.n===n&&!cut)openDoll(ti,f,n);},0); $('hint').classList.remove('on'); setTimeout(syncHash,0); curTower=ti; curFloor=f; renderUI(); paintUnits(); applyCut(); openDetail(); if(!opts.keepMini) setMini(false); if(!opts.noFly) viewUnit(ti,f,n);}
+function select(ti,f,n,opts){opts=opts||{}; if(OB.on){setObra(null); obraUI();} sel={ti,f,n}; setTimeout(()=>{if(sel&&sel.ti===ti&&sel.f===f&&sel.n===n&&!cut)openDoll(ti,f,n);},0); $('hint').classList.remove('on'); setTimeout(syncHash,0); curTower=ti; curFloor=f; renderUI(); paintUnits(); applyCut(); openDetail(); if(!opts.keepMini) setMini(false); if(!opts.noFly) viewUnit(ti,f,n);}
 function clearSel(){closeDoll(); sel=null; setTimeout(syncHash,0);cut=false;paintUnits();applyCut();closeDetail();document.body.classList.remove('mini');renderUI();}
 
 // ---------- UI ----------
@@ -1601,10 +1703,45 @@ function tick(){let ms=Math.max(0,TARGET-Date.now());const d=Math.floor(ms/DAY);
   $('hD').textContent=d; $('hH').textContent=p2(h); $('hM').textContent=p2(m); $('hS').textContent=p2(s); $('cdD').textContent=d; $('cdH').textContent=p2(h); $('cdM').textContent=p2(m); $('cdS').textContent=p2(s);}
 tick(); setInterval(tick,1000);
 
+// diário da obra (aba Obra)
+const MESN=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+OB.i=OBRA.meses.length-1;
+const mesNome=id=>{const n=MESN[+id.slice(4)-1];return n[0].toUpperCase()+n.slice(1)+' de '+id.slice(0,4);};
+const mesCurto=id=>MESES[+id.slice(4)-1]+'/'+id.slice(2,4);
+const pctBR=v=>v==null?'—':v.toFixed(2).replace('.',',')+'%';
+const BLK={A:'A',B:'B',AB:'A e B'};
+function obraLeg(m){const has=k=>['A','B'].some(b=>{const s=m[b];return k==='est'?s.S>s.W:k==='alv'?s.W>Math.max(s.R,s.L)&&s.W>0:k==='reb'?s.R>s.L:k==='sel'?s.L>0:s.E>0;});
+  return [['est','#5f5d59','Estrutura'],['alv','#7c3e22','Alvenaria'],['reb','#57554f','Reboco externo'],['sel','#8d8b86','Selador'],['esq','#7d95a6','Esquadrias']].filter(x=>has(x[0])).map(x=>`<span><i style="background:${x[1]}"></i>${x[2]}</span>`).join('');}
+function obraUI(){ const L=OBRA.meses, m=L[OB.i]; if(!m) return; const prev=L[OB.i-1];
+  $('diaMes').textContent=mesNome(m.id);
+  $('diaSub').textContent=pctBR(m.pct)+(prev&&m.pct!=null&&prev.pct!=null?' · +'+(m.pct-prev.pct).toFixed(2).replace('.',',')+' no mês':'')+(m.envio?' · relatório de '+m.envio:'');
+  const r=$('diaR'); r.max=L.length-1; r.value=OB.i; r.style.setProperty('--p',(L.length>1?OB.i/(L.length-1)*100:100)+'%');
+  $('diaT0').textContent=mesCurto(L[0].id); $('diaT1').textContent=mesCurto(L[L.length-1].id);
+  $('diaPrev').disabled=OB.i<=0; $('diaNext').disabled=OB.i>=L.length-1;
+  $('diaLeg').innerHTML=obraLeg(m); $('diaA').textContent=m.notaA||''; $('diaB').textContent=m.notaB||'';
+  $('diaF').innerHTML=(m.fotos||[]).map((f,k)=>`<button data-k="${k}" style="background-image:url('obra/t/${f.f}')" aria-label="${(f.txt||'Foto').replace(/"/g,'')}"><span>${BLK[f.bloco]||'Obra'}</span></button>`).join('');
+  $('diaF').querySelectorAll('button').forEach(b=>b.onclick=()=>lbOpen(+b.dataset.k));
+  $('diaPronto').textContent=OB.on?'Ver o prédio pronto':'Ver o prédio em '+mesNome(m.id).toLowerCase();
+}
+function diaSet(i){OB.i=Math.max(0,Math.min(OBRA.meses.length-1,i)); if(section==='obra') setObra(OBRA.meses[OB.i]); obraUI();}
+$('diaR').oninput=e=>diaSet(+e.target.value);
+$('diaPrev').onclick=()=>diaSet(OB.i-1); $('diaNext').onclick=()=>diaSet(OB.i+1);
+$('diaPronto').onclick=()=>{ if(OB.on) setObra(null); else setObra(OBRA.meses[OB.i]); obraUI(); };
+let lbK=0;
+function lbShow(){const m=OBRA.meses[OB.i],f=m.fotos[lbK]; $('lbI').src='obra/'+f.f; $('lbI').alt=f.txt||'';
+  $('lbK').textContent=mesNome(m.id)+' · Bloco '+(BLK[f.bloco]||'—')+' · '+(lbK+1)+' de '+m.fotos.length; $('lbT').textContent=f.txt||'';}
+function lbOpen(k){lbK=k; lbShow(); $('lb').hidden=false; $('lbX').focus();}
+function lbClose(){$('lb').hidden=true;}
+function lbGo(d){const n=OBRA.meses[OB.i].fotos.length; lbK=(lbK+d+n)%n; lbShow();}
+$('lbX').onclick=lbClose; $('lbP').onclick=()=>lbGo(-1); $('lbN').onclick=()=>lbGo(1);
+$('lb').addEventListener('click',e=>{if(e.target.id==='lb')lbClose();});
+addEventListener('keydown',e=>{if($('lb').hidden)return; if(e.key==='Escape')lbClose(); if(e.key==='ArrowLeft')lbGo(-1); if(e.key==='ArrowRight')lbGo(1);});
+obraUI();
+
 function openSection(k,focus){
   section=k; document.body.classList.add('explore'); document.body.classList.toggle('sec-other',k!=='aptos'); sheetOpen(true);
   $('pk').textContent=SEC[k][0]; $('pt').textContent=SEC[k][1];
-  ['obra','aptos','lazer','arredores','sobre'].forEach(s=>$('s-'+s).hidden=s!==k); if(k==='obra') drawObra();
+  ['obra','aptos','lazer','arredores','sobre'].forEach(s=>$('s-'+s).hidden=s!==k); if(k==='obra'){ drawObra(); if(curHour>17.4||curHour<7.4){ setSun(15.5); $('hour').value=15.5; } setObra(OBRA.meses[OB.i]); } else if(OB.on) setObra(null); obraUI();
   document.querySelectorAll('nav.main button').forEach(b=>b.setAttribute('aria-current',String(b.dataset.sec===k)));
   buildLabels(); resize();
   if(k==='obra') flyTo(new THREE.Vector3(60,60,175),new THREE.Vector3(-10,22,-15),1800);
@@ -1613,7 +1750,7 @@ function openSection(k,focus){
   if(k==='aptos'&&!sel) flyTo(new THREE.Vector3(-70,40,140),new THREE.Vector3(0,20,-10),1700);
   if(focus&&!MOBILE()) setTimeout(()=>$(focus).focus(),500);
 }
-function closeSection(){section=null;document.body.classList.remove('explore','sheet-open','sec-other');document.querySelectorAll('nav.main button').forEach(b=>b.setAttribute('aria-current','false'));buildLabels();resize();}
+function closeSection(){section=null; if(OB.on) setObra(null); obraUI();document.body.classList.remove('explore','sheet-open','sec-other');document.querySelectorAll('nav.main button').forEach(b=>b.setAttribute('aria-current','false'));buildLabels();resize();}
 function sheetOpen(o){if(!MOBILE())return;document.body.classList.toggle('sheet-open',o);$('menuBtn').setAttribute('aria-expanded',String(o));}
 document.querySelectorAll('[data-sec]').forEach(b=>b.addEventListener('click',()=>openSection(b.dataset.sec,b.dataset.focus)));
 $('pClose').onclick=()=>{if(MOBILE())sheetOpen(false);else closeSection();};
@@ -1651,7 +1788,7 @@ $('find').onsubmit=e=>{e.preventDefault();const raw=$('q').value.trim().toUpperC
 
 // clique e hover
 const ray=new THREE.Raycaster(), mp=new THREE.Vector2(); let down=null; const tip=$('tip');
-function pick(e){const r=canvas.getBoundingClientRect();mp.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mp,camera);
+function pick(e){if(OB.on)return null;const r=canvas.getBoundingClientRect();mp.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mp,camera);
   const h=ray.intersectObjects(unitMeshes.filter(m=>m.parent.visible),false);return h.length?h[0].object:null;}
 canvas.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};autoOrbit=false;});
 canvas.addEventListener('pointerup',e=>{if(!down)return;const mv=Math.hypot(e.clientX-down.x,e.clientY-down.y);down=null;if(mv>6)return;const o=pick(e);if(o){const d=o.userData;if(!section&&!MOBILE())openSection('aptos');select(d.tower,d.floor,d.n,{noFly:cut});}});
@@ -1719,7 +1856,7 @@ setTimeout(()=>{$('loading').style.opacity=0;setTimeout(()=>$('loading').remove(
   const a=parseApt(location.hash,1);
   if(a){if(!MOBILE())openSection('aptos');select(a.ti,a.f,a.n);} else startIntro();},300);
 addEventListener('hashchange',()=>{const a=parseApt(location.hash,curTower);if(a&&!(sel&&sel.ti===a.ti&&sel.f===a.f&&sel.n===a.n))select(a.ti,a.f,a.n);});
-window.__predio={THREE,scene,camera,controls,select,setSun,flyTo,home,clearSel,openSection,closeSection,cutToggle:()=>{cut=!cut;paintUnits();applyCut();},terrainH};
+window.__predio={setObra,OBRA,THREE,scene,camera,controls,select,setSun,flyTo,home,clearSel,openSection,closeSection,cutToggle:()=>{cut=!cut;paintUnits();applyCut();},terrainH};
 })();
 </script>
 </body>
