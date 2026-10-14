@@ -32,17 +32,22 @@ Guia 3D **não oficial**, feito por morador, do condomínio Scire Boulevard (Ped
 - "Ver o andar por dentro" (corte) com barra flutuante ↑↓.
 - Janelas com interior (shader), luz de dia/noite pela régua de horário, verão/inverno, nuvens, pássaros, trânsito.
 - Entorno: avenida em curva, rotatória, mata, prédio vizinho, bairro no morro, morro de pedra.
+- Mata do morro: textura de copa pintada no próprio terreno (shader no material do terreno, atributo `aForest` = peso da mata + variação de tom). Árvores individuais só na mata do lote e esparsas na baixada.
+- Apê aberto: à noite os materiais do interior (`DM_GLOW`) ganham luz própria quente + luzes pontuais; o guarda-corpo do apê e o do andar de cima viram vidro translúcido (`GUARD`, `ghostGuard()`), e voltam ao fechar.
 - Abas: Obra (contagem, gráfico, previsões), Apartamentos, Lazer, Arredores, Sobre.
 - Modo leve automático no celular (`?leve` / `?completo` para testar).
 - Avisos de "não oficial · feito por morador · sem vínculo com a construtora" na página e na prévia.
 
 ## Pendências e ideias
 - Interiores realistas no corte do andar inteiro (hoje: mobília genérica).
-- À noite o interior do apê aberto fica escuro. Em alguns aptos com sacada, o guarda-corpo tapa parte da vista.
-- Mata do morro ainda em "bolas". Ideia: textura de copa no próprio terreno.
+- `og.jpg` (prévia do WhatsApp) ainda mostra o morro com a mata antiga em bolas: refazer a partir da abertura nova.
 - Atualizar a % da obra a cada nova medição da Caixa (array `SCHED` no template).
 - Ideias: "Sol no meu apê", comparador de dois aptos, "Monte sua sala".
 - Não fazer: reivindicar apê ou foto de morador (risco de segurança/LGPD).
+
+## Testar visualmente (sandbox do Claude)
+- O jsDelivr é bloqueado no sandbox. Trazer o three r128 por clone esparso: `git clone --depth 1 --branch r128 --filter=blob:none --sparse https://github.com/mrdoob/three.js` + `git sparse-checkout set build examples/js/controls examples/js/postprocessing examples/js/shaders`, e no Playwright redirecionar `cdn.jsdelivr.net/npm/three@0.128.0/*` para esses arquivos.
+- A página expõe `window.__predio` (`setSun`, `select`, `flyTo`, `camera`, `controls`…). Ex.: abrir `#A604` e chamar `__predio.setSun(21)`.
 
 ## Preferências do Bruno
 - Português, direto. Fonte sem serifa (não gostou da serifada). Hierarquia tipográfica clara.
