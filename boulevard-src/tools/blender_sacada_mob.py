@@ -60,22 +60,31 @@ def poe(pid, px, py, rot=0., z=0., escala=1., alvo=None, nome=None):
 info = {}
 # sala — sofá encostado na parede da direita (x=753), virado para a TV
 info["sofa"] = poe("sofa_03", 706, 110, rot=-90, alvo=(0, 2.0))[1][:]
-info["almofadas"] = poe("throw_pillows_01", 728, 110, rot=-90, z=.45, alvo=(0, 1.2))[1][:]
-info["mesa_centro"] = poe("modern_coffee_table_01", 615, 112, rot=-90, alvo=(0, .9))[1][:]
+info["almofadas"] = poe("throw_pillows_01", 728, 110, rot=-90, z=.42, alvo=(0, .9))[1][:]
+info["mesa_centro"] = poe("modern_coffee_table_01", 612, 112, rot=0, alvo=(1, 1.0))[1][:]
 # rack baixo + TV na parede da esquerda (x=514)
 info["rack"] = poe("modern_wooden_cabinet", 536, 135, rot=90, alvo=(0, 1.6))[1][:]
-info["tv"] = poe("television_02", 530, 135, rot=90, z=.55, alvo=(0, 1.1))[1][:]
 info["vaso"] = poe("ceramic_vase_01", 536, 88, z=.55, alvo=(2, .28))[1][:]
 # jantar junto à península
-info["mesa"] = poe("round_wooden_table_01", 660, 282, alvo=(0, .9))[1][:]
+info["mesa"] = poe("round_wooden_table_01", 660, 282, alvo=(2, .75))[1][:]
 info["cad1"] = poe("dining_chair_02", 652, 228, rot=180, alvo=(2, .82))[1][:]
 info["cad2"] = poe("dining_chair_02", 714, 284, rot=90, alvo=(2, .82))[1][:]
 info["cad3"] = poe("dining_chair_02", 606, 284, rot=-90, alvo=(2, .82))[1][:]
 info["pendente"] = poe("modern_ceiling_lamp_01", 660, 282, z=1.95, alvo=(2, .6))[1][:]
 # verde e arte
-info["planta"] = poe("potted_plant_04", 526, 252, alvo=(2, 1.5))[1][:]
+info["planta"] = poe("potted_plant_04", 552, 262, alvo=(2, 1.4))[1][:]
 info["planta2"] = poe("potted_plant_02", 742, 14, alvo=(2, .9))[1][:]
-info["quadro"] = poe("hanging_picture_frame_01", 750, 110, rot=-90, z=1.25, alvo=(0, .9))[1][:]
+info["quadro"] = poe("hanging_picture_frame_01", 750, 110, rot=-90, z=1.2, alvo=(2, .8))[1][:]
+
+# TV de tela plana na parede (modelo procedural simples: moldura fina + tela vítrea)
+def caixa(nome, c, d, mat):
+    me = bpy.data.meshes.new(nome); x, y, z = c; a, b2, h = d[0]/2, d[1]/2, d[2]/2
+    v = [(x+i*a, y+j*b2, z+k*h) for i in (-1, 1) for j in (-1, 1) for k in (-1, 1)]
+    f = [(0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)]
+    me.from_pydata(v, [], f); me.materials.append(mat); o = bpy.data.objects.new(nome, me); C.objects.link(o); return o
+mtv = bpy.data.materials.get("SAC_TV") or bpy.data.materials.new("SAC_TV"); mtv.use_nodes = True
+bt = mtv.node_tree.nodes.get("Principled BSDF"); bt.inputs['Base Color'].default_value = (.008, .008, .009, 1); bt.inputs['Roughness'].default_value = .05; bt.inputs['Coat Weight'].default_value = 1.
+tx, ty = P(517, 135); caixa("SAC_tv", (tx+.025, ty, 1.25), (.04, 1.24, .72), mtv)
 
 # esconde as coleções-fonte
 for c in bpy.data.collections:
