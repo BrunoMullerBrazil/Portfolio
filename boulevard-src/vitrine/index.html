@@ -1,0 +1,246 @@
+<title>Boulevard Vitrine 360</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout (PC): palco 16:9 à esquerda, painel de estoque à direita; abaixo de 980px empilha.
+   Tema único escuro e deliberado (cena noturna). Acento = luz quente de janela; status com cores semânticas próprias. */
+:root{
+  --bg:#0c0f15; --panel:#131822; --panel2:#181e2a; --line:#242b38; --fg:#e8eaef; --muted:#8b93a5;
+  --warm:#f3b765; --warm-ink:#1b1306; --sold:#f3b765; --hold:#a9a0e6; --free:#7fc2a8;
+  --ui:"Manrope",ui-sans-serif,system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--ui);font-size:14px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 28px}
+.app{max-width:1600px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media (max-width:980px){.app{grid-template-columns:minmax(0,1fr)}}
+header{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between}
+h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
+h1 em{font-style:normal;color:var(--warm)}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.stagewrap{display:grid;gap:10px;min-width:0}
+.stage{position:relative;aspect-ratio:16/9;max-width:100%;background:#05070b;border:1px solid var(--line);border-radius:10px;overflow:hidden;user-select:none}
+canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
+canvas.drag{cursor:grabbing}
+.tip{position:absolute;pointer-events:none;background:rgba(9,12,18,.94);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12.5px;white-space:nowrap;transform:translate(-50%,calc(-100% - 12px))}
+.tip b{font-family:var(--mono);font-weight:500}
+.hud{position:absolute;left:12px;bottom:12px;display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11.5px;color:var(--muted);background:rgba(9,12,18,.7);border:1px solid var(--line);border-radius:999px;padding:5px 10px}
+.load{position:absolute;right:12px;bottom:12px;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.dial{display:flex;gap:2px;align-items:flex-end;height:22px}
+.dial i{display:block;width:4px;height:8px;background:var(--line);border-radius:1px}
+.dial i.ok{background:#3a4458}.dial i.on{background:var(--warm);height:16px}
+.bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.btn{font:inherit;font-size:12.5px;font-weight:700;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--warm);border-color:var(--warm);color:var(--warm-ink)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
+.kpis{display:flex;gap:16px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12.5px}
+.kpis strong{font-family:var(--mono);font-weight:500;color:var(--fg);font-size:14px}
+aside{display:grid;gap:12px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px;min-width:0}
+.card h2{margin:0;font-size:13px;font-weight:800;letter-spacing:.02em}
+.unit{display:grid;gap:8px}
+.unit .code{font-family:var(--mono);font-size:26px;font-weight:500;letter-spacing:-.01em}
+.unit dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:13px}
+.unit dt{color:var(--muted)}.unit dd{margin:0}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;border:1px solid var(--line)}
+.chip i{width:8px;height:8px;border-radius:50%}
+.empty{color:var(--muted);font-size:13px}
+input[type=search]{width:100%;font:inherit;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.list{max-height:290px;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:4px;padding-right:2px}
+.list button{font-family:var(--mono);font-size:11.5px;color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-left-width:3px;border-radius:5px;padding:5px 4px;cursor:pointer;text-align:left}
+.list button[aria-current="true"]{outline:2px solid var(--warm)}
+textarea{width:100%;min-height:110px;resize:vertical;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px;font-family:var(--mono);font-size:11.5px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msg{font-size:12px;color:var(--muted)}
+.btn.primary{background:var(--warm);border-color:var(--warm);color:var(--warm-ink)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <header>
+    <h1>Boulevard · <em>vitrine 360°</em></h1>
+    <span class="tag">Protótipo · tabela de exemplo · não oficial</span>
+  </header>
+
+  <div class="stagewrap">
+    <div class="stage" id="stage">
+      <canvas id="cv" width="1920" height="1080" tabindex="0" aria-label="Vista 360 do Boulevard. Arraste ou use as setas para girar; clique numa janela para selecionar o apartamento."></canvas>
+      <div class="tip" id="tip" hidden></div>
+      <div class="hud"><span id="ang">0°</span><span class="dial" id="dial" aria-hidden="true"></span></div>
+      <div class="load" id="load"></div>
+    </div>
+    <div class="bar">
+      <div class="seg" role="group" aria-label="O que mostrar">
+        <button type="button" id="m-sold" data-mode="vendido" aria-pressed="true">Vendidos</button>
+        <button type="button" id="m-free" data-mode="disponivel" aria-pressed="false">Disponíveis</button>
+        <button type="button" id="m-hold" data-mode="reservado" aria-pressed="false">Reservados</button>
+        <button type="button" id="m-map" data-mode="mapa" aria-pressed="false">Mapa de status</button>
+        <button type="button" id="m-night" data-mode="noite" aria-pressed="false">Noite comum</button>
+      </div>
+      <div class="kpis" aria-live="polite">
+        <span>Vendidos <strong id="k-sold">0</strong></span>
+        <span>Reservados <strong id="k-hold">0</strong></span>
+        <span>Disponíveis <strong id="k-free">0</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <aside>
+    <section class="card" aria-labelledby="h-unit">
+      <h2 id="h-unit">Unidade</h2>
+      <div id="unit" class="empty">Clique numa janela ou escolha na lista. A vista gira até o melhor ângulo do apartamento.</div>
+    </section>
+    <section class="card" aria-labelledby="h-list">
+      <h2 id="h-list">Estoque</h2>
+      <input type="search" id="q" placeholder="Buscar: A304, B1112…" aria-label="Buscar apartamento">
+      <div class="legend"><span><i class="dot" style="background:var(--sold)"></i>vendido</span><span><i class="dot" style="background:var(--hold)"></i>reservado</span><span><i class="dot" style="background:var(--free)"></i>disponível</span></div>
+      <div class="list" id="list"></div>
+    </section>
+    <section class="card" aria-labelledby="h-tab">
+      <h2 id="h-tab">Tabela da construtora</h2>
+      <textarea id="tbl" spellcheck="false" aria-label="Tabela: apartamento;status"></textarea>
+      <div class="row"><button type="button" class="btn primary" id="apply">Aplicar tabela</button><span class="msg" id="msg"></span></div>
+    </section>
+  </aside>
+</div>
+
+<script>
+(async function(){
+  const $=id=>document.getElementById(id);
+  const D=await (await fetch('dados.json')).json();
+  const FR=D.frames, NF=FR.length, W=D.w, H=D.h, NAME=D.units, BEST=D.best, VISF=D.visible;  // VISF[frameIndex] = [ids]
+  const INFO=n=>{const bl=n[0], num=n.slice(1), fin=+num.slice(-2), and=+num.slice(0,-2);
+    const T={1:['2 demi-suítes','53,19 m²'],2:['2 demi-suítes','53,19 m²'],4:['1 suíte + 1 dorm.','53,76 m²'],5:['1 suíte + 1 dorm.','53,76 m²'],7:['1 suíte + 1 dorm.','57,71 m²'],8:['1 suíte + 1 dorm.','57,71 m²']}[fin]||['2 dormitórios','47,75–48,55 m²'];
+    const front=fin>=2&&fin<=7; return {bl,num,fin,and,tipo:T[0],area:T[1],face:front?'Frente · sol da tarde':'Fundos · sol da manhã'};};
+  const LBL={vendido:['vendido','var(--sold)',[0.95,0.72,0.40]],reservado:['reservado','var(--hold)',[0.66,0.63,0.90]],disponivel:['disponível','var(--free)',[0.50,0.76,0.66]]};
+
+  // ---------- carregamento progressivo dos quadros ----------
+  const img=src=>new Promise((ok,err)=>{const i=new Image();i.decoding='async';i.onload=()=>ok(i);i.onerror=err;i.src=src;});
+  const cache=new Array(NF).fill(null); let loaded=0;
+  const order=[]; const seen=new Set(); [9,3,1].forEach(step=>{for(let k=0;k<NF;k+=step) if(!seen.has(k)){seen.add(k);order.push(k);}});
+  async function loadFrame(k){ if(cache[k]) return cache[k]; const f=FR[k];
+    const [b,l,m]=await Promise.all([img(`q/${f}_b.jpg`),img(`q/${f}_l.jpg`),img(`q/${f}_m.png`)]);
+    const oc=document.createElement('canvas');oc.width=W;oc.height=H;const ox=oc.getContext('2d',{willReadFrequently:true});ox.drawImage(m,0,0);
+    cache[k]={b,l,m,ids:ox.getImageData(0,0,W,H).data}; loaded++; drawDial(); $('load').textContent=loaded<NF?`carregando ${loaded}/${NF}`:''; return cache[k]; }
+
+  // ---------- WebGL ----------
+  const cv=$('cv'), gl=cv.getContext('webgl',{antialias:false,premultipliedAlpha:false});
+  const vs=`attribute vec2 p;varying vec2 uv;void main(){uv=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}`;
+  const fs=`precision mediump float;varying vec2 uv;uniform sampler2D tB,tL,tM,tS;uniform float hov,sel,mapa,t;
+    vec3 lin(vec3 c){return mix(c/12.92,pow((c+.055)/1.055,vec3(2.4)),step(.04045,c));}
+    vec3 srgb(vec3 c){return mix(c*12.92,1.055*pow(c,vec3(1./2.4))-.055,step(.0031308,c));}
+    void main(){vec3 b=lin(texture2D(tB,uv).rgb),l=lin(texture2D(tL,uv).rgb);vec4 m=texture2D(tM,uv);
+      float has=step(.5,m.b);float idx=floor(m.r*255.+.5)+floor(m.g*255.+.5)*256.;
+      vec4 s=texture2D(tS,vec2((mod(idx,256.)+.5)/256.,(floor(idx/256.)+.5)/2.));
+      vec3 d=max(l-b,0.);
+      vec3 tint=mix(vec3(1.),s.gba*1.6,mapa);
+      vec3 c=b+d*s.r*has*tint;
+      float isH=has*(1.-step(.5,abs(idx-hov))), isS=has*(1.-step(.5,abs(idx-sel)));
+      c+=isH*vec3(.010,.022,.040);
+      c=mix(c,c+d*1.4+vec3(.05,.035,.012),isS*(.55+.45*sin(t*3.)));
+      gl_FragColor=vec4(srgb(clamp(c,0.,1.)),1.);}`;
+  const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(o));return o;};
+  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);gl.useProgram(pr);
+  const bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const ap=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,0,0);
+  const mkT=(u,nearest)=>{const t=gl.createTexture();gl.activeTexture(gl.TEXTURE0+u);gl.bindTexture(gl.TEXTURE_2D,t);const f=nearest?gl.NEAREST:gl.LINEAR;
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,f);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,f);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);return t;};
+  const TB=mkT(0),TL=mkT(1),TM=mkT(2,true),TS=mkT(3,true);
+  const S=new Uint8Array(256*2*4); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,256,2,0,gl.RGBA,gl.UNSIGNED_BYTE,S);
+  ['tB','tL','tM','tS'].forEach((n,i)=>gl.uniform1i(gl.getUniformLocation(pr,n),i));
+  const U={hov:gl.getUniformLocation(pr,'hov'),sel:gl.getUniformLocation(pr,'sel'),mapa:gl.getUniformLocation(pr,'mapa'),t:gl.getUniformLocation(pr,'t')};
+  let shown=-1;
+  function bindFrame(k){ const c=cache[k]; if(!c||shown===k) return; shown=k;
+    [[0,TB,c.b],[1,TL,c.l],[2,TM,c.m]].forEach(([u,t,im])=>{gl.activeTexture(gl.TEXTURE0+u);gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,im);}); }
+
+  // ---------- estado das unidades ----------
+  const N=289, cur=new Float32Array(N), tgt=new Float32Array(N), delay=new Float32Array(N);
+  let status={}, mode='vendido', manual={}, hov=-1, sel=-1, frame=0;
+  const st=i=>status[NAME[i]]||'disponivel';
+  const target=i=>{ if(i in manual) return manual[i];
+    if(mode==='mapa') return 1;
+    if(mode==='noite'){const h=Math.sin(i*12.9898)*43758.5453;return (h-Math.floor(h))<.45?1:0;}
+    return st(i)===mode?1:0; };
+  function retarget(){ const t0=performance.now(); let k=0;
+    for(let i=1;i<N;i++){ const v=target(i); if(v!==tgt[i]){tgt[i]=v; delay[i]=t0+(k++%60)*16+Math.random()*120;}
+      const c=LBL[st(i)][2], o=((i%256)+(i>>8)*256)*4; S[o+1]=c[0]*160; S[o+2]=c[1]*160; S[o+3]=c[2]*160; }
+    kick(); }
+  // ---------- desenho ----------
+  let raf=0; const kick=()=>{ if(!raf) raf=requestAnimationFrame(draw); };
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function draw(now){ raf=0; let moving=sel>0;
+    for(let i=1;i<N;i++){ if(now>=delay[i]){ const d=tgt[i]-cur[i]; if(Math.abs(d)>.002){cur[i]+=reduce?d:d*.18;moving=true;} else cur[i]=tgt[i]; } else if(cur[i]!==tgt[i]) moving=true;
+      S[((i%256)+(i>>8)*256)*4]=Math.round(cur[i]*255); }
+    bindFrame(frame);
+    gl.activeTexture(gl.TEXTURE3);gl.bindTexture(gl.TEXTURE_2D,TS);gl.texSubImage2D(gl.TEXTURE_2D,0,0,0,256,2,gl.RGBA,gl.UNSIGNED_BYTE,S);
+    gl.uniform1f(U.hov,hov);gl.uniform1f(U.sel,sel);gl.uniform1f(U.mapa,mode==='mapa'?1:0);gl.uniform1f(U.t,now/1000);
+    gl.viewport(0,0,cv.width,cv.height); if(shown>=0) gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    if(moving) kick(); }
+
+  // ---------- giro ----------
+  function nearestLoaded(k){ for(let d=0;d<NF;d++){ for(const s of [1,-1]){ const j=((k+s*d)%NF+NF)%NF; if(cache[j]) return j; } } return -1; }
+  function setFrame(k){ k=((k%NF)+NF)%NF; const j=cache[k]?k:nearestLoaded(k); if(j<0) return; frame=j; $('ang').textContent=(+FR[j])+'°'; drawDial(); kick();
+    if(!cache[k]) loadFrame(k).then(()=>{ if(frame===j) setFrame(k); }); }
+  function drawDial(){ const d=$('dial'); if(!d.children.length) for(let k=0;k<NF;k++) d.appendChild(document.createElement('i'));
+    [...d.children].forEach((e,k)=>{e.className=k===frame?'on':(cache[k]?'ok':'');}); }
+  let spin=null;
+  function spinTo(k){ clearInterval(spin); const n=NF; let d=((k-frame)%n+n)%n; if(d>n/2)d-=n; const step=Math.sign(d);
+    if(!d||reduce){setFrame(k);return;} spin=setInterval(()=>{ setFrame(frame+step); if(frame===k||!step) clearInterval(spin); },55); }
+  let drag=null;
+  cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,f:frame,moved:false};cv.setPointerCapture(e.pointerId);cv.classList.add('drag');clearInterval(spin);});
+  cv.addEventListener('pointermove',e=>{ if(drag){ const dx=e.clientX-drag.x; if(Math.abs(dx)>4) drag.moved=true; setFrame(drag.f-Math.round(dx/28)); $('tip').hidden=true; return; } hover(e); });
+  cv.addEventListener('pointerup',e=>{ cv.classList.remove('drag'); const d=drag; drag=null; if(d&&!d.moved){ const p=pick(e); if(p.id) select(p.id,false); } });
+  cv.addEventListener('pointerleave',()=>{ $('tip').hidden=true; hov=-1; kick(); });
+  cv.addEventListener('keydown',e=>{ if(e.key==='ArrowLeft'){setFrame(frame-1);e.preventDefault();} if(e.key==='ArrowRight'){setFrame(frame+1);e.preventDefault();} });
+  function pick(e){ const r=cv.getBoundingClientRect(), x=Math.floor((e.clientX-r.left)/r.width*W), y=Math.floor((e.clientY-r.top)/r.height*H);
+    const c=cache[frame]; if(!c) return {id:0}; const o=(Math.max(0,Math.min(H-1,y))*W+Math.max(0,Math.min(W-1,x)))*4;
+    return {id:c.ids[o+2]>200?c.ids[o]+c.ids[o+1]*256:0,cx:e.clientX-r.left,cy:e.clientY-r.top}; }
+  function hover(e){ const p=pick(e), tip=$('tip'); if(!p.id){tip.hidden=true;hov=-1;kick();return;}
+    const n=NAME[p.id], s=LBL[st(p.id)]; tip.innerHTML=`<b>${n[0]} ${n.slice(1)}</b> &nbsp;<i class="dot" style="background:${s[1]}"></i>${s[0]}`;
+    tip.style.left=p.cx+'px'; tip.style.top=p.cy+'px'; tip.hidden=false; hov=p.id; kick(); }
+
+  // ---------- seleção ----------
+  const byName={}; Object.entries(NAME).forEach(([i,n])=>byName[n]=+i);
+  function select(id,rotate=true){ sel=id; const n=NAME[id], I=INFO(n), s=LBL[st(id)];
+    $('unit').className='unit'; $('unit').innerHTML=`<div class="code">${I.bl} ${I.num}</div>
+      <span class="chip"><i style="background:${s[1]}"></i>${s[0]}</span>
+      <dl><dt>Bloco</dt><dd>${I.bl}</dd><dt>Andar</dt><dd>${I.and}º</dd><dt>Final</dt><dd>${String(I.fin).padStart(2,'0')}</dd>
+      <dt>Tipologia</dt><dd>${I.tipo}</dd><dt>Área privativa</dt><dd>${I.area}</dd><dt>Fachada</dt><dd>${I.face}</dd></dl>
+      <button type="button" class="btn" disabled title="Próxima fase: vista interna com régua de sol">Ver da sacada · em breve</button>`;
+    document.querySelectorAll('#list button').forEach(b=>b.setAttribute('aria-current',b.dataset.id==id?'true':'false'));
+    if(rotate&&BEST[n]!=null) spinTo(FR.indexOf(BEST[n])); kick(); }
+
+  // ---------- lista e tabela ----------
+  function renderList(){ const q=$('q').value.trim().toUpperCase().replace(/\s+/g,''); const L=$('list'); L.innerHTML='';
+    Object.values(NAME).sort((a,b)=>a[0]===b[0]?(+a.slice(1))-(+b.slice(1)):a<b?-1:1).filter(n=>!q||n.includes(q)).forEach(n=>{
+      const b=document.createElement('button'); b.type='button'; b.textContent=n; b.dataset.id=byName[n]; b.style.borderLeftColor=LBL[st(byName[n])][1];
+      b.setAttribute('aria-current',byName[n]===sel?'true':'false'); b.title=BEST[n]==null?'Não aparece em nenhum ângulo':'Mostrar na vista';
+      b.addEventListener('click',()=>select(byName[n])); L.appendChild(b); }); }
+  $('q').addEventListener('input',renderList);
+  $('tbl').value=Object.values(NAME).sort().map(n=>`${n};${D.exemplo[n]}`).join('\n');
+  function parse(txt){ const out={}; let ok=0,bad=0;
+    txt.split(/\r?\n/).forEach(l=>{ const p=l.trim().split(/[;,\t]/); if(p.length<2||!p[0])return; const u=p[0].trim().toUpperCase().replace(/\s+/g,'');
+      let s=p[1].trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+      s=s.startsWith('vend')?'vendido':s.startsWith('reserv')?'reservado':(s.startsWith('disp')||s==='livre')?'disponivel':'';
+      if(s&&u in byName){out[u]=s;ok++;} else bad++; }); return {out,ok,bad}; }
+  function apply(){ const r=parse($('tbl').value); status=r.out; manual={};
+    const c={vendido:0,reservado:0,disponivel:0}; Object.values(NAME).forEach(n=>c[status[n]||'disponivel']++);
+    $('k-sold').textContent=c.vendido; $('k-hold').textContent=c.reservado; $('k-free').textContent=c.disponivel;
+    $('msg').textContent=`${r.ok} linhas lidas${r.bad?` · ${r.bad} ignoradas`:''}`; retarget(); renderList(); if(sel>0) select(sel,false); }
+  $('apply').addEventListener('click',apply);
+  document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{ mode=b.dataset.mode; manual={};
+    document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false')); retarget(); }));
+
+  // ---------- início ----------
+  await loadFrame(0); setFrame(0); apply();
+  for(const k of order) await loadFrame(k).catch(()=>{});
+})();
+</script>
