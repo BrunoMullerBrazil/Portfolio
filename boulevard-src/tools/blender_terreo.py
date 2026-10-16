@@ -178,7 +178,7 @@ x0, x1, y0, y1 = gx0+.15, gx1-.15, gy0+.15, gy1-.15
 sala = box("BLV_T_mosto_sala", x0, x1, y0, y1, .0, gz1-.05, SALA); sala["madeira"] = 1.
 bm = bmesh.new(); bm.from_mesh(sala.data); bmesh.ops.reverse_faces(bm, faces=bm.faces[:]); bm.to_mesh(sala.data); bm.free()
 # miolo do prédio (núcleo) no fundo, para o ambiente não ficar vazado de lado a lado
-box("BLV_T_mosto_nucleo", (x0+x1)/2-3., (x0+x1)/2+3., (y0+y1)/2-2.5, (y0+y1)/2+2.5, 0., gz1-.05, M['pedra'])
+box("BLV_T_mosto_nucleo", (x0+x1)/2-3., (x0+x1)/2+3., (y0+y1)/2-2.5, (y0+y1)/2+2.5, 0., gz1-.05, RIP)
 for i, (a, bnd) in enumerate((((x0, (x0+x1)/2-3.3)), (((x0+x1)/2+3.3, x1)))):
     mobilia(f"mosto{i}", a, bnd, y0, y1, 0., gz1-.05)
 
