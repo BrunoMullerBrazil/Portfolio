@@ -82,7 +82,7 @@ tx, ty = P(517, 135); caixa("SAC_tv", (tx+.025, ty, 1.25), (.04, 1.24, .72), mtv
 # ---------- peças contemporâneas modeladas aqui, com texturas reais (Poly Haven) ----------
 import bmesh
 TX = os.path.expanduser("~/Movies/Boulevard_3D/assets/tex")
-def mat_tex(nome, pid, escala=1., tint=(1, 1, 1), rough=1., bump=.5, sheen=0.):
+def mat_tex(nome, pid, escala=1., tint=(1, 1, 1), rough=1., bump=.5, sheen=0., mono=0.):
     m = bpy.data.materials.get(nome) or bpy.data.materials.new(nome); m.use_nodes = True; nt = m.node_tree; nt.nodes.clear(); L = nt.links.new
     out = nt.nodes.new('ShaderNodeOutputMaterial'); b = nt.nodes.new('ShaderNodeBsdfPrincipled'); L(b.outputs[0], out.inputs['Surface'])
     tc = nt.nodes.new('ShaderNodeTexCoord'); mp = nt.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (escala,)*3; L(tc.outputs['Object'], mp.inputs['Vector'])
@@ -90,7 +90,12 @@ def mat_tex(nome, pid, escala=1., tint=(1, 1, 1), rough=1., bump=.5, sheen=0.):
         p = f"{TX}/{pid}/{pid}_{m_}_2k.jpg"; t = nt.nodes.new('ShaderNodeTexImage'); t.projection = 'BOX'; t.projection_blend = .3
         t.image = bpy.data.images.get(os.path.basename(p)) or bpy.data.images.load(p); t.image.colorspace_settings.name = cs; L(mp.outputs[0], t.inputs[0]); return t
     d = img("diff", 'sRGB'); mx = nt.nodes.new('ShaderNodeMix'); mx.data_type = 'RGBA'; mx.blend_type = 'MULTIPLY'; mx.inputs['Factor'].default_value = 1.
-    s_ = [x for x in mx.inputs if x.type == 'RGBA']; L(d.outputs[0], s_[0]); s_[1].default_value = (*tint, 1); L([x for x in mx.outputs if x.type == 'RGBA'][0], b.inputs['Base Color'])
+    s_ = [x for x in mx.inputs if x.type == 'RGBA']
+    if mono:   # só a trama da textura; a cor vem do tint
+        hs = nt.nodes.new('ShaderNodeHueSaturation'); hs.inputs['Saturation'].default_value = 0.; hs.inputs['Value'].default_value = mono
+        L(d.outputs[0], hs.inputs['Color']); L(hs.outputs[0], s_[0])
+    else: L(d.outputs[0], s_[0])
+    s_[1].default_value = (*tint, 1); L([x for x in mx.outputs if x.type == 'RGBA'][0], b.inputs['Base Color'])
     r = img("rough", 'Non-Color'); rm = nt.nodes.new('ShaderNodeMath'); rm.operation = 'MULTIPLY'; rm.inputs[1].default_value = rough; L(r.outputs[0], rm.inputs[0]); L(rm.outputs[0], b.inputs['Roughness'])
     n = img("nor_gl", 'Non-Color'); nm = nt.nodes.new('ShaderNodeNormalMap'); nm.inputs['Strength'].default_value = bump; L(n.outputs[0], nm.inputs['Color']); L(nm.outputs[0], b.inputs['Normal'])
     b.inputs['Sheen Weight'].default_value = sheen; return m
@@ -98,11 +103,11 @@ def mat_cor(nome, cor, rough=.5, metal=0.):
     m = bpy.data.materials.get(nome) or bpy.data.materials.new(nome); m.use_nodes = True; b = m.node_tree.nodes.get("Principled BSDF")
     b.inputs['Base Color'].default_value = (*cor, 1); b.inputs['Roughness'].default_value = rough; b.inputs['Metallic'].default_value = metal; return m
 
-LINHO = mat_tex("SAC_Linho", "rough_linen", 2.5, (1., .96, .9), 1., .4, .5)
-BOUCLE = mat_tex("SAC_Boucle", "wool_boucle", 3., (1., .97, .92), 1., .6, .6)
-TERRA = mat_tex("SAC_Terracota", "rough_linen", 3., (1.25, .62, .42), 1., .4, .4)
+LINHO = mat_tex("SAC_Linho", "rough_linen", 2.5, (.78, .74, .67), 1., .4, .5, mono=1.6)
+BOUCLE = mat_tex("SAC_Boucle", "wool_boucle", 3., (.86, .83, .77), 1., .6, .6, mono=1.4)
+TERRA = mat_tex("SAC_Terracota", "rough_linen", 3., (.62, .30, .19), 1., .4, .4, mono=1.6)
 CARVALHO = mat_tex("SAC_Carvalho", "oak_veneer_01", 1., (1., 1., 1.), .8, .3)
-JUTA = mat_tex("SAC_Juta", "hessian_230", 1.6, (1., .95, .85), 1., .7)
+JUTA = mat_tex("SAC_Juta", "hessian_230", 1.6, (.72, .62, .46), 1., .7, mono=1.5)
 PRETO = mat_cor("SAC_MetalPreto", (.02, .02, .02), .35, 1.)
 
 def peca(pai, nome, c, d, mat, bev=.008, seg=3, sub=0, rot=(0, 0, 0), cil=False):
