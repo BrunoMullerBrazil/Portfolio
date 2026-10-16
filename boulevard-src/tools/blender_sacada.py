@@ -46,7 +46,7 @@ def baixa(pid, maps=("diff", "rough", "nor_gl")):
 if fresh:
     with bpy.context.temp_override(window=w, scene=S):
         before = set(bpy.data.objects)
-        bpy.ops.import_scene.gltf(filepath=f"{D}/b112.glb")
+        bpy.ops.import_scene.gltf(filepath=f"{D}/{PARAMS.get('glb', 'b112_base.glb')}")
         new = [o for o in bpy.data.objects if o not in before]
     for o in new:
         for c in list(o.users_collection): c.objects.unlink(o)
