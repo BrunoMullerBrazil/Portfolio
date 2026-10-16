@@ -51,6 +51,13 @@ def terrainH(x, z):
         d = math.hypot(x-b[0], z-b[1]); h += b[3]*math.exp(-(d/b[2])**2)
     h = max(h, mesa(x, z)); h += (4*vn(x, z)+2*vn(x*3.1, z*2.7))*min(1, h/30+.2)
     d = math.hypot(x*.85, (z-10)*1.1); return max(0., h*smooth(240, 760, d))
+# relevo real (DEM) quando carregado: blv_dem(norte_m, leste_m) -> altura relativa ao lote.
+# Convenção do site: norte = -x (three), leste = -z (three). Perto do lote fica plano (implantação do book).
+_dem = bpy.app.driver_namespace.get('blv_dem')
+if _dem:
+    def terrainH(x, z):
+        d = math.hypot(x*.85, (z-10)*1.1)
+        return max(0., _dem(-x, -z)*smooth(200, 520, d))
 
 def terrain_mat():
     m = bpy.data.materials.get("BLV_Terreno") or bpy.data.materials.new("BLV_Terreno")
@@ -85,7 +92,7 @@ def terrain_mat():
     ms = nt.nodes.new('ShaderNodeMixShader'); L(hz.outputs[0], ms.inputs[0]); L(b.outputs[0], ms.inputs[1]); L(em.outputs[0], ms.inputs[2]); L(ms.outputs[0], out.inputs[0])
     return m
 
-N, SZ = 300, 5200.
+N, SZ = (440, 9000.) if _dem else (300, 5200.)
 verts, faces = [], []
 for j in range(N+1):
     for i in range(N+1):
@@ -330,7 +337,10 @@ for poly, n in zones:
     xs = [p[0] for p in poly]; ys = [p[1] for p in poly]; k = gd = 0
     while k < n and gd < n*40:
         gd += 1; x = min(xs)+rnd()*(max(xs)-min(xs)); y = min(ys)+rnd()*(max(ys)-min(ys))
-        if inPoly(x, y, poly): TP.append((*S(x, y), 1.)); k += 1
+        if inPoly(x, y, poly):
+            w = S(x, y)
+            if math.hypot(w[0]-RB[0], w[1]-RB[1]) < 24 or roadDist(*w) < 12: continue
+            TP.append((*w, 1.)); k += 1
 for p in [[880,70],[1010,60],[1250,70],[1600,60],[1830,40],[1120,40],[960,40]]: TP.append((*S(*p), 1.))
 k = gd = 0
 while k < 600 and gd < 60000:
