@@ -103,8 +103,8 @@ def mat_cor(nome, cor, rough=.5, metal=0.):
     m = bpy.data.materials.get(nome) or bpy.data.materials.new(nome); m.use_nodes = True; b = m.node_tree.nodes.get("Principled BSDF")
     b.inputs['Base Color'].default_value = (*cor, 1); b.inputs['Roughness'].default_value = rough; b.inputs['Metallic'].default_value = metal; return m
 
-LINHO = mat_tex("SAC_Linho", "rough_linen", 2.5, (.78, .74, .67), 1., .4, .5, mono=1.6)
-BOUCLE = mat_tex("SAC_Boucle", "wool_boucle", 3., (.86, .83, .77), 1., .6, .6, mono=1.4)
+LINHO = mat_tex("SAC_Linho", "rough_linen", 2.5, (.60, .56, .50), 1., .5, .5, mono=1.6)
+BOUCLE = mat_tex("SAC_Boucle", "rough_linen", 4., (.72, .69, .63), 1., .7, .6, mono=1.6)
 TERRA = mat_tex("SAC_Terracota", "rough_linen", 3., (.62, .30, .19), 1., .4, .4, mono=1.6)
 CARVALHO = mat_tex("SAC_Carvalho", "oak_veneer_01", 1., (1., 1., 1.), .8, .3)
 JUTA = mat_tex("SAC_Juta", "hessian_230", 1.6, (.72, .62, .46), 1., .7, mono=1.5)
@@ -140,7 +140,7 @@ peca(sf, "sofa_costas", (0, Dp/2-.05, .3), (W-.3, .1, .32), LINHO, bev=.02)
 # almofadas soltas (bouclê e terracota)
 peca(sf, "almofada1", (-.62, Dp/2-.3, .47), (.46, .14, .44), BOUCLE, bev=.06, seg=5, sub=2, rot=(math.radians(-18), 0, math.radians(8)))
 peca(sf, "almofada2", (.66, Dp/2-.3, .47), (.42, .14, .40), TERRA, bev=.06, seg=5, sub=2, rot=(math.radians(-16), 0, math.radians(-6)))
-peca(sf, "manta", (.55, -.05, .48), (.5, .62, .025), BOUCLE, bev=.01, sub=1)
+peca(sf, "manta", (.55, -.05, .48), (.5, .62, .025), mat_tex("SAC_Manta", "rough_linen", 5., (.36, .38, .33), 1., .6, .5, mono=1.6), bev=.01, sub=1)
 
 # mesa de centro redonda em carvalho, base preta
 mc = movel("MOB_mesa_centro", 612, 112, 0)
