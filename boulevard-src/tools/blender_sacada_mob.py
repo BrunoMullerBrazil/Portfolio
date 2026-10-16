@@ -66,7 +66,6 @@ info["mesa_centro"] = poe("modern_coffee_table_01", 615, 112, rot=-90, alvo=(0, 
 info["rack"] = poe("modern_wooden_cabinet", 536, 135, rot=90, alvo=(0, 1.6))[1][:]
 info["tv"] = poe("television_02", 530, 135, rot=90, z=.55, alvo=(0, 1.1))[1][:]
 info["vaso"] = poe("ceramic_vase_01", 536, 88, z=.55, alvo=(2, .28))[1][:]
-info["livros"] = poe("decorative_book_set_01", 536, 190, rot=90, z=.55, alvo=(0, .3))[1][:]
 # jantar junto à península
 info["mesa"] = poe("round_wooden_table_01", 660, 282, alvo=(0, .9))[1][:]
 info["cad1"] = poe("dining_chair_02", 652, 228, rot=180, alvo=(2, .82))[1][:]
