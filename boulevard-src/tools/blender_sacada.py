@@ -53,7 +53,7 @@ if fresh:
         if o.type == 'LIGHT': bpy.data.objects.remove(o, do_unlink=True)
         else: C.objects.link(o)
 
-objs = [o for o in C.objects if o.type == 'MESH']
+objs = [o for o in C.objects if o.type == 'MESH' and not o.name.startswith('SAC_')]
 mats = {m.name: m for o in objs for m in o.data.materials if m}
 
 # ---------- materiais ----------
