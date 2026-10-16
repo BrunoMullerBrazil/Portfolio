@@ -29,9 +29,11 @@ def mat_sala():
     wave = node(nt, 'ShaderNodeTexWave', wave_type='BANDS'); wave.inputs['Scale'].default_value = 3.; L(tc.outputs['Object'], wave.inputs['Vector'])
     wood = node(nt, 'ShaderNodeValToRGB'); L(wave.outputs['Fac'], wood.inputs[0])
     wood.color_ramp.elements[0].color = (.20, .11, .055, 1); wood.color_ramp.elements[1].color = (.36, .21, .11, 1)
-    wsel = node(nt, 'ShaderNodeMath', operation='GREATER_THAN'); L(oi.outputs['Random'], wsel.inputs[0]); wsel.inputs[1].default_value = .45
+    wr = node(nt, 'ShaderNodeMath', operation='GREATER_THAN'); L(oi.outputs['Random'], wr.inputs[0]); wr.inputs[1].default_value = .45
+    at = node(nt, 'ShaderNodeAttribute', attribute_type='OBJECT', attribute_name='madeira')
+    wsel = node(nt, 'ShaderNodeMath', operation='MAXIMUM'); L(wr.outputs[0], wsel.inputs[0]); L(at.outputs['Fac'], wsel.inputs[1])
     wall = node(nt, 'ShaderNodeMix', data_type='RGBA'); s = [x for x in wall.inputs if x.type == 'RGBA']
-    s[0].default_value = (.62, .57, .50, 1); L(wood.outputs[0], s[1]); L(wsel.outputs[0], wall.inputs['Factor'])
+    s[0].default_value = (.46, .42, .37, 1); L(wood.outputs[0], s[1]); L(wsel.outputs[0], wall.inputs['Factor'])
     # piso: pedra polida com juntas
     brick = node(nt, 'ShaderNodeTexBrick'); brick.inputs['Scale'].default_value = .8; brick.inputs['Mortar Size'].default_value = .004
     brick.inputs['Color1'].default_value = (.42, .40, .37, 1); brick.inputs['Color2'].default_value = (.36, .345, .32, 1)
@@ -47,7 +49,7 @@ def mat_sala():
     L(tc.outputs['Object'], vor.inputs['Vector'])
     spot = node(nt, 'ShaderNodeMath', operation='LESS_THAN'); L(vor.outputs['Distance'], spot.inputs[0]); spot.inputs[1].default_value = .085
     sc = node(nt, 'ShaderNodeMath', operation='MULTIPLY'); L(spot.outputs[0], sc.inputs[0]); L(isC.outputs[0], sc.inputs[1])
-    st = node(nt, 'ShaderNodeMath', operation='MULTIPLY'); L(sc.outputs[0], st.inputs[0]); st.inputs[1].default_value = 60.
+    st = node(nt, 'ShaderNodeMath', operation='MULTIPLY'); L(sc.outputs[0], st.inputs[0]); st.inputs[1].default_value = 35.
     bb = node(nt, 'ShaderNodeBlackbody'); bb.inputs[0].default_value = 3000.
     L(bb.outputs[0], bs.inputs['Emission Color']); L(st.outputs[0], bs.inputs['Emission Strength'])
     tr = node(nt, 'ShaderNodeBsdfTransparent'); mx = node(nt, 'ShaderNodeMixShader')
@@ -60,6 +62,21 @@ def pbr(name, col, rough, metal=0.):
     b.inputs['Roughness'].default_value = rough; b.inputs['Metallic'].default_value = metal; return m
 
 SALA = mat_sala()
+def mat_ripado():
+    m = bpy.data.materials.get("BLV_T_Ripado") or bpy.data.materials.new("BLV_T_Ripado"); m.use_nodes = True
+    nt = m.node_tree; nt.nodes.clear(); L = nt.links.new
+    out = node(nt, 'ShaderNodeOutputMaterial'); tc = node(nt, 'ShaderNodeTexCoord')
+    wv = node(nt, 'ShaderNodeTexWave', wave_type='BANDS', bands_direction='X'); wv.inputs['Scale'].default_value = 9.; wv.inputs['Distortion'].default_value = 0.
+    L(tc.outputs['Object'], wv.inputs['Vector'])
+    wv2 = node(nt, 'ShaderNodeTexWave', wave_type='BANDS', bands_direction='Y'); wv2.inputs['Scale'].default_value = 9.; wv2.inputs['Distortion'].default_value = 0.
+    L(tc.outputs['Object'], wv2.inputs['Vector'])
+    mx = node(nt, 'ShaderNodeMath', operation='MULTIPLY'); L(wv.outputs['Fac'], mx.inputs[0]); L(wv2.outputs['Fac'], mx.inputs[1])
+    cr = node(nt, 'ShaderNodeValToRGB'); L(mx.outputs[0], cr.inputs[0])
+    cr.color_ramp.elements[0].color = (.07, .045, .028, 1); cr.color_ramp.elements[1].color = (.26, .16, .09, 1)
+    bs = node(nt, 'ShaderNodeBsdfPrincipled'); L(cr.outputs[0], bs.inputs['Base Color']); bs.inputs['Roughness'].default_value = .55
+    bp = node(nt, 'ShaderNodeBump'); bp.inputs['Strength'].default_value = .4; L(mx.outputs[0], bp.inputs['Height']); L(bp.outputs[0], bs.inputs['Normal'])
+    L(bs.outputs[0], out.inputs['Surface']); return m
+RIP = mat_ripado()
 M = dict(madeira=pbr("BLV_T_Madeira", (.30, .17, .08), .45), tecido=pbr("BLV_T_Tecido", (.16, .15, .14), .9),
          tecido2=pbr("BLV_T_Tecido2", (.42, .33, .24), .9), pedra=pbr("BLV_T_Pedra", (.80, .78, .74), .2),
          metal=pbr("BLV_T_Metal", (.05, .05, .05), .35, 1.), vaso=pbr("BLV_T_Vaso", (.12, .11, .10), .6))
@@ -85,7 +102,7 @@ def mobilia(tag, x0, x1, y0, y1, z0, h):
     nx, ny = max(1, round(w/5.)), max(1, round(d/5.))
     for i in range(nx):
         for j in range(ny):
-            ld = bpy.data.lights.new(f"BLV_T_{tag}_l{n}", 'POINT'); ld.energy = 140.; ld.shadow_soft_size = .4
+            ld = bpy.data.lights.new(f"BLV_T_{tag}_l{n}", 'POINT'); ld.energy = 70.; ld.shadow_soft_size = .4
             ld.color = (1., .78, .55); lo = bpy.data.objects.new(ld.name, ld)
             lo.location = (x0+(i+.5)*w/nx, y0+(j+.5)*d/ny, z0+h-.35); C.objects.link(lo); n += 1
     long_x = w >= d
@@ -123,7 +140,7 @@ def mobilia(tag, x0, x1, y0, y1, z0, h):
 # ---------- 1) térreo das torres: o cartão vira ambiente ----------
 ilhas = 0
 for T in ("A", "B"):
-    o = bpy.data.objects[f"BLV_{T}_shopin"]; o.data.materials.clear(); o.data.materials.append(SALA)
+    o = bpy.data.objects[f"BLV_{T}_shopin"]; o.data.materials.clear(); o.data.materials.append(SALA); o.data.materials.append(RIP)
     mw = o.matrix_world; bm = bmesh.new(); bm.from_mesh(o.data); bm.verts.ensure_lookup_table()
     seen = set()
     for f in bm.faces:
@@ -139,9 +156,11 @@ for T in ("A", "B"):
         vs = [mw@v.co for g in isl for v in g.verts]
         x0, x1 = min(v.x for v in vs), max(v.x for v in vs); y0, y1 = min(v.y for v in vs), max(v.y for v in vs)
         z0, z1 = min(v.z for v in vs), max(v.z for v in vs)
-        if (x1-x0) < 3 or (y1-y0) < 3: continue
+        raso = (x1-x0) < 3 or (y1-y0) < 3
+        for g in isl: g.material_index = 1 if raso else 0
+        if raso: continue
         mobilia(f"{T}{ilhas}", x0+.3, x1-.3, y0+.3, y1-.3, z0, z1-z0); ilhas += 1
-    bm.free()
+    bm.to_mesh(o.data); bm.free()
 
 # ---------- 2) Torre di Mosto: tira o maciço branco do térreo e cria o ambiente ----------
 G = bpy.data.objects["BLV_vizinho_shopglass"]; gv = [G.matrix_world@v.co for v in G.data.vertices]
@@ -156,7 +175,7 @@ for n in ("BLV_vizinho_white", "BLV_vizinho_graph"):
     if edges: bmesh.ops.edgeloop_fill(bm, edges=edges)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces); bm.to_mesh(o.data); bm.free(); o["terreo_cortado"] = 1
 x0, x1, y0, y1 = gx0+.15, gx1-.15, gy0+.15, gy1-.15
-sala = box("BLV_T_mosto_sala", x0, x1, y0, y1, .0, gz1-.05, SALA)
+sala = box("BLV_T_mosto_sala", x0, x1, y0, y1, .0, gz1-.05, SALA); sala["madeira"] = 1.
 bm = bmesh.new(); bm.from_mesh(sala.data); bmesh.ops.reverse_faces(bm, faces=bm.faces[:]); bm.to_mesh(sala.data); bm.free()
 # miolo do prédio (núcleo) no fundo, para o ambiente não ficar vazado de lado a lado
 box("BLV_T_mosto_nucleo", (x0+x1)/2-3., (x0+x1)/2+3., (y0+y1)/2-2.5, (y0+y1)/2+2.5, 0., gz1-.05, M['pedra'])
