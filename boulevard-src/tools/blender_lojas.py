@@ -95,8 +95,8 @@ for ei, (a, b, L, u, n) in enumerate(edges):
         G['awn'].slab(o, u, n, -bw*.43, bw*.43, 3.1, .02, 2.72, 1.45, .05)       # toldo grafite
         G['awn'].obox(o, u, n, -bw*.43, bw*.43, 2.5, 2.77, 1.42, 1.47)           # bambinela do toldo
         texts.append((o+n*1.48, u, n, NAMES[ni % len(NAMES)], bw)); ni += 1
-    if nb % 2 == 0: vines.append((a+u*L+n*.25, u, n))
         if j % 2 == 0: vines.append((a+u*(bw*j)+n*.25, u, n))                    # jardim vertical no montante
+    if nb % 2 == 0: vines.append((a+u*L+n*.25, u, n))
 for k, mb in G.items(): mb.build(f"BLV_lojas_{k}", M[k])
 for (p, u, n, txt, bw) in texts:
     cu = bpy.data.curves.new(f"BLV_toldo_txt", 'FONT'); cu.body = txt; cu.align_x = 'CENTER'; cu.align_y = 'CENTER'; cu.size = .13; cu.extrude = .004
