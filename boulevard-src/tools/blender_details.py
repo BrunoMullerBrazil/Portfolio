@@ -146,7 +146,7 @@ for (o, u, n, txt, bw) in signs:
     cu.size = .32; cu.extrude = .015
     ob = bpy.data.objects.new(f"BLV_letreiro_{txt}", cu); ob.data.materials.append(lett)
     ob.location = (o.x+n.x*.24, o.y+n.y*.24, 3.37)
-    ob.rotation_euler = (math.pi/2, 0, math.atan2(n.y, n.x)-math.pi/2)
+    ob.rotation_euler = (math.pi/2, 0, math.atan2(n.y, n.x)+math.pi/2)
     dims = ob.dimensions.x or len(txt)*.2
     C_SH.objects.link(ob)
     bpy.context.view_layer.update()
