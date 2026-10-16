@@ -148,11 +148,11 @@ for i, (x, wdt, z0, z1) in enumerate(((46, 151, 1.0, 2.2), (302.5, 151, 1.0, 2.2
 cam = bpy.data.objects.get("SAC_Cam")
 if not cam:
     cam = bpy.data.objects.new("SAC_Cam", bpy.data.cameras.new("SAC_Cam")); S.collection.objects.link(cam)
-cam.data.lens = PARAMS.get("lente", 20.); cam.data.sensor_width = 36.
-cam.location = Vector(PARAMS.get("cam", (2.10, 3.42, 1.42)))
-alvo = Vector(PARAMS.get("alvo", (0.6, -1.6, 1.15)))
+cam.data.lens = PARAMS.get("lente", 18.); cam.data.sensor_width = 36.
+cam.location = Vector(PARAMS.get("cam", (2.55, 3.55, 1.40)))
+alvo = Vector(PARAMS.get("alvo", (2.25, -2.5, 1.0)))
 cam.rotation_euler = (alvo-cam.location).to_track_quat('-Z', 'Y').to_euler()
-cam.data.shift_y = .04; cam.data.clip_start = .05
+cam.data.shift_y = .03; cam.data.clip_start = .05
 S.camera = cam
 
 # ---------- render ----------
@@ -161,6 +161,14 @@ cy = S.cycles; cy.device = 'GPU'; cy.samples = PARAMS.get("amostras", 256); cy.u
 cy.max_bounces = 12; cy.diffuse_bounces = 6; cy.glossy_bounces = 4; cy.transmission_bounces = 12; cy.transparent_max_bounces = 16
 cy.sample_clamp_indirect = 8.; cy.caustics_reflective = False; cy.caustics_refractive = False
 S.view_settings.view_transform = 'AgX'; S.view_settings.look = PARAMS.get("look", 'AgX - Medium High Contrast')
-S.view_settings.exposure = PARAMS.get("exposicao", .6)
+S.view_settings.exposure = PARAMS.get("exposicao", 1.2)
 r.image_settings.file_format = 'PNG'
+vs = S.view_settings
+if hasattr(vs, 'use_white_balance'): vs.use_white_balance = True; vs.white_balance_temperature = 5900
+# porta da sacada aberta: some o vidro de correr e o montante central
+for o in S.objects:
+    if o.type != 'MESH': continue
+    t = o.matrix_world.translation; dm = o.dimensions
+    if abs(t.y-2.96) < .05 and 1.5 < t.x < 3.05 and dm.z > 2.0 and ((dm.x < .06 and abs(t.x-2.27) < .05) or (dm.x > 1.4 and dm.y < .02)):
+        o.hide_render = o.hide_viewport = True
 result = dict(sol_elev=round(el, 1), sol_az=round(az, 1), rel_fachada=round(az-FACHADA_AZ, 1), objetos=len(objs), materiais=len(mats))
