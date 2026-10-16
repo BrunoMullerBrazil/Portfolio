@@ -61,8 +61,8 @@ def bsdf(m): return next(n for n in m.node_tree.nodes if n.type == 'BSDF_PRINCIP
 # piso de madeira real
 fl = baixa("wood_floor")
 for name, m in mats.items():
-    if not name.startswith("tex_90633e"): continue
-    nt = m.node_tree; b = bsdf(m)
+    if not name.startswith("tex_90633e") or m.node_tree.nodes.get("PISO_OK"): continue
+    nt = m.node_tree; b = bsdf(m); nt.nodes.new('NodeFrame').name = "PISO_OK"
     tc = nt.nodes.new('ShaderNodeTexCoord'); mp = nt.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (.55, .55, .55)
     nt.links.new(tc.outputs['Object'], mp.inputs['Vector'])
     for key, sock, cs in (("diff", 'Base Color', 'sRGB'), ("rough", 'Roughness', 'Non-Color')):
@@ -122,7 +122,9 @@ d = math.radians(az-FACHADA_AZ)          # ângulo do sol em relação à normal
 dirv = Vector((math.sin(d)*math.cos(math.radians(el)), math.cos(d)*math.cos(math.radians(el)), math.sin(math.radians(el))))
 W = S.world or bpy.data.worlds.new("SAC_Ceu"); S.world = W; W.use_nodes = True; wn = W.node_tree; wn.nodes.clear()
 sky = wn.nodes.new('ShaderNodeTexSky'); sky.sky_type = 'MULTIPLE_SCATTERING' if 'MULTIPLE_SCATTERING' in [i.identifier for i in sky.bl_rna.properties['sky_type'].enum_items] else 'NISHITA'
-sky.sun_disc = False; sky.altitude = 40.; sky.air_density = 1.; sky.dust_density = 1.6
+sky.sun_disc = False
+for k, v in (('altitude', 40.), ('air_density', 1.), ('dust_density', 1.6), ('aerosol_density', 1.6)):
+    if hasattr(sky, k): setattr(sky, k, v)
 sky.sun_elevation = math.radians(max(el, -2.)); sky.sun_rotation = math.atan2(dirv.x, dirv.y)*-1 + math.pi/2
 bg = wn.nodes.new('ShaderNodeBackground'); bg.inputs['Strength'].default_value = .35
 wo = wn.nodes.new('ShaderNodeOutputWorld'); wn.links.new(sky.outputs[0], bg.inputs[0]); wn.links.new(bg.outputs[0], wo.inputs['Surface'])
