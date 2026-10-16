@@ -95,30 +95,40 @@ for ei, (a, b, L, u, n) in enumerate(edges):
         G['awn'].slab(o, u, n, -bw*.43, bw*.43, 3.1, .02, 2.72, 1.45, .05)       # toldo grafite
         G['awn'].obox(o, u, n, -bw*.43, bw*.43, 2.5, 2.77, 1.42, 1.47)           # bambinela do toldo
         texts.append((o+n*1.48, u, n, NAMES[ni % len(NAMES)], bw)); ni += 1
-        if j % 2 == 0: vines.append((a+u*(bw*j)+n*.18, u, n))                    # jardim vertical no montante
+    if nb % 2 == 0: vines.append((a+u*L+n*.25, u, n))
+        if j % 2 == 0: vines.append((a+u*(bw*j)+n*.25, u, n))                    # jardim vertical no montante
 for k, mb in G.items(): mb.build(f"BLV_lojas_{k}", M[k])
 for (p, u, n, txt, bw) in texts:
     cu = bpy.data.curves.new(f"BLV_toldo_txt", 'FONT'); cu.body = txt; cu.align_x = 'CENTER'; cu.align_y = 'CENTER'; cu.size = .13; cu.extrude = .004
     ob = bpy.data.objects.new(f"BLV_toldo_{txt}", cu); ob.data.materials.append(M['txt']); C.objects.link(ob)
     ob.location = (p.x+n.x*.01, p.y+n.y*.01, 2.635); ob.rotation_euler = (math.pi/2, 0, math.atan2(n.y, n.x)+math.pi/2)
-# jardins verticais: colunas de folhagem (instâncias achatadas do arbusto shrub_01), 0 a 7,4 m
+# jardins verticais: folhagens do shrub_01 (cada variante tem ~30 cm) escaladas ~3x e empilhadas densamente, 0 a 7,3 m
 col = bpy.data.collections.get("shrub_01_LOD0")
 p = os.path.expanduser("~/Movies/Boulevard_3D/assets/models/shrub_01/shrub_01.blend")
 if col is None and os.path.exists(p):
     with bpy.data.libraries.load(p, link=False) as (src, dst):
-        dst.collections = [c for c in src.collections if c.endswith("LOD0")][:1] or [c for c in src.collections if c == "shrub_01"][:1]
+        dst.collections = [c for c in src.collections if c.endswith("LOD0")][:1]
     col = dst.collections[0] if dst.collections else None
 nv = 0
 if col:
+    leaves = [o for o in col.all_objects if o.type == 'MESH']
+    def leaf(pos, s, rz):
+        o = bpy.data.objects.new("BLV_trepadeira", rng.choice(leaves).data)
+        o.location = pos; o.scale = (s, s, s); o.rotation_euler = (rng.uniform(-.3, .3), rng.uniform(-.3, .3), rz); C.objects.link(o)
     for (q, u, n) in vines:
         z = 0.
-        while z < 7.2:
-            e = bpy.data.objects.new(f"BLV_trepadeira_{nv:03d}", None); e.instance_type = 'COLLECTION'; e.instance_collection = col
-            s = rng.uniform(.55, .75); e.location = (q.x+u.x*rng.uniform(-.15, .15), q.y+u.y*rng.uniform(-.15, .15), z)
-            e.scale = (s*.9, s*.9, s*.7); e.rotation_euler[2] = rng.random()*6.28; C.objects.link(e); nv += 1; z += .55
+        while z < 7.3:
+            for k in range(3):
+                pp = q+u*rng.uniform(-.45, .45)+n*rng.uniform(0, .25)
+                leaf((pp.x, pp.y, z+rng.uniform(0, .3)), rng.uniform(2.6, 3.6), rng.random()*6.28); nv += 1
+            z += .42
     # floreira sobre o volume baixo branco (lado direito no book)
     a3, b3 = S(372, 458), S(495, 525); x0, x1 = sorted((a3[0], b3[0])); y0, y1 = sorted((-a3[1], -b3[1]))
-    for k in range(10):
-        e = bpy.data.objects.new(f"BLV_floreira_{k:02d}", None); e.instance_type = 'COLLECTION'; e.instance_collection = col
-        e.location = (rng.uniform(x0+.5, x1-.5), rng.uniform(y0+.5, y1-.5), 3.2); s = rng.uniform(.7, 1.); e.scale = (s, s, s); C.objects.link(e)
+    for k in range(70): leaf((rng.uniform(x0+.3, x1-.3), rng.uniform(y0+.3, y1-.3), 3.15), rng.uniform(3., 4.5), rng.random()*6.28)
+mu = MAT.get("BLV_Muro")
+if mu:
+    for nd in mu.node_tree.nodes:
+        if nd.type == 'MIX': nd.inputs['Factor'].default_value = .2
+lf = MAT.get("BLV_Loja_Fundo")
+if lf: lf.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value = 2.5
 result = dict(edges=len(edges), shops=len(texts), vines=nv, longest=round(edges[longest][2], 1))
