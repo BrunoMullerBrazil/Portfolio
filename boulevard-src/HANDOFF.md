@@ -57,7 +57,6 @@ Guia 3D **não oficial**, feito por morador, do condomínio Scire Boulevard (Ped
 
 ## Pendências e ideias
 - Interiores realistas no corte do andar inteiro (hoje: mobília genérica).
-- `og.jpg` (prévia do WhatsApp) ainda mostra a cena antiga (morro em bolas, árvores facetadas): refazer a partir da abertura nova.
 - Realismo, próximas etapas combinadas: 3) fachada (vidro refletindo o céu no lugar das sacadas pretas, leve variação/sujeira na pintura); 4) chão e entorno (gramado com textura, meio-fio, casas com mais forma); 5) interiores realistas por último. Alvo: realismo cinematográfico pela luz, não fotorrealismo.
 - Atualizar a % da obra a cada nova medição da Caixa (array `SCHED` no template) e o Diário da obra a cada relatório da construtora (seção acima).
 - Diário: as fotos são dos relatórios da construtora, enviados aos compradores. Se a construtora pedir, retirar `public/boulevard/obra/` e o diário continua só com o 3D.
@@ -67,6 +66,15 @@ Guia 3D **não oficial**, feito por morador, do condomínio Scire Boulevard (Ped
 ## Testar visualmente (sandbox do Claude)
 - O jsDelivr é bloqueado no sandbox. Trazer o three r128 por clone esparso: `git clone --depth 1 --branch r128 --filter=blob:none --sparse https://github.com/mrdoob/three.js` + `git sparse-checkout set build examples/js/controls examples/js/postprocessing examples/js/shaders`, e no Playwright redirecionar `cdn.jsdelivr.net/npm/three@0.128.0/*` para esses arquivos.
 - A página expõe `window.__predio` (`setSun`, `select`, `flyTo`, `camera`, `controls`…). Ex.: abrir `#A604` e chamar `__predio.setSun(21)`.
+
+## Renders do Blender (out/2026)
+- Fonte: Mac do Bruno, `~/Movies/Boulevard_3D/` (`boulevard_fotoreal_0900c.blend`). Pastas: raiz (herói e lojas), `orbita/` (36 ângulos × base/luzes/máscara), `sacada/` (interiores do B112).
+- Abertura: `public/boulevard/hero.webp` (1920) e `hero-m.webp` (1080), de `heroi_v3.png`, como placa atrás do título (`.i-plate` no template); some com a abertura e revela o 3D. `og.jpg` recortado do mesmo render (`?v=6`).
+- B112 (`public/boulevard/b112/`, cópia em `b112-source.html`): botão "Fotos do decorado", atalho "Ver o render" ao escolher um cômodo (segue o botão Noite) e visualizador em tela cheia. Arquivos em `b112/renders/` (`nome.webp` 1600 e `nome-p.webp` 640). Lista e cômodos no array `R` do script da galeria. `?fotos` abre a galeria direto.
+- Versões antigas descartadas: `fotoreal_dormitorio2`/`noite_dormitorio2` (viraram escritório) e `fotoreal_banheiro`/`noite_banheiro` (substituídas por `banheiro_reforma`).
+- Sempre limpar metadados: o Blender grava o caminho do Mac no JPEG. Reencodar com PIL a partir dos pixels.
+- Transferência Mac → sandbox pelo Blender: cada resposta aguenta ~410 mil caracteres; empacotar em tar, base64 e trazer em fatias de 380 mil, conferindo md5.
+- Próxima rodada combinada: órbita fotorrealista (36 quadros, camada de luzes por horário, máscara para destacar a unidade), comprimida para ~6–10 MB no total.
 
 ## Preferências do Bruno
 - Português, direto. Fonte sem serifa (não gostou da serifada). Hierarquia tipográfica clara.

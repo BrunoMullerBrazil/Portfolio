@@ -6,7 +6,7 @@
 <meta name="description" content="Guia não oficial, feito por um morador, sem vínculo com a construtora. Ache seu apartamento, veja a planta, o sol nas fachadas e o andamento da obra.">
 <meta property="og:title" content="Boulevard em 3D · guia não oficial feito por morador">
 <meta property="og:description" content="Feito por um morador, sem vínculo com a construtora. Ache o seu apê, veja a planta, o sol nas fachadas e a contagem para a entrega.">
-<meta property="og:image" content="https://aue.productions/boulevard/og.jpg?v=2">
+<meta property="og:image" content="https://aue.productions/boulevard/og.jpg?v=6">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://aue.productions/boulevard/">
@@ -384,6 +384,12 @@ body.explore #hint,body.detail #hint,body.cutting #hint{opacity:0!important}
 /* ===== abertura cinematográfica ===== */
 #intro{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
 body.intro #intro{opacity:1}
+/* placa fotográfica (render do Blender) atrás do título; some junto com a abertura e revela o 3D */
+#intro>.i-plate{position:absolute;inset:0;z-index:-1;pointer-events:none!important;overflow:hidden;background:#0b0c10}
+.i-plate img{width:100%;height:100%;object-fit:cover;object-position:58% 50%;transform:scale(1.06);animation:iplate 28s ease-out forwards}
+.i-plate::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(6,6,8,.55),transparent 26%),linear-gradient(0deg,rgba(6,6,8,.85),rgba(6,6,8,.3) 34%,transparent 55%)}
+@keyframes iplate{to{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.i-plate img{animation:none;transform:none}}
 body.intro #intro>*{pointer-events:auto}
 body.intro #hero,body.intro #rail,body.intro #time,body.intro #compass,body.intro .foot,body.intro #hint,body.intro nav.main,body.intro .hcta,body.intro #menuBtn{opacity:0!important;pointer-events:none!important}
 #hero,#rail,#time,#compass,header nav.main,.hcta{transition:opacity .9s ease .2s,transform .9s ease .2s}
@@ -503,6 +509,7 @@ body.intro .brand{opacity:0;pointer-events:none}
 </header>
 
 <section id="intro" aria-label="Abertura">
+  <div class="i-plate" aria-hidden="true"><picture><source media="(max-width:900px)" srcset="hero-m.webp"><img src="hero.webp" alt="" decoding="async" fetchpriority="high"></picture></div>
   <p class="i-lede">Dois blocos, 288 apartamentos,<br>no pé do morro, em Pedra Branca.</p>
   <div class="i-mark"><span class="i-over">Guia do morador</span><h1 class="i-word">BOULEVARD</h1></div>
   <button class="i-go" id="iGo">Encontrar o seu apartamento<span class="i-line"></span></button>
@@ -644,7 +651,7 @@ body.intro .brand{opacity:0;pointer-events:none}
     <div class="eb">Ambientes</div>
     <div class="rooms" id="dRooms"></div>
     <p class="note" style="margin-top:14px" id="dNote"></p>
-    <div class="drow"><button class="cta solid" id="dCut">Ver o andar por dentro</button><a class="cta solid" id="dEnter" href="#" hidden style="text-decoration:none">Entrar no apê decorado</a><a class="cta solid" id="dEnter" href="#" hidden style="text-decoration:none;display:inline-flex;align-items:center">Entrar no apê decorado</a><button class="cta ghost" id="dShare">Compartilhar este apê</button><button class="cta ghost" id="dHome">Vista geral</button></div>
+    <div class="drow"><button class="cta solid" id="dCut">Ver o andar por dentro</button><a class="cta solid" id="dEnter" href="#" hidden style="text-decoration:none;align-items:center">Visitar decorado</a><button class="cta ghost" id="dShare">Compartilhar este apê</button><button class="cta ghost" id="dHome">Vista geral</button></div>
     <div class="msg" id="shareMsg" role="status"></div>
   </div>
 </aside>

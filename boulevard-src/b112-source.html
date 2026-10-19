@@ -1,4 +1,15 @@
-<title>Casinha 1112 realista</title>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="Apto B112 decorado · Boulevard em 3D (guia não oficial)">
+<meta property="og:description" content="Guia feito por um morador, sem vínculo com a construtora.">
+<meta property="og:image" content="https://aue.productions/boulevard/og.jpg?v=6">
+</head>
+<body>
+<title>Apto B112 · Boulevard em 3D</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,600;1,6..72,400&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
 <style>
 /* layout: full-bleed render like an architectural visualization; title top-left, camera stops and light switches in a bottom dock */
@@ -27,11 +38,36 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
 .note b{display:block;font-family:var(--f-display);font-size:16px;margin-bottom:2px}
 .load{position:fixed;inset:0;display:grid;place-items:center;z-index:4;background:var(--bg);color:var(--muted);font-size:14px;transition:opacity .6s}
 .err{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}
+
+/* renders fotorrealistas (Blender): atalho por cômodo + visualizador em tela cheia */
+.fotos{pointer-events:auto;display:inline-flex;align-items:center;gap:7px;font:600 13px var(--f-body);background:var(--ink);color:var(--bg);border:0;border-radius:999px;padding:9px 14px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+.fotos svg{width:15px;height:15px}
+.rcard{position:fixed;right:16px;bottom:calc(128px + env(safe-area-inset-bottom,0px));z-index:3;display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 12px 6px 6px;cursor:pointer;color:var(--ink);font:500 13px var(--f-body);box-shadow:0 8px 28px rgba(0,0,0,.16);transition:opacity .3s,transform .3s}
+.rcard[hidden]{display:none}
+.rcard img{width:84px;height:47px;object-fit:cover;border-radius:9px;display:block}
+.rcard b{display:block;font-weight:600}
+.rcard span{color:var(--muted);font-size:12px}
+.lb{position:fixed;inset:0;z-index:10;background:#0d0c0a;color:#EDE6DA;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .35s}
+.lb.on{opacity:1;pointer-events:auto}
+.lb-top{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 8px 16px}
+.lb-top h2{margin:0;font:600 15px var(--f-body);flex:1;min-width:0}
+.lb-top h2 small{display:block;font:400 12px var(--f-body);color:#A79D8E;margin-top:2px}
+.lb-x{border:1px solid #3a352e;background:transparent;color:inherit;width:40px;height:40px;border-radius:999px;font-size:20px;cursor:pointer;flex:0 0 auto}
+.lb-stage{flex:1;position:relative;min-height:0;overflow:hidden;touch-action:pan-y}
+.lb-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;transition:opacity .25s}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:999px;border:0;background:rgba(20,18,15,.55);color:#fff;font-size:22px;cursor:pointer;backdrop-filter:blur(6px)}
+.lb-prev{left:10px}.lb-next{right:10px}
+.lb-rooms{display:flex;gap:6px;overflow-x:auto;padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));scrollbar-width:none;justify-content:safe center}
+.lb-rooms::-webkit-scrollbar{display:none}
+.lb-rooms button{flex:0 0 auto;border:1px solid #3a352e;background:transparent;color:#A79D8E;font:600 13px var(--f-body);padding:8px 13px;border-radius:999px;cursor:pointer}
+.lb-rooms button[aria-pressed="true"]{background:#EDE6DA;color:#0d0c0a;border-color:#EDE6DA}
+.lb-note{text-align:center;font-size:11px;color:#7d7468;padding:0 16px 4px}
+@media (max-width:600px){.lb-nav{display:none}.rcard{bottom:calc(132px + env(safe-area-inset-bottom,0px));right:12px}.fotos span{display:none}.fotos{padding:9px 11px}}
 </style>
 
 <div id="stage" aria-label="Visualização 3D realista do apartamento"></div>
 <div class="load" id="load">Montando a casa…</div>
-<div class="top"><div><h1>Casinha <em>1112</em> · realista</h1><p>Mesma planta, com materiais, luz e móveis mais próximos do real. Arraste para girar, pince ou role para aproximar.</p></div><span class="badge">estudo</span></div>
+<div class="top"><div><h1>Apto <em>B112</em> · decorado</h1><p>O 112 do Bloco B com a mobília planejada pelos moradores. Arraste para girar, pince ou role para aproximar. Em cada cômodo, veja o render fotorrealista. <a href="../#B112" style="color:inherit;font-weight:600">← Voltar ao prédio</a></p></div><button type="button" class="fotos" id="fotosBtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg><span>Fotos do decorado</span></button></div>
 <div class="note" id="redeNote" hidden><b>Rede na diagonal da sala</b>Entre os ganchos dá ~3,9 m, o que basta. Mas ela atravessa o sofá e a mesa: só funciona armada e desarmada no dia a dia.</div>
 <div class="dock">
   <div class="row" role="group" aria-label="Vistas">
@@ -414,3 +450,53 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
   setTimeout(function(){ var l=document.getElementById('load'); if(l){ l.style.opacity=0; setTimeout(function(){ l.remove(); },700); } },300);
 })();
 </script>
+
+<button type="button" class="rcard" id="rcard" hidden><img alt=""><div><b></b><span>Ver o render</span></div></button>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Fotos do apê decorado" aria-hidden="true">
+  <div class="lb-top"><h2 id="lbTitle"></h2><button type="button" class="lb-x" id="lbX" aria-label="Fechar">×</button></div>
+  <div class="lb-stage" id="lbStage"><img id="lbImg" alt=""><button type="button" class="lb-nav lb-prev" id="lbPrev" aria-label="Anterior">‹</button><button type="button" class="lb-nav lb-next" id="lbNext" aria-label="Próxima">›</button></div>
+  <div class="lb-note">Renders feitos no Blender a partir da planta. Ilustração de decoração, não é foto do imóvel.</div>
+  <div class="lb-rooms" id="lbRooms" role="group" aria-label="Cômodos"></div>
+</div>
+<script>
+(function(){
+  var R=[
+    {room:'sala',nome:'Sala',f:'dia_sala',q:'dia'},{room:'sala',nome:'Sala',f:'noite_sala',q:'noite'},
+    {room:'sala',nome:'Sala, canto do gato',f:'noite_sala_arranhador',q:'noite'},{room:'sala',nome:'Sofá e nicho',f:'noite_nicho_sofa',q:'noite'},
+    {room:'jantar',nome:'Jantar',f:'noite_jantar',q:'noite'},
+    {room:'cozinha',nome:'Cozinha',f:'cozinha',q:'dia'},{room:'cozinha',nome:'Cozinha',f:'noite_cozinha',q:'noite'},
+    {room:'entrada',nome:'Entrada',f:'noite_entrada_remos',q:'noite'},{room:'entrada',nome:'Hall e sapateira',f:'noite_hall_sapateira',q:'noite'},
+    {room:'escritorio',nome:'Escritório',f:'noite_escritorio',q:'noite'},{room:'escritorio',nome:'Escritório, mesa',f:'noite_escritorio_mesa',q:'noite'},{room:'escritorio',nome:'Escritório, parede',f:'noite_escritorio_poster',q:'noite'},
+    {room:'quarto',nome:'Quarto',f:'dormitorio1',q:'dia'},{room:'quarto',nome:'Quarto',f:'noite_dormitorio1',q:'noite'},
+    {room:'banheiro',nome:'Banheiro',f:'banheiro_reforma',q:'dia'}];
+  var ROOMS=[['sala','Sala'],['jantar','Jantar'],['cozinha','Cozinha'],['entrada','Entrada'],['escritorio','Escritório'],['quarto','Quarto'],['banheiro','Banheiro']];
+  var small=Math.min(innerWidth,innerHeight)<600;
+  function src(r,thumb){ return 'renders/'+r.f+((thumb||small)?'-p':'')+'.webp'; }
+  var $=function(i){return document.getElementById(i);}, lb=$('lb'), img=$('lbImg'), cur=0, lastFocus=null;
+  function isNight(){ var b=$('tNight'); return b&&b.getAttribute('aria-pressed')==='true'; }
+  function pick(room){ var a=R.map(function(r,i){return i;}).filter(function(i){return R[i].room===room;}); if(!a.length) return -1;
+    var want=isNight()?'noite':'dia'; for(var k=0;k<a.length;k++) if(R[a[k]].q===want) return a[k]; return a[0]; }
+  var rb=$('lbRooms'); ROOMS.forEach(function(x){ var b=document.createElement('button'); b.type='button'; b.textContent=x[1]; b.dataset.room=x[0]; b.onclick=function(){ show(pick(x[0])); }; rb.appendChild(b); });
+  function show(i){ if(i<0) return; cur=(i+R.length)%R.length; var r=R[cur];
+    img.style.opacity=0; var n=new Image(); n.onload=function(){ img.src=n.src; img.alt=r.nome+' de '+r.q; img.style.opacity=1; }; n.src=src(r);
+    $('lbTitle').innerHTML=r.nome+'<small>'+(r.q==='noite'?'Noite':'Dia')+' · '+(cur+1)+' de '+R.length+'</small>';
+    rb.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed',b.dataset.room===r.room); if(b.dataset.room===r.room&&b.scrollIntoView) b.scrollIntoView({block:'nearest',inline:'center'}); });
+    var nx=new Image(); nx.src=src(R[(cur+1)%R.length]); }
+  function open(i){ lastFocus=document.activeElement; lb.classList.add('on'); lb.setAttribute('aria-hidden','false'); show(i); $('lbX').focus(); }
+  function close(){ lb.classList.remove('on'); lb.setAttribute('aria-hidden','true'); if(lastFocus) lastFocus.focus(); }
+  $('fotosBtn').onclick=function(){ open(pick(curRoom||'sala')); };
+  $('lbX').onclick=close; $('lbPrev').onclick=function(){show(cur-1);}; $('lbNext').onclick=function(){show(cur+1);};
+  addEventListener('keydown',function(e){ if(!lb.classList.contains('on')) return; if(e.key==='Escape') close(); if(e.key==='ArrowLeft') show(cur-1); if(e.key==='ArrowRight') show(cur+1); });
+  var sx=null; $('lbStage').addEventListener('touchstart',function(e){ sx=e.touches[0].clientX; },{passive:true});
+  $('lbStage').addEventListener('touchend',function(e){ if(sx==null) return; var d=e.changedTouches[0].clientX-sx; if(Math.abs(d)>45) show(cur+(d<0?1:-1)); sx=null; });
+  // atalho no cômodo: aparece quando o 3D vai para uma vista que tem render
+  var curRoom=null, card=$('rcard');
+  function upd(){ var i=curRoom?pick(curRoom):-1; if(i<0){ card.hidden=true; return; } var r=R[i]; card.hidden=false; card.querySelector('img').src=src(r,true); card.querySelector('b').textContent=r.nome+(r.q==='noite'?' à noite':''); card.onclick=function(){ open(i); }; }
+  document.querySelectorAll('[data-view]').forEach(function(b){ b.addEventListener('click',function(){ curRoom=b.getAttribute('data-view'); upd(); }); });
+  var tn=$('tNight'); if(tn) tn.addEventListener('click',function(){ setTimeout(upd,0); });
+  if(/[?&#]fotos/.test(location.href)) open(0);
+})();
+</script>
+
+</body>
+</html>
