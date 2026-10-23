@@ -53,7 +53,7 @@ Guia 3D **não oficial**, feito por morador, do condomínio Scire Boulevard (Ped
 3. Revisar as legendas (o PDF quebra frases com "Torre A/B" no meio) e escrever `notaA`/`notaB` (uma frase por bloco).
 4. Preencher `A` e `B` do mês, em andares de apartamento 1–12 (andar = pavimento − 2): `S` estrutura, `W` alvenaria, `R` reboco externo (contado de cima), `L` selador (de cima), `E` esquadrias (de baixo), `G` guarda-corpo (de baixo), `top: 1` quando o ático estiver pronto. É estimativa a partir das legendas; manter coerente mês a mês (nunca regredir).
 5. `python3 boulevard-src/build.py`, testar a aba Obra e dar push.
-- Meses já carregados: set/2025 a ago/2026 (12 relatórios, 85 fotos). Faltam os relatórios anteriores a set/2025.
+- Meses já carregados: set/2025 a set/2026 (13 relatórios, 92 fotos; o de set/2026 chegou em out/2026). O relatório de out/2026 veio com fotos emolduradas: as limpas saem com `pdfimages -j` (ordem do PDF ≠ ordem do slide). Faltam os relatórios anteriores a set/2025.
 
 ## Pendências e ideias
 - Interiores realistas no corte do andar inteiro (hoje: mobília genérica).

@@ -747,6 +747,69 @@
     }
    ],
    "revisado": true
+  },
+  {
+   "id": "202609",
+   "A": {
+    "S": 12,
+    "W": 12,
+    "R": 12,
+    "L": 12,
+    "E": 8,
+    "G": 5,
+    "top": 1
+   },
+   "B": {
+    "S": 12,
+    "W": 12,
+    "R": 12,
+    "L": 12,
+    "E": 0,
+    "G": 0,
+    "top": 1
+   },
+   "notaA": "Esquadrias das portas de sacada subindo. Por dentro: piso, azulejo, forro e primeira demão de pintura.",
+   "notaB": "Selador na fachada inteira.",
+   "pct": 76.16,
+   "envio": "out/2026",
+   "fotos": [
+    {
+     "f": "202609-1.jpg",
+     "bloco": "A",
+     "txt": "Aplicação do selador na parte externa."
+    },
+    {
+     "f": "202609-2.jpg",
+     "bloco": "B",
+     "txt": "Aplicação do selador na parte externa."
+    },
+    {
+     "f": "202609-3.jpg",
+     "bloco": "AB",
+     "txt": "Forro de gesso nos apartamentos personalizados."
+    },
+    {
+     "f": "202609-4.jpg",
+     "bloco": "A",
+     "txt": "Instalação das esquadrias das portas de sacada."
+    },
+    {
+     "f": "202609-5.jpg",
+     "bloco": "A",
+     "txt": "Revestimento de piso e azulejo."
+    },
+    {
+     "f": "202609-6.jpg",
+     "bloco": "A",
+     "txt": "Pintura, primeira demão, no 1º pavimento."
+    },
+    {
+     "f": "202609-7.jpg",
+     "bloco": "A",
+     "txt": "Soleiras das sacadas no 3º pavimento."
+    }
+   ],
+   "revisado": true
   }
  ],
  "_leia": "Diário da obra. Um item por relatório da construtora. A/B = estado do 3D por bloco, em andares de apartamento (1-12): S estrutura, W alvenaria, R reboco externo (de cima), L selador (de cima), E esquadrias (de baixo), G guarda-corpo (de baixo), top = ático pronto. Estado estimado a partir das legendas."
