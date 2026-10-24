@@ -22,6 +22,7 @@ ORDEM = [
     "rebuild/11_heroi_cam.py",
     "blender_realismo2.py",            # céu puro, gramado, moitas, variedade de mata, árvores no morro
     "rebuild/12_heroi_v3.py",          # >>> aqui a cena está no estado do heroi_v3 (hero do site) <<<
+    "rebuild/12b_calibra_capa.py",     # calibração medida contra a capa publicada
     "SAVE",
     "rebuild/13_pos_v3.py",
     "blender_terreo.py",               # térreos com ambiente (torres e Mosto)
