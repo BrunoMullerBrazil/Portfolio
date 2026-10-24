@@ -30,11 +30,14 @@ def samp(px, py):
 base = samp(sx, sy)
 def raw(north, east): return samp(sx+east*ppm_e, sy+north*ppm_n)-base
 ns['blv_dem_raw'] = raw
-# Pedra Branca: geo (N 2589, E -2267) = rumo 319°. No site o paredão fica nos fundos, rumo ~57° (frame do site).
-A = math.radians(319-57)
-def dem_rot(nn, e):
-    gn = nn*math.cos(A)-e*math.sin(A); ge = nn*math.sin(A)+e*math.cos(A)
-    return raw(gn, ge)
-ns['blv_dem'] = dem_rot
-d = math.hypot(2589, 2267); bt = math.radians(57)
-result = {"base_elev": round(base, 1), "peak_check": round(dem_rot(d*math.cos(bt), d*math.sin(bt)), 1)}
+# Encaixe geográfico real (24/out, lote marcado pelo Bruno no mapa OSM): o eixo X do Blender (avenida da frente)
+# aponta para o rumo 29°; rótula do site = rótula real. real(E,N) = Rot(61°)·(X,Y) + (28.2, -45.7) m em relação a LAT0/LON0.
+GEO = ns.get('blv_geo') or dict(rot=61., off=(28.2, -45.7)); ns['blv_geo'] = GEO
+cr, sr = math.cos(math.radians(GEO['rot'])), math.sin(math.radians(GEO['rot']))
+def bl2geo(X, Y): return cr*X-sr*Y+GEO['off'][0], sr*X+cr*Y+GEO['off'][1]      # (E, N)
+def dem_true(n, e):          # blv_dem recebe (norte_site, leste_site) = (-X, Y)
+    E, Nn = bl2geo(-n, e); return raw(Nn, E)
+ns['blv_dem'] = dem_true
+pe, pn = -2267., 2589.       # pico da Pedra Branca (geo, m)
+X = cr*(pe-GEO['off'][0])+sr*(pn-GEO['off'][1]); Y = -sr*(pe-GEO['off'][0])+cr*(pn-GEO['off'][1])
+result = {"base_elev": round(base, 1), "pico_blender": (round(X), round(Y)), "pico_alt": round(dem_true(-X, Y), 1)}

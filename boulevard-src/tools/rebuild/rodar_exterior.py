@@ -28,6 +28,13 @@ ORDEM = [
     "blender_terreo.py",               # térreos com ambiente (torres e Mosto)
     "blender_lojas_fix.py",            # remove paredes laterais no plano do vidro
     "SAVE",
+    # ---- realismo (24/out) ----
+    "rebuild/24_carros.py",            # carros nas vagas e na avenida
+    "rebuild/23_bairro_osm.py",        # ruas, prédios, casas e mata reais (OSM) no encaixe geográfico
+    "blender_bairro.py",               # janelas, muros e telhados nas casas novas
+    "rebuild/21_fachada_desgaste.py", "rebuild/22_pos.py",
+    "rebuild/20_look_tarde.py",        # look fim de tarde (o v3 continua em driver_namespace['blv_look']('v3'))
+    "SAVE",
 ]
 def fetch(p):
     u = f"https://raw.githubusercontent.com/BrunoMullerBrazil/Portfolio/{SHA}/boulevard-src/tools/{p}"
