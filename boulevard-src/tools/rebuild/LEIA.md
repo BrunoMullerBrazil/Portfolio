@@ -13,3 +13,9 @@ Blender na conversa de 16/out ("Cena com bola no Blender"), inclusive os passos 
 ## Diferenças conhecidas em relação ao original
 - HDRIs de interior das janelas: são "os 4 mais baixados" da Poly Haven no dia do download; podem não ser os mesmos de 16/out.
 - Exposição/balanço: conferir contra `public/boulevard/hero.webp` (a capa publicada) antes de renderizar finais.
+
+### Realismo do bairro e praça (24/out, parte 2)
+- `29_materiais_bairro.py` — só shader: paver da praça, paredes com variação e faixas de janela, telha com fiadas, prédios OSM com cobertura de fibrocimento, asfalto/calçada com remendos.
+- `30_praca_layout.py` — Praça Oscar Niemeyer pelo programa das imagens oficiais do altosdapedra.com.br (espelho d'água oval com bancos curvos, pergolado metálico ~48×9 m com bancas, canteiros com agapanto, palmeiras na avenida, árvores de sombra). Medidas estimadas: o site não publica planta dimensionada. A escultura do Niemeyer não é modelada (obra autoral).
+- `31_cores_casas.py` — corrige o 29, que tinha lido cor base .8 em todas as casas.
+- O polígono da praça (28) agora encosta na calçada da avenida.
