@@ -1310,8 +1310,10 @@ const beaconPts=(function(){const g=new THREE.BufferGeometry().setFromPoints(roo
 const OBRA=__OBRA__;
 const OB={on:null,mats:null,pil:new Map(),hoist:[]};
 function obraMats(){ if(OB.mats) return OB.mats;
-  const M={conc:mat(0x5f5d59,{roughness:.95}),reb:mat(0x57554f,{roughness:.95}),sel:mat(0x75736d,{roughness:.9}),
-    tij:[mat(0x7c3e22,{roughness:.95}),mat(0x723920,{roughness:.95}),mat(0x85452a,{roughness:.95})],vao:new THREE.MeshBasicMaterial({color:0x151311})};
+  const M={conc:mat(0x5f5d59,{roughness:.95}),concL:mat(0xbcb8b0,{roughness:.92}),reb:mat(0x57554f,{roughness:.95}),sel:mat(0x45484d,{roughness:.88}),
+    tij:[mat(0x7c3e22,{roughness:.95}),mat(0x723920,{roughness:.95}),mat(0x85452a,{roughness:.95})],vao:new THREE.MeshBasicMaterial({color:0x0e0f11})};
+  // vão sem esquadria: escuro e neutro, sem o tom individual das janelas acesas
+  M.vao.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <color_fragment>','');}; M.vao.customProgramCacheKey=()=>'vaoNoTint';
   [M.reb,M.sel].concat(M.tij).forEach(facadeAO); OB.mats=M; return M;}
 function obraPilares(fg){ let g=OB.pil.get(fg); if(g) return g; g=new THREE.Group(); const M=obraMats(); const geo=new THREE.BoxGeometry(.38,FH-.2,.38); const gs=[];
   fg.children.forEach(c=>{ if(!c.userData.type) return; const b=c.geometry.boundingBox; [[b.min.x,b.min.z],[b.max.x,b.min.z],[b.min.x,b.max.z],[b.max.x,b.max.z]].forEach(p=>{const q=geo.clone(); q.translate(p[0],b.min.y+(FH-.2)/2,p[1]); gs.push(q);}); });
@@ -1326,17 +1328,17 @@ function setObra(m){
     const pil=OB.pil.get(fg);
     fg.children.forEach(c=>{ const u=c.userData; if(c===pil) return;
       if(u.type){ if(!u.m0)u.m0=c.material; c.visible=walls; c.material=!s?u.m0:(sl?M.sel:reb?M.reb:M.tij[(f+u.n)%3]); return; }
-      if(u.kind==='slab'||u.kind==='core'){ if(!u.m0)u.m0=c.material; c.material=s?M.conc:u.m0; if(!s){c.visible=true;c.scale.y=1;c.position.y=0;} return; }
+      if(u.kind==='slab'||u.kind==='core'){ if(!u.m0)u.m0=c.material; c.material=!s?u.m0:(u.kind==='slab'&&(reb||sl)?M.concL:M.conc); if(!s){c.visible=true;c.scale.y=1;c.position.y=0;} return; }
       if(c.isInstancedMesh){ if(u.byN){ if(!u.m0)u.m0=c.material; c.visible=walls; c.material=(s&&!esq)?M.vao:u.m0; } else c.visible=!s; return; }
       if(Array.isArray(c.material)){ c.visible=gc; return; }
       if(c.material===matYellow){ c.visible=!s; return; }
-      if(c.material===matSlab){ if(!u.m0)u.m0=c.material; c.material=s?M.conc:u.m0; }
+      if(c.material===matSlab||u.m0===matSlab){ if(!u.m0)u.m0=c.material; c.material=!s?u.m0:((reb||sl)?M.concL:M.conc); }
     });
     if(s&&!walls) obraPilares(fg).visible=true; else if(pil) pil.visible=false;
   }));
   roofs.forEach((rg,ti)=>{ const s=m?m[ti?'B':'A']:null; rg.visible=!s||s.S>=12;
     rg.children.forEach((c,i)=>{ if(!c.userData.m0)c.userData.m0=c.material; c.material=s?M.conc:c.userData.m0; if(i>0)c.visible=!s||!!s.top; }); });
-  TBASE.forEach((arr,ti)=>arr.forEach(o=>{ if(!o.userData.m0)o.userData.m0=o.material; o.material=m?M.conc:o.userData.m0; }));
+  TBASE.forEach((arr,ti)=>arr.forEach(o=>{ if(!o.userData.m0)o.userData.m0=o.material; const s=m?m[ti?'B':'A']:null; o.material=m?((s&&s.R>=12)?M.concL:M.conc):o.userData.m0; }));
   beaconPts.visible=!m;
   TOWERS.forEach((t,ti)=>{ const s=m?m[ti?'B':'A']:null; let h=OB.hoist[ti];
     if(!h){ h=new THREE.Group(); const mast=new THREE.Mesh(new THREE.BoxGeometry(.7,1,.7),mat(0x8a7a4a,{roughness:.7,metalness:.2})); mast.castShadow=true;
@@ -1718,7 +1720,7 @@ const mesCurto=id=>MESES[+id.slice(4)-1]+'/'+id.slice(2,4);
 const pctBR=v=>v==null?'—':v.toFixed(2).replace('.',',')+'%';
 const BLK={A:'A',B:'B',AB:'A e B'};
 function obraLeg(m){const has=k=>['A','B'].some(b=>{const s=m[b];return k==='est'?s.S>s.W:k==='alv'?s.W>Math.max(s.R,s.L)&&s.W>0:k==='reb'?s.R>s.L:k==='sel'?s.L>0:s.E>0;});
-  return [['est','#5f5d59','Estrutura'],['alv','#7c3e22','Alvenaria'],['reb','#57554f','Reboco externo'],['sel','#8d8b86','Selador'],['esq','#7d95a6','Esquadrias']].filter(x=>has(x[0])).map(x=>`<span><i style="background:${x[1]}"></i>${x[2]}</span>`).join('');}
+  return [['est','#5f5d59','Estrutura'],['alv','#7c3e22','Alvenaria'],['reb','#57554f','Reboco externo'],['sel','#45484d','Selador'],['esq','#7d95a6','Esquadrias']].filter(x=>has(x[0])).map(x=>`<span><i style="background:${x[1]}"></i>${x[2]}</span>`).join('');}
 function obraUI(){ const L=OBRA.meses, m=L[OB.i]; if(!m) return; const prev=L[OB.i-1];
   $('diaMes').textContent=mesNome(m.id);
   $('diaSub').textContent=pctBR(m.pct)+(prev&&m.pct!=null&&prev.pct!=null?' · +'+(m.pct-prev.pct).toFixed(2).replace('.',',')+' no mês':'')+(m.envio?' · relatório de '+m.envio:'');
