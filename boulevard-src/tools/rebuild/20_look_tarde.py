@@ -37,6 +37,15 @@ def look(nome, az=246., el=13.):
         if lg: lg.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value = 30.
         for o in scn.objects:
             if o.name.startswith("BLV_luz_poste"): o.hide_render = False
+    tm = bpy.data.materials["BLV_Terreno"].node_tree; hz = tm.nodes.get('HAZE')
+    gr = [n for n in tm.nodes if n.type == 'VALTORGB'][0]
+    if nome == 'tarde':
+        if hz: hz.inputs['Color'].default_value = (.66, .70, .78, 1); hz.inputs['Strength'].default_value = .85
+        for e in gr.color_ramp.elements: e.color = (.075, .10, .035, 1)
+        gr.color_ramp.elements[-1].color = (.12, .12, .06, 1)
+    else:
+        if hz: hz.inputs['Color'].default_value = (.30, .36, .52, 1); hz.inputs['Strength'].default_value = .12
+        for e in gr.color_ramp.elements: e.color = (.035, .05, .022, 1)
     scn["blv_look"] = nome
 bpy.app.driver_namespace['blv_look'] = look
 look(globals().get("LOOK", "tarde"))
