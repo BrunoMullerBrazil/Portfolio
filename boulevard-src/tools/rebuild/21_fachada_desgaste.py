@@ -18,7 +18,7 @@ def wear(m, k):
     nb = N.new('ShaderNodeTexNoise'); nb.inputs['Scale'].default_value = .06; nb.inputs['Detail'].default_value = 3.; L(tc.outputs['Object'], nb.inputs['Vector'])
     bm = N.new('ShaderNodeMapRange'); bm.inputs['From Min'].default_value = .4; bm.inputs['From Max'].default_value = .7; L(nb.outputs['Fac'], bm.inputs['Value'])
     # cantos: oclusão
-    ao = N.new('ShaderNodeAmbientOcclusion'); ao.samples = 8; ao.inputs['Distance'].default_value = .35
+    ao = N.new('ShaderNodeAmbientOcclusion'); ao.samples = 4; ao.inputs['Distance'].default_value = .35
     inv = N.new('ShaderNodeMath'); inv.operation = 'SUBTRACT'; inv.inputs[0].default_value = 1.; L(ao.outputs['AO'], inv.inputs[1])
     s1 = N.new('ShaderNodeMath'); s1.operation = 'MAXIMUM'; L(st.outputs[0], s1.inputs[0]); L(inv.outputs[0], s1.inputs[1])
     s2 = N.new('ShaderNodeMath'); s2.operation = 'ADD'; s2.use_clamp = True; L(s1.outputs[0], s2.inputs[0]); L(bm.outputs[0], s2.inputs[1])
