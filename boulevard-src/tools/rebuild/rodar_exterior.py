@@ -32,6 +32,7 @@ ORDEM = [
     "rebuild/24_carros.py",            # carros nas vagas e na avenida
     "rebuild/23_bairro_osm.py",        # ruas, prédios, casas e mata reais (OSM) no encaixe geográfico
     "blender_bairro.py",               # janelas, muros e telhados nas casas novas
+    "rebuild/26_quintais.py", "rebuild/27_desempenho.py",
     "rebuild/21_fachada_desgaste.py", "rebuild/22_pos.py",
     "rebuild/25_cam_aerea.py",         # câmeras aéreas de masterplan
     "rebuild/20_look_tarde.py",        # look fim de tarde (o v3 continua em driver_namespace['blv_look']('v3'))
