@@ -16,15 +16,19 @@ def geo2bl(lat, lon):
     return Vector((cr*E+sr*Nn, -sr*E+cr*Nn))
 r = json.load(open(os.path.expanduser("~/Movies/Boulevard_3D/assets/osm/pedra_branca.json")))
 dg = bpy.context.evaluated_depsgraph_get()
-def chao(p):
-    hit, loc, *_ = scn.ray_cast(dg, Vector((p.x, p.y, 3000.)), Vector((0, 0, -1)))
-    return loc.z if hit else 0.
+TER = scn.objects["BLV_terreno"]; _ti = TER.matrix_world.inverted()
+def chao(p):     # só o terreno (antes pegava copa de árvore e prédio e levantava a rua)
+    o = _ti@Vector((p.x, p.y, 3000.)); d = (_ti.to_3x3()@Vector((0, 0, -1))).normalized()
+    hit, loc, *_ = TER.ray_cast(o, d)
+    return (TER.matrix_world@loc).z if hit else 0.
 def coll(name):
     c = bpy.data.collections.get(name) or bpy.data.collections.new(name)
     if c.name not in scn.collection.children: scn.collection.children.link(c)
     for o in list(c.objects): bpy.data.objects.remove(o, do_unlink=True)
     return c
 C = coll("BLV_Bairro_OSM")
+for o in list(scn.objects):     # idempotente: limpa o que uma rodada anterior criou
+    if o.name.startswith(("BLV_arv_mata_", "BLV_carro_osm")): bpy.data.objects.remove(o, do_unlink=True)
 # lote do condomínio (implantação do book) + Torre di Mosto: nada do OSM entra aqui
 LOTE = (-106., 80., -47., 32.)
 def no_lote(p, m=0.): return LOTE[0]-m < p.x < LOTE[1]+m and LOTE[2]-m < p.y < LOTE[3]+m
@@ -239,7 +243,7 @@ if CC and mods:
             p = d[i]
             if p.length > 600 or no_lote(p): continue
             t = (d[i+1]-d[i-1]).normalized(); nn = Vector((-t.y, t.x)); side = rng.choice((1, -1))
-            q = p+nn*side*(W[h]/4); e = bpy.data.objects.new("BLV_carro", None); e.instance_type = 'COLLECTION'
+            q = p+nn*side*(W[h]/4); e = bpy.data.objects.new("BLV_carro_osm", None); e.instance_type = 'COLLECTION'
             e.instance_collection = rng.choice(mods); e.location = (q.x, q.y, chao(q)+.13)
             e.rotation_euler[2] = math.atan2(t.y, t.x)+(0 if side < 0 else math.pi); CC.objects.link(e); nc += 1
 result = dict(ruas=len(ways), predios=nb, casas=nh, arvores_removidas=rm, mata=nm, postes_vertices_removidos=rp, carros_removidos=rc, carros_rua=nc)
