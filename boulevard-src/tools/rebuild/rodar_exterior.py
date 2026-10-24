@@ -36,6 +36,7 @@ ORDEM = [
     "rebuild/29_materiais_bairro.py",  # paver, tinta, telha, asfalto com albedo real
     "rebuild/30_praca_layout.py",      # espelho d'água, pergolado, canteiros, palmeiras (imagens oficiais Altos da Pedra)
     "rebuild/31_cores_casas.py",       # reaplica paletas de parede/telhado sobre o 29
+    "rebuild/32_grama_terrenos.py",    # grama menos limão, capim seco e terra exposta
     "rebuild/27_desempenho.py",
     "rebuild/21_fachada_desgaste.py", "rebuild/22_pos.py",
     "rebuild/25_cam_aerea.py",         # câmeras aéreas de masterplan
