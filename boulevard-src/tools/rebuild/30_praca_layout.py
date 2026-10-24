@@ -20,13 +20,16 @@ def chao(p):
     return (_mw@loc).z if loc is not None else 0.
 # eixo da faixa (borda norte (-75,-62)->(335,-116); borda sul ~(-52,-96)->(332,-160))
 def yc(x):   # linha média e meia-largura da praça em x
-    yn = -62+(x+75)/410*(-54)
+    pn = [(-75, -50), (0, -55), (150, -67), (250, -75), (330, -94)]
+    yn = pn[0][1] if x < -75 else pn[-1][1]
+    for (x0, y0), (x1, y1) in zip(pn, pn[1:]):
+        if x0 <= x <= x1: yn = y0+(y1-y0)*(x-x0)/(x1-x0); break
     pts = [(-52, -96), (-20, -110), (150, -127), (280, -150), (332, -160)]
     for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
         if x0 <= x <= x1: ys = y0+(y1-y0)*(x-x0)/(x1-x0); break
     else: ys = -96 if x < -52 else -160
     return (yn+ys)/2, (yn-ys)/2
-ANG = math.atan2(-54, 410); U = Vector((math.cos(ANG), math.sin(ANG))); N = Vector((-U.y, U.x))
+ANG = math.atan2(-44, 405); U = Vector((math.cos(ANG), math.sin(ANG))); N = Vector((-U.y, U.x))
 def P(x, off=0.):
     y, hw = yc(x); return Vector((x, y))+N*off
 # limpa o que este script cria (idempotente) e as árvores do 28
@@ -51,8 +54,9 @@ CANT = M.get("BLV_Praca_Canteiro") or M.new("BLV_Praca_Canteiro"); CANT.use_node
 o_ = nt.nodes.new('ShaderNodeOutputMaterial'); bb = nt.nodes.new('ShaderNodeBsdfPrincipled'); L(bb.outputs[0], o_.inputs[0])
 tc = nt.nodes.new('ShaderNodeTexCoord'); nz = nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 1.8; nz.inputs['Detail'].default_value = 6
 L(tc.outputs['Object'], nz.inputs['Vector']); rp = nt.nodes.new('ShaderNodeValToRGB'); L(nz.outputs['Fac'], rp.inputs['Fac'])
-e = rp.color_ramp.elements; e[0].position = .35; e[0].color = (.025, .055, .02, 1); e[1].position = .62; e[1].color = (.05, .09, .06, 1)
-e2 = e.new(.70); e2.color = (.13, .15, .38, 1); L(rp.outputs['Color'], bb.inputs['Base Color']); bb.inputs['Roughness'].default_value = .75
+e = rp.color_ramp.elements; e[0].position = .35; e[0].color = (.022, .05, .018, 1); e[1].position = .72; e[1].color = (.045, .085, .04, 1)
+e2 = e.new(.80); e2.color = (.10, .10, .28, 1)   # flor de agapanto só em manchas pequenas (v1 deixava o canteiro azul, lendo como água)
+L(rp.outputs['Color'], bb.inputs['Base Color']); bb.inputs['Roughness'].default_value = .75
 bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = .6; L(nz.outputs['Fac'], bp.inputs['Height']); L(bp.outputs[0], bb.inputs['Normal'])
 # ---------- piso: tudo em placa clara; tira as faces sob o espelho d'água ----------
 PISO = M["BLV_Praca_Piso"]; nt = PISO.node_tree

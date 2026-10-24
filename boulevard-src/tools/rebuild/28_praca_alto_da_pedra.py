@@ -5,8 +5,9 @@
 import bpy, bmesh, math, random
 from mathutils import Vector
 scn = bpy.data.scenes["Boulevard"]; rng = random.Random(28)
-POLY = [Vector(p) for p in ((-75, -62), (120, -82), (260, -100), (335, -116), (332, -160), (280, -150), (150, -127),
-                            (-20, -110), (-52, -96))]
+# borda norte encostada na calçada da avenida (v2: a v1 deixava uma fileira de casas entre a praça e a avenida)
+POLY = [Vector(p) for p in ((-75, -50), (0, -55), (150, -67), (250, -75), (330, -94), (332, -160), (280, -150),
+                            (150, -127), (-20, -110), (-52, -96))]
 def inpoly(p, poly=POLY):
     c = False; j = len(poly)-1
     for i in range(len(poly)):
