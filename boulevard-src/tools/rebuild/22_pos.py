@@ -19,10 +19,7 @@ out = N.new("NodeGroupOutput")
 L(rl.outputs['Image'], gl.inputs['Image']); L(gl.outputs['Image'], ld.inputs['Image'])
 ins = [s for s in mx.inputs if s.type == 'RGBA']; L(ld.outputs['Image'], ins[0])
 # vinheta: máscara elíptica desfocada vira cor (branco no centro, cinza nas bordas)
-try:
-    for k, v in (('Size', (.35, .35)),):
-        if k in bl.inputs: bl.inputs[k].default_value = v
-except Exception: pass
+bl.inputs['Size'].default_value = (260, 260)
 L(el.outputs['Mask'], bl.inputs['Image']); L(bl.outputs['Image'], ins[1])
 L([s for s in mx.outputs if s.type == 'RGBA'][0], out.inputs[0])
 scn.compositing_node_group = ng
