@@ -3,7 +3,13 @@
 # Rodar ANTES de blender_site.py (que lê blv_dem).
 import bpy, os, math
 import numpy as np
-ns = bpy.app.driver_namespace; M = ns['blv_dem_meta']
+ns = bpy.app.driver_namespace
+if 'blv_dem_meta' not in ns:   # o namespace é zerado ao abrir arquivo: recalcula como em 00_assets.py
+    _L0, _O0, _Z = -27.6340, -48.6822, 14; _n = 2**_Z
+    _cx = (_O0+180)/360*_n; _cy = (1-math.asinh(math.tan(math.radians(_L0)))/math.pi)/2*_n
+    ns['blv_dem_meta'] = dict(Z=_Z, tx0=int(_cx)-2, ty0=int(_cy)-2, cx=_cx, cy=_cy, LAT0=_L0, LON0=_O0,
+                              D=os.path.expanduser("~/Movies/Boulevard_3D/assets/dem"))
+M = ns['blv_dem_meta']
 Z, tx0, ty0, D = M['Z'], M['tx0'], M['ty0'], M['D']
 big = np.zeros((5*256, 5*256), dtype=np.float64)
 for j in range(5):
