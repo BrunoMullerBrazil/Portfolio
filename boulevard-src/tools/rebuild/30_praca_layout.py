@@ -63,7 +63,7 @@ PISO = M["BLV_Praca_Piso"]; nt = PISO.node_tree
 br = next((n for n in nt.nodes if n.type == 'TEX_BRICK'), None)
 if br:   # placas grandes ~1,4 × 0,7 m, concreto claro (albedo ~.36) — o 29 deixou escuro demais
     br.inputs['Scale'].default_value = .36; br.inputs['Mortar Size'].default_value = .012
-    br.inputs['Color1'].default_value = (.33, .315, .29, 1); br.inputs['Color2'].default_value = (.29, .28, .26, 1); br.inputs['Mortar'].default_value = (.16, .155, .14, 1)
+    br.inputs['Color1'].default_value = (.23, .22, .205, 1); br.inputs['Color2'].default_value = (.20, .195, .18, 1); br.inputs['Mortar'].default_value = (.11, .105, .10, 1)
 po = scn.objects["BLV_praca_piso"]; me = po.data
 POOL_C = P(95); POOL_A, POOL_B = 15., 6.5     # semi-eixos do espelho d'água
 def em_elipse(p, c, a, b_, ang=ANG):
@@ -129,7 +129,7 @@ while x < 322:
     if not near:
         hw = yc(x)[1]
         for s in ((1,) if rng.random() < .35 else (1, -1)):
-            a = rng.uniform(8, 12); b_ = min(hw*.38, rng.uniform(4.5, 7.))
+            a = rng.uniform(12, 17); b_ = min(hw*.42, rng.uniform(6., 8.5))
             CAN.append((x+rng.uniform(-3, 3), s*(hw*.45+rng.uniform(-1.5, 1.5)), a, b_))
     else:   # lado sul do espelho/pergolado: canteiro raso acompanhando a borda
         CAN.append((x, -(yc(x)[1]-4.5), 9., 2.6))
