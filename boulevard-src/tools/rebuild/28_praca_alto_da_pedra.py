@@ -14,11 +14,13 @@ def inpoly(p, poly=POLY):
         if ((a.y > p.y) != (b.y > p.y)) and (p.x < (b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x): c = not c
         j = i
     return c
-TER = scn.objects["BLV_terreno"]; _ti = TER.matrix_world.inverted()
-def chao(p):
-    o = _ti@Vector((p.x, p.y, 3000.)); d = (_ti.to_3x3()@Vector((0, 0, -1))).normalized()
-    hit, loc, *_ = TER.ray_cast(o, d)
-    return (TER.matrix_world@loc).z if hit else 0.
+from mathutils.bvhtree import BVHTree
+TER = scn.objects["BLV_terreno"]
+_bvh = BVHTree.FromObject(TER, bpy.context.evaluated_depsgraph_get(), deform=False)   # índice montado uma vez
+_mw = TER.matrix_world; _ti = _mw.inverted(); _dl = (_ti.to_3x3()@Vector((0, 0, -1))).normalized()
+def chao(p):     # só o terreno (antes pegava copa de árvore e prédio e levantava a rua)
+    loc, *_ = _bvh.ray_cast(_ti@Vector((p.x, p.y, 3000.)), _dl)
+    return (_mw@loc).z if loc is not None else 0.
 # 1) casas, muros, janelas e quintais dentro da praça saem (remove as faces/caixas cujo centro cai no polígono)
 def tira_ilhas(o, dentro):
     bm = bmesh.new(); bm.from_mesh(o.data); mw = o.matrix_world; seen = set(); kill = []

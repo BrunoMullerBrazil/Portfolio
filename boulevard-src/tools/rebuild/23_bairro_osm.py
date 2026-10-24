@@ -16,11 +16,13 @@ def geo2bl(lat, lon):
     return Vector((cr*E+sr*Nn, -sr*E+cr*Nn))
 r = json.load(open(os.path.expanduser("~/Movies/Boulevard_3D/assets/osm/pedra_branca.json")))
 dg = bpy.context.evaluated_depsgraph_get()
-TER = scn.objects["BLV_terreno"]; _ti = TER.matrix_world.inverted()
+from mathutils.bvhtree import BVHTree
+TER = scn.objects["BLV_terreno"]
+_bvh = BVHTree.FromObject(TER, bpy.context.evaluated_depsgraph_get(), deform=False)   # índice montado uma vez
+_mw = TER.matrix_world; _ti = _mw.inverted(); _dl = (_ti.to_3x3()@Vector((0, 0, -1))).normalized()
 def chao(p):     # só o terreno (antes pegava copa de árvore e prédio e levantava a rua)
-    o = _ti@Vector((p.x, p.y, 3000.)); d = (_ti.to_3x3()@Vector((0, 0, -1))).normalized()
-    hit, loc, *_ = TER.ray_cast(o, d)
-    return (TER.matrix_world@loc).z if hit else 0.
+    loc, *_ = _bvh.ray_cast(_ti@Vector((p.x, p.y, 3000.)), _dl)
+    return (_mw@loc).z if loc is not None else 0.
 def coll(name):
     c = bpy.data.collections.get(name) or bpy.data.collections.new(name)
     if c.name not in scn.collection.children: scn.collection.children.link(c)
