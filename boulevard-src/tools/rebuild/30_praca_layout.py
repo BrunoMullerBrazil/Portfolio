@@ -63,7 +63,7 @@ PISO = M["BLV_Praca_Piso"]; nt = PISO.node_tree
 br = next((n for n in nt.nodes if n.type == 'TEX_BRICK'), None)
 if br:   # placas grandes ~1,4 × 0,7 m, concreto claro (albedo ~.36) — o 29 deixou escuro demais
     br.inputs['Scale'].default_value = .36; br.inputs['Mortar Size'].default_value = .012
-    br.inputs['Color1'].default_value = (.40, .38, .35, 1); br.inputs['Color2'].default_value = (.35, .34, .31, 1); br.inputs['Mortar'].default_value = (.16, .155, .14, 1)
+    br.inputs['Color1'].default_value = (.33, .315, .29, 1); br.inputs['Color2'].default_value = (.29, .28, .26, 1); br.inputs['Mortar'].default_value = (.16, .155, .14, 1)
 po = scn.objects["BLV_praca_piso"]; me = po.data
 POOL_C = P(95); POOL_A, POOL_B = 15., 6.5     # semi-eixos do espelho d'água
 def em_elipse(p, c, a, b_, ang=ANG):
@@ -121,13 +121,24 @@ for i in range(6):
     c = PC+U*(-19+i*7.6)+N*rng.uniform(-1.2, 1.2); BK.box(c, U, 2.4, 1.2, chao(c), .95)
 BK.build("BLV_praca_bancas", [MAD])
 # ---------- canteiros orgânicos com borda de concreto ----------
-CAN = [(-38, 7, 13, 5.), (5, -8, 16, 6.), (40, 9, 12, 5.), (140, -10, 15, 6.), (160, 10, 10, 4.5), (262, 9, 13, 5.),
-       (290, -9, 15, 6.), (318, 4, 9, 4.)]
+# v2: a praca31 mostrou piso demais (praça vazia, lê como estacionamento). As imagens oficiais mostram verde
+# dominante com caminhos — canteiros a cada ~22 m, alternando lados, fora do entorno do espelho e do pergolado.
+CAN = []; x = -58.
+while x < 322:
+    near = abs(x-95) < POOL_A+14 or abs(x-215) < 30
+    if not near:
+        hw = yc(x)[1]
+        for s in ((1,) if rng.random() < .35 else (1, -1)):
+            a = rng.uniform(8, 12); b_ = min(hw*.38, rng.uniform(4.5, 7.))
+            CAN.append((x+rng.uniform(-3, 3), s*(hw*.45+rng.uniform(-1.5, 1.5)), a, b_))
+    else:   # lado sul do espelho/pergolado: canteiro raso acompanhando a borda
+        CAN.append((x, -(yc(x)[1]-4.5), 9., 2.6))
+    x += rng.uniform(20, 24)
 CB = MB(); arv_spots = []
 for x, off, a, b_ in CAN:
     c = P(x, off); poly = elipse(c, a, b_, ANG+rng.uniform(-.2, .2)); z = min(chao(p) for p in poly)
     CB.prism(poly, z-.1, .5, 1)
-    for _ in range(max(1, int(a/6))): arv_spots.append(c+U*rng.uniform(-a*.55, a*.55)+N*rng.uniform(-b_*.4, b_*.4))
+    for _ in range(1+int(a*b_/35)): arv_spots.append(c+U*rng.uniform(-a*.6, a*.6)+N*rng.uniform(-b_*.45, b_*.45))
 # anel de canteiro em torno da praça do espelho (lado norte, voltado à avenida)
 CB.build("BLV_praca_canteiros", [CONC, CANT])
 # ---------- palmeira procedural (tronco anelado + coroa de 11 folhas arqueadas) ----------
@@ -165,7 +176,7 @@ for k in range(-2, 3):
     for s in (-1, 1): inst("BLV_palmeira", POOL_C+U*k*8+N*s*(POOL_B+13), rng.uniform(1., 1.25), "p")
 # árvores de sombra nos canteiros e uma grande copa isolada junto ao pergolado (como na imagem oficial)
 SOMBRA = ["island_tree_01_LOD0", "island_tree_02_LOD0", "tree_small_02_LOD0"]
-for p in arv_spots: inst(rng.choice(SOMBRA), p, rng.uniform(1.8, 2.5), "s")
+for p in arv_spots: inst(rng.choice(SOMBRA), p, rng.uniform(2.2, 3.1), "s")
 inst("island_tree_01_LOD0", PC-U*29+N*2, 3.0, "s")
 # borda sul: renque de árvores de sombra separando a praça das casas
 x = -30.
