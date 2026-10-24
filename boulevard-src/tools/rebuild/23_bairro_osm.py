@@ -140,7 +140,7 @@ def em_area(c, lst): return any(inpoly(c, poly) for poly in lst)
 nb = 0
 for pts, t in blds:
     if len(pts) < 4: continue
-    c = sum(pts[:-1], Vector())/(len(pts)-1)
+    c = sum(pts[:-1], Vector((0, 0)))/(len(pts)-1)
     if no_lote(c, 5) or c.length > 1500: continue
     lv = t.get('building:levels'); h = float(lv)*3.1 if lv and lv.replace('.', '').isdigit() else (3.6 if rng.random() < .6 else 6.8)
     PB.prism(pts[:-1], chao(c)-.3, h+.3); nb += 1
