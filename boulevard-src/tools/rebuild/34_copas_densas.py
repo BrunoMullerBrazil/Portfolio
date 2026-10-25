@@ -88,3 +88,19 @@ if ra:
         if any(bv.ray_cast(mi@Vector((p.x+dx, p.y+dy, 3000.)), d)[0] is not None for dx, dy in ((0, 0), (1.2, 0), (-1.2, 0), (0, 1.2), (0, -1.2))):
             bpy.data.objects.remove(o, do_unlink=True); rm += 1
 result['removidas_rua'] = rm
+# modo de vegetação por câmera: a copa procedural só se sustenta à distância (na foto ao nível do olho vira brócolis
+# facetado). ns['blv_arvores']('perto') volta as folhosas Poly Haven com a escala original; ('aerea') põe as copas densas.
+def blv_arvores(modo):
+    sc = bpy.data.scenes["Boulevard"]; n = 0
+    var = [c for c in (bpy.data.collections.get(f"BLV_copa_densa_{k}") for k in range(3)) if c]
+    ph = [c for c in (bpy.data.collections.get(x) for x in ("island_tree_01_LOD0", "island_tree_02_LOD0", "tree_small_02_LOD0")) if c]
+    for o in sc.objects:
+        if 'blv34_esc' not in o or o.instance_type != 'COLLECTION': continue
+        r = random.Random(o.name); s0 = o['blv34_esc']
+        if modo == 'perto': o.instance_collection = r.choice(ph); o.scale = (s0, s0, s0)
+        else:
+            o.instance_collection = r.choice(var); s = max(.75, min(1.35, s0*.48)); o.scale = (s, s, s)
+        n += 1
+    sc['blv_arvores'] = modo
+    return n
+bpy.app.driver_namespace['blv_arvores'] = blv_arvores
