@@ -86,10 +86,12 @@ def set_mist(v):
 # ---------- gotas ----------
 GOTA = M.get("BLV_Gota") or M.new("BLV_Gota"); GOTA.use_nodes = True
 bg_ = GOTA.node_tree.nodes['Principled BSDF']; bg_.inputs['Base Color'].default_value = (1, 1, 1, 1); bg_.inputs['Roughness'].default_value = .05
-bg_.inputs['IOR'].default_value = 1.33; bg_.inputs['Alpha'].default_value = .55
+bg_.inputs['IOR'].default_value = 1.33; bg_.inputs['Alpha'].default_value = .5
+bg_.inputs['Emission Color'].default_value = (.8, .85, .9, 1); bg_.inputs['Emission Strength'].default_value = .03   # leve: gota pega a luz ambiente
 for k in ('Transmission Weight', 'Transmission'):
     if k in bg_.inputs: bg_.inputs[k].default_value = 1.; break
-def chuva_cam(camname, n=25000, dmin=1.5, dmax=40., vento=(.12, .05), seed=38):
+def chuva_cam(camname, n=18000, dmin=1.2, dmax=35., vento=(.12, .05), seed=38):
+    bpy.context.view_layer.update()   # matrix_world da câmera recém-movida (sem isso o frustum é o da posição antiga)
     o = scn.objects.get("BLV_chuva")
     if o: bpy.data.objects.remove(o, do_unlink=True)
     cam = scn.objects[camname]; mw = cam.matrix_world; fr = cam.data.view_frame(scene=scn); tr, br, bl, tl = fr; zf = -bl.z
@@ -98,7 +100,7 @@ def chuva_cam(camname, n=25000, dmin=1.5, dmax=40., vento=(.12, .05), seed=38):
         d = dmin+(dmax-dmin)*r.random()**1.6
         u, v = r.uniform(-.08, 1.08), r.uniform(-.08, 1.08)
         pl = bl+(br-bl)*u+(tl-bl)*v; p = mw@(pl*(d/zf))
-        Lg = r.uniform(.35, .8)*(1+d/30); w = .0025+.0006*d          # traço longo (obturador ~1/60) e mais largo longe
+        Lg = r.uniform(.35, .8)*(1+d/30); w = .0018+.00035*d          # traço longo (obturador ~1/60) e mais largo longe
         down = Vector((vento[0], vento[1], -1.)).normalized()
         side = (p-cp).cross(down).normalized()*w
         a, b_ = p-down*Lg/2, p+down*Lg/2; k = len(V)
