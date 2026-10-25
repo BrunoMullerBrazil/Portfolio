@@ -146,8 +146,12 @@ while x < 322:
     x += rng.uniform(20, 24)
 CB = MB(); arv_spots = []
 for x, off, a, b_ in CAN:
-    c = P(x, off); poly = elipse(c, a, b_, ANG+rng.uniform(-.2, .2))
-    if na_rua(c) or any(na_rua(q) for q in poly[::4]): continue   # canteiro em cima de rua: descarta
+    ang = ANG+rng.uniform(-.2, .2); ok = False
+    for _t in range(4):   # se cair em rua, aproxima do eixo e encolhe (v4); só descarta depois de 4 tentativas
+        c = P(x, off); poly = elipse(c, a, b_, ang)
+        if not (na_rua(c) or any(na_rua(q) for q in poly[::3])): ok = True; break
+        off *= .55; a *= .8; b_ *= .85
+    if not ok: continue
     z = min(chao(p) for p in poly)
     CB.prism(poly, z-.1, .5, 1)
     for _ in range(1+int(a*b_/35)): arv_spots.append(c+U*rng.uniform(-a*.6, a*.6)+N*rng.uniform(-b_*.45, b_*.45))
