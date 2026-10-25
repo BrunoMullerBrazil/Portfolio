@@ -18,6 +18,16 @@ _mw = TER.matrix_world; _ti = _mw.inverted(); _dl = (_ti.to_3x3()@Vector((0, 0, 
 def chao(p):
     loc, *_ = _bvh.ray_cast(_ti@Vector((p.x, p.y, 3000.)), _dl)
     return (_mw@loc).z if loc is not None else 0.
+# v4: ruas do OSM atravessam a faixa da praça — nada (árvore, palmeira, canteiro, banco) pode cair no asfalto
+_rua = [o for o in (scn.objects.get("BLV_osm_asfalto"),) if o]
+_rb = [(BVHTree.FromObject(o, bpy.context.evaluated_depsgraph_get(), deform=False), o.matrix_world, o.matrix_world.inverted()) for o in _rua]
+def na_rua(p, r=0.):
+    for k in range(9 if r > 0 else 1):
+        q = p if k == 0 else p+Vector((math.cos(k*.785), math.sin(k*.785)))*r
+        for bv, mw, mi in _rb:
+            d = (mi.to_3x3()@Vector((0, 0, -1))).normalized()
+            if bv.ray_cast(mi@Vector((q.x, q.y, 3000.)), d)[0] is not None: return True
+    return False
 # eixo da faixa (borda norte (-75,-62)->(335,-116); borda sul ~(-52,-96)->(332,-160))
 def yc(x):   # linha média e meia-largura da praça em x
     pn = [(-75, -50), (0, -55), (150, -67), (250, -75), (330, -94)]
@@ -104,7 +114,7 @@ for seg in range(3):
         t = -math.pi/2+(seg-1)*.75+(j-3)*.09
         ca, sa = math.cos(ANG), math.sin(ANG); x, y = (POOL_A+8)*math.cos(t), (POOL_B+8)*math.sin(t)
         c = POOL_C+Vector((x*ca-y*sa, x*sa+y*ca)); tg = Vector((-(POOL_A+8)*math.sin(t), (POOL_B+8)*math.cos(t))); tg = Vector((tg.x*ca-tg.y*sa, tg.x*sa+tg.y*ca)).normalized()
-        E.box(c, tg, 1.15, .55, chao(c), .45)
+        if not na_rua(c, .8): E.box(c, tg, 1.15, .55, chao(c), .45)
 E.build("BLV_praca_espelho", [CONC, AGUA])
 # ---------- pergolado: 48 × 9 m, h 4,2 m, cobertura metálica fina, pilares Ø15 cm a cada 6 m ----------
 PC = P(215); zP = chao(PC); PG = MB()
@@ -136,7 +146,9 @@ while x < 322:
     x += rng.uniform(20, 24)
 CB = MB(); arv_spots = []
 for x, off, a, b_ in CAN:
-    c = P(x, off); poly = elipse(c, a, b_, ANG+rng.uniform(-.2, .2)); z = min(chao(p) for p in poly)
+    c = P(x, off); poly = elipse(c, a, b_, ANG+rng.uniform(-.2, .2))
+    if na_rua(c) or any(na_rua(q) for q in poly[::4]): continue   # canteiro em cima de rua: descarta
+    z = min(chao(p) for p in poly)
     CB.prism(poly, z-.1, .5, 1)
     for _ in range(1+int(a*b_/35)): arv_spots.append(c+U*rng.uniform(-a*.6, a*.6)+N*rng.uniform(-b_*.45, b_*.45))
 # anel de canteiro em torno da praça do espelho (lado norte, voltado à avenida)
@@ -164,6 +176,7 @@ if pal is None:
 n = 0
 def inst(colname, p, s, nm):
     global n
+    if na_rua(p, 1.0 if colname == "BLV_palmeira" else 1.8): return
     e = bpy.data.objects.new(f"BLV_arv_praca_{nm}{n:03d}", None); e.instance_type = 'COLLECTION'
     e.instance_collection = bpy.data.collections[colname]; e.location = (p.x, p.y, chao(p)); e.scale = (s, s, s)
     e.rotation_euler[2] = rng.random()*6.28; C.objects.link(e); n += 1
