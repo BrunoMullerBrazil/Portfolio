@@ -30,7 +30,7 @@ def coll(name):
     return c
 C = coll("BLV_Bairro_OSM")
 for o in list(scn.objects):     # idempotente: limpa o que uma rodada anterior criou
-    if o.name.startswith(("BLV_arv_mata_", "BLV_carro_osm")): bpy.data.objects.remove(o, do_unlink=True)
+    if o.name.startswith(("BLV_arv_mata_", "BLV_carro_osm", "BLV_osm_predios")): bpy.data.objects.remove(o, do_unlink=True)
 # lote do condomínio (implantação do book) + Torre di Mosto: nada do OSM entra aqui
 LOTE = (-106., 80., -47., 32.)
 def no_lote(p, m=0.): return LOTE[0]-m < p.x < LOTE[1]+m and LOTE[2]-m < p.y < LOTE[3]+m

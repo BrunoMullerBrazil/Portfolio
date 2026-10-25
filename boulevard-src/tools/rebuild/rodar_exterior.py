@@ -41,6 +41,7 @@ ORDEM = [
     "rebuild/21_fachada_desgaste.py", "rebuild/22_pos.py",
     "rebuild/25_cam_aerea.py",         # câmeras aéreas de masterplan
     "rebuild/20_look_tarde.py",        # look fim de tarde (o v3 continua em driver_namespace['blv_look']('v3'))
+    "rebuild/33_acabamento_aerea.py",  # exposição e tons finais da aérea (depois do 20)
     "SAVE",
 ]
 def fetch(p):
