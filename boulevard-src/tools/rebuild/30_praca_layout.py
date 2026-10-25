@@ -56,6 +56,7 @@ if not any(n.type == 'BUMP' for n in nt.nodes):
     nz = nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 3.; bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = .05
     nt.links.new(nz.outputs['Fac'], bp.inputs['Height']); nt.links.new(bp.outputs[0], b.inputs['Normal'])
 CONC = M.get("BLV_Concreto_Lazer") or mat("BLV_Concreto_Lazer", (.42, .41, .39, 1), .8)
+COPING = mat("BLV_Praca_Borda", (.24, .235, .22, 1), .75)
 METAL = M.get("BLV_Metal_Escuro") or mat("BLV_Metal_Escuro", (.03, .03, .032, 1), .45, .8)
 TRONCO = mat("BLV_Palmeira_Tronco", (.30, .29, .26, 1), .85)
 FOLHA = M.get("BLV_Folhagem") or mat("BLV_Folhagem", (.04, .08, .03, 1), .7)
@@ -115,7 +116,7 @@ for seg in range(3):
         ca, sa = math.cos(ANG), math.sin(ANG); x, y = (POOL_A+8)*math.cos(t), (POOL_B+8)*math.sin(t)
         c = POOL_C+Vector((x*ca-y*sa, x*sa+y*ca)); tg = Vector((-(POOL_A+8)*math.sin(t), (POOL_B+8)*math.cos(t))); tg = Vector((tg.x*ca-tg.y*sa, tg.x*sa+tg.y*ca)).normalized()
         if not na_rua(c, .8): E.box(c, tg, 1.15, .55, chao(c), .45)
-E.build("BLV_praca_espelho", [CONC, AGUA])
+E.build("BLV_praca_espelho", [COPING, AGUA])
 # ---------- pergolado: 48 × 9 m, h 4,2 m, cobertura metálica fina, pilares Ø15 cm a cada 6 m ----------
 PC = P(215); zP = chao(PC); PG = MB()
 PG.box(PC, U, 48., 9., zP+4.0, .22)
@@ -157,26 +158,47 @@ for x, off, a, b_ in CAN:
     for _ in range(1+int(a*b_/35)): arv_spots.append(c+U*rng.uniform(-a*.6, a*.6)+N*rng.uniform(-b_*.45, b_*.45))
 # anel de canteiro em torno da praça do espelho (lado norte, voltado à avenida)
 CB.build("BLV_praca_canteiros", [CONC, CANT])
-# ---------- palmeira procedural (tronco anelado + coroa de 11 folhas arqueadas) ----------
-pal = bpy.data.collections.get("BLV_palmeira")
-if pal is None:
-    pal = bpy.data.collections.new("BLV_palmeira")
-    pm = bmesh.new(); H = 1.
-    # tronco unitário (escala no objeto): 10 m, Ø .32
-    bmesh.ops.create_cone(pm, cap_ends=False, segments=8, radius1=.19, radius2=.15, depth=10.)
-    for v in pm.verts: v.co.z += 5.
-    tm = bpy.data.meshes.new("BLV_palmeira_tronco"); pm.to_mesh(tm); pm.free(); tm.materials.append(TRONCO)
-    to = bpy.data.objects.new("BLV_palmeira_tronco", tm); pal.objects.link(to)
-    fv, ff = [], []
-    for k in range(11):
-        a = 2*math.pi*k/11+.2*math.sin(k*1.7); d = Vector((math.cos(a), math.sin(a), 0)); s = Vector((-d.y, d.x, 0))
-        b0 = len(fv)
-        for j in range(7):
-            t = j/6; r = 4.2*t; z = 10.+1.1*math.sin(t*math.pi*.8)-1.9*t*t; w = .55*math.sin(t*math.pi)+.05
-            c = d*r+Vector((0, 0, z)); fv += [tuple(c-s*w), tuple(c+s*w)]
-        ff += [(b0+2*j, b0+2*j+2, b0+2*j+3, b0+2*j+1) for j in range(6)]
-    fm = bpy.data.meshes.new("BLV_palmeira_folhas"); fm.from_pydata(fv, [], ff); fm.update(); fm.materials.append(FOLHA)
-    fo = bpy.data.objects.new("BLV_palmeira_folhas", fm); pal.objects.link(fo)
+# ---------- palmeira procedural v2 (folha pinada: ráquis + folíolos pendentes; a v1 era recorte de papel) ----------
+pal = bpy.data.collections.get("BLV_palmeira") or bpy.data.collections.new("BLV_palmeira")
+for o in list(pal.objects): bpy.data.objects.remove(o, do_unlink=True)
+TRONCO = mat("BLV_Palmeira_Tronco", (.20, .175, .14, 1), .9)
+nt = TRONCO.node_tree; b = nt.nodes['Principled BSDF']
+if not any(n.type == 'TEX_WAVE' for n in nt.nodes):   # anéis do estipe
+    wv = nt.nodes.new('ShaderNodeTexWave'); wv.bands_direction = 'Z'; wv.inputs['Scale'].default_value = 6.
+    tcp = nt.nodes.new('ShaderNodeTexCoord'); nt.links.new(tcp.outputs['Object'], wv.inputs['Vector'])
+    bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = .4; nt.links.new(wv.outputs['Fac'], bp.inputs['Height']); nt.links.new(bp.outputs[0], b.inputs['Normal'])
+FOLHA_P = M.get("BLV_Palmeira_Folha") or M.new("BLV_Palmeira_Folha"); FOLHA_P.use_nodes = True
+bF = FOLHA_P.node_tree.nodes['Principled BSDF']; bF.inputs['Base Color'].default_value = (.045, .075, .025, 1); bF.inputs['Roughness'].default_value = .5
+try: bF.inputs['Subsurface Weight'].default_value = .15
+except Exception: pass
+HP = 10.
+pm = bmesh.new()
+bmesh.ops.create_cone(pm, cap_ends=False, segments=10, radius1=.24, radius2=.17, depth=HP)
+for v in pm.verts: v.co.z += HP/2
+_cap = bmesh.ops.create_cone(pm, cap_ends=True, segments=10, radius1=.21, radius2=.13, depth=1.4)   # palmito
+for v in _cap['verts']: v.co.z += HP+.7
+tm = bpy.data.meshes.new("BLV_palmeira_tronco"); pm.to_mesh(tm); pm.free(); tm.materials.append(TRONCO)
+pal.objects.link(bpy.data.objects.new("BLV_palmeira_tronco", tm))
+fv, ff = [], []; rp_ = random.Random(7)
+for k in range(13):
+    a = 2*math.pi*k/13+rp_.uniform(-.15, .15); d = Vector((math.cos(a), math.sin(a), 0)); sd = Vector((-d.y, d.x, 0))
+    L_ = rp_.uniform(3.6, 4.6); up = rp_.uniform(.6, 1.3); droop = rp_.uniform(1.6, 2.6)
+    def rq(t): return d*(L_*t)+Vector((0, 0, HP+1.3+up*math.sin(t*math.pi*.7)-droop*t*t))
+    NL = 34
+    for j in range(2, NL):
+        t = j/NL; p0 = rq(t); tg = (rq(min(1, t+.02))-p0).normalized()
+        ll = .95*math.sin(t*math.pi)**.6+.12           # folíolo mais longo no meio da folha
+        for sgn in (-1, 1):
+            dirl = (sd*sgn*.85+tg*.35+Vector((0, 0, -.55))).normalized()   # pendente, inclinado para a ponta
+            w = .045; nrm = dirl.cross(Vector((0, 0, 1))).normalized()*w
+            p1 = p0+dirl*ll; b0 = len(fv)
+            fv += [tuple(p0-nrm), tuple(p0+nrm), tuple(p1+nrm*.3), tuple(p1-nrm*.3)]; ff.append((b0, b0+1, b0+2, b0+3))
+    # ráquis
+    for j in range(NL-1):
+        t0, t1 = j/NL, (j+1)/NL; q0, q1 = rq(t0), rq(t1); n_ = Vector((0, 0, .03)); b0 = len(fv)
+        fv += [tuple(q0-sd*.03), tuple(q0+sd*.03), tuple(q1+sd*.02), tuple(q1-sd*.02)]; ff.append((b0, b0+1, b0+2, b0+3))
+fm = bpy.data.meshes.new("BLV_palmeira_folhas"); fm.from_pydata(fv, [], ff); fm.update(); fm.materials.append(FOLHA_P)
+pal.objects.link(bpy.data.objects.new("BLV_palmeira_folhas", fm))
 n = 0
 def inst(colname, p, s, nm):
     global n
