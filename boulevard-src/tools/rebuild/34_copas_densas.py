@@ -94,6 +94,7 @@ def blv_arvores(modo):
     sc = bpy.data.scenes["Boulevard"]; n = 0
     var = [c for c in (bpy.data.collections.get(f"BLV_copa_densa_{k}") for k in range(3)) if c]
     ph = [c for c in (bpy.data.collections.get(x) for x in ("island_tree_01_LOD0", "island_tree_02_LOD0", "tree_small_02_LOD0")) if c]
+    ph += [c for c in (bpy.data.collections.get(x) for x in bpy.app.driver_namespace.get('blv_arvores_extra', [])) if c]   # 40: ficus/jasmim-manga
     for o in sc.objects:
         if 'blv34_esc' not in o or o.instance_type != 'COLLECTION': continue
         r = random.Random(o.name); s0 = o['blv34_esc']
