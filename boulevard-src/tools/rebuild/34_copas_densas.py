@@ -98,7 +98,10 @@ def blv_arvores(modo):
     for o in sc.objects:
         if 'blv34_esc' not in o or o.instance_type != 'COLLECTION': continue
         r = random.Random(o.name); s0 = o['blv34_esc']
-        if modo == 'perto': o.instance_collection = r.choice(ph); o.scale = (s0, s0, s0)
+        if modo == 'perto':
+            c_ = r.choice(ph); o.instance_collection = c_
+            k_ = r.uniform(.85, 1.15) if c_.name.startswith("ASSET_") else s0   # assets do 40 já vêm em escala real
+            o.scale = (k_, k_, k_)
         else:
             o.instance_collection = r.choice(var); s = max(.75, min(1.35, s0*.48)); o.scale = (s, s, s)
         n += 1

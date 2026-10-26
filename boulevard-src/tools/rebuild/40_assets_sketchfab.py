@@ -123,7 +123,7 @@ out['carros'] = (len(POOL), n)
 # ---------- árvores e palmeiras ----------
 FICUS = importa("ficus", 9.5); FRANG = importa("frangipani", 5.2)
 P1 = importa("palm1", 10.5); P2 = importa("palm2", 11.)
-ns['blv_arvores_extra'] = [FICUS.name, FICUS.name, FRANG.name]   # o 34 sorteia daqui também no modo 'perto'
+ns['blv_arvores_extra'] = [FICUS.name, FRANG.name]   # o 34 sorteia daqui também no modo 'perto'
 pal = 0
 for o in scn.objects:
     if o.instance_type == 'COLLECTION' and o.instance_collection and o.instance_collection.name == "BLV_palmeira":
