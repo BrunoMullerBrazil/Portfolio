@@ -21,33 +21,92 @@ CROMO = pmat("CAR_roda", (.5, .5, .52), .3, 1.); FAROL = pmat("CAR_farol", (.9, 
 TINTAS = [((.8, .8, .78), .25, 0.), ((.55, .56, .58), .3, .8), ((.02, .02, .022), .2, .3), ((.25, .26, .27), .3, .7),
           ((.42, .03, .03), .25, .3), ((.05, .1, .25), .25, .5), ((.6, .6, .6), .3, .9), ((.85, .84, .8), .25, 0.)]
 PESO = [.24, .2, .18, .14, .07, .06, .07, .04]
-def bloco(bm, c, d, mat_i, bev=0.):
-    g = bmesh.ops.create_cube(bm, size=1.)['verts']
-    bmesh.ops.scale(bm, vec=d, verts=g); bmesh.ops.translate(bm, vec=c, verts=g)
-    fs = list({f for v in g for f in v.link_faces})
-    for f in fs: f.material_index = mat_i
-    if bev:
-        es = list({e for v in g for e in v.link_edges}); bmesh.ops.bevel(bm, geom=es, offset=bev, segments=2, affect='EDGES')
+# v2 (26/out): carroceria por loft de seções (perfil lateral real: capô, para-brisa, teto, vigia/porta-malas),
+# subdivisão, caixa de roda escura, pneu com flanco e roda de liga, faróis e lanternas. Mesma API (CARRO_<nome>).
+LANT = pmat("CAR_lanterna", (.35, .01, .01), .15); CAIXA = pmat("CAR_caixa_roda", (.008, .008, .008), .9)
+for nm_, col_ in (("CAR_farol", (1., .95, .85)), ("CAR_lanterna", (1., .05, .02))):
+    b_ = bpy.data.materials[nm_].node_tree.nodes['Principled BSDF']; b_.inputs['Emission Color'].default_value = (*col_, 1)
+    b_.inputs['Emission Strength'].default_value = 0.   # aceso só à noite (ns['blv_farois'])
+def lerp_pts(pts, x):
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        if x0 <= x <= x1: t = (x-x0)/(x1-x0); return y0+(y1-y0)*(.5-.5*math.cos(t*math.pi))
+    return pts[0][1] if x < pts[0][0] else pts[-1][1]
+# perfis normalizados (x de -1 traseira a +1 frente): linha de cintura (z_b) e teto (z_t); z em fração de H
+PERFIS = {
+  "sedan": dict(b=[(-1, .52), (-.92, .62), (-.6, .66), (.35, .62), (.9, .5), (1, .4)],
+                t=[(-1, .52), (-.92, .62), (-.62, .68), (-.38, 1.), (.12, 1.), (.42, .66), (1, .5)], cab=(-.62, .42)),
+  "hatch": dict(b=[(-1, .55), (-.96, .66), (-.6, .66), (.35, .62), (.9, .5), (1, .42)],
+                t=[(-1, .6), (-.95, .9), (-.8, 1.), (.1, 1.), (.42, .66), (1, .5)], cab=(-.95, .42)),
+  "suv":   dict(b=[(-1, .55), (-.97, .66), (-.6, .66), (.4, .64), (.92, .56), (1, .46)],
+                t=[(-1, .62), (-.97, .95), (-.85, 1.), (.18, 1.), (.45, .7), (1, .56)], cab=(-.97, .45))}
 def carro(nome, L, Wd, H, cab, tinta):
-    me = bpy.data.meshes.new(nome); bm = bmesh.new()
-    bloco(bm, (0, 0, .32+(H*.42)/2), (L, Wd, H*.42), 0, .12)                                  # carroceria
-    bloco(bm, (-L*.06+cab[1], 0, .32+H*.42+cab[0]/2), (L*cab[2], Wd*.86, cab[0]), 1, .1)       # cabine (vidro)
-    bloco(bm, (-L*.06+cab[1], 0, .32+H*.42+cab[0]+.03), (L*cab[2]*.82, Wd*.84, .06), 0, .02)  # teto
+    fn = nome.split("_")[0]; P = PERFIS[fn]; zb0 = .2 if fn != "suv" else .26
+    me = bpy.data.meshes.new(nome); V = []; F = []; FM = []; NS = 30; rings = []
+    for k in range(NS+1):
+        xn = -1+2*k/NS; x = xn*L/2
+        w = Wd/2*(1-.16*abs(xn)**5); zb = zb0+.06*abs(xn)**4
+        zbelt = zb0+(H-zb0)*lerp_pts(P["b"], xn); ztop = zb0+(H-zb0)*lerp_pts(P["t"], xn)
+        incab = P["cab"][0] <= xn <= P["cab"][1]
+        wr = w*.8
+        sec = [(0, zb), (w*.92, zb+.02), (w, zb+.22), (w, zbelt-.08), (w*.96, zbelt)]
+        if ztop > zbelt+.05: sec += [(wr+(w*.96-wr)*.15, zbelt+(ztop-zbelt)*.35), (wr, ztop-.04), (wr*.55, ztop), (0, ztop+.01)]
+        else: sec += [(w*.82, zbelt+.025), (w*.6, zbelt+.04), (w*.3, zbelt+.05), (0, zbelt+.055)]
+        ring = [(x, y, z) for y, z in sec]+[(x, -y, z) for y, z in reversed(sec[1:-1])]
+        dz = abs(lerp_pts(P["t"], min(1, xn+.04))-lerp_pts(P["t"], max(-1, xn-.04)))/.08   # inclinação do teto
+        rings.append((len(V), len(ring), (incab and ztop > zbelt+.05, dz > .9))); V += ring
+    nr = rings[0][1]
+    for k in range(NS):
+        a0, _, c0 = rings[k]; a1, _, c1 = rings[k+1]
+        for i in range(nr):
+            j = (i+1) % nr; F.append((a0+i, a0+j, a1+j, a1+i))
+            # vidro: faixas entre a cintura e o teto (índices 4..7 de cada lado) dentro da cabine
+            ii = i if i < 8 else nr-1-i
+            lat = c0[0] and c1[0] and 4 <= ii <= 5                      # vidros laterais
+            frt = c0[0] and c1[0] and 6 <= ii <= 7 and (c0[1] or c1[1])  # para-brisa e vigia (trecho inclinado do teto)
+            FM.append(1 if (lat or frt) else 0)
+    # tampas
+    for a, n_, _c in (rings[0], rings[-1]):
+        F.append(tuple(range(a, a+n_)) if a == 0 else tuple(reversed(range(a, a+n_)))); FM.append(0)
+    bm = bmesh.new()
+    me_tmp = bpy.data.meshes.new("tmp"); me_tmp.from_pydata(V, [], F); me_tmp.update()
+    for p_, m_ in zip(me_tmp.polygons, FM): p_.material_index = m_
+    bm.from_mesh(me_tmp); bpy.data.meshes.remove(me_tmp)
+    R = .33 if fn != "suv" else .37; ox = L/2-(.88 if fn != "hatch" else .78)
     for sx in (-1, 1):
         for sy in (-1, 1):
-            bm2 = bmesh.ops.create_cone(bm, cap_ends=True, segments=16, radius1=.33, radius2=.33, depth=.22)['verts']
-            bmesh.ops.rotate(bm, verts=bm2, cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi/2, 3, 'X'))
-            bmesh.ops.translate(bm, vec=(sx*L*.33, sy*(Wd/2-.1), .33), verts=bm2)
-            for f in {f for v in bm2 for f in v.link_faces}: f.material_index = 2
-    bloco(bm, (L/2-.02, 0, .32+H*.3), (.04, Wd*.8, .12), 3)
+            cx = sx*ox+(.06 if sx < 0 else 0); cy = sy*(Wd/2-.13)
+            # caixa de roda (cilindro escuro um pouco maior, encostado na carroceria)
+            g = bmesh.ops.create_cone(bm, cap_ends=True, segments=20, radius1=R+.05, radius2=R+.05, depth=.3)['verts']
+            bmesh.ops.rotate(bm, verts=g, cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi/2, 3, 'X')); bmesh.ops.translate(bm, vec=(cx, cy*.97, R+.02), verts=g)
+            for f in {f for v in g for f in v.link_faces}: f.material_index = 5
+            # pneu
+            g = bmesh.ops.create_cone(bm, cap_ends=True, segments=24, radius1=R, radius2=R, depth=.21)['verts']
+            bmesh.ops.rotate(bm, verts=g, cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi/2, 3, 'X')); bmesh.ops.translate(bm, vec=(cx, cy, R), verts=g)
+            for f in {f for v in g for f in v.link_faces}: f.material_index = 2
+            # roda de liga (disco metálico saliente)
+            g = bmesh.ops.create_cone(bm, cap_ends=True, segments=24, radius1=R*.66, radius2=R*.6, depth=.03)['verts']
+            bmesh.ops.rotate(bm, verts=g, cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi/2, 3, 'X')); bmesh.ops.translate(bm, vec=(cx, cy+sy*.106, R), verts=g)
+            for f in {f for v in g for f in v.link_faces}: f.material_index = 3
+    # faróis e lanternas
+    for sy in (-1, 1):
+        for xs, mi, zf in ((1, 4, .62), (-1, 6, .7)):
+            zz = zb0+(H-zb0)*lerp_pts(P["b"], xs*.97)-.1
+            g = bmesh.ops.create_cube(bm, size=1.)['verts']
+            bmesh.ops.scale(bm, vec=(.08, .42, .1), verts=g); bmesh.ops.translate(bm, vec=(xs*(L/2-.06), sy*(Wd/2-.32), zz), verts=g)
+            for f in {f for v in g for f in v.link_faces}: f.material_index = mi
     bm.to_mesh(me); bm.free()
-    for p in me.polygons: p.use_smooth = True
-    for m_ in (pmat(f"CAR_tinta_{tinta}", *TINTAS[tinta], coat=1.), VID, PNEU, FAROL): me.materials.append(m_)
+    for p_ in me.polygons: p_.use_smooth = True
+    for m_ in (pmat(f"CAR_tinta_{tinta}", *TINTAS[tinta], coat=1.), VID, PNEU, CROMO, FAROL, CAIXA, LANT): me.materials.append(m_)
     o = bpy.data.objects.new(nome, me); LIB.objects.link(o)
+    sd = o.modifiers.new("sub", 'SUBSURF'); sd.levels = 1; sd.render_levels = 2
     col = bpy.data.collections.get(f"CARRO_{nome}") or bpy.data.collections.new(f"CARRO_{nome}")
     for x in list(col.objects): col.objects.unlink(x)
     col.objects.link(o); return col
-FORMAS = {"sedan": (4.45, 1.78, 1.05, (.5, .05, .5)), "hatch": (3.95, 1.72, 1.0, (.55, -.1, .58)), "suv": (4.5, 1.85, 1.3, (.55, -.05, .62))}
+def blv_farois(on=True):
+    for nm_, st in (("CAR_farol", 6.), ("CAR_lanterna", 4.)):
+        bpy.data.materials[nm_].node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value = st if on else 0.
+bpy.app.driver_namespace['blv_farois'] = blv_farois
+FORMAS = {"sedan": (4.5, 1.8, 1.45, None), "hatch": (4.0, 1.74, 1.48, None), "suv": (4.55, 1.86, 1.68, None)}
 MODELOS = []
 for fn, (L, Wd, H, cab) in FORMAS.items():
     for t in range(len(TINTAS)): MODELOS.append((carro(f"{fn}_{t}", L, Wd, H, cab, t), t))
