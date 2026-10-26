@@ -182,7 +182,10 @@ for g in ('SHELL', 'MOB'):
     activate([o], o)
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.0025, area_weight=0.0, correct_aspect=True, scale_to_bounds=False)
+    # malhas vindas de importação têm cada triângulo solto: sem soldar, o smart project vira poeira de ilhas de 1 px
+    bpy.ops.mesh.remove_doubles(threshold=0.0005)
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.uv.smart_project(angle_limit=math.radians(66), island_margin=0.001, area_weight=0.0, correct_aspect=True, scale_to_bounds=True)
     bpy.ops.object.mode_set(mode='OBJECT')
     prog('uv_lightmap', grupo=g)
 
