@@ -16,6 +16,10 @@ argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 OUT = argv[0] if argv else '/tmp/b112_web'
 SAMPLES = int(argv[1]) if len(argv) > 1 else 256
 LM_RES = {'SHELL': 4096, 'MOB': 4096}
+ENV_POS = (2.3, 1.4, 1.35)          # centro da sala: panorama para os reflexos no navegador
+# cúpulas, LEDs e embutidos: acesos só à noite (no navegador o emissivo liga no botão Noite)
+EMISSIVOS = ('DEC_globo', 'DEC_cupula_mesa', 'ABAJUR_linho', 'col_ffe8c0', 'DEC2_papel_arroz', 'LED_3200k', 'LUZ_embutido',
+             'col_fff0d0', 'BWC_led', '1920s_Ceiling_Pendant_Lamp_Type_A_Ornate_01')
 os.makedirs(OUT, exist_ok=True)
 T0 = time.time()
 PROG = {'etapa': 'inicio', 'feito': [], 'erro': None}
@@ -31,10 +35,10 @@ def prog(etapa, **kw):
 
 VEG_KEYS = ('plant', 'leaves', 'leaf', 'calathea', 'pebble', 'tree', 'planta', 'folha', 'fern', 'monstera')
 SHELL_COLLS = ('SAC_modelo', 'PERSIANAS', 'BWC_reforma', 'LUZ_interna')
-MAX_FACES = 15000
+MAX_FACES = 8000          # só para objetos soltos (decoração do Sketchfab); B112_* já vêm otimizados
 # períodos: o arquivo está salvo na noite (sol 0, luzes da casa acesas, céu 0,35). Dia = sol ligado, casa apagada.
-SUN_DIA = 4.0
-CEU_DIA = 1.0
+SUN_DIA = 4.5
+CEU_DIA = 0.6
 
 try:
     sc = bpy.data.scenes['Sacada']
@@ -101,7 +105,13 @@ for inst in dg.object_instances:
     n.matrix_world = inst.matrix_world.copy()
     web.objects.link(n)
     nm = orig.name.lower()
-    grp = 'VEG' if any(k in nm for k in VEG_KEYS) else ('SHELL' if top_of.get(owner.name, '') in SHELL_COLLS else 'MOB')
+    if orig.name.startswith('B112_VEG') or any(k in nm for k in VEG_KEYS):
+        grp = 'VEG'
+    elif orig.name.startswith('B112_SHELL') or top_of.get(owner.name, '') in SHELL_COLLS:
+        grp = 'SHELL'
+    else:
+        grp = 'MOB'
+    n['b112'] = orig.name.startswith('B112_')
     n['grp'] = grp
     made.append(n)
 prog('convertido', objetos=len(made))
@@ -131,7 +141,7 @@ prog('simplificando')
 dec = []
 for o in made:
     f = len(o.data.polygons)
-    if f > MAX_FACES:
+    if f > MAX_FACES and not o.get('b112'):
         r = max(0.06, MAX_FACES / f)
         m = o.modifiers.new('dec', 'DECIMATE')
         m.ratio = r
@@ -227,26 +237,65 @@ def bg_nodes():
     return [n for n in w.node_tree.nodes if n.type == 'BACKGROUND'] if w and w.node_tree else []
 
 
-saved = {
-    'lights': {o.name: (o.hide_render, o.data.energy) for o in sc.objects if o.type == 'LIGHT'},
-    'bg': [n.inputs['Strength'].default_value for n in bg_nodes()],
-}
+def emis_mats():
+    out = []
+    for m in bpy.data.materials:
+        if m.users and any(m.name.startswith(k) for k in EMISSIVOS) and m.node_tree:
+            b = next((x for x in m.node_tree.nodes if x.type == 'BSDF_PRINCIPLED'), None)
+            if b:
+                out.append((m, b))
+    return out
+
+
+EMIS = emis_mats()
+for m, b in EMIS:   # cor quente padrão quando o material não tinha emissão
+    c = b.inputs['Emission Color'].default_value
+    if sum(c[:3]) < .05 or b.inputs['Emission Strength'].default_value == 0:
+        b.inputs['Emission Color'].default_value = (1, .78, .5, 1)
+EMIS_COR = {m.name: list(b.inputs['Emission Color'].default_value[:3]) for m, b in EMIS}
 
 
 def set_period(p):
-    """noite = como o arquivo foi salvo; dia = sol SUN_DIA, céu CEU_DIA, luzes da casa apagadas (portais das janelas ficam)."""
+    """dia = sol + céu, luzes da casa (coleção LUZ_noite) apagadas, cúpulas sem emissão; noite = o inverso, céu quase apagado."""
     for o in sc.objects:
         if o.type != 'LIGHT':
             continue
-        hid, en = saved['lights'][o.name]
-        o.hide_render, o.data.energy = hid, en
-        if p == 'dia':
-            if o.data.type == 'SUN':
-                o.hide_render, o.data.energy = False, SUN_DIA
-            elif 'portal' not in o.name.lower():
-                o.hide_render = True
-    for n, s0 in zip(bg_nodes(), saved['bg']):
-        n.inputs['Strength'].default_value = s0 if p == 'noite' else CEU_DIA
+        if o.data.type == 'SUN':
+            o.hide_render = (p != 'dia')
+            o.data.energy = SUN_DIA
+        else:
+            o.hide_render = (p == 'dia')
+    for n in bg_nodes():
+        n.inputs['Strength'].default_value = CEU_DIA if p == 'dia' else .015
+    for m, b in EMIS:
+        b.inputs['Emission Strength'].default_value = 0.0 if p == 'dia' else (6.0 if 'embutido' in m.name else 2.5)
+
+
+def panorama(p):
+    """equirretangular do centro da sala: vira o envMap (reflexos) no navegador."""
+    cd = bpy.data.cameras.new('ENV')
+    cd.type = 'PANO'
+    try:
+        cd.panorama_type = 'EQUIRECTANGULAR'
+    except Exception:
+        cd.cycles.panorama_type = 'EQUIRECTANGULAR'
+    c = bpy.data.objects.new('ENV', cd)
+    sc.collection.objects.link(c)
+    c.location = ENV_POS
+    c.rotation_euler = (math.pi / 2, 0, -math.pi / 2)
+    sc.camera = c
+    r = sc.render
+    r.resolution_x, r.resolution_y, r.resolution_percentage = 1024, 512, 100
+    sc.cycles.samples = 96
+    sc.cycles.use_denoising = True
+    r.image_settings.file_format = 'JPEG'
+    r.image_settings.quality = 88
+    r.filepath = os.path.join(OUT, f'env_{p}.jpg')
+    bpy.ops.render.render(write_still=True)
+    sc.cycles.use_denoising = False
+    man.setdefault('env', {})[p] = f'env_{p}.jpg'
+    json.dump(man, open(os.path.join(OUT, 'manifest.json'), 'w'), ensure_ascii=False, indent=1)
+    bpy.data.objects.remove(c)
 
 
 def bake(g, p):
@@ -291,14 +340,17 @@ def bake(g, p):
     PROG['feito'].append(f'{g}_{p}')
 
 
+man['emissivos'] = EMIS_COR
 try:
-    for p in ('noite', 'dia'):
+    for p in ('dia', 'noite'):
         set_period(p)
         for g in ('SHELL', 'MOB'):
             if g in joined:
                 prog('bake', atual=f'{g}_{p}')
                 bake(g, p)
-    set_period('noite')
+        prog('panorama', atual=p)
+        panorama(p)
+    set_period('dia')
     prog('fim')
 except Exception as e:
     import traceback
