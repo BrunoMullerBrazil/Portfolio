@@ -123,11 +123,13 @@ def _proximo(*a):
         r.engine = 'BLENDER_EEVEE' if 'BLENDER_EEVEE' in [e.identifier for e in bpy.types.RenderSettings.bl_rna.properties['engine'].enum_items] else 'BLENDER_EEVEE_NEXT'
         r.resolution_x, r.resolution_y, r.resolution_percentage = 1920, 1080, 50
         scn.frame_step = 2; r.fps = 12
+        if hasattr(r.image_settings, 'media_type'): r.image_settings.media_type = 'VIDEO'   # Blender 5
         r.image_settings.file_format = 'FFMPEG'; r.ffmpeg.format = 'MPEG4'; r.ffmpeg.codec = 'H264'; r.ffmpeg.constant_rate_factor = 'MEDIUM'
         r.filepath = os.path.join(OUT, f"animatic_{k}_")
     else:
         r.engine = 'CYCLES'; scn.cycles.samples = 64; scn.cycles.use_denoising = True
         r.resolution_x, r.resolution_y, r.resolution_percentage = 1920, 1080, 100; scn.frame_step = 1
+        if hasattr(r.image_settings, 'media_type'): r.image_settings.media_type = 'IMAGE'
         r.image_settings.file_format = 'PNG'; r.image_settings.color_mode = 'RGB'
         d = os.path.join(OUT, f"final_{k}"); os.makedirs(d, exist_ok=True); r.filepath = os.path.join(d, "f_")
     r.use_stamp = False; r.use_file_extension = True
