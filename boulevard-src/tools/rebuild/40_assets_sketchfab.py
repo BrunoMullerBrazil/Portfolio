@@ -124,10 +124,31 @@ out['carros'] = (len(POOL), n)
 FICUS = importa("ficus", 9.5); FRANG = importa("frangipani", 5.2)
 P1 = importa("palm1", 10.5); P2 = importa("palm2", 11.)
 ns['blv_arvores_extra'] = [FICUS.name, FRANG.name]   # o 34 sorteia daqui também no modo 'perto'
+# palm2 é um pacote de ~20 palmeiras espalhadas: separa as 3 mais altas, cada uma centrada na base do estipe
+import re
+grp = {}
+for o in P2.objects:
+    m_ = re.search(r"P2_(\d+)_", o.name)
+    if m_ and o.type == 'MESH': grp.setdefault(m_.group(1), []).append(o)
+info = []
+for gid, objs in grp.items():
+    tr = [o for o in objs if 'Trunk' in o.name]
+    if not tr: continue
+    Pt = [wm(tr[0])@Vector(c) for c in tr[0].bound_box]
+    info.append((max(p.z for p in Pt), gid, Vector((sum(p.x for p in Pt)/8, sum(p.y for p in Pt)/8, min(p.z for p in Pt))), objs))
+SOLO = [P1]
+for h, gid, base, objs in sorted(info, key=lambda t: -t[0])[:3]:
+    nm = f"ASSET_palm2_{gid}"; col = bpy.data.collections.get(nm) or bpy.data.collections.new(nm); col.use_fake_user = True
+    for o in list(col.objects): bpy.data.objects.remove(o, do_unlink=True)
+    T = Matrix.Scale(10.5/max(h-base.z, 1e-3), 4)@Matrix.Translation(-base)
+    for o in objs: c = o.copy(); c.parent = None; c.matrix_basis = T@wm(o); col.objects.link(c)
+    SOLO.append(col)
 pal = 0
 for o in scn.objects:
-    if o.instance_type == 'COLLECTION' and o.instance_collection and o.instance_collection.name == "BLV_palmeira":
-        r = random.Random(o.name); o.instance_collection = r.choice((P1, P2)); s = r.uniform(.9, 1.1); o.scale = (s, s, s); pal += 1
+    ic = o.instance_collection if o.instance_type == 'COLLECTION' else None
+    if ic and (ic.name == "BLV_palmeira" or ic.name.startswith("ASSET_palm")):
+        r = random.Random(o.name); o.instance_collection = r.choice(SOLO); s = r.uniform(.9, 1.1); o.scale = (s, s, s)
+        o.rotation_euler[2] = r.random()*6.28; pal += 1
 out['palmeiras'] = pal
 # ---------- pessoas e motos (coleções prontas; posicionadas por foto em 36/38) ----------
 MEI = importa("mei", 1.66); HOM = importa("homem", 1.80); PCX = importa("pcx", 1.92, 'comprimento', frente=True)
