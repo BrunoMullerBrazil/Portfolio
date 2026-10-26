@@ -39,9 +39,14 @@ def tira_ilhas(o, dentro):
         if dentro(c): kill += isl
     if kill: bmesh.ops.delete(bm, geom=list({id(f): f for f in kill}.values()), context='FACES'); bm.to_mesh(o.data)
     bm.free(); return len(kill)
+NORTE = [Vector(p) for p in ((-75, -50), (0, -55), (150, -67), (250, -75), (330, -94))]
+def na_faixa(c):   # v3: muros/janelas que sobravam entre a borda norte da praça e a calçada da avenida
+    for a_, b_ in zip(NORTE, NORTE[1:]):
+        if a_.x <= c.x <= b_.x: yn = a_.y+(b_.y-a_.y)*(c.x-a_.x)/(b_.x-a_.x); return yn-1 <= c.y <= yn+9
+    return False
 rem = 0
 for o in list(scn.objects):
-    if o.type == 'MESH' and o.name.startswith(("BLV_casas_", "BLV_galpoes")): rem += tira_ilhas(o, inpoly)
+    if o.type == 'MESH' and o.name.startswith(("BLV_casas_", "BLV_galpoes")): rem += tira_ilhas(o, lambda c: inpoly(c) or na_faixa(c))
 for o in list(scn.objects):
     if o.name.startswith("BLV_arv") and not o.name.startswith("BLV_arv_praca") and inpoly(o.location.xy):
         bpy.data.objects.remove(o, do_unlink=True)
