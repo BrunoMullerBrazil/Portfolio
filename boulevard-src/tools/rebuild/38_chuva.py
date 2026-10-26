@@ -11,7 +11,7 @@ import bpy, math, random, os
 from mathutils import Vector
 scn = bpy.data.scenes["Boulevard"]; ns = bpy.app.driver_namespace; M = bpy.data.materials; out = {}
 MOLHA = ["BLV_Asfalto", "BLV_Calcada", "BLV_Faixa", "BLV_Praca_Piso", "BLV_Praca_Borda", "BLV_Concreto_Lazer",
-         "BLV_Casa_Laje", "BLV_Telha_Metalica", "BLV_Poste_Concreto"] + [f"BLV_Casa_Telhado_{i}" for i in range(6)]
+         "BLV_Casa_Laje", "BLV_Telha_Metalica", "BLV_Poste_Concreto", "BLV_Pintura_Branca"] + [f"BLV_Casa_Telhado_{i}" for i in range(6)]
 MOLHA += [m.name for m in M if m.name.startswith(("BLV_Estac", "BLV_Vaga", "BLV_Piso", "BLV_Pav"))]
 def fonte(nt, sock, kind):
     """devolve um socket com o valor atual de sock (ligado ou constante)"""
