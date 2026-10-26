@@ -80,3 +80,11 @@ Guia 3D **não oficial**, feito por morador, do condomínio Scire Boulevard (Ped
 - Português, direto. Fonte sem serifa (não gostou da serifada). Hierarquia tipográfica clara.
 - Visual cinematográfico, realista, elegante (referência: landing "Aurora Residence").
 - Testar no celular, porque a maioria abre pelo WhatsApp.
+
+### B112 3D interativo v2 (branch `boulevard-b112-glb`, ainda fora da main)
+- Fonte: `~/Movies/Boulevard_3D/b112_interior.blend` (cena Sacada: B112_SHELL/MOB/VEG + coleções `DEC2_*` com a decoração nova e `LUZ_noite` com as luzes de noite).
+- Materiais que tinham perdido a textura (nogueira, cerejeira, teca, carvalho, tampos, sisal, palhinha, zebra) agora têm madeira/tecido do Poly Haven com UV em caixa no tamanho real; tapete da sala virou calçadão de Copacabana; azulejo português atrás da pia.
+- Decoração nova (Sketchfab CC BY, créditos na página): máscara Gèlèdé e cabeça de Ifé na prateleira da sala, máquina de escrever no aparador, relógio antigo no quarto, pendente anos 1920 no hall, luminária de papel no quarto.
+- Exportação: `boulevard-src/blender/b112_web.py` (GLB + lightmaps dia/noite + panoramas de reflexo `env_*.jpg`), depois `glb_texturas.py` para baixar as texturas. Lightmaps passam por filtro bilateral antes do webp (ruído do bake de noite).
+- Página: lightmaps sem dupla luz (o ambiente só entra como reflexo), material duplicado por grupo (SHELL e MOB não podem dividir lightmap), cúpulas/LEDs acendem no botão Noite.
+- 360°: `b112_panos.py` renderiza `pano_<cômodo>_<dia|noite>.jpg` + `panos.json`; com o `panos.json` presente, os botões de cômodo abrem o panorama (versão `-m` 2048 no celular). Sem ele, a página cai nas câmeras do modelo.

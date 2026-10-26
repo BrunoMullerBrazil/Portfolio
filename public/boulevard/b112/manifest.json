@@ -1,0 +1,150 @@
+{
+ "cams": {
+  "CAM_banho": {
+   "lens": 15.4074068069458,
+   "sensor": 36.0
+  },
+  "CAM_cozinha": {
+   "lens": 23.703704833984375,
+   "sensor": 36.0
+  },
+  "CAM_dorm1": {
+   "lens": 18.962961196899414,
+   "sensor": 36.0
+  },
+  "CAM_dorm2": {
+   "lens": 18.962961196899414,
+   "sensor": 36.0
+  },
+  "CAM_entrada": {
+   "lens": 16.592592239379883,
+   "sensor": 36.0
+  },
+  "CAM_escritorio2": {
+   "lens": 21.33333396911621,
+   "sensor": 36.0
+  },
+  "CAM_escritorio_mesa": {
+   "lens": 20.148147583007812,
+   "sensor": 36.0
+  },
+  "CAM_hall": {
+   "lens": 14.222222328186035,
+   "sensor": 36.0
+  },
+  "CAM_jantar": {
+   "lens": 18.962961196899414,
+   "sensor": 36.0
+  },
+  "CAM_nicho_sofa": {
+   "lens": 23.703704833984375,
+   "sensor": 36.0
+  },
+  "CAM_sofa": {
+   "lens": 21.33333396911621,
+   "sensor": 36.0
+  },
+  "SAC_Cam": {
+   "lens": 21.33333396911621,
+   "sensor": 36.0
+  }
+ },
+ "faces": {
+  "MOB": 259597,
+  "SHELL": 43340,
+  "VEG": 107523
+ },
+ "lm": {
+  "SHELL_dia": {
+   "arquivo": "lm_SHELL_dia.webp",
+   "k": 0.2829492590154026,
+   "web": "lm_SHELL_dia.webp",
+   "web_m": "lm_SHELL_dia-m.webp"
+  },
+  "MOB_dia": {
+   "arquivo": "lm_MOB_dia.webp",
+   "k": 0.19677536975043336,
+   "web": "lm_MOB_dia.webp",
+   "web_m": "lm_MOB_dia-m.webp"
+  },
+  "SHELL_noite": {
+   "arquivo": "lm_SHELL_noite.webp",
+   "k": 0.39587881700652927,
+   "web": "lm_SHELL_noite.webp",
+   "web_m": "lm_SHELL_noite-m.webp"
+  },
+  "MOB_noite": {
+   "arquivo": "lm_MOB_noite.webp",
+   "k": 0.06784186001974615,
+   "web": "lm_MOB_noite.webp",
+   "web_m": "lm_MOB_noite-m.webp"
+  }
+ },
+ "samples": 512,
+ "emissivos": {
+  "1920s_Ceiling_Pendant_Lamp_Type_A_Ornate_01": [
+   1.0,
+   0.7799999713897705,
+   0.5
+  ],
+  "ABAJUR_linho": [
+   1.0,
+   0.7799999713897705,
+   0.5
+  ],
+  "BWC_led": [
+   1.0,
+   0.75,
+   0.5
+  ],
+  "col_ffe8c0": [
+   1.0,
+   0.7200000286102295,
+   0.44999998807907104
+  ],
+  "col_fff0d0": [
+   1.0,
+   0.7200000286102295,
+   0.44999998807907104
+  ],
+  "col_fff0d0.001": [
+   1.0,
+   0.7200000286102295,
+   0.44999998807907104
+  ],
+  "col_fff0d0.002": [
+   1.0,
+   0.7200000286102295,
+   0.44999998807907104
+  ],
+  "DEC2_papel_arroz": [
+   1.0,
+   0.7799999713897705,
+   0.5
+  ],
+  "DEC_cupula_mesa": [
+   1.0,
+   0.800000011920929,
+   0.6000000238418579
+  ],
+  "DEC_globo": [
+   1.0,
+   0.7799999713897705,
+   0.550000011920929
+  ],
+  "LED_3200k.001": [
+   1.0,
+   0.7799999713897705,
+   0.5
+  ],
+  "LUZ_embutido": [
+   1.0,
+   0.7799999713897705,
+   0.5
+  ]
+ },
+ "env": {
+  "dia": "env_dia.jpg",
+  "noite": "env_noite.jpg"
+ }
+}

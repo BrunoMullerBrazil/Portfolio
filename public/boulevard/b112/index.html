@@ -37,6 +37,14 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
 .note[hidden]{display:none}
 .note b{display:block;font-family:var(--f-display);font-size:16px;margin-bottom:2px}
 .load{position:fixed;inset:0;display:grid;place-items:center;z-index:4;background:var(--bg);color:var(--muted);font-size:14px;transition:opacity .6s}
+.pnote{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(118px + env(safe-area-inset-bottom,0px));z-index:3;font:500 12px var(--f-body);color:#fff;background:rgba(20,18,15,.5);backdrop-filter:blur(6px);padding:6px 12px;border-radius:999px;white-space:nowrap;pointer-events:none}
+.pnote[hidden]{display:none}
+.busy{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;font:600 13px var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:9px 16px;box-shadow:0 8px 28px rgba(0,0,0,.16)}
+.row button:disabled{cursor:default}
+.lnk{border:0;background:none;padding:0;font:inherit;color:inherit;font-weight:600;text-decoration:underline;cursor:pointer;pointer-events:auto}
+.cred{max-width:min(380px,calc(100% - 32px));max-height:55vh;overflow:auto;pointer-events:auto}
+.cred ul{margin:6px 0;padding-left:18px}.cred li{margin:3px 0}.cred a{color:inherit}
+.top p{pointer-events:auto}
 .err{position:fixed;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}
 
 /* renders fotorrealistas (Blender): atalho por cômodo + visualizador em tela cheia */
@@ -67,7 +75,17 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
 
 <div id="stage" aria-label="Visualização 3D realista do apartamento"></div>
 <div class="load" id="load">Carregando o apê…</div>
-<div class="top"><div><h1>Apto <em>B112</em> · decorado</h1><p>O 112 do Bloco B, modelado no Blender com a decoração planejada. Arraste para olhar em volta, pince ou role para aproximar. Em cada cômodo, veja o render. <a href="../#B112" style="color:inherit;font-weight:600">← Voltar ao prédio</a></p></div><button type="button" class="fotos" id="fotosBtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg><span>Fotos do decorado</span></button></div>
+<div class="top"><div><h1>Apto <em>B112</em> · decorado</h1><p>O 112 do Bloco B, modelado no Blender com a decoração planejada. Arraste para olhar em volta, pince ou role para aproximar. Em cada cômodo, veja o render. <a href="../#B112" style="color:inherit;font-weight:600">← Voltar ao prédio</a> · <button type="button" id="credBtn" class="lnk" aria-expanded="false" aria-controls="cred">Créditos 3D</button></p></div><button type="button" class="fotos" id="fotosBtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg><span>Fotos do decorado</span></button></div>
+<div class="pnote" id="panoNote" hidden>Vista 360° renderizada no Cycles · arraste para olhar em volta</div>
+<div class="note cred" id="cred" hidden><b>Créditos dos modelos 3D</b>Peças de decoração e luminárias baixadas do Sketchfab, licença CC BY 4.0:
+<ul>
+<li><a href="https://sketchfab.com/3d-models/76b4d1a0ffa6466f905c5013084b5e55" target="_blank" rel="noopener">Yorùbá People Wooden Mask (Gelede)</a> — Broward County Library Special Collections</li>
+<li><a href="https://sketchfab.com/3d-models/57f4de3eff7a465fba8fa883b001a46a" target="_blank" rel="noopener">Bronze Head from Ife</a> — yugengen</li>
+<li><a href="https://sketchfab.com/3d-models/174a3fc826414bfc9693d9b00f43fe57" target="_blank" rel="noopener">Antique Wall Clock</a> — 3DGunsmith</li>
+<li><a href="https://sketchfab.com/3d-models/f2027b2b27df4ac8a57648d165688c4a" target="_blank" rel="noopener">HW #5 Details | typewriter</a> — Tatyana Volkova</li>
+<li><a href="https://sketchfab.com/3d-models/d748b52457ba48cfabbd86e8dd810aed" target="_blank" rel="noopener">1920s Ceiling Pendant Lamps Type A</a> — Mad_Lobster_Workshop</li>
+<li><a href="https://sketchfab.com/3d-models/59201bfda53440bbb8f4fce1e06fd531" target="_blank" rel="noopener">Rice Paper Lamp</a> — ceciliebn</li>
+</ul>Texturas de madeira e tecido: Poly Haven (CC0). Calçadão de Copacabana e azulejo: desenhados para este modelo.</div>
 <div class="dock">
   <div class="row" role="group" aria-label="Vistas" id="views">
     <button type="button" data-view="geral" aria-pressed="true">Geral</button>
@@ -123,6 +141,21 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
   var CAMS={sala:['CAM_sofa','SAC_Cam'],jantar:['CAM_jantar'],cozinha:['CAM_cozinha'],entrada:['CAM_entrada','CAM_hall'],quarto:['CAM_dorm1'],escritorio:['CAM_escritorio2','CAM_escritorio_mesa','CAM_dorm2'],banheiro:['CAM_banho']};
 
   function setProg(t){ if(loadEl) loadEl.textContent=t; }
+  // materiais: com lightmap, o ambiente só entra como reflexo (a luz difusa já vem gravada do Cycles)
+  var matGrp={}, matOwner={}, allMats=[], glassRe=/vidro|_t$|glass|acrilico/i;
+  function prepMat(m,grp){ if(allMats.indexOf(m)>=0) return; allMats.push(m);
+    m.envMapIntensity=grp==='VEG'?1.0:1.0;
+    if(glassRe.test(m.name)){ m.transparent=true; m.opacity=Math.min(m.opacity,.18); m.depthWrite=false; m.roughness=0.03; m.metalness=0; if('transmission' in m) m.transmission=0; }
+    m.onBeforeCompile=function(sh){ sh.fragmentShader=sh.fragmentShader.replace('#include <lights_fragment_maps>',
+      THREE.ShaderChunk.lights_fragment_maps.replace('iblIrradiance += getLightProbeIndirectIrradiance( geometry, maxMipLevel );','#ifndef USE_LIGHTMAP\n iblIrradiance += getLightProbeIndirectIrradiance( geometry, maxMipLevel );\n #endif')); };
+    m.needsUpdate=true; }
+  // cúpulas, LEDs e embutidos acendem à noite (lista e cor vêm do manifest)
+  function applyEmissive(){ var E=(man&&man.emissivos)||{}; allMats.forEach(function(m){ var k=Object.keys(E).filter(function(n){ return m.name.indexOf(n)===0; })[0]; if(!k||!m.emissive) return;
+      if(night){ m.emissive.setRGB(E[k][0],E[k][1],E[k][2]); m.emissiveIntensity=/embutido/i.test(m.name)?3:/papel_arroz/i.test(m.name)?.42:/ABAJUR|cupula|globo/i.test(m.name)?.8:1.2; } else { m.emissive.setRGB(0,0,0); } }); }
+  // panorama do Cycles no centro da sala: reflexos realistas (dia e noite)
+  var envLM={};
+  function loadEnv(p,cb){ if(envLM[p]||!man||!man.env||!man.env[p]){ cb(); return; }
+    texL.load(man.env[p],function(t){ t.mapping=THREE.EquirectangularReflectionMapping; t.encoding=THREE.sRGBEncoding; envLM[p]=pm.fromEquirectangular(t).texture; t.dispose(); cb(); },undefined,function(){ cb(); }); }
   var draco=new THREE.DRACOLoader(); draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/');
   var gl=new THREE.GLTFLoader(); gl.setDRACOLoader(draco);
   gl.load('b112.glb',function(g){
@@ -131,8 +164,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
       if(o.isCamera){ cams[o.name]=o; if(o.parent&&o.parent.name&&!cams[o.parent.name]) cams[o.parent.name]=o; }
       if(o.isMesh){ var n=(o.name+' '+(o.parent?o.parent.name:'')); var grp=/SHELL/.test(n)?'SHELL':/MOB/.test(n)?'MOB':/VEG/.test(n)?'VEG':'MOB';
         (groups[grp]=groups[grp]||[]).push(o);
-        var ms=Array.isArray(o.material)?o.material:[o.material];
-        ms.forEach(function(m){ if(!m) return; if(m.map) m.map.anisotropy=MOBILE?2:8; m.envMapIntensity=grp==='VEG'?1.1:.35; if(grp!=='VEG'&&lmMats[grp].indexOf(m)<0) lmMats[grp].push(m); });
+        // o mesmo material pode estar no SHELL e no MOB: cada grupo precisa da sua cópia (lightmaps diferentes)
+        var arr=Array.isArray(o.material), ms=(arr?o.material:[o.material]).map(function(m){ if(!m) return m; var k=m.uuid+'|'+grp;
+          if(!matGrp[k]){ var owner=matOwner[m.uuid]; matGrp[k]=(owner&&owner!==grp)?m.clone():m; matOwner[m.uuid]=matOwner[m.uuid]||grp; } return matGrp[k]; });
+        o.material=arr?ms:ms[0];
+        ms.forEach(function(m){ if(!m) return; if(m.map) m.map.anisotropy=MOBILE?2:8; prepMat(m,grp); if(grp!=='VEG'&&lmMats[grp].indexOf(m)<0) lmMats[grp].push(m); });
         if(grp==='SHELL') box.expandByObject(o); }
     });
     floorY=box.min.y; cutTop=box.min.y+2.42;
@@ -142,7 +178,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
 
   // lightmaps (luz do Cycles): dia primeiro; noite sob demanda
   var man=null, texL=new THREE.TextureLoader();
-  function loadLM(){ fetch('manifest.json').then(function(r){return r.ok?r.json():null;}).then(function(m){ if(!m||!m.lm) return; man=m; getPeriod('dia',function(){ applyPeriod(); }); }).catch(function(){}); }
+  function loadLM(){ fetch('manifest.json').then(function(r){return r.ok?r.json():null;}).then(function(m){ if(!m||!m.lm) return; man=m; getPeriod('dia',function(){ loadEnv('dia',applyPeriod); }); }).catch(function(){}); }
   function getPeriod(p,cb){ var need=['SHELL','MOB'].filter(function(g){ return man.lm[g+'_'+p]&&!LM[g+'_'+p]; }), left=need.length; if(!left){ cb(); return; }
     need.forEach(function(g){ var e=man.lm[g+'_'+p]; texL.load((MOBILE&&e.web_m)||e.web||e.arquivo,function(t){ t.flipY=false; t.encoding=THREE.sRGBEncoding; t.anisotropy=4; LM[g+'_'+p]={t:t,i:1/e.k}; if(--left===0) cb(); },undefined,function(){ if(--left===0) cb(); }); }); }
   function applyPeriod(){ var p=night?'noite':'dia', any=false;
@@ -150,7 +186,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
     haveLM=any;
     // com lightmap a luz já está gravada: luzes de tempo real só para as plantas e reflexos
     hemi.intensity=haveLM?(night?.05:.18):(night?.15:.9); sun.intensity=haveLM?0:(night?0:1.6);
-    scene.environment=night?envNight:envDay; scene.background.copy(night?nightBg:dayBg);
+    scene.environment=(night?envLM.noite:envLM.dia)||(night?envNight:envDay); scene.background.copy(night?nightBg:dayBg); applyEmissive();
     renderer.toneMappingExposure=night?(haveLM?1.9:1.2):1.6; }
 
   // vistas: "geral" e "de cima" por fora com o teto cortado; cômodos pelas câmeras do Blender
@@ -158,7 +194,10 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
   function camPose(name){ var list=CAMS[name]||[]; for(var i=0;i<list.length;i++){ var c=cams[list[i]]; if(c){ var p=new THREE.Vector3(), q=new THREE.Quaternion(); c.getWorldPosition(p); c.getWorldQuaternion(q); var d=new THREE.Vector3(0,0,-1).applyQuaternion(q); return {p:p,t:p.clone().add(d.multiplyScalar(1.4)),fov:c.fov}; } } return null; }
   function outside(top){ var c=box.getCenter(new THREE.Vector3()), s=box.getSize(new THREE.Vector3()), R=Math.max(s.x,s.z);
     return top?{p:new THREE.Vector3(c.x+.01,box.min.y+R*1.55,c.z+.3),t:new THREE.Vector3(c.x,floorY,c.z),fov:45}:{p:new THREE.Vector3(c.x+R*.7,box.min.y+R*.95,c.z+R*.85),t:new THREE.Vector3(c.x,floorY+.6,c.z),fov:45}; }
-  function go(name,instant){ var v=name==='geral'?outside(false):name==='topo'?outside(true):camPose(name); if(!v) return; curView=name;
+  function go(name,instant){ var room=!(name==='geral'||name==='topo');
+    if(room&&PANOS&&PANOS[name]){ curView=name; enterPano(name); document.querySelectorAll('[data-view]').forEach(function(b){ b.setAttribute('aria-pressed',b.getAttribute('data-view')===name); }); return; }
+    exitPano();
+    var v=name==='geral'?outside(false):name==='topo'?outside(true):camPose(name); if(!v) return; curView=name;
     var inside=!(name==='geral'||name==='topo');
     controls.minDistance=inside?.3:2; controls.maxDistance=inside?4:30; controls.maxPolarAngle=inside?Math.PI*.92:Math.PI*.49;
     tw={p0:camera.position.clone(),t0:controls.target.clone(),f0:camera.fov,p1:v.p,t1:v.t,f1:Math.min(Math.max(v.fov,40),70),s:performance.now(),d:(instant||RM)?1:1500};
@@ -168,15 +207,48 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
   var lowWalls=false;
   function applyClip(){ var inside=!(curView==='geral'||curView==='topo'); var y=lowWalls?floorY+1.15:(inside?Infinity:cutTop); clip.constant=isFinite(y)?y:1e6; }
   document.getElementById('tWalls').addEventListener('click',function(){ lowWalls=!lowWalls; this.setAttribute('aria-pressed',lowWalls); applyClip(); });
-  document.getElementById('tNight').addEventListener('click',function(){ night=!night; this.setAttribute('aria-pressed',night); if(man) getPeriod(night?'noite':'dia',applyPeriod); else applyPeriod(); });
+  document.getElementById('tNight').addEventListener('click',function(){ night=!night; this.setAttribute('aria-pressed',night); if(pano.room) showPano(pano.room,true); if(man) getPeriod(night?'noite':'dia',function(){ loadEnv(night?'noite':'dia',applyPeriod); }); else applyPeriod(); });
   var decor=true; document.getElementById('tDecor').addEventListener('click',function(){ decor=!decor; this.setAttribute('aria-pressed',decor); ['MOB','VEG'].forEach(function(g){ (groups[g]||[]).forEach(function(o){ o.visible=decor; }); }); });
   var spin=false; document.getElementById('tSpin').addEventListener('click',function(){ spin=!spin; this.setAttribute('aria-pressed',spin); controls.autoRotate=spin; controls.autoRotateSpeed=.6; });
 
-  function resize(){ var w=innerWidth,h=innerHeight; renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+  // 360°: cada cômodo é um panorama equirretangular renderizado no Cycles (panos.json + pano_<cômodo>_<dia|noite>.jpg)
+  var PANOS=null, panoTex={}, panoNote=document.getElementById('panoNote');
+  fetch('panos.json').then(function(r){ return r.ok?r.json():null; }).then(function(j){ PANOS=j; if(PANOS&&curView!=='geral'&&curView!=='topo') go(curView,true); }).catch(function(){});
+  var pano={on:false,room:null,yaw:0,pitch:0,fov:72,drag:false,scene:new THREE.Scene(),cam:new THREE.PerspectiveCamera(72,1,.1,100)};
+  pano.mat=new THREE.ShaderMaterial({uniforms:{map:{value:null},fade:{value:1}},depthWrite:false,side:THREE.BackSide,toneMapped:false,
+    vertexShader:'varying vec3 d;void main(){d=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader:'uniform sampler2D map;uniform float fade;varying vec3 d;void main(){vec3 n=normalize(d);vec2 uv=vec2(.5+atan(n.z,n.x)/6.28318530718,.5+asin(clamp(n.y,-1.,1.))/3.14159265359);gl_FragColor=vec4(texture2D(map,uv).rgb*fade,1.);}'});
+  pano.scene.add(new THREE.Mesh(new THREE.SphereGeometry(50,64,32),pano.mat));
+  pano.update=function(){ var cp=Math.cos(pano.pitch); pano.cam.lookAt(Math.cos(pano.yaw)*cp,Math.sin(pano.pitch),-Math.sin(pano.yaw)*cp); if(pano.cam.fov!==pano.fov){ pano.cam.fov=pano.fov; pano.cam.updateProjectionMatrix(); } };
+  function panoSrc(room){ return 'pano_'+room+'_'+(night?'noite':'dia')+(MOBILE?'-m':'')+'.jpg'; }
+  function showPano(room,keepView){ var key=panoSrc(room);
+    function put(t){ pano.mat.uniforms.map.value=t; pano.on=true; if(panoNote){ panoNote.hidden=false; } setBusy(false);
+      var t0=performance.now(); (function f(){ var k=Math.min((performance.now()-t0)/450,1); pano.mat.uniforms.fade.value=.35+.65*k; if(k<1) requestAnimationFrame(f); })(); }
+    if(!keepView){ var P=PANOS[room]; pano.yaw=P.yaw; pano.pitch=Math.max(-.5,Math.min(.3,P.pitch)); pano.fov=MOBILE?80:72; }
+    if(panoTex[key]){ put(panoTex[key]); return; }
+    setBusy(true);
+    texL.load(key,function(t){ t.encoding=THREE.LinearEncoding; t.generateMipmaps=false; t.minFilter=THREE.LinearFilter; t.magFilter=THREE.LinearFilter; panoTex[key]=t; if(pano.room===room) put(t); },undefined,function(){ setBusy(false); exitPano(); go('geral'); }); }
+  function enterPano(room){ pano.room=room; controls.enabled=false; tw=null; showPano(room,false); setModelOnly(true); }
+  function exitPano(){ if(!pano.on&&!pano.room) return; pano.on=false; pano.room=null; controls.enabled=true; if(panoNote) panoNote.hidden=true; setModelOnly(false); }
+  function setModelOnly(dis){ ['tWalls','tDecor'].forEach(function(id){ var b=document.getElementById(id); if(b){ b.disabled=dis; b.style.opacity=dis?.4:1; } }); }
+  var busyEl=null; function setBusy(on){ if(on&&!busyEl){ busyEl=document.createElement('div'); busyEl.className='busy'; busyEl.textContent='Carregando a vista 360°…'; document.body.appendChild(busyEl); } else if(!on&&busyEl){ busyEl.remove(); busyEl=null; } }
+  (function(){ var el=renderer.domElement, pts={}, lx=0, ly=0, pd=0;
+    function n(){ return Object.keys(pts).length; }
+    el.addEventListener('pointerdown',function(e){ if(!pano.on) return; pts[e.pointerId]=[e.clientX,e.clientY]; lx=e.clientX; ly=e.clientY; pano.drag=true; if(n()===2){ var a=Object.values(pts); pd=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]); } });
+    el.addEventListener('pointermove',function(e){ if(!pano.on||!pts[e.pointerId]) return; pts[e.pointerId]=[e.clientX,e.clientY];
+      if(n()===2){ var a=Object.values(pts), d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]); if(pd) pano.fov=Math.max(35,Math.min(95,pano.fov*pd/d)); pd=d; return; }
+      var k=pano.fov/70*.0042; pano.yaw+=(e.clientX-lx)*k; pano.pitch=Math.max(-1.35,Math.min(1.35,pano.pitch+(e.clientY-ly)*k)); lx=e.clientX; ly=e.clientY; });
+    function up(e){ delete pts[e.pointerId]; pd=0; if(!n()) pano.drag=false; }
+    el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up); el.addEventListener('pointerleave',up);
+    el.addEventListener('wheel',function(e){ if(!pano.on) return; e.preventDefault(); pano.fov=Math.max(35,Math.min(95,pano.fov+e.deltaY*.04)); },{passive:false});
+    addEventListener('keydown',function(e){ if(!pano.on||document.getElementById('lb').classList.contains('on')) return; if(e.key==='ArrowLeft') pano.yaw+=.12; if(e.key==='ArrowRight') pano.yaw-=.12; if(e.key==='ArrowUp') pano.pitch=Math.min(1.35,pano.pitch+.1); if(e.key==='ArrowDown') pano.pitch=Math.max(-1.35,pano.pitch-.1); });
+  })();
+  function resize(){ var w=innerWidth,h=innerHeight; renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix(); pano.cam.aspect=w/h; pano.cam.updateProjectionMatrix(); }
   addEventListener('resize',resize); resize();
   var ease=function(x){return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;};
   function loop(now){ requestAnimationFrame(loop);
     if(tw){ var k=Math.min((now-tw.s)/tw.d,1),e=ease(k); camera.position.lerpVectors(tw.p0,tw.p1,e); controls.target.lerpVectors(tw.t0,tw.t1,e); camera.fov=tw.f0+(tw.f1-tw.f0)*e; camera.updateProjectionMatrix(); if(k>=1) tw=null; }
+    if(pano.on){ var tm=renderer.toneMapping; renderer.toneMapping=THREE.NoToneMapping; if(spin&&!pano.drag) pano.yaw-=.0009; pano.update(); renderer.render(pano.scene,pano.cam); renderer.toneMapping=tm; return; }
     controls.update(); renderer.render(scene,camera); }
   requestAnimationFrame(loop);
   window.__casa={THREE:THREE,scene:scene,camera:camera,controls:controls,go:go,cams:cams,groups:groups,LM:LM,setCalib:function(c){ if(man){ man.calib=c; applyPeriod(); } },setExposure:function(x){ renderer.toneMappingExposure=x; }};
@@ -190,6 +262,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
   <div class="lb-note">Renders feitos no Blender a partir da planta. Ilustração de decoração, não é foto do imóvel.</div>
   <div class="lb-rooms" id="lbRooms" role="group" aria-label="Cômodos"></div>
 </div>
+<script>
+(function(){ var b=document.getElementById('credBtn'), c=document.getElementById('cred'); if(!b||!c) return;
+  b.onclick=function(){ c.hidden=!c.hidden; b.setAttribute('aria-expanded',!c.hidden); };
+  addEventListener('keydown',function(e){ if(e.key==='Escape'&&!c.hidden){ c.hidden=true; b.setAttribute('aria-expanded','false'); b.focus(); } }); })();
+</script>
 <script>
 (function(){
   var R=[
