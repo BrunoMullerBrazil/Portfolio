@@ -34,3 +34,4 @@ Blender na conversa de 16/out ("Cena com bola no Blender"), inclusive os passos 
 - Árvores 'perto': + ficus (Chinese Banyan) e jasmim-manga (PlantCatalog), na escala real. Palmeiras da praça: NextSpring (palm1 + 3 separadas do pacote palm2).
 - Pessoas: `ns['blv_pessoas']([(x, y, rot, 'mei'|'homem'), ...])` — só para fotos, esvaziar antes da aérea. Motos: 3 Honda PCX na calçada das lojas.
 - Foto 4 v2: vidro com gotículas + rastros escorrendo (Voronoi esticado + distorção), câmera a 2,2 m olhando as vitrines por cima dos carros, f/5.6.
+- Fotos de chuva com o prédio como assunto (26/out): foto 6 `BLV_Foto_6_Torres_Chuva` (12,-57.5,+1.6) → (0,8,21), 24 mm, `blv_look_chuva(exp=1.5)`, árvores 'perto', `blv_chuva_cam(..., n=22000, dmin=3, dmax=35)`; foto 4 v3 `BLV_Foto_4_Gotas` (-24,-60,+1.7) → (-28,10,33), 40 mm, foco 74 m f/8, vidro a 0,45 m escala 1,4.
