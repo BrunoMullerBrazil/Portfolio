@@ -36,6 +36,7 @@ TAKES = {
                        nota="85 mm: foco puxa da folhagem da praça em primeiro plano para as janelas da torre A"),
 }
 def take_cam(k):
+    bpy.context.preferences.edit.keyframe_new_interpolation_type = 'BEZIER'
     T = TAKES[k]; nm = f"BLV_Take_{k}"
     cam = scn.objects.get(nm)
     if not cam: cam = bpy.data.objects.new(nm, bpy.data.cameras.new(nm)); scn.collection.objects.link(cam)
@@ -56,10 +57,7 @@ def take_cam(k):
         for f, p, a in T['k']:
             cam.location = p; cam.keyframe_insert("location", frame=f)
             alvo.location = a; alvo.keyframe_insert("location", frame=f)
-    for o in (cam, alvo):
-        if o.animation_data and o.animation_data.action:
-            for fc in o.animation_data.action.fcurves:
-                for kp in fc.keyframe_points: kp.interpolation = 'BEZIER'; kp.easing = 'AUTO'
+    # Blender 5 (actions em camadas): interpolação vem da preferência; Bezier com alças automáticas = ease in/out
     d = cam.data.dof; d.use_dof = True; d.aperture_fstop = T['f']
     if T['foco'] == 'alvo': d.focus_object = alvo
     else:
@@ -76,11 +74,12 @@ def chuva_take(k, cam):
     ns['blv_chuva_cam'](cam.name, n=18000, dmin=3., dmax=35.)
     ch = scn.objects["BLV_chuva"]; ch.animation_data_clear()
     mw = ch.matrix_world.copy(); ch.parent = cam; ch.matrix_parent_inverse = cam.matrix_world.inverted(); ch.matrix_world = mw
-    y0 = ch.location.y
-    for f in range(1, TAKES[k]['fim']+1):
-        ch.location.y = y0-((f-1)*.375) % 1.5; ch.keyframe_insert("location", index=1, frame=f)
-    for fc in ch.animation_data.action.fcurves:
-        for kp in fc.keyframe_points: kp.interpolation = 'CONSTANT'
+    y0 = ch.location.y; ed = bpy.context.preferences.edit; old = ed.keyframe_new_interpolation_type
+    ed.keyframe_new_interpolation_type = 'CONSTANT'
+    try:
+        for f in range(1, TAKES[k]['fim']+1):
+            ch.location.y = y0-((f-1)*.375) % 1.5; ch.keyframe_insert("location", index=1, frame=f)
+    finally: ed.keyframe_new_interpolation_type = old
     ch.hide_render = False
 def _sol(scene, *a):
     k = scn.get('blv_take_atual')
