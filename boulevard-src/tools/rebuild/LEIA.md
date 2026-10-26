@@ -27,3 +27,10 @@ Blender na conversa de 16/out ("Cena com bola no Blender"), inclusive os passos 
 - Foto 2 (chuva, 35 mm, f/2.8 foco 22 m): câmera BLV_Foto_2_Chuva em (-46,-9,1.55) → (-100,-3,2.4); carros a < 28 m escondidos só para essa foto.
 - Foto 4 (gotas no vidro, 85 mm, f/4.5 foco 0,55 m): câmera BLV_Foto_4_Gotas + plano BLV_vidro_gotas (material BLV_Vidro_Gotas, Voronoi). Fica oculto fora dessa foto.
 - `ns['blv_arvores']('perto'|'aerea')` (34): Poly Haven nas fotos no chão, copa densa nas aéreas.
+
+### Assets reais (26/out)
+- `39_carros_reais.py` e `40_assets_sketchfab.py` — Sketchfab, todos CC Attribution (créditos em `assets/carros/CREDITOS.txt` e `assets/sketchfab/CREDITOS.txt`; **citar os autores ao publicar**). O token do Sketchfab só vive em `ns['skf_tok']`, nunca em arquivo.
+- Carros: Onix, Compass, Corolla, Virtus, Duster, T-Cross × 6 pinturas. Fora: HB20 (malha corrompida), HR-V (configurador), Strada (scan sem material).
+- Árvores 'perto': + ficus (Chinese Banyan) e jasmim-manga (PlantCatalog), na escala real. Palmeiras da praça: NextSpring (palm1 + 3 separadas do pacote palm2).
+- Pessoas: `ns['blv_pessoas']([(x, y, rot, 'mei'|'homem'), ...])` — só para fotos, esvaziar antes da aérea. Motos: 3 Honda PCX na calçada das lojas.
+- Foto 4 v2: vidro com gotículas + rastros escorrendo (Voronoi esticado + distorção), câmera a 2,2 m olhando as vitrines por cima dos carros, f/5.6.
