@@ -12,6 +12,7 @@ argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 OUT = argv[0] if argv else '/tmp/b112_panos'
 SPP = int(argv[1]) if len(argv) > 1 else 384
 W = int(argv[2]) if len(argv) > 2 else 4096
+SO = set(argv[3].split(',')) if len(argv) > 3 and argv[3] else None   # só estes cômodos (ex.: sala,jantar)
 os.makedirs(OUT, exist_ok=True)
 T0 = time.time()
 
@@ -95,11 +96,13 @@ sc.collection.objects.link(cam)
 sc.camera = cam
 # o centro da imagem olha para +X do Blender; a direção inicial vai no json (o navegador gira a vista)
 cam.rotation_euler = (math.pi / 2, 0, -math.pi / 2)
-info = {}
+info = json.load(open(os.path.join(OUT, 'panos.json'))) if os.path.exists(os.path.join(OUT, 'panos.json')) else {}
 try:
     for p in ('dia', 'noite'):
         periodo(p)
         for k, (pos, alvo) in COMODOS.items():
+            if SO and k not in SO:
+                continue
             cam.location = pos
             dx, dy = alvo[0] - pos[0], alvo[1] - pos[1]
             info[k] = {'pos': pos, 'yaw': math.atan2(dy, dx), 'pitch': math.atan2(alvo[2] - pos[2], math.hypot(dx, dy))}
