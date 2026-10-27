@@ -21,11 +21,15 @@ COMODOS = {
     'sala':       ((2.30, 1.55, 1.40), (3.8, 1.6, 1.2)),
     'jantar':     ((2.25, 0.05, 1.45), (3.1, 0.25, 0.9)),
     'cozinha':    ((2.45, -1.45, 1.55), (2.6, -2.6, 1.1)),
-    'entrada':    ((0.30, -2.00, 1.55), (0.3, 0.5, 1.3)),
-    'quarto':     ((-1.65, 0.35, 1.50), (-3.8, 0.8, 1.0)),
+    'entrada':    ((0.15, -1.45, 1.55), (0.3, -2.6, 1.3)),
+    'quarto':     ((-1.75, -0.85, 1.50), (-3.2, 1.2, 1.0)),
     'escritorio': ((0.15, 0.55, 1.45), (-1.1, 1.6, 1.1)),
-    'banheiro':   ((-2.75, -1.95, 1.55), (-3.8, -2.0, 1.2)),
+    'banheiro':   ((-2.85, -1.85, 1.55), (-3.8, -2.0, 1.2)),
 }
+# de dia, os cômodos do fundo só recebem a luz que entra pelas janelas (persianas baixadas): compensação de exposição,
+# como um fotógrafo faria em cada ambiente
+EXPO_DIA = {'sala': 0.0, 'jantar': 0.3, 'cozinha': 1.2, 'entrada': 2.6, 'quarto': 2.4, 'escritorio': 2.2, 'banheiro': 2.8}
+EXPO_NOITE = {'sala': 0.0, 'jantar': 0.0, 'cozinha': 0.0, 'entrada': 0.0, 'quarto': 0.0, 'escritorio': 0.3, 'banheiro': 0.0}
 EMISSIVOS = ('DEC_globo', 'DEC_cupula_mesa', 'ABAJUR_linho', 'col_ffe8c0', 'DEC2_papel_arroz', 'LED_3200k', 'LUZ_embutido',
              'col_fff0d0', 'BWC_led', '1920s_Ceiling_Pendant_Lamp_Type_A_Ornate_01')
 SUN_DIA, CEU_DIA = 4.5, 0.6
@@ -104,6 +108,7 @@ try:
             if SO and k not in SO:
                 continue
             cam.location = pos
+            sc.view_settings.exposure = (EXPO_DIA if p == 'dia' else EXPO_NOITE).get(k, 0.0)
             dx, dy = alvo[0] - pos[0], alvo[1] - pos[1]
             info[k] = {'pos': pos, 'yaw': math.atan2(dy, dx), 'pitch': math.atan2(alvo[2] - pos[2], math.hypot(dx, dy))}
             prog(atual=f'{k}_{p}')
