@@ -24,7 +24,7 @@ COMODOS = {
     'entrada':    ((0.15, -1.45, 1.55), (0.3, -2.6, 1.3)),
     'quarto':     ((-1.75, -0.85, 1.50), (-3.2, 1.2, 1.0)),
     'escritorio': ((0.15, 0.55, 1.45), (-1.1, 1.6, 1.1)),
-    'banheiro':   ((-2.85, -1.85, 1.55), (-3.8, -2.0, 1.2)),
+    'banheiro':   ((-3.35, -2.00, 1.55), (-3.9, -2.0, 1.3)),
 }
 # de dia, os cômodos do fundo só recebem a luz que entra pelas janelas (persianas baixadas): compensação de exposição,
 # como um fotógrafo faria em cada ambiente
