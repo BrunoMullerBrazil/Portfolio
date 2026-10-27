@@ -22,13 +22,15 @@ COMODOS = {
     'jantar':     ((2.25, 0.05, 1.45), (3.1, 0.25, 0.9)),
     'cozinha':    ((2.45, -1.45, 1.55), (2.6, -2.6, 1.1)),
     'entrada':    ((0.15, -1.45, 1.55), (0.3, -2.6, 1.3)),
-    'quarto':     ((-1.75, -0.85, 1.50), (-3.2, 1.2, 1.0)),
+    'quarto':     ((-2.40, 1.75, 1.50), (-3.8, 0.7, 1.0)),
     'escritorio': ((0.15, 0.55, 1.45), (-1.1, 1.6, 1.1)),
     'banheiro':   ((-3.35, -2.00, 1.55), (-3.9, -2.0, 1.3)),
 }
 # de dia, os cômodos do fundo só recebem a luz que entra pelas janelas (persianas baixadas): compensação de exposição,
 # como um fotógrafo faria em cada ambiente
-EXPO_DIA = {'sala': 0.0, 'jantar': 0.3, 'cozinha': 1.2, 'entrada': 2.6, 'quarto': 2.4, 'escritorio': 2.2, 'banheiro': 2.8}
+EXPO_DIA = {'sala': 0.0, 'jantar': 0.3, 'cozinha': 1.2, 'entrada': 1.0, 'quarto': 1.0, 'escritorio': 1.0, 'banheiro': 0.6}
+# cômodos sem luz natural suficiente: de dia a casa acende as luzes desses ambientes (60%), como na vida real
+LUZ_DIA = {'entrada': .6, 'quarto': .6, 'escritorio': .6, 'banheiro': 1.0}
 EXPO_NOITE = {'sala': 0.0, 'jantar': 0.0, 'cozinha': 0.0, 'entrada': 0.0, 'quarto': 0.0, 'escritorio': 0.3, 'banheiro': 0.0}
 EMISSIVOS = ('DEC_globo', 'DEC_cupula_mesa', 'ABAJUR_linho', 'col_ffe8c0', 'DEC2_papel_arroz', 'LED_3200k', 'LUZ_embutido',
              'col_fff0d0', 'BWC_led', '1920s_Ceiling_Pendant_Lamp_Type_A_Ornate_01')
@@ -60,7 +62,11 @@ for m in bpy.data.materials:
             EMIS.append((m, b))
 
 
-def periodo(p):
+E0 = {}
+
+
+def periodo(p, k=None):
+    f = LUZ_DIA.get(k, 0) if p == 'dia' else 1.0
     for o in sc.objects:
         if o.type != 'LIGHT':
             continue
@@ -68,12 +74,14 @@ def periodo(p):
             o.hide_render = (p != 'dia')
             o.data.energy = SUN_DIA
         else:
-            o.hide_render = (p == 'dia')
+            E0.setdefault(o.name, o.data.energy)
+            o.hide_render = (f == 0)
+            o.data.energy = E0[o.name] * max(f, 1e-3)
     for n in sc.world.node_tree.nodes:
         if n.type == 'BACKGROUND':
             n.inputs['Strength'].default_value = CEU_DIA if p == 'dia' else .015
     for m, b in EMIS:
-        b.inputs['Emission Strength'].default_value = 0.0 if p == 'dia' else (6.0 if 'embutido' in m.name else 2.5)
+        b.inputs['Emission Strength'].default_value = f * (6.0 if 'embutido' in m.name else 2.5)
 
 
 r = sc.render
@@ -107,6 +115,7 @@ try:
         for k, (pos, alvo) in COMODOS.items():
             if SO and k not in SO:
                 continue
+            periodo(p, k)
             cam.location = pos
             sc.view_settings.exposure = (EXPO_DIA if p == 'dia' else EXPO_NOITE).get(k, 0.0)
             dx, dy = alvo[0] - pos[0], alvo[1] - pos[1]
