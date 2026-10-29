@@ -480,13 +480,13 @@ ul { list-style: none; }
   var lk = document.getElementById('lock'), lctx = lk.getContext('2d');
   var stage = intro ? intro.querySelector('.stage') : null;
   var hint = stage ? stage.querySelector('.hint') : null, who = stage ? stage.querySelector('.who') : null, hexc = stage ? stage.querySelector('.hexc') : null;
-  var L = { cols: 0, rows: 0, cell: 13, cw: 0, chh: 0, last: 0, p: -1, opened: false };
+  var L = { cols: 0, rows: 0, cell: 10, cw: 0, chh: 0, last: 0, p: -1, opened: false, popAt: 0 };
   var C_PAPER = '#EFE8DC', C_CAFE = '#1B110E';
   function sizeLock() {
     var dpr = Math.min(window.devicePixelRatio || 1, 2), w = lk.clientWidth, h = lk.clientHeight;
     lk.width = Math.round(w * dpr); lk.height = Math.round(h * dpr);
     lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    L.cell = w < 600 ? 10 : 13; L.cw = L.cell * .62; L.chh = L.cell * 1.04;
+    L.cell = w < 600 ? 8 : 10; L.cw = L.cell * .62; L.chh = L.cell * 1.04;
     L.cols = Math.ceil(w / L.cw); L.rows = Math.ceil(h / L.chh);
     lctx.font = '500 ' + L.cell + 'px "Geist Mono", ui-monospace, monospace';
     lctx.textBaseline = 'top';
@@ -521,26 +521,37 @@ ul { list-style: none; }
     var t = now / 1000;
     if (p >= 1) { if (stage.style.opacity !== '0') { stage.style.opacity = '0'; stage.style.visibility = 'hidden'; } return; }
     stage.style.visibility = ''; 
-    var e1 = eio(p / .42), e2 = eio((p - .34) / .24), e3 = Math.pow(clamp01((p - .54) / .3), 3), fade = clamp01((p - .86) / .12);
+    // pressão sobe até POP; ao cruzar, a haste estoura aberta (por tempo, não por scroll); depois, entrada pela fechadura
+    var POP = .5;
+    if (p >= POP && !L.popAt) L.popAt = now;
+    if (p < POP - .03) L.popAt = 0;
+    var q = L.popAt ? clamp01((now - L.popAt) / 460) : 0;
+    var qb = q ? 1 + 2.9 * Math.pow(q - 1, 3) + 1.9 * Math.pow(q - 1, 2) : 0; // estouro com overshoot
+    var flash = L.popAt ? 1 - clamp01((now - L.popAt) / 280) : 0;
+    var tension = L.popAt ? 0 : Math.pow(clamp01(p / POP), 2);
+    var e3 = Math.pow(clamp01((p - .6) / .26), 3), fade = clamp01((p - .86) / .12);
     stage.style.opacity = String(1 - fade);
     document.documentElement.classList.toggle('intro-on', p < .9);
     if (p > .86 && !L.opened) { L.opened = true; groups.forEach(function (g) { if (g.gate && !g.done) { g.done = true; reveal(g); } }); fStart = now; }
     if (p < .02 && L.opened) { L.opened = false; }
     hint.style.opacity = String(1 - clamp01(p / .06));
     who.style.opacity = String(1 - clamp01((p - .5) / .1));
-    hexc.style.opacity = String(clamp01((p - .04) / .05) * (1 - clamp01((p - .56) / .06)));
-    var hv = Math.round(clamp01(p / .58) * 255);
-    hexc.textContent = (hv >= 255 ? 'Aberto · ' : '') + '0x' + (hv < 16 ? '0' : '') + hv.toString(16).toUpperCase();
+    hexc.style.opacity = String(clamp01((p - .04) / .05) * (1 - clamp01((p - .6) / .05)));
+    var hv = L.popAt ? 255 : Math.round(clamp01(p / POP) * 254);
+    hexc.textContent = '0x' + (hv < 16 ? '0' : '') + hv.toString(16).toUpperCase() + (L.popAt ? ' · Aberto' : '');
     if (now - L.last < 33) return; L.last = now;
 
-    var breathe = p < .02 ? .012 * Math.sin(t * 2.4) : 0;
-    var st = { e1: e1, inf: 1 + .14 * e1 + breathe, n: 7 - 4.4 * e1, lift: .15 * e2 + .02 * Math.sin(Math.PI * e2), rot: -.42 * eio((p - .44) / .16) };
+    var swell = L.popAt ? .09 * (1 - q) : .09 * tension + .022 * tension * Math.sin(t * 55);
+    if (p < .02) swell += .01 * Math.sin(t * 2.4);
+    var st = { e1: L.popAt ? 1 - q : tension, inf: 1 + swell, n: 7 - 3.2 * (L.popAt ? 1 - q : tension), lift: .15 * qb, rot: -.42 * qb };
     var W = lk.clientWidth, H = lk.clientHeight;
-    var base = W < 700 ? Math.min(W * .78, H * .5) : Math.min(W * .5, H * .62);
-    var zoom = Math.exp(Math.log(160) * e3);
-    var S = base * (1 + .3 * e1) * zoom;
-    var cxu = 0, cyu = .02 + .11 * clamp01(e3 * 6);
-    var noise = e2 * (1 - e3);
+    var base = W < 700 ? Math.min(W * .5, H * .3) : Math.min(W * .26, H * .36);
+    var zoom = Math.exp(Math.log(420) * e3);
+    var S = base * zoom;
+    var amp = L.popAt ? 0 : .3 + 11 * Math.pow(tension, 1.7);
+    var sx = (Math.random() * 2 - 1) * amp, sy = (Math.random() * 2 - 1) * amp;
+    var cxu = -sx / S, cyu = .02 + .11 * clamp01(e3 * 6) - sy / S;
+    var noise = L.popAt ? flash : .6 * Math.pow(tension, 2.5);
     lctx.fillStyle = C_PAPER; lctx.fillRect(0, 0, W, H);
     for (var j = 0; j < L.rows; j++) {
       var py = j * L.chh, uy = (py + L.chh / 2 - H / 2) / S + cyu;
@@ -549,7 +560,7 @@ ul { list-style: none; }
         var v = lockAt(ux, uy, st);
         if (!v) continue;
         if (v === 1) { lctx.globalAlpha = 1; lctx.fillStyle = C_CAFE; lctx.fillRect(px - .5, py - .5, L.cw + 1, L.chh + 1); continue; }
-        if (noise > 0 && Math.random() < noise * .55) { lctx.globalAlpha = .9; lctx.fillStyle = C_ACC; lctx.fillText(rnd(HEX), px, py); continue; }
+        if (noise > 0 && Math.random() < noise) { lctx.globalAlpha = .9; lctx.fillStyle = C_ACC; lctx.fillText(rnd(HEX), px, py); continue; }
         var k = Math.max(1, Math.min(RAMP.length - 1, Math.round(v * (RAMP.length - 1))));
         lctx.globalAlpha = .35 + .65 * v; lctx.fillStyle = C_CAFE; lctx.fillText(RAMP[k], px, py);
       }
