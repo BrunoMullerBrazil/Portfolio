@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Isabela Martins</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: editorial assimétrico — coluna estreita de rótulos em mono à esquerda, conteúdo largo à direita; retrato com proporção travada no hero */
+:root {
+  --cream: #EDE5D7;
+  --paper: #F4EEE3;
+  --sand: #C9B49F;
+  --terra: #AD6045;
+  --olive: #74765A;
+  --coffee: #33221F;
+  --ink: var(--coffee);
+  --muted: #6B5A52;
+  --line: rgba(51, 34, 31, .16);
+  --bg: var(--cream);
+  --surface: var(--paper);
+  --accent: var(--terra);
+  --note-bg: #E2E0CF;
+  --note-fg: #4B4C38;
+
+  --f-display: "Gloock", "Bodoni 72", "Didot", Georgia, serif;
+  --f-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --s-xs: .75rem; --s-sm: .875rem; --s-md: 1.0625rem; --s-lg: 1.375rem;
+  --s-xl: clamp(1.75rem, 3.2vw, 2.5rem);
+  --s-hero: clamp(3.25rem, 10vw, 8.5rem);
+  --wrap: 1180px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #EDE5D7; --muted: #B8A99B; --line: rgba(237, 229, 215, .14);
+    --bg: #1F1614; --surface: #2A1E1B; --accent: #D9805F; --olive: #A6A784; --sand: #8C7563;
+    --note-bg: #2F3024; --note-fg: #CFD0B2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ink: #EDE5D7; --muted: #B8A99B; --line: rgba(237, 229, 215, .14);
+  --bg: #1F1614; --surface: #2A1E1B; --accent: #D9805F; --olive: #A6A784; --sand: #8C7563;
+  --note-bg: #2F3024; --note-fg: #CFD0B2;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; } img { max-width: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: var(--s-md); line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+a:hover { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 400; margin: 0; text-wrap: balance; line-height: 1.05; }
+p { margin: 0; }
+.mono { font-family: var(--f-mono); font-size: var(--s-xs); letter-spacing: .06em; text-transform: uppercase; }
+
+.wrap {
+  max-width: var(--wrap); margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+
+/* faixa de preview */
+.preview-bar { background: var(--ink); color: var(--bg); }
+.preview-bar .wrap { display: flex; gap: 12px 24px; flex-wrap: wrap; align-items: center; justify-content: space-between; padding-block: 10px; }
+.preview-bar .mono { opacity: .85; }
+.toggle {
+  font: 500 var(--s-xs)/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase;
+  background: transparent; color: inherit; border: 1px solid currentColor; border-radius: 999px;
+  padding: 8px 14px; cursor: pointer;
+}
+.toggle:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* nav */
+.nav .wrap { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-block: 22px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.nav-name { font-family: var(--f-display); font-size: var(--s-lg); text-decoration: none; }
+.nav ul { list-style: none; display: flex; gap: 22px; margin: 0; padding: 0; flex-wrap: wrap; }
+.nav ul a { text-decoration: none; color: var(--muted); }
+.nav ul a:hover { color: var(--accent); }
+
+/* notas de preview */
+.note {
+  background: var(--note-bg); color: var(--note-fg);
+  font-family: var(--f-mono); font-size: var(--s-xs); line-height: 1.5;
+  padding: 10px 12px; border-left: 2px solid var(--olive);
+  max-width: 46ch;
+}
+.note b { font-weight: 500; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+body.hide-notes .note { display: none; }
+.tbc {
+  font-family: var(--f-mono); font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
+  border: 1px dashed var(--olive); color: var(--olive); border-radius: 3px; padding: 1px 6px; white-space: nowrap;
+  vertical-align: middle;
+}
+.ok { border-style: solid; border-color: var(--accent); color: var(--accent); }
+body.hide-notes .tbc { display: none; }
+
+/* hero */
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 48px; padding-block: 64px 80px; align-items: end; }
+.hero-text { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.eyebrow { color: var(--olive); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.eyebrow::before { content: ""; width: 28px; height: 1px; background: currentColor; }
+.hero h1 { font-size: var(--s-hero); letter-spacing: -.02em; line-height: .92; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.thesis { font-family: var(--f-display); font-size: var(--s-xl); line-height: 1.15; max-width: 22ch; }
+.lede { color: var(--muted); max-width: 52ch; }
+.cta { display: flex; gap: 14px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+  font: 500 var(--s-sm)/1 var(--f-body); padding: 14px 20px; border-radius: 999px; border: 1px solid var(--ink);
+}
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn.primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn:hover { color: var(--accent); }
+
+.portrait { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.photo {
+  aspect-ratio: 4 / 5; max-width: 100%; width: 100%;
+  background:
+    repeating-linear-gradient(135deg, transparent 0 14px, rgba(51,34,31,.05) 14px 15px),
+    var(--sand);
+  display: flex; align-items: flex-end; padding: 16px; position: relative; overflow: hidden;
+}
+.photo .mono { color: var(--coffee); opacity: .7; }
+.photo .net { position: absolute; inset: 0; width: 100%; height: 100%; }
+.spec { width: 100%; border-collapse: collapse; font-family: var(--f-mono); font-size: var(--s-xs); }
+.spec td { padding: 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.spec td:first-child { color: var(--muted); text-transform: uppercase; letter-spacing: .06em; width: 34%; }
+
+/* seções */
+section.block .wrap { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 40px; padding-block: 88px; border-top: 1px solid var(--line); }
+.label { display: flex; flex-direction: column; gap: 14px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; }
+.label .mono { color: var(--accent); }
+.content { display: flex; flex-direction: column; gap: 40px; min-width: 0; }
+.content > h2 { font-size: var(--s-xl); max-width: 24ch; }
+
+/* talks */
+.talks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+.talk { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 8px 28px; padding: 26px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.talk .date { font-family: var(--f-mono); font-size: var(--s-sm); font-variant-numeric: tabular-nums; color: var(--muted); }
+.talk h3 { font-size: var(--s-lg); line-height: 1.2; }
+.talk .meta { color: var(--muted); font-size: var(--s-sm); margin-top: 6px; }
+.talk .role { color: var(--olive); }
+.talk.featured h3 { font-size: clamp(1.5rem, 2.6vw, 2rem); }
+.talk .side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+
+/* expertise */
+.domains { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--ink); }
+.domain { padding: 24px 24px 24px 0; display: flex; flex-direction: column; gap: 12px; }
+.domain + .domain { padding-left: 24px; border-left: 1px solid var(--line); }
+.domain h3 { font-size: var(--s-lg); }
+.domain p { color: var(--muted); font-size: var(--s-sm); }
+.domain ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.domain li { font-family: var(--f-mono); font-size: .72rem; border: 1px solid var(--line); border-radius: 3px; padding: 3px 7px; }
+
+.threat { background: var(--surface); padding: 28px; display: flex; flex-direction: column; gap: 22px; }
+.threat-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; }
+.threat-head h3 { font-size: var(--s-lg); }
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; position: relative; }
+.node { display: flex; flex-direction: column; gap: 10px; padding: 0 12px 0 0; position: relative; }
+.node .box {
+  border: 1px solid var(--ink); padding: 12px; font-size: var(--s-sm); font-weight: 500; background: var(--bg);
+  position: relative;
+}
+.node:not(:last-child) .box::after {
+  content: ""; position: absolute; right: -13px; top: 50%; width: 12px; height: 1px; background: var(--ink);
+}
+.node .box small { display: block; font-weight: 400; color: var(--muted); font-size: .78rem; margin-top: 2px; }
+.risk { font-family: var(--f-mono); font-size: .72rem; color: var(--accent); line-height: 1.4; display: flex; gap: 6px; }
+.risk::before { content: "▲"; font-size: .6rem; padding-top: 2px; }
+.threat .src { color: var(--muted); font-size: .78rem; }
+
+/* labs / cases */
+.cases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+.case { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.case .thumb { aspect-ratio: 3 / 2; max-width: 100%; background: var(--surface); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.case .thumb svg { width: 70%; height: auto; }
+.case .kind { color: var(--olive); }
+.case h3 { font-size: var(--s-lg); line-height: 1.2; }
+.case dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; font-size: var(--s-sm); }
+.case dt { font-family: var(--f-mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding-top: 3px; }
+.case dd { margin: 0; }
+
+/* insights */
+.insights { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; }
+.post { display: flex; flex-direction: column; gap: 12px; padding-top: 18px; border-top: 1px solid var(--ink); text-decoration: none; }
+.post:hover h3 { color: var(--accent); }
+.post .kind { color: var(--olive); }
+.post h3 { font-size: var(--s-lg); line-height: 1.2; transition: color .2s; }
+.post p { color: var(--muted); font-size: var(--s-sm); }
+.post.lead h3 { font-size: clamp(1.6rem, 3vw, 2.25rem); }
+.wave { width: 100%; height: 64px; display: block; }
+.wave path { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+.wave text { font-family: var(--f-mono); font-size: 10px; fill: var(--muted); }
+.side-posts { display: flex; flex-direction: column; gap: 28px; }
+
+/* manifesto */
+.manifesto { background: var(--olive); color: var(--cream); }
+.manifesto .wrap { padding-block: 96px; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 40px; }
+.manifesto .label .mono { color: var(--cream); opacity: .8; }
+.manifesto blockquote { margin: 0; font-family: var(--f-display); font-size: clamp(1.75rem, 3.8vw, 3rem); line-height: 1.15; max-width: 26ch; }
+.manifesto .sig { margin-top: 28px; font-family: var(--f-mono); font-size: var(--s-xs); letter-spacing: .06em; text-transform: uppercase; opacity: .85; }
+.manifesto .note { margin-top: 28px; background: rgba(0,0,0,.18); color: var(--cream); border-left-color: var(--cream); }
+
+/* contato */
+.contact .wrap { padding-block: 96px 56px; display: flex; flex-direction: column; gap: 40px; }
+.contact h2 { font-size: var(--s-hero); line-height: .95; letter-spacing: -.02em; }
+.contact h2 em { font-style: normal; color: var(--accent); }
+.links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--ink); }
+.links > * { padding: 20px 20px 20px 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.links > * + * { padding-left: 20px; border-left: 1px solid var(--line); }
+.links .mono { color: var(--muted); }
+.links a, .links span.v { font-size: var(--s-lg); font-family: var(--f-display); text-decoration: none; }
+footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 24px 40px; border-top: 1px solid var(--line); color: var(--muted); }
+
+/* entrada */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-text > *, .portrait { animation: rise .8s cubic-bezier(.2,.7,.2,1) both; }
+  .hero-text > *:nth-child(2) { animation-delay: .06s; }
+  .hero-text > *:nth-child(3) { animation-delay: .12s; }
+  .hero-text > *:nth-child(4) { animation-delay: .18s; }
+  .portrait { animation-delay: .24s; }
+  @keyframes rise { from { transform: translateY(14px); opacity: .001; } to { transform: none; opacity: 1; } }
+}
+
+/* responsivo */
+@media (max-width: 900px) {
+  .hero .wrap { grid-template-columns: 1fr; padding-block: 40px 56px; }
+  .portrait { max-width: 420px; }
+  section.block .wrap, .manifesto .wrap { grid-template-columns: 1fr; gap: 24px; padding-block: 64px; }
+  .label { position: static; }
+  .domains, .cases, .insights, .links { grid-template-columns: 1fr; }
+  .domain, .domain + .domain { padding: 22px 0; border-left: 0; }
+  .domain + .domain { border-top: 1px solid var(--line); }
+  .links > *, .links > * + * { padding: 18px 0; border-left: 0; }
+  .links > * + * { border-top: 1px solid var(--line); }
+  .flow { grid-template-columns: 1fr; gap: 14px; }
+  .node { padding: 0; }
+  .node:not(:last-child) .box::after { right: auto; left: 20px; top: auto; bottom: -15px; width: 1px; height: 14px; }
+  .talk { grid-template-columns: 1fr; }
+  .talk .side { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+}
+@media (max-width: 560px) {
+  .nav ul { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="preview-bar">
+  <div class="wrap">
+    <span class="mono">Preview · conteúdo provisório · aue.productions/isabela</span>
+    <button class="toggle" id="toggle-notes" type="button" aria-pressed="false">Ocultar notas</button>
+  </div>
+</div>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="nav-name" href="#topo">Isabela Martins</a>
+    <ul>
+      <li><a href="#palco">Palco</a></li>
+      <li><a href="#atuacao">Atuação</a></li>
+      <li><a href="#labs">Labs</a></li>
+      <li><a href="#escritos">Escritos</a></li>
+      <li><a href="#contato">Contato</a></li>
+    </ul>
+  </div>
+</header>
+
+<main id="topo">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-text">
+        <span class="mono eyebrow">Segurança de IA · Florianópolis</span>
+        <h1>Isabela<br><em>Martins</em></h1>
+        <p class="thesis">Construo sistemas de IA e estudo por onde eles quebram.</p>
+        <p class="lede">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pentest, defesa e desenvolvimento de IA, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        <div class="cta">
+          <a class="btn primary" href="#palco">Palestras e painéis</a>
+          <a class="btn" href="#contato">Convidar para um evento</a>
+        </div>
+        <p class="note"><b>Nota de preview</b>A frase central é hipótese de recorte ("constrói e quebra IA"). Depende das respostas 2 e 3. O CTA assume público prioritário = organizadores de evento (resposta 5).</p>
+      </div>
+      <div class="portrait">
+        <div class="photo" role="img" aria-label="Espaço reservado para retrato vertical">
+          <svg class="net" viewBox="0 0 400 500" preserveAspectRatio="none" aria-hidden="true">
+            <g stroke="#33221F" stroke-opacity=".22" stroke-width="1" fill="none">
+              <path d="M60 80 L180 140 L300 90 L340 220 L220 260 L180 140 M220 260 L120 330 L60 80 M220 260 L300 380 L340 220"/>
+            </g>
+            <g fill="#AD6045">
+              <circle cx="60" cy="80" r="4"/><circle cx="180" cy="140" r="4"/><circle cx="300" cy="90" r="4"/>
+              <circle cx="340" cy="220" r="4"/><circle cx="220" cy="260" r="6"/><circle cx="120" cy="330" r="4"/><circle cx="300" cy="380" r="4"/>
+            </g>
+          </svg>
+          <span class="mono">Retrato vertical · 4:5 · aguardando foto</span>
+        </div>
+        <table class="spec">
+          <tr><td>Cargo</td><td>Lorem ipsum · Empresa <span class="tbc">a confirmar</span></td></tr>
+          <tr><td>Foco</td><td>Segurança ofensiva e IA</td></tr>
+          <tr><td>Base</td><td>Florianópolis, SC</td></tr>
+          <tr><td>Idiomas</td><td>PT · EN <span class="tbc">a confirmar</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="palco">
+    <div class="wrap">
+      <div class="label">
+        <span class="mono">Palco</span>
+        <p class="note"><b>Nota de preview</b>Palco vem antes de Atuação porque é a prova pública mais forte hoje.</p>
+      </div>
+      <div class="content">
+        <h2>Painéis, palestras e entrevistas</h2>
+        <ul class="talks">
+          <li class="talk featured">
+            <span class="date">17.06.2026</span>
+            <div>
+              <h3>O futuro da Cyber Security na era da IA Agêntica e Física</h3>
+              <p class="meta">Security Leaders Florianópolis · <span class="role">Painelista</span> · com Alisson Fuckner (Natura) e Luis Gomes (SumUp)</p>
+            </div>
+            <div class="side"><span class="tbc ok">Fonte verificada</span><a class="mono" href="https://securityleaders.com.br/e-amanha-debates-no-security-leaders-florianopolis-abordam-inovacao-sustentavel-ia-e-risco/" target="_blank" rel="noopener">Ver programação ↗</a></div>
+          </li>
+          <li class="talk">
+            <span class="date">00.00.2026</span>
+            <div>
+              <h3>Fórum da Internet no Brasil · FIB16</h3>
+              <p class="meta">Lorem ipsum dolor sit amet · <span class="role">Papel a definir</span></p>
+            </div>
+            <div class="side"><span class="tbc">Data, papel e link</span></div>
+          </li>
+          <li class="talk">
+            <span class="date">00.00.2026</span>
+            <div>
+              <h3>Lorem ipsum dolor sit amet consectetur</h3>
+              <p class="meta">Nome do evento · <span class="role">Entrevista</span></p>
+            </div>
+            <div class="side"><span class="tbc">Aguardando lista</span></div>
+          </li>
+          <li class="talk">
+            <span class="date">00.00.2025</span>
+            <div>
+              <h3>Sed do eiusmod tempor incididunt ut labore</h3>
+              <p class="meta">Nome do evento · <span class="role">Palestra</span></p>
+            </div>
+            <div class="side"><span class="tbc">Aguardando lista</span></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="atuacao">
+    <div class="wrap">
+      <div class="label">
+        <span class="mono">Atuação</span>
+        <p class="note"><b>Nota de preview</b>Domínios montados a partir de sinais públicos (pentest, defesa, desenvolvimento de IA). Ferramentas são placeholder.</p>
+      </div>
+      <div class="content">
+        <h2>Ataque, defesa e os sistemas de IA entre os dois</h2>
+        <div class="domains">
+          <div class="domain">
+            <span class="mono" style="color:var(--accent)">Ofensiva</span>
+            <h3>Pentest e bug bounty</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</p>
+            <ul><li>Ferramenta</li><li>Ferramenta</li><li>Ferramenta</li></ul>
+          </div>
+          <div class="domain">
+            <span class="mono" style="color:var(--accent)">Defesa</span>
+            <h3>Defesa cibernética</h3>
+            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
+            <ul><li>Ferramenta</li><li>Ferramenta</li></ul>
+          </div>
+          <div class="domain">
+            <span class="mono" style="color:var(--accent)">IA</span>
+            <h3>Desenvolvimento e segurança de IA</h3>
+            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</p>
+            <ul><li>Linguagem</li><li>Framework</li><li>Modelo</li></ul>
+          </div>
+        </div>
+
+        <div class="threat">
+          <div class="threat-head">
+            <h3>Onde um agente de IA costuma ser atacado</h3>
+            <span class="mono" style="color:var(--muted)">Referência: OWASP Top 10 for LLM Applications 2025</span>
+          </div>
+          <div class="flow">
+            <div class="node"><div class="box">Entrada<small>usuário, e-mail, página</small></div><span class="risk">LLM01 Prompt Injection</span></div>
+            <div class="node"><div class="box">Modelo<small>instruções de sistema</small></div><span class="risk">LLM07 System Prompt Leakage</span></div>
+            <div class="node"><div class="box">Ferramentas<small>APIs, ações</small></div><span class="risk">LLM06 Excessive Agency</span></div>
+            <div class="node"><div class="box">Contexto<small>RAG, embeddings</small></div><span class="risk">LLM08 Vector &amp; Embedding Weaknesses</span></div>
+            <div class="node"><div class="box">Saída<small>resposta, código</small></div><span class="risk">LLM02 Sensitive Info Disclosure</span></div>
+          </div>
+          <p class="note"><b>Nota de preview</b>Exemplo de "elemento tech com significado": um diagrama que explica, não decora. O conteúdo final precisa sair da prática dela.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="labs">
+    <div class="wrap">
+      <div class="label">
+        <span class="mono">Labs</span>
+        <p class="note"><b>Nota de preview</b>Substitui "Cases": em cyber quase tudo é sob NDA. Cada item segue contexto → papel → abordagem → resultado.</p>
+      </div>
+      <div class="content">
+        <h2>Pesquisa, labs e trabalhos que podem ser mostrados</h2>
+        <div class="cases">
+          <article class="case">
+            <div class="thumb" aria-hidden="true">
+              <svg viewBox="0 0 200 120"><g fill="none" stroke="currentColor" stroke-opacity=".5"><rect x="10" y="40" width="50" height="40"/><rect x="140" y="40" width="50" height="40"/><path d="M60 60 H140" stroke-dasharray="4 4"/></g><circle cx="100" cy="60" r="7" fill="#AD6045"/></svg>
+            </div>
+            <span class="mono kind">Write-up · CTF</span>
+            <h3>Lorem ipsum dolor sit amet</h3>
+            <dl>
+              <dt>Contexto</dt><dd>Lorem ipsum dolor sit amet.</dd>
+              <dt>Papel</dt><dd>Consectetur adipiscing.</dd>
+              <dt>Resultado</dt><dd>Sed do eiusmod tempor.</dd>
+            </dl>
+          </article>
+          <article class="case">
+            <div class="thumb" aria-hidden="true">
+              <svg viewBox="0 0 200 120"><g fill="none" stroke="currentColor" stroke-opacity=".5"><circle cx="100" cy="60" r="40"/><circle cx="100" cy="60" r="24"/></g><path d="M100 20 L100 60 L134 80" fill="none" stroke="#AD6045" stroke-width="2"/></svg>
+            </div>
+            <span class="mono kind">Ferramenta · GitHub</span>
+            <h3>Ut enim ad minim veniam</h3>
+            <dl>
+              <dt>Contexto</dt><dd>Quis nostrud exercitation.</dd>
+              <dt>Papel</dt><dd>Ullamco laboris nisi.</dd>
+              <dt>Resultado</dt><dd>Ut aliquip ex ea commodo.</dd>
+            </dl>
+          </article>
+          <article class="case">
+            <div class="thumb" aria-hidden="true">
+              <svg viewBox="0 0 200 120"><g fill="none" stroke="currentColor" stroke-opacity=".5"><path d="M20 100 L60 70 L100 80 L140 40 L180 50"/><path d="M20 105 H180"/></g><circle cx="140" cy="40" r="6" fill="#AD6045"/></svg>
+            </div>
+            <span class="mono kind">Pesquisa · Segurança de IA</span>
+            <h3>Duis aute irure dolor in reprehenderit</h3>
+            <dl>
+              <dt>Contexto</dt><dd>In voluptate velit esse.</dd>
+              <dt>Papel</dt><dd>Cillum dolore eu fugiat.</dd>
+              <dt>Resultado</dt><dd>Nulla pariatur excepteur.</dd>
+            </dl>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="escritos">
+    <div class="wrap">
+      <div class="label">
+        <span class="mono">Escritos</span>
+        <p class="note"><b>Nota de preview</b>Temas tirados do Instagram dela (história da tecnologia). Títulos provisórios.</p>
+      </div>
+      <div class="content">
+        <h2>História da tecnologia, segurança e IA, sem jargão</h2>
+        <div class="insights">
+          <a class="post lead" href="#escritos">
+            <svg class="wave" viewBox="0 0 400 64" preserveAspectRatio="none" aria-hidden="true"><path id="wave"/><text x="0" y="62">2600 Hz</text></svg>
+            <span class="mono kind">História · Phreaking</span>
+            <h3>John Draper, um apito de brinquedo e a linha telefônica que obedecia a 2600 Hz</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+          </a>
+          <div class="side-posts">
+            <a class="post" href="#escritos">
+              <span class="mono kind">História · Linguagens</span>
+              <h3>Como o PHP saiu de um projeto pessoal e foi parar em boa parte da web</h3>
+              <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
+            </a>
+            <a class="post" href="#escritos">
+              <span class="mono kind">IA · Segurança</span>
+              <h3>Lorem ipsum dolor sit amet consectetur adipiscing</h3>
+              <p>Duis aute irure dolor in reprehenderit in voluptate.</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="manifesto">
+    <div class="wrap">
+      <div class="label"><span class="mono">Ponto de vista</span></div>
+      <div>
+        <blockquote>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.</blockquote>
+        <p class="sig">Isabela Martins</p>
+        <p class="note"><b>Nota de preview</b>Espaço para a visão dela sobre diversidade na tecnologia. Só entra com texto escrito ou aprovado por ela (resposta 8).</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contato">
+    <div class="wrap">
+      <h2>Vamos <em>conversar</em></h2>
+      <div class="links">
+        <div><span class="mono">LinkedIn</span><a href="https://www.linkedin.com/in/isabela-rodrigues-martins-50ab0723a/" target="_blank" rel="noopener">isabela-rodrigues-martins ↗</a></div>
+        <div><span class="mono">Instagram</span><a href="https://www.instagram.com/isabelahacker.ai/" target="_blank" rel="noopener">@isabelahacker.ai ↗</a></div>
+        <div><span class="mono">E-mail</span><span class="v">contato@lorem.com</span> <span class="tbc">a confirmar</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="mono">© 2026 Isabela Martins</span>
+    <span class="mono">Preview · não indexado</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // onda senoidal do card de 2600 Hz
+  var p = document.getElementById('wave');
+  if (p) {
+    var d = 'M0 28', w = 400, cycles = 9;
+    for (var x = 0; x <= w; x += 2) d += ' L' + x + ' ' + (28 - 20 * Math.sin((x / w) * cycles * 2 * Math.PI)).toFixed(1);
+    p.setAttribute('d', d);
+  }
+  // alternar notas de preview
+  var btn = document.getElementById('toggle-notes');
+  function set(hidden) {
+    document.body.classList.toggle('hide-notes', hidden);
+    btn.textContent = hidden ? 'Mostrar notas' : 'Ocultar notas';
+    btn.setAttribute('aria-pressed', String(hidden));
+  }
+  var saved = false;
+  try { saved = localStorage.getItem('isa-hide-notes') === '1'; } catch (e) {}
+  set(saved);
+  btn.addEventListener('click', function () {
+    var next = !document.body.classList.contains('hide-notes');
+    set(next);
+    try { localStorage.setItem('isa-hide-notes', next ? '1' : '0'); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
