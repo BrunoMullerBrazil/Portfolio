@@ -108,18 +108,11 @@ ul { list-style: none; }
 .notch-alt .n-cta.hov { background: var(--cafe); color: var(--on-dark); }
 
 /* ── atmosfera: grão e brilho ── */
-body::after { content: ""; position: fixed; inset: -50%; z-index: 90; pointer-events: none; opacity: .07; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: grain 1s steps(4) infinite; }
+body::after { content: ""; position: fixed; inset: -50%; z-index: 90; pointer-events: none; opacity: var(--grain, .07); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: grain 1s steps(4) infinite; }
 @keyframes grain { 0% { transform: translate(0, 0); } 25% { transform: translate(-3%, 2%); } 50% { transform: translate(2%, -3%); } 75% { transform: translate(-2%, -1%); } 100% { transform: translate(0, 0); } }
 .hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 70% at 78% 62%, rgba(232, 96, 42, .2), transparent 70%), radial-gradient(40% 40% at 10% 100%, rgba(232, 96, 42, .08), transparent 70%); }
 
-/* ── feixe: a luz que sai da fechadura vira o eixo vertical do hero ── */
-:root { --beam-w: clamp(52px, 6vw, 108px); }
-.beam { position: absolute; top: 0; bottom: 0; left: 50%; width: var(--beam-w); transform: translateX(-50%); pointer-events: none; z-index: 1; }
-.beam i { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(232, 96, 42, 0) 0%, rgba(232, 96, 42, .5) 16%, #E8602A 52%, #F07A45 74%, rgba(232, 96, 42, .3) 100%); animation: flick 5s ease-in-out infinite; }
-.beam::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 700%; transform: translateX(-50%); background: radial-gradient(50% 55% at 50% 62%, rgba(232, 96, 42, .3), transparent 72%); }
-.beam::after { content: ""; position: absolute; top: 8%; bottom: 0; left: 50%; width: 22%; transform: translateX(-50%); background: linear-gradient(to bottom, transparent, rgba(255, 210, 175, .55) 55%, rgba(255, 210, 175, .2)); filter: blur(5px); }
-@keyframes flick { 0%, 100% { opacity: 1; } 40% { opacity: .9; } 46% { opacity: .97; } 70% { opacity: .92; } }
-.hero .field-wrap { z-index: 2; }
+
 
 /* ── sobre: ilustrações dentro da frase ── */
 .chip { display: inline-block; position: relative; height: .9em; width: 2.3em; margin: 0 .14em; vertical-align: -.06em; border-radius: 999px; background: var(--cafe); overflow: hidden; transition: transform .6s cubic-bezier(.18, 1.22, .32, 1.02), background .3s; }
@@ -284,7 +277,6 @@ html.lenis, html.lenis body { height: auto; }
   .hero { grid-template-columns: 1fr; min-height: 0; }
   .field-wrap { order: -1; min-height: 0; aspect-ratio: 1 / 1; margin: 72px auto 0; width: min(100%, 46vh); }
   .field-tag { display: none; }
-  .beam { opacity: .75; }
   .hero-copy { padding-top: 0; }
   .areas { grid-template-columns: 1fr; }
   .area, .area:first-child { padding: 24px 0; border-right: 0; border-bottom: 1px solid var(--line-dark); min-height: 0; }
@@ -305,7 +297,6 @@ html.lenis, html.lenis body { height: auto; }
   .links > * { width: 100%; justify-content: space-between; white-space: nowrap; font-size: .92rem; gap: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .beam i { animation: none; }
   .js .intro { display: none; }
   .js [data-in] { clip-path: none; transform: none; }
   .js [data-in].in::after { display: none; }
@@ -346,7 +337,6 @@ html.lenis, html.lenis body { height: auto; }
 
 <main id="topo">
   <section class="band dark hero">
-    <span class="beam" aria-hidden="true"><i></i></span>
     <div class="hero-copy in-pad">
       <h1 class="name" data-cipher data-reveal data-gate>Isabela<br>Martins</h1>
       <p class="role">Ethical hacker <span class="soft">&amp; desenvolvedora de inteligência artificial.</span></p>
@@ -449,6 +439,14 @@ html.lenis, html.lenis body { height: auto; }
 <script>
 (function () {
   'use strict';
+  /* ───────── parâmetros de ajuste fino (editáveis ao vivo com ?ajuste) ───────── */
+  var T = {
+    introDur: 3.6, resist: .65, pop: .5, tremor: 11, dolly: .7, lockSize: 1, inertia: 5,
+    follow: 26, tilt: .07, portrait: .045,
+    cipherR: 110, bandMin: .93, grain: .07, lenisDur: 1.1, magnet: 8, lens: 190
+  };
+  var TUNE = /[?&]ajuste\b/.test(location.search);
+  if (TUNE) { try { var sv = JSON.parse(localStorage.getItem('isa-ajuste') || '{}'); for (var tk in sv) if (tk in T) T[tk] = sv[tk]; } catch (e) {} }
   var HEX = '0123456789ABCDEF';
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -578,12 +576,11 @@ html.lenis, html.lenis body { height: auto; }
     var tfy = my > -9000 ? Math.max(-1, Math.min(1, (my - r.top - h / 2) / (window.innerHeight / 2))) : (fine ? 0 : .35 * Math.sin(t * .33 + 2));
     F.x += (tfx - F.x) * fk; F.y += (tfy - F.y) * fk;
     var p = reduce ? 2 : (now - fStart) / 1800;
-    var beamRel = window.innerWidth / 2 - r.left, beamR = Math.max(90, w * .22);
     for (var y = 0; y < rows; y++) {
       for (var x = 0; x < cols; x++) {
         var i = y * cols + x, u = (x + .5) / cols, v = (y + .5) / rows;
         var n = .5 + .5 * Math.sin(u * 10 + t * .7) * Math.sin(v * 7 - t * .45);
-        var val = shape(u - F.x * .045, v - F.y * .03, asp) * (.7 + .3 * n);
+        var val = shape(u - F.x * T.portrait, v - F.y * .03, asp) * (.7 + .3 * n);
         if (val < .06) val = seeds[i] > .988 ? .1 : 0;
         if (!val) continue;
         var px = x * cw, py = y * chh, dx = lx - px, dy = ly - py;
@@ -592,8 +589,7 @@ html.lenis, html.lenis body { height: auto; }
         } else {
           var k = Math.min(RAMP.length - 1, Math.round(val * (RAMP.length - 1)));
           if (!k) continue;
-          var bl = (px - beamRel) / beamR, rim = Math.exp(-bl * bl * 2);
-          ctx.fillStyle = rim > .45 ? C_ACC : val < .14 ? C_DIM : C_INK; ctx.globalAlpha = (.2 + .8 * val) * (rim > .45 ? .55 + .45 * rim : 1);
+          ctx.fillStyle = val < .14 ? C_DIM : C_INK; ctx.globalAlpha = .2 + .8 * val;
           ctx.fillText(RAMP[k], px, py);
         }
       }
@@ -653,7 +649,7 @@ html.lenis, html.lenis body { height: auto; }
     var p = clamp01(-r.top / (r.height - vhh));
     // progresso suavizado: o cadeado acompanha o scroll com inércia, como uma câmera com peso
     var ldt = Math.min(.05, (now - (L.lt || now)) / 1000); L.lt = now;
-    L.ps = L.ps === undefined ? p : L.ps + (p - L.ps) * (1 - Math.exp(-ldt * 5));
+    L.ps = L.ps === undefined ? p : L.ps + (p - L.ps) * (1 - Math.exp(-ldt * T.inertia));
     var ps = L.ps;
     var t = now / 1000;
     if (p >= 1) {
@@ -665,7 +661,7 @@ html.lenis, html.lenis body { height: auto; }
     }
     stage.style.visibility = ''; 
     // pressão sobe até POP; ao cruzar, a haste estoura aberta (por tempo, não por scroll); depois, entrada pela fechadura
-    var POP = .5;
+    var POP = T.pop;
     if (p >= POP && !L.popAt) L.popAt = now;
     if (p < POP - .03) L.popAt = 0;
     var q = L.popAt ? clamp01((now - L.popAt) / 460) : 0;
@@ -688,12 +684,12 @@ html.lenis, html.lenis body { height: auto; }
     if (p < .02) swell += .01 * Math.sin(t * 2.4);
     var st = { e1: L.popAt ? 1 - q : tension, inf: 1 + swell, n: 7 - 3.2 * (L.popAt ? 1 - q : tension), lift: .15 * qb, rot: -.42 * qb };
     var W = lk.clientWidth, H = lk.clientHeight;
-    var base = W < 700 ? Math.min(W * .5, H * .3) : Math.min(W * .26, H * .36);
+    var base = W < 700 ? Math.min(W * .5, H * .3) * T.lockSize : Math.min(W * .26, H * .36) * T.lockSize;
     var zoom = Math.exp(Math.log(420) * e3);
-    var dolly = 1 + .7 * eio(ps / .62);             // aproximação lenta durante toda a pressão
+    var dolly = 1 + T.dolly * eio(ps / .62);             // aproximação lenta durante toda a pressão
     var S = base * dolly * zoom;
     var drift = .12 * (1 - eio(ps / .62));           // começa um pouco abaixo e sobe até o centro
-    var amp = L.popAt ? 0 : .3 + 11 * Math.pow(tension, 1.7);
+    var amp = L.popAt ? 0 : .3 + T.tremor * Math.pow(tension, 1.7);
     if (now - (L.shT || 0) > 33) { L.shT = now; L.sx = (Math.random() * 2 - 1) * amp; L.sy = (Math.random() * 2 - 1) * amp; }
     var sx = L.sx || 0, sy = L.sy || 0;
     // cursor move a peça: desliza e inclina na direção do mouse, com inércia
@@ -701,8 +697,8 @@ html.lenis, html.lenis body { height: auto; }
     var tny = my > -9000 ? Math.max(-1, Math.min(1, (my - H / 2) / (H / 2))) : (fine ? 0 : .3 * Math.sin(t * .37 + 1));
     var mk = 1 - Math.exp(-ldt * 3.5);
     L.nx = (L.nx || 0) + (tnx - (L.nx || 0)) * mk; L.ny = (L.ny || 0) + (tny - (L.ny || 0)) * mk;
-    var ox = L.nx * 26 * (1 - e3), oy = L.ny * 18 * (1 - e3);
-    var tilt = L.nx * .07 * (1 - e3), tc = Math.cos(tilt), ts = Math.sin(tilt);
+    var ox = L.nx * T.follow * (1 - e3), oy = L.ny * T.follow * .7 * (1 - e3);
+    var tilt = L.nx * T.tilt * (1 - e3), tc = Math.cos(tilt), ts = Math.sin(tilt);
     var cxu = -(sx + ox) / S, cyu = .02 - drift + .11 * clamp01(e3 * 6) - (sy + oy) / S;
 
     // fundo em paralaxe: cresce menos que o cadeado, então parece mais distante
@@ -721,15 +717,6 @@ html.lenis, html.lenis body { height: auto; }
     bctx.globalAlpha = 1;
     var noise = L.popAt ? flash : .6 * Math.pow(tension, 2.5);
     lctx.fillStyle = C_PAPER; lctx.fillRect(0, 0, W, H);
-    // depois do estouro, a fechadura acende: a luz é o mesmo feixe do hero, com a mesma largura na tela
-    var beamEl = document.querySelector('.beam'), beamW = beamEl ? beamEl.offsetWidth : 80;
-    var glow = L.popAt ? Math.min(1, q * 1.4) : 0;
-    var kX = W / 2 - cxu * S, kY = H / 2 + (.12 - cyu) * S;
-    if (glow > 0 && e3 < 1) {
-      var hr = Math.max(60, .45 * S), hg = lctx.createRadialGradient(kX, kY, 0, kX, kY, hr);
-      hg.addColorStop(0, 'rgba(232,96,42,' + (.32 * glow * (1 - e3)).toFixed(3) + ')'); hg.addColorStop(1, 'rgba(232,96,42,0)');
-      lctx.fillStyle = hg; lctx.fillRect(kX - hr, kY - hr, hr * 2, hr * 2);
-    }
     for (var j = 0; j < L.rows; j++) {
       var py = j * L.chh, uy = (py + L.chh / 2 - H / 2) / S + cyu;
       for (var i = 0; i < L.cols; i++) {
@@ -737,16 +724,7 @@ html.lenis, html.lenis body { height: auto; }
         var rx0 = ux - cxu, ry0 = uy - cyu;
         var v = lockAt(rx0 * tc + ry0 * ts + cxu, -rx0 * ts + ry0 * tc + cyu, st);
         if (!v) continue;
-        if (v === 1) {
-          lctx.globalAlpha = 1; lctx.fillStyle = C_CAFE; lctx.fillRect(px - .5, py - .5, L.cw + 1, L.chh + 1);
-          if (glow > 0) {
-            var bd = (px + L.cw / 2 - kX) / (beamW * .5), inten = Math.exp(-bd * bd * 1.4) * glow;
-            var vy = clamp01((py + L.chh / 2) / H);                     // mais forte no meio, como o feixe do hero
-            inten *= e3 > .5 ? (.35 + .65 * Math.sin(Math.PI * Math.min(1, vy * 1.1))) : 1;
-            if (inten > .02) { lctx.globalAlpha = inten; lctx.fillStyle = C_ACC; lctx.fillRect(px - .5, py - .5, L.cw + 1, L.chh + 1); }
-          }
-          continue;
-        }
+        if (v === 1) { lctx.globalAlpha = 1; lctx.fillStyle = C_CAFE; lctx.fillRect(px - .5, py - .5, L.cw + 1, L.chh + 1); continue; }
         if (noise > 0 && Math.random() < noise) { lctx.globalAlpha = .9; lctx.fillStyle = C_ACC; lctx.fillText(rnd(HEX), px, py); continue; }
         var k = Math.max(1, Math.min(RAMP.length - 1, Math.round(v * (RAMP.length - 1))));
         lctx.globalAlpha = .35 + .65 * v; lctx.fillStyle = C_CAFE; lctx.fillText(RAMP[k], px, py);
@@ -782,7 +760,7 @@ html.lenis, html.lenis body { height: auto; }
   document.addEventListener('DOMContentLoaded', function () {
     if (reduce || !window.Lenis) return;
     lenis = new window.Lenis({
-      duration: 1.1,
+      duration: T.lenisDur,
       easing: function (t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); },
       smoothWheel: true, wheelMultiplier: .8, touchMultiplier: 1.2, syncTouch: false
     });
@@ -807,7 +785,7 @@ html.lenis, html.lenis body { height: auto; }
     bands.forEach(function (b) {
       var top = b.getBoundingClientRect().top;
       var e = eio(clamp01((vhh - top) / (vhh * .7)));
-      var sc = (.93 + .07 * e).toFixed(4);
+      var sc = (T.bandMin + (1 - T.bandMin) * e).toFixed(4);
       if (b._sc !== sc) { b._sc = sc; b.style.transform = 'scale(' + sc + ')'; }
     });
   }
@@ -924,7 +902,7 @@ html.lenis, html.lenis body { height: auto; }
     });
     mags.forEach(function (m) {
       var near = m === hit;
-      var tx = near ? Math.max(-8, Math.min(8, m.dx * .1)) : 0, ty = near ? Math.max(-8, Math.min(8, m.dy * .3)) : 0;
+      var tx = near ? Math.max(-T.magnet, Math.min(T.magnet, m.dx * .1)) : 0, ty = near ? Math.max(-8, Math.min(8, m.dy * .3)) : 0;
       m.x += (tx - m.x) * k; m.y += (ty - m.y) * k;
       if (Math.abs(m.x) > .05 || Math.abs(m.y) > .05 || near) m.el.style.transform = 'translate(' + m.x.toFixed(2) + 'px,' + m.y.toFixed(2) + 'px)';
     });
@@ -1082,7 +1060,7 @@ html.lenis, html.lenis body { height: auto; }
   function dotsTick(now) {
     if (!D.vis || !D.w || now - D.last < 33) return; D.last = now;
     var t = now / 1000, r = dcv.getBoundingClientRect(), lx = mx - r.left, ly = my - r.top;
-    var sp = D.w < 600 ? 22 : 28, RR = D.w < 600 ? 120 : 190;
+    var sp = D.w < 600 ? 22 : 28, RR = D.w < 600 ? T.lens * .63 : T.lens;
     dctx.clearRect(0, 0, D.w, D.h);
     for (var y = sp / 2; y < D.h; y += sp) {
       for (var x = sp / 2; x < D.w; x += sp) {
@@ -1098,6 +1076,71 @@ html.lenis, html.lenis body { height: auto; }
       }
     }
     dctx.globalAlpha = 1;
+  }
+
+  /* ───────── painel de ajuste fino (só com ?ajuste no endereço) ───────── */
+  if (TUNE) {
+    var SPEC = [
+      ['Intro', null],
+      ['introDur', 'Duração mínima da intro (s)', 1, 8, .1],
+      ['resist', 'Resistência antes do estouro', 0, .95, .05],
+      ['pop', 'Ponto do estouro (fração da intro)', .3, .7, .01],
+      ['tremor', 'Tremor máximo (px)', 0, 30, 1],
+      ['dolly', 'Aproximação do cadeado', 0, 1.5, .05],
+      ['lockSize', 'Tamanho do cadeado', .5, 1.6, .05],
+      ['inertia', 'Inércia do cadeado (maior = mais preso ao scroll)', 1, 15, .5],
+      ['Cursor', null],
+      ['follow', 'Cadeado segue o cursor (px)', 0, 60, 1],
+      ['tilt', 'Inclinação do cadeado', 0, .2, .01],
+      ['portrait', 'Retrato segue o cursor', 0, .12, .005],
+      ['cipherR', 'Raio da cifra no texto (px)', 40, 240, 5],
+      ['magnet', 'Botões magnéticos (px)', 0, 24, 1],
+      ['lens', 'Lente do contato (px)', 80, 360, 10],
+      ['Página', null],
+      ['bandMin', 'Escala inicial das faixas', .8, 1, .01],
+      ['grain', 'Grão de filme', 0, .2, .01],
+      ['lenisDur', 'Suavidade do scroll (s)', .4, 2.4, .1]
+    ];
+    var DEF = JSON.parse(JSON.stringify(T));
+    var css = document.createElement('style');
+    css.textContent = '#tune{position:fixed;left:12px;bottom:12px;z-index:10000;width:300px;max-height:calc(100vh - 24px);overflow:auto;background:#1B110E;color:#F1EADF;font:12px/1.4 "Geist Mono",monospace;border-radius:14px;padding:12px 14px;box-shadow:0 18px 50px rgba(0,0,0,.4);cursor:auto}#tune *{cursor:auto}#tune h4{margin:12px 0 4px;font:500 10px/1 "Geist Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:#E8602A}#tune label{display:block;margin:8px 0 2px;color:rgba(241,234,223,.7)}#tune .r{display:flex;gap:8px;align-items:center}#tune input{flex:1;accent-color:#E8602A}#tune output{width:38px;text-align:right;color:#F1EADF}#tune .b{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}#tune button{flex:1;font:inherit;background:#F1EADF;color:#1B110E;border:0;border-radius:999px;padding:8px 10px;cursor:pointer}#tune button.o{background:#E8602A}#tune .x{float:right;background:none;color:#F1EADF;flex:none;padding:0 4px}';
+    document.head.appendChild(css);
+    var pn = document.createElement('div'); pn.id = 'tune'; pn.setAttribute('data-lenis-prevent', '');
+    var html = '<button class="x" id="tune-min" title="Recolher">–</button><b>Ajuste fino</b><div id="tune-body">';
+    SPEC.forEach(function (sp) {
+      if (!sp[1]) { html += '<h4>' + sp[0] + '</h4>'; return; }
+      html += '<label for="t-' + sp[0] + '">' + sp[1] + '</label><div class="r"><input type="range" id="t-' + sp[0] + '" min="' + sp[2] + '" max="' + sp[3] + '" step="' + sp[4] + '" value="' + T[sp[0]] + '"><output id="o-' + sp[0] + '">' + T[sp[0]] + '</output></div>';
+    });
+    html += '<div class="b"><button class="o" id="tune-copy">Copiar valores</button><button id="tune-intro">Ver intro</button><button id="tune-reset">Padrão</button></div></div>';
+    pn.innerHTML = html; document.body.appendChild(pn);
+    function applyT() {
+      document.documentElement.style.setProperty('--grain', T.grain);
+      if (lenis) lenis.options.duration = T.lenisDur;
+      bands.forEach(function (b) { b._sc = null; });
+      try { localStorage.setItem('isa-ajuste', JSON.stringify(T)); } catch (e) {}
+    }
+    SPEC.forEach(function (sp) {
+      if (!sp[1]) return;
+      var inp = document.getElementById('t-' + sp[0]), out = document.getElementById('o-' + sp[0]);
+      inp.addEventListener('input', function () { T[sp[0]] = parseFloat(inp.value); out.textContent = inp.value; applyT(); });
+    });
+    document.getElementById('tune-min').addEventListener('click', function () { var bd = document.getElementById('tune-body'); bd.hidden = !bd.hidden; this.textContent = bd.hidden ? '+' : '–'; });
+    document.getElementById('tune-copy').addEventListener('click', function () {
+      var btn = this, txt = JSON.stringify(T);
+      function ok(m) { btn.textContent = m; setTimeout(function () { btn.textContent = 'Copiar valores'; }, 1500); }
+      try { navigator.clipboard.writeText(txt).then(function () { ok('Copiado'); }, function () { prompt('Copie:', txt); }); } catch (e) { ok('Erro ao copiar'); }
+    });
+    document.getElementById('tune-intro').addEventListener('click', function () {
+      L.popAt = 0; L.opened = false; L.ps = 0; H.on = false;
+      if (lenis) lenis.scrollTo(0, { immediate: true, force: true }); else window.scrollTo(0, 0);
+    });
+    document.getElementById('tune-reset').addEventListener('click', function () {
+      for (var k in DEF) T[k] = DEF[k];
+      SPEC.forEach(function (sp) { if (!sp[1]) return; document.getElementById('t-' + sp[0]).value = T[sp[0]]; document.getElementById('o-' + sp[0]).textContent = T[sp[0]]; });
+      applyT();
+    });
+    document.addEventListener('DOMContentLoaded', applyT);
+    applyT();
   }
 
   /* ───────── a intro segura o scroll: velocidade máxima + resistência antes do estouro ───────── */
@@ -1120,8 +1163,8 @@ html.lenis, html.lenis body { height: auto; }
   function holdTick(dt) {
     if (!H.on) return;
     var end = introEnd(), p = H.y / end;
-    var minDur = 3.6;                                   // segundos mínimos para atravessar a intro
-    var resist = 1 - .65 * Math.max(0, 1 - Math.abs(p - .44) / .1); // pesa perto do estouro
+    var minDur = T.introDur;                                   // segundos mínimos para atravessar a intro
+    var resist = 1 - T.resist * Math.max(0, 1 - Math.abs(p - .44) / .1); // pesa perto do estouro
     var vmax = end / minDur * resist;
     var want = Math.max(-vmax, Math.min(vmax, H.pend * 5));
     H.v += (want - H.v) * (1 - Math.exp(-dt * 7));
@@ -1134,6 +1177,7 @@ html.lenis, html.lenis body { height: auto; }
   }
   if (introOn) {
     window.addEventListener('wheel', function (e) {
+      if (e.target.closest && e.target.closest('#tune')) return;
       var d = e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? window.innerHeight : 1);
       if (!inZone(d)) return;
       e.preventDefault(); e.stopImmediatePropagation();
@@ -1141,7 +1185,7 @@ html.lenis, html.lenis body { height: auto; }
     }, { passive: false, capture: true });
     window.addEventListener('touchstart', function (e) { H.ty = e.touches[0].clientY; }, { passive: true, capture: true });
     window.addEventListener('touchmove', function (e) {
-      if (H.ty === null) return;
+      if (H.ty === null || (e.target.closest && e.target.closest('#tune'))) return;
       var y = e.touches[0].clientY, d = (H.ty - y) * 1.6; H.ty = y;
       if (!inZone(d)) return;
       e.preventDefault();
@@ -1153,7 +1197,7 @@ html.lenis, html.lenis body { height: auto; }
       if (k === 'ArrowDown') d = 80; else if (k === 'ArrowUp') d = -80;
       else if (k === 'PageDown' || (k === ' ' && !e.shiftKey)) d = vhh * .8;
       else if (k === 'PageUp' || (k === ' ' && e.shiftKey)) d = -vhh * .8;
-      if (!d || !inZone(d) || /input|textarea/i.test(e.target.tagName)) return;
+      if (!d || !inZone(d) || /input|textarea/i.test(e.target.tagName) || (e.target.closest && e.target.closest('#tune'))) return;
       e.preventDefault(); e.stopImmediatePropagation();
       feed(d);
     }, { capture: true });
@@ -1163,6 +1207,7 @@ html.lenis, html.lenis body { height: auto; }
   var last = performance.now(), vh = window.innerHeight;
   function frame(now) {
     var dt = Math.min(.05, (now - last) / 1000); last = now;
+    R = T.cipherR;
     holdTick(dt);
     if (lenis) lenis.raf(now);
 
