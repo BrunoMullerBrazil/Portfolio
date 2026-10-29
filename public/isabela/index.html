@@ -107,6 +107,12 @@ ul { list-style: none; }
 .notch-alt .n-item.on .ring b, .notch-alt .n-item.hov .ring b { color: var(--cafe); }
 .notch-alt .n-cta.hov { background: var(--cafe); color: var(--on-dark); }
 
+.ic { width: .85em; height: .85em; flex: none; display: inline-block; vertical-align: -.08em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.feat .go .ic { width: 38%; height: 38%; }
+html { -webkit-tap-highlight-color: transparent; }
+html.intro-on { overscroll-behavior-y: none; }
+@media (hover: none) { body::after { animation: none; } }
+
 /* ── atmosfera: grão e brilho ── */
 body::after { content: ""; position: fixed; inset: -50%; z-index: 90; pointer-events: none; opacity: var(--grain, .07); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: grain 1s steps(4) infinite; }
 @keyframes grain { 0% { transform: translate(0, 0); } 25% { transform: translate(-3%, 2%); } 50% { transform: translate(2%, -3%); } 75% { transform: translate(-2%, -1%); } 100% { transform: translate(0, 0); } }
@@ -239,12 +245,21 @@ html.lenis, html.lenis body { height: auto; }
 .stage .who { top: calc(env(safe-area-inset-top, 0px) + 28px); font-size: .875rem; font-weight: 500; letter-spacing: -.01em; }
 .stage .who i { display: inline-block; width: 8px; height: 8px; background: var(--orange); margin-right: 8px; }
 .stage .hint { bottom: calc(env(safe-area-inset-bottom, 0px) + 32px); color: var(--mute); display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.stage .hint::after { content: ""; width: 1px; height: 36px; background: linear-gradient(var(--orange) 50%, transparent 0) 0 0 / 1px 200% ; animation: drip 1.6s var(--ease) infinite; }
+.gest { position: relative; width: 22px; height: 34px; border: 1.5px solid currentColor; border-radius: 999px; }
+.gest i { position: absolute; left: 50%; top: 6px; width: 3px; height: 7px; margin-left: -1.5px; border-radius: 2px; background: var(--orange); animation: wheel 1.6s var(--ease) infinite; }
+@keyframes wheel { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 70% { transform: translateY(11px); opacity: 1; } 100% { transform: translateY(13px); opacity: 0; } }
+@keyframes swipe { 0% { transform: translateY(0) scale(.6); opacity: 0; } 18% { transform: translateY(0) scale(1); opacity: 1; } 75% { transform: translateY(-15px) scale(1); opacity: 1; } 100% { transform: translateY(-17px) scale(.6); opacity: 0; } }
+.t-touch { display: none; }
+@media (hover: none) {
+  .t-touch { display: inline; } .t-mouse { display: none; }
+  .gest i { top: auto; bottom: 5px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; box-shadow: 0 0 0 4px rgba(232, 96, 42, .2); animation-name: swipe; }
+}
 @keyframes drip { from { background-position: 0 100%; } to { background-position: 0 -100%; } }
 .stage .hexc { bottom: calc(env(safe-area-inset-bottom, 0px) + 32px); color: var(--orange); opacity: 0; }
 .intro-on .badge { opacity: 0; pointer-events: none; }
 .intro-on .notch { transform: translate(-50%, -130%); pointer-events: none; }
-.badge { transition: opacity .5s; }
+.badge { transition: opacity .5s, transform .5s var(--ease); }
+.badge.away { opacity: 0; transform: translateY(8px); pointer-events: none; }
 
 /* ── entradas ── */
 [data-in] { position: relative; }
@@ -291,6 +306,7 @@ html.lenis, html.lenis body { height: auto; }
   .term { font-size: .66rem; }
 }
 @media (max-width: 520px) {
+  .b-long { display: none; }
   .n-item.on .n-txt { max-width: 0; opacity: 0; padding: 0; }
   .n-cta .lbl { display: none; }
   .n-cta { padding: 0 12px; }
@@ -321,7 +337,7 @@ html.lenis, html.lenis body { height: auto; }
       <a class="n-item" href="#palco" data-sec="palco" data-cursor="ir"><span class="ring"><svg viewBox="0 0 30 30" aria-hidden="true"><circle class="trk" cx="15" cy="15" r="12.5"/><circle class="bar" cx="15" cy="15" r="12.5" stroke-dasharray="78.54" stroke-dashoffset="78.54"/></svg><b aria-hidden="true">P</b></span><span class="n-txt"><span>Palco</span><i>0%</i></span></a>
       <a class="n-item" href="#atuacao" data-sec="atuacao" data-cursor="ir"><span class="ring"><svg viewBox="0 0 30 30" aria-hidden="true"><circle class="trk" cx="15" cy="15" r="12.5"/><circle class="bar" cx="15" cy="15" r="12.5" stroke-dasharray="78.54" stroke-dashoffset="78.54"/></svg><b aria-hidden="true">A</b></span><span class="n-txt"><span>Atuação</span><i>0%</i></span></a>
       <a class="n-item" href="#contato" data-sec="contato" data-cursor="ir"><span class="ring"><svg viewBox="0 0 30 30" aria-hidden="true"><circle class="trk" cx="15" cy="15" r="12.5"/><circle class="bar" cx="15" cy="15" r="12.5" stroke-dasharray="78.54" stroke-dashoffset="78.54"/></svg><b aria-hidden="true">C</b></span><span class="n-txt"><span>Contato</span><i>0%</i></span></a>
-    <a class="n-cta" href="#contato" data-cursor="falar"><span class="lbl">Convidar</span><span class="arr">↗</span></a>
+    <a class="n-cta" href="#contato" data-cursor="falar"><span class="lbl">Convidar</span><span class="arr"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 11.5l7-7M5.5 4.5h6v6"/></svg></span></a>
   </div>
 </nav>
 
@@ -330,7 +346,7 @@ html.lenis, html.lenis body { height: auto; }
     <canvas id="lockbg" aria-hidden="true"></canvas>
     <canvas id="lock" aria-hidden="true"></canvas>
     <span class="who"><i></i>Isabela Martins</span>
-    <span class="mono hint">Role para abrir</span>
+    <span class="hint"><span class="gest" aria-hidden="true"><i></i></span><span class="mono"><span class="t-mouse">Role para abrir</span><span class="t-touch">Deslize para abrir</span></span></span>
     <span class="mono hexc">0x00</span>
   </div>
 </section>
@@ -342,7 +358,7 @@ html.lenis, html.lenis body { height: auto; }
       <p class="role">Ethical hacker <span class="soft">&amp; desenvolvedora de inteligência artificial.</span></p>
       <div class="hero-foot mono">
         <span>Florianópolis, BR</span>
-        <a href="#sobre" data-cursor="descer">Rolar ↓</a>
+        <a href="#sobre" data-cursor="descer"><span class="t-mouse">Rolar</span><span class="t-touch">Deslize</span> ↓&#xFE0E;</a>
       </div>
     </div>
     <div class="field-wrap">
@@ -379,7 +395,7 @@ html.lenis, html.lenis body { height: auto; }
         <div class="feat-body">
           <span class="mono meta"><span>17.06.2026</span><span>Security Leaders Florianópolis</span><span>Painel · Natura e SumUp</span></span>
           <h3>O futuro da Cyber Security na era da IA Agêntica e Física</h3>
-          <span class="go" aria-hidden="true">↗</span>
+          <span class="go" aria-hidden="true"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 11.5l7-7M5.5 4.5h6v6"/></svg></span>
         </div>
       </a>
       <ul class="rows">
@@ -421,8 +437,8 @@ html.lenis, html.lenis body { height: auto; }
     <div class="contact in-pad">
       <h2 data-cipher data-reveal>Vamos<br><span class="soft">conversar.</span></h2>
       <div class="links">
-        <a href="https://www.linkedin.com/in/isabela-rodrigues-martins-50ab0723a/" target="_blank" rel="noopener" data-cursor="abrir"><span class="mono">LinkedIn</span>Isabela Rodrigues Martins ↗</a>
-        <a href="https://www.instagram.com/isabelahacker.ai/" target="_blank" rel="noopener" data-cursor="abrir"><span class="mono">Instagram</span>@isabelahacker.ai ↗</a>
+        <a href="https://www.linkedin.com/in/isabela-rodrigues-martins-50ab0723a/" target="_blank" rel="noopener" data-cursor="abrir"><span class="mono">LinkedIn</span>Isabela Rodrigues Martins <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 11.5l7-7M5.5 4.5h6v6"/></svg></a>
+        <a href="https://www.instagram.com/isabelahacker.ai/" target="_blank" rel="noopener" data-cursor="abrir"><span class="mono">Instagram</span>@isabelahacker.ai <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 11.5l7-7M5.5 4.5h6v6"/></svg></a>
         <button type="button" id="copy-mail" data-cursor="copiar" data-mail="contato@lorem.com"><span class="mono">E-mail</span><span class="mail-v">contato@lorem.com</span></button>
       </div>
       <div class="contact-foot mono">
@@ -433,7 +449,7 @@ html.lenis, html.lenis body { height: auto; }
   </section>
 </main>
 
-<span class="badge mono">Preview · conteúdo provisório</span>
+<span class="badge mono">Preview<span class="b-long"> · conteúdo provisório</span></span>
 <div class="peek" aria-hidden="true"><b></b><span class="mono"></span></div>
 
 <script>
@@ -680,6 +696,7 @@ html.lenis, html.lenis body { height: auto; }
     hexc.textContent = '0x' + (hv < 16 ? '0' : '') + hv.toString(16).toUpperCase() + (L.popAt ? ' · Aberto' : '');
     
 
+    if (!fine && now - (L.last || 0) < 33) return; L.last = now;
     var swell = L.popAt ? .09 * (1 - q) : .09 * tension + .022 * tension * Math.sin(t * 55);
     if (p < .02) swell += .01 * Math.sin(t * 2.4);
     var st = { e1: L.popAt ? 1 - q : tension, inf: 1 + swell, n: 7 - 3.2 * (L.popAt ? 1 - q : tension), lift: .15 * qb, rot: -.42 * qb };
@@ -807,6 +824,7 @@ html.lenis, html.lenis body { height: auto; }
         c.px = mx;
       } else c.px = null;
       var rest = -3 + Math.sin(now / 1400) * .8;          // balanço leve de algo pendurado
+      c.v += (window.scrollY - lastSY) * (fine ? .15 : .5);   // o scroll também sacode o crachá
       c.v += (-(c.a - rest) * 38 - c.v * 3.2) * dt;
       c.a += c.v * dt; c.a = Math.max(-16, Math.min(16, c.a));
       c.el.style.transform = 'rotate(' + c.a.toFixed(2) + 'deg)';
@@ -1060,6 +1078,7 @@ html.lenis, html.lenis body { height: auto; }
   function dotsTick(now) {
     if (!D.vis || !D.w || now - D.last < 33) return; D.last = now;
     var t = now / 1000, r = dcv.getBoundingClientRect(), lx = mx - r.left, ly = my - r.top;
+    if (TB && now - TB.t < 1400) { lx = TB.x - r.left; ly = TB.y - r.top; }
     var sp = D.w < 600 ? 22 : 28, RR = D.w < 600 ? T.lens * .63 : T.lens;
     dctx.clearRect(0, 0, D.w, D.h);
     for (var y = sp / 2; y < D.h; y += sp) {
@@ -1203,6 +1222,24 @@ html.lenis, html.lenis body { height: auto; }
     }, { capture: true });
   }
 
+  /* ───────── toque: equivalentes ao que o mouse faz ───────── */
+  var TB = null; // último toque (cifra, lente, ilustrações)
+  document.addEventListener('pointerdown', function (e) {
+    if (e.pointerType !== 'touch') return;
+    TB = { x: e.clientX, y: e.clientY, t: performance.now() };
+    chips.forEach(function (c) { c.hov = c.el.contains(e.target); if (c.hov) setTimeout(function () { c.hov = false; }, 1600); });
+  }, { passive: true });
+  document.addEventListener('touchmove', function (e) {
+    var tt = e.touches[0]; if (TB && tt) { TB.x = tt.clientX; TB.y = tt.clientY; TB.t = performance.now(); }
+  }, { passive: true });
+  var lastSY = window.scrollY;
+  // selo de preview sai do caminho enquanto a pessoa rola
+  var badge = document.querySelector('.badge'), badgeT;
+  window.addEventListener('scroll', function () {
+    badge.classList.add('away'); clearTimeout(badgeT);
+    badgeT = setTimeout(function () { badge.classList.remove('away'); }, 1100);
+  }, { passive: true });
+
   /* ───────── loop ───────── */
   var last = performance.now(), vh = window.innerHeight;
   function frame(now) {
@@ -1219,12 +1256,18 @@ html.lenis, html.lenis body { height: auto; }
         var lit = Math.round(Math.max(0, Math.min(1, p)) * g.words.length);
         if (lit !== g.lit) { g.lit = lit; g.words.forEach(function (w, i) { w.classList.toggle('lit', i < lit); }); }
       }
-      if (reduce || !fine) return;
-      if (mx < r.left - R || mx > r.right + R || my < r.top - R || my > r.bottom + R) return;
-      g.chars.forEach(function (c) {
-        var b = c.el.getBoundingClientRect();
-        var dx = mx - (b.left + b.width / 2), dy = my - (b.top + b.height / 2), d = Math.sqrt(dx * dx + dy * dy);
-        if (d < R) { var s = 1 - d / R; if (s > c.heat) c.heat = s; active.add(c); }
+      if (reduce) return;
+      // fontes de "calor": o cursor (mouse) e, no toque, o ponto tocado por um instante
+      var pts = [];
+      if (fine) pts.push([mx, my]);
+      if (TB && now - TB.t < 450) pts.push([TB.x, TB.y]);
+      pts.forEach(function (pt) {
+        if (pt[0] < r.left - R || pt[0] > r.right + R || pt[1] < r.top - R || pt[1] > r.bottom + R) return;
+        g.chars.forEach(function (c) {
+          var b = c.el.getBoundingClientRect();
+          var dx = pt[0] - (b.left + b.width / 2), dy = pt[1] - (b.top + b.height / 2), d = Math.sqrt(dx * dx + dy * dy);
+          if (d < R) { var s = 1 - d / R; if (s > c.heat) c.heat = s; active.add(c); }
+        });
       });
     });
 
@@ -1245,6 +1288,7 @@ html.lenis, html.lenis body { height: auto; }
     drawLock(now);
     bandsTick(); credTick(now, dt); peekTick(dt); termTick(now); magTick(dt);
     notchTick(); chipTick(now); dotsTick(now);
+    lastSY = window.scrollY;
     requestAnimationFrame(frame);
   }
 
