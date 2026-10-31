@@ -9,6 +9,8 @@
 <meta property="og:image" content="https://aue.productions/boulevard/og.jpg?v=6">
 </head>
 <body>
+<script>(function(){if(/[?&]embed=1/.test(location.search)){var r=document.documentElement;r.classList.add('embed');r.setAttribute('data-theme','dark');}})();</script>
+<style>html.embed{--bg:#0f0d0b!important}html.embed .top,html.embed .dock,html.embed .note,html.embed .hint,html.embed .rcard,html.embed .lab,html.embed .badge,html.embed #fotosBtn,html.embed #lb{display:none!important}html.embed #stage canvas{pointer-events:none}</style>
 <title>Apto B112 · Boulevard em 3D</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,600;1,6..72,400&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
 <style>
@@ -446,7 +448,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);overflow:hi
     nightT+=((night?1:0)-nightT)*(RM?1:0.06); if(Math.abs(nightT-lastNight)>1e-3){ applyNight(); lastNight=nightT; }
     controls.update(); renderer.render(scene,camera);
   }
+  if(document.documentElement.classList.contains('embed')){ setWalls(true); controls.autoRotate=!RM; controls.autoRotateSpeed=1.1; controls.enableZoom=false; controls.enabled=false; }
   applyNight(); requestAnimationFrame(loop);
+  if(document.documentElement.classList.contains('embed') && window.parent!==window){ setTimeout(function(){ try{ window.parent.postMessage('b112-ready','*'); }catch(e){} },1500); }
   setTimeout(function(){ var l=document.getElementById('load'); if(l){ l.style.opacity=0; setTimeout(function(){ l.remove(); },700); } },300);
 })();
 </script>
