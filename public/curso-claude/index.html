@@ -174,9 +174,13 @@ a{color:#e0dbd1}a:hover{color:#ece7dd}
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem">
 <div class="card rv d1" style="padding: 1.5rem; border: 1px solid rgba(255,255,255,.06); border-radius: 20px; background: rgba(255,255,255,.014); box-shadow: 0 22px 44px -34px rgba(0,0,0,.72); display: flex; flex-direction: column; gap: 1.25rem">
-<div class="media" style="aspect-ratio: 16 / 10; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; color: #8a857c; font-size: 0.875rem">[print: simulação interativa para aula]</div>
+<a href="/curso-claude/equilibrio/" class="tile" style="position: relative; display: block; aspect-ratio: 16 / 10; border-radius: 12px; overflow: hidden; background: #0f0d0b">
+<img src="/curso-claude/equilibrio/poster.webp" alt="Simulação de equilíbrio químico: moléculas de N₂O₄ e NO₂ num recipiente" loading="lazy" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block">
+<iframe id="liveSim" title="Simulação de equilíbrio químico rodando" data-src="/curso-claude/equilibrio/?embed=1" tabindex="-1" aria-hidden="true" loading="lazy" style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity 1s cubic-bezier(.16,1,.3,1); pointer-events: none"></iframe>
+<span style="position: absolute; right: 0.875rem; bottom: 0.75rem; z-index: 2; font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #ece7dd; background: rgba(15,13,11,.72); border: 1px solid rgba(255,255,255,.08); border-radius: 100px; padding: 0.45rem 0.9rem">Testar a simulação ↗</span>
+</a>
 <h3 class="disp" style="margin: 0; font-weight: 44; font-size: 1.75rem; letter-spacing: -0.01em; line-height: 1.05; color: #ece7dd">Uma simulação para a sua aula</h3>
-<p style="margin: 0; color: #b0a898">Um conteúdo difícil de explicar no quadro vira algo que o aluno abre, gira e testa: uma reação química, um circuito, um ciclo, um gráfico que muda na hora.</p>
+<p style="margin: 0; color: #b0a898">Um conteúdo difícil de explicar no quadro vira algo que o aluno abre e testa. No exemplo acima, o equilíbrio N₂O₄ ⇌ 2 NO₂: aqueça, esfrie e comprima o gás e veja Le Chatelier acontecer.</p>
 </div>
 <div class="card rv d2" style="padding: 1.5rem; border: 1px solid rgba(255,255,255,.06); border-radius: 20px; background: rgba(255,255,255,.014); box-shadow: 0 22px 44px -34px rgba(0,0,0,.72); display: flex; flex-direction: column; gap: 1.25rem">
 <div style="aspect-ratio: 16 / 10; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem">
@@ -339,6 +343,11 @@ if('IntersectionObserver' in window && !RM){
 }
 
 /* ── 3D ao vivo no hero: carrega o iframe só depois da página pronta ── */
+var sim=document.getElementById('liveSim');
+if(sim && !RM && 'IntersectionObserver' in window){
+  window.addEventListener('message',function(e){ if(e.source===sim.contentWindow && e.data==='sim-ready') sim.style.opacity=1; });
+  var sio=new IntersectionObserver(function(es){ if(es[0].isIntersecting){ sim.src=sim.getAttribute('data-src'); sio.disconnect(); } },{rootMargin:'200px'}); sio.observe(sim);
+}
 var live=document.getElementById('live3d');
 if(live && !RM){
   window.addEventListener('message',function(e){ if(e.source===live.contentWindow && e.data==='b112-ready') live.style.opacity=1; });
