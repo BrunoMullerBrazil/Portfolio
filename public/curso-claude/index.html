@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mostrar em vez de explicar · Curso de Claude com Bruno Müller</title>
+<meta name="description" content="Turma piloto online e ao vivo: crie simulações para a sua aula e tours 3D de casas e apartamentos com o Claude, sem programar e sem instalar nada.">
+<meta property="og:title" content="Mostrar em vez de explicar">
+<meta property="og:description" content="Simulações para aula e tours 3D de imóveis com o Claude. Turma piloto, 15 vagas.">
+<meta property="og:image" content="https://aue.productions/boulevard/b112/renders/noite_sala.webp">
+<meta property="og:url" content="https://aue.productions/curso-claude/">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0c0c0b">
+<link rel="preload" href="/fonts/franie.woff2" as="font" type="font/woff2" crossorigin>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+img{max-width:100%}
+.lead{width:100%;max-width:44rem;margin-top:.5rem;display:flex;flex-direction:column;gap:1.25rem;text-align:left;padding:1.75rem;border:1px solid rgba(255,255,255,.08);border-radius:20px;background:rgba(12,12,11,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.lf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.lf{display:flex;flex-direction:column;gap:.4rem}
+.lf span,.lf-perfil legend{font-size:.6875rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:#b0a898}
+.lf em{font-style:normal;text-transform:none;letter-spacing:0;color:#8a857c}
+.lf input{font:300 1rem Inter,sans-serif;color:#ece7dd;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:12px;min-height:3rem;padding:0 1rem;outline:none;transition:border-color .3s,background .3s}
+.lf input:focus{border-color:#c8cfa8;background:rgba(255,255,255,.05)}
+.lf input[aria-invalid="true"]{border-color:#d9a07a}
+.lf-perfil{border:0;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.5rem}
+.lf-perfil legend{margin-bottom:.6rem;padding:0}
+.chip{position:relative;cursor:pointer}
+.chip input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.chip span{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:100px;font-size:.875rem;color:#c9c3ba;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);transition:color .3s,background .3s,border-color .3s}
+.chip input:checked+span{color:#12140e;background:#c8cfa8;border-color:#c8cfa8}
+.chip input:focus-visible+span{outline:2px solid #c8cfa8;outline-offset:2px}
+.lf-ok{display:flex;gap:.75rem;align-items:flex-start;font-size:.875rem;color:#b0a898;cursor:pointer}
+.lf-ok input{margin-top:.2rem;width:1.1rem;height:1.1rem;accent-color:#c8cfa8;flex:none}
+.lf-btn{border:0;min-height:3.5rem;border-radius:100px;font:500 1rem Inter,sans-serif;cursor:pointer;align-self:flex-start;padding:0 2.25rem}
+.lf-btn[disabled]{opacity:.6;cursor:wait}
+.lf-msg{margin:0;font-size:.9375rem;color:#c9c3ba;min-height:1.2em}
+.lf-msg a{color:#c8cfa8}
+#cc{position:fixed;left:1rem;right:1rem;bottom:1rem;z-index:50;max-width:34rem;margin:0 auto;display:none;gap:1rem;align-items:center;flex-wrap:wrap;padding:1rem 1.25rem;border-radius:16px;background:rgba(18,18,16,.82);backdrop-filter:blur(18px) saturate(1.25);-webkit-backdrop-filter:blur(18px) saturate(1.25);border:1px solid rgba(255,255,255,.09);box-shadow:0 22px 55px -22px rgba(0,0,0,.7);font-size:.8125rem;color:#c9c3ba}
+#cc.show{display:flex}
+#cc p{margin:0;flex:1 1 16rem}
+#cc button{min-height:44px;padding:0 1.1rem;border-radius:100px;font:500 .8125rem Inter,sans-serif;cursor:pointer}
+#ccNo{background:transparent;color:#c9c3ba;border:1px solid rgba(255,255,255,.15)}
+#ccYes{background:#c8cfa8;color:#12140e;border:0}
+
+@font-face{font-family:'Franie';src:url('/fonts/franie.woff2') format('woff2');font-weight:1 100;font-style:normal;font-display:swap}
+body{margin:0;background:#0c0c0b}
+a{color:#e0dbd1}a:hover{color:#ece7dd}
+.disp{font-family:'Franie','Inter',sans-serif}
+.ital{font-variation-settings:"ital" 100}
+.herobg{position:relative;overflow:hidden;background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(150,168,110,.045) 27px 28px),repeating-linear-gradient(90deg,transparent 0 27px,rgba(150,168,110,.045) 27px 28px),repeating-linear-gradient(0deg,transparent 0 139px,rgba(150,168,110,.075) 139px 140px),repeating-linear-gradient(90deg,transparent 0 139px,rgba(150,168,110,.075) 139px 140px),radial-gradient(42% 32% at 72% 16%,rgba(190,205,150,.06),transparent 70%),radial-gradient(135% 108% at 26% 8%,#2b331e 0%,#1e2416 32%,#151a0f 62%,#0c0c0b 100%)}
+.herobg::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:url('/assets/window-shadow.webp') center right/cover no-repeat;opacity:.9}
+.herobg::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");background-size:240px 240px;opacity:.10;mix-blend-mode:overlay}
+.contactbg{position:relative;overflow:hidden;border-top:1px solid rgba(136,144,99,.1);background:radial-gradient(120% 130% at 50% 115%,#161b10 0%,#0e120a 55%,#0c0c0b 100%)}
+.contactbg::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(150,168,110,.028) 27px 28px),repeating-linear-gradient(90deg,transparent 0 27px,rgba(150,168,110,.028) 27px 28px)}
+.contactbg::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:url('/assets/window-shadow.webp') center left/cover no-repeat;opacity:.42;mix-blend-mode:multiply;transform:scaleX(-1)}
+.media{background:radial-gradient(120% 130% at 50% 22%,#2c2420 0%,#17110f 58%,#0b0908 100%)}
+:root{--f:41.667ms;--ease:cubic-bezier(.16,1,.3,1);--settle:cubic-bezier(.18,1.22,.32,1.02)}
+@keyframes foco{from{opacity:0;transform:translateY(28px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes mask{from{transform:translateY(105%);opacity:0;filter:blur(8px)}to{transform:none;opacity:1;filter:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.h-fade{animation:fade calc(var(--f)*18) var(--ease) both}
+.h-foco{animation:foco calc(var(--f)*30) var(--ease) both}
+.ml{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em}
+.h-mask{display:inline-block;animation:mask 1.1s var(--ease) both}
+.t4{animation-delay:calc(var(--f)*4)}.t8{animation-delay:calc(var(--f)*8)}.t11{animation-delay:calc(var(--f)*11)}.t14{animation-delay:calc(var(--f)*14)}.t18{animation-delay:calc(var(--f)*18)}.t22{animation-delay:calc(var(--f)*22)}.t26{animation-delay:calc(var(--f)*26)}.t32{animation-delay:calc(var(--f)*32)}
+.rv{transition:opacity calc(var(--f)*24) var(--ease),transform calc(var(--f)*30) var(--settle),filter calc(var(--f)*24) var(--ease)}
+.ml>.rm{display:inline-block;transition:transform 1.1s var(--ease),opacity .7s var(--ease),filter 1s var(--ease)}
+.armed .sec:not(.on) .rv{opacity:0;transform:translateY(28px);filter:blur(6px)}
+.armed .sec:not(.on) .ml>.rm{transform:translateY(105%);opacity:0;filter:blur(8px)}
+.d1{transition-delay:calc(var(--f)*3)}.d2{transition-delay:calc(var(--f)*6)}.d3{transition-delay:calc(var(--f)*9)}.d4{transition-delay:calc(var(--f)*12)}
+.card{position:relative;overflow:hidden;transition:translate .4s var(--ease),opacity .4s var(--ease),filter .4s var(--ease),border-color .3s,background .3s,box-shadow .4s var(--ease)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:#889063;transform:scaleX(0);transform-origin:left;transition:transform .8s .1s cubic-bezier(.22,1,.36,1)}
+.card:hover{border-color:rgba(255,255,255,.12)!important;background:rgba(255,255,255,.02)!important;box-shadow:0 28px 56px -30px rgba(0,0,0,.82)!important;translate:0 -3px}
+.card:hover::before{transform:scaleX(1)}
+.rv.card{transition:opacity calc(var(--f)*24) var(--ease),transform calc(var(--f)*30) var(--settle),filter calc(var(--f)*24) var(--ease),translate .4s var(--ease),border-color .3s,background .3s,box-shadow .4s var(--ease)}
+.rv.card.d1{transition-delay:calc(var(--f)*3),calc(var(--f)*3),calc(var(--f)*3),0s,0s,0s,0s}
+.rv.card.d2{transition-delay:calc(var(--f)*6),calc(var(--f)*6),calc(var(--f)*6),0s,0s,0s,0s}
+.rv.card.d3{transition-delay:calc(var(--f)*9),calc(var(--f)*9),calc(var(--f)*9),0s,0s,0s,0s}
+.tile{transition:translate .4s var(--ease),box-shadow .4s var(--ease)}
+.tile:hover{translate:0 -3px;box-shadow:0 18px 36px -16px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.09)}
+.cta{background:#c8cfa8;color:#12140e;box-shadow:0 22px 46px -18px rgba(200,207,168,.45);transition:background .3s var(--ease),translate .3s var(--ease),box-shadow .3s var(--ease)}
+.cta:hover{background:#dde3bd;color:#12140e;translate:0 -2px;box-shadow:0 26px 52px -18px rgba(200,207,168,.6)}
+.ulink{text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/100% 1px no-repeat;padding-bottom:3px;transition:background-size .4s var(--ease)}
+.ulink:hover{background-size:0% 1px;background-position:100% 100%}
+.cine{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#0b0908;box-shadow:0 50px 100px -44px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05)}
+.cine::after{content:'';position:absolute;inset:0;z-index:3;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.42));pointer-events:none}
+.slide{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;z-index:1;transition:opacity 0s calc(var(--f)*18)}
+.slide.on{opacity:1;z-index:2;transition:none;animation:wipe calc(var(--f)*18) var(--ease) both}
+@keyframes wipe{from{clip-path:inset(0 0 0 100%)}to{clip-path:inset(0 0 0 0)}}
+.tab{font-family:Inter,sans-serif;font-size:10px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:#8a857c;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:100px;padding:0 18px;min-height:44px;cursor:pointer;transition:color .3s,background .3s,border-color .3s}
+.tab:hover{color:#e0dbd1}
+.tab.act{color:#12140e;background:#c8cfa8;border-color:#c8cfa8}
+.arrow{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);color:#c9c3ba;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .3s,border-color .3s}
+.arrow:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2)}
+.tp{background:linear-gradient(180deg,rgba(12,12,11,.1) 0%,rgba(12,12,11,.88) 78%),url('/boulevard/hero.webp') center/cover no-repeat}
+.ta{background:linear-gradient(180deg,rgba(12,12,11,.1) 0%,rgba(12,12,11,.88) 78%),url('/boulevard/b112/renders/noite_jantar.webp') center/cover no-repeat}
+@media (prefers-reduced-motion:reduce){.slide.on{animation:none}}
+@media (prefers-reduced-motion:reduce){.h-fade,.h-foco,.h-mask{animation:none}.rv,.ml>.rm,.card,.tile,.cta{transition:none}}
+</style>
+
+</head>
+<body>
+
+<div id="root" style="font-family: Inter, system-ui, sans-serif; font-weight: 300; color: #e0dbd1; background: #0c0c0b; line-height: 1.6; font-size: 1.0625rem">
+
+<div class="herobg">
+<header class="h-fade" style="position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; padding: 1.75rem 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center">
+<img src="/assets/muller-logo.svg" alt="Müller" style="height: 1.5rem; width: auto; display: block">
+<div style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #b0a898">Turma piloto · 01</div>
+</header>
+
+<section style="position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; padding: 4rem 1.5rem 7rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3.5rem; align-items: center">
+<div style="display: flex; flex-direction: column; gap: 1.75rem">
+<div class="h-foco t4" style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #b0a898">Online e ao vivo · 15 vagas · lote fundador</div>
+<h1 class="disp" style="margin: 0; font-weight: 28; font-size: clamp(3rem, 6.6vw, 6.25rem); line-height: 0.92; letter-spacing: -0.02em; color: #ece7dd"><span class="ml"><span class="h-mask t8">Mostrar</span></span><span class="ml"><span class="h-mask t11 ital" style="white-space: nowrap; color: #c8cfa8">em vez de</span></span><span class="ml"><span class="h-mask t14">explicar.</span></span></h1>
+<p class="h-foco t18" style="margin: 0; font-size: 1.1875rem; color: #c9c3ba; max-width: 33rem">Crie simulações para a sua aula e tours 3D de casas e apartamentos com o Claude. Sem programar e sem instalar nada.</p>
+<div class="h-foco t22" style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center">
+<a class="cta" href="#inscricao" style="display: inline-flex; align-items: center; justify-content: center; min-height: 3.25rem; padding: 0 1.75rem; font-weight: 500; font-size: 0.9375rem; text-decoration: none; border-radius: 100px">Quero minha vaga</a>
+<div style="display: flex; flex-direction: column; gap: 0.125rem"><span class="disp" style="font-weight: 34; font-size: 1.625rem; line-height: 1; color: #ece7dd">R$ 97</span><span style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #b0a898">2 encontros de 2h · [datas]</span></div>
+</div>
+</div>
+<div class="h-foco t14" style="display: flex; flex-direction: column; gap: 0.875rem">
+<div class="cine" style="aspect-ratio: 4 / 3; background: #0f0d0b">
+<img src="/boulevard/b112/renders/noite_sala.webp" alt="Sala do apartamento B112 decorado, à noite" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block">
+<iframe id="live3d" title="Apartamento B112 em 3D, girando" data-src="/boulevard/b112/?embed=1" tabindex="-1" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity 1.2s cubic-bezier(.16,1,.3,1); pointer-events: none; z-index: 1"></iframe>
+</div>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 1rem; font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #b0a898"><span>Apto B112 · 3D ao vivo</span><a class="ulink" href="/boulevard/b112/" style="color: #e0dbd1">Abrir em 3D ↗</a></div>
+</div>
+</section>
+<div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 9rem; z-index: 1; background: linear-gradient(180deg, rgba(12,12,11,0), #0c0c0b)"></div>
+</div>
+
+<section class="sec" style="padding: 5rem 1.5rem 7rem; background: #0c0c0b">
+<div style="max-width: 1240px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 3rem; align-items: center">
+<div class="rv" style="flex: 999 1 560px; min-width: 0">
+<div class="cine">
+<img class="slide on" src="/boulevard/hero.webp" alt="Boulevard à noite, com a fachada iluminada">
+<img class="slide" src="/boulevard/b112/renders/dia_sala.webp" alt="Sala do apartamento B112 durante o dia" loading="lazy">
+<img class="slide" src="/boulevard/b112/renders/noite_jantar.webp" alt="Mesa de jantar e cozinha à noite" loading="lazy">
+<img class="slide" src="/boulevard/b112/renders/cozinha.webp" alt="Cozinha com península e mesa redonda" loading="lazy">
+<img class="slide" src="/boulevard/b112/renders/noite_escritorio.webp" alt="Escritório com duas telas à noite" loading="lazy">
+<img class="slide" src="/boulevard/b112/renders/dormitorio1.webp" alt="Quarto com parede verde" loading="lazy">
+<div style="position: absolute; left: 1.25rem; bottom: 1.125rem; z-index: 4; font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #e0dbd1" id="slLabel">Boulevard · fachada</div>
+</div>
+</div>
+<div style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 1.5rem">
+<div class="rv d1" style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">Feito com o Claude</div>
+<div class="ml"><h2 class="disp rm" style="margin: 0; font-weight: 40; font-size: clamp(1.75rem, 3.4vw, 2.75rem); line-height: 1.03; letter-spacing: -0.02em; color: #ece7dd" id="pTitle">Boulevard em 3D</h2></div>
+<p class="rv d2" style="margin: 0; color: #b0a898" id="pDesc">Um prédio inteiro para navegar: cada apartamento, as plantas, o sol nas fachadas e o andamento da obra.</p>
+<div class="rv d2" style="display: flex; flex-wrap: wrap; gap: 0.5rem">
+<button type="button" class="tab act" id="tabP">Prédio</button>
+<button type="button" class="tab" id="tabA">Apto B112</button>
+</div>
+<div class="rv d3" style="display: flex; align-items: center; gap: 0.75rem">
+<button type="button" class="arrow" aria-label="Imagem anterior" id="gPrev"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<button type="button" class="arrow" aria-label="Próxima imagem" id="gNext"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg></button>
+<span class="disp" style="font-weight: 30; font-size: 1.375rem; color: #e0dbd1; margin-left: 0.5rem" id="gCount">01 / 06</span>
+</div>
+<a class="ulink rv d4" id="pHref" href="/boulevard/" style="align-self: flex-start; font-size: 0.75rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #e0dbd1">Abrir em 3D ↗</a>
+</div>
+</div>
+</section>
+
+<section class="sec" style="padding: 7rem 1.5rem; background: #0c0c0b">
+<div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 3rem">
+<div style="display: flex; flex-direction: column; gap: 1rem; max-width: 48rem">
+<div class="rv" style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">01 — O que você sai fazendo</div>
+<div class="ml"><h2 class="disp rm" style="margin: 0; font-weight: 30; font-size: clamp(2.125rem, 5vw, 3.875rem); line-height: 1; letter-spacing: -0.02em; color: #ece7dd">Dois materiais prontos, feitos <span class="ital" style="color: #c8cfa8">por você</span>, durante as aulas.</h2></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem">
+<div class="card rv d1" style="padding: 1.5rem; border: 1px solid rgba(255,255,255,.06); border-radius: 20px; background: rgba(255,255,255,.014); box-shadow: 0 22px 44px -34px rgba(0,0,0,.72); display: flex; flex-direction: column; gap: 1.25rem">
+<div class="media" style="aspect-ratio: 16 / 10; border-radius: 12px; display: flex; align-items: center; justify-content: center; padding: 1.5rem; text-align: center; color: #8a857c; font-size: 0.875rem">[print: simulação interativa para aula]</div>
+<h3 class="disp" style="margin: 0; font-weight: 44; font-size: 1.75rem; letter-spacing: -0.01em; line-height: 1.05; color: #ece7dd">Uma simulação para a sua aula</h3>
+<p style="margin: 0; color: #b0a898">Um conteúdo difícil de explicar no quadro vira algo que o aluno abre, gira e testa: uma reação química, um circuito, um ciclo, um gráfico que muda na hora.</p>
+</div>
+<div class="card rv d2" style="padding: 1.5rem; border: 1px solid rgba(255,255,255,.06); border-radius: 20px; background: rgba(255,255,255,.014); box-shadow: 0 22px 44px -34px rgba(0,0,0,.72); display: flex; flex-direction: column; gap: 1.25rem">
+<div style="aspect-ratio: 16 / 10; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem">
+<a href="/boulevard/b112/" class="ta tile" style="display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; padding: 1.25rem; border-radius: 12px; text-decoration: none; color: #ece7dd">
+<span style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #e0dbd1">Apto B112 · decorado</span>
+<span style="display: flex; flex-direction: column; gap: 0.5rem"><span class="disp" style="font-weight: 40; font-size: 1.375rem; line-height: 1.05; letter-spacing: -0.01em">Um apartamento mobiliado, cômodo por cômodo</span><span style="font-size: 0.8125rem; color: #c9c3ba">Abrir em 3D ↗</span></span>
+</a>
+<a href="/boulevard/" class="tp tile" style="display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; padding: 1.25rem; border-radius: 12px; text-decoration: none; color: #ece7dd">
+<span style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #e0dbd1">Prédio · Boulevard</span>
+<span style="display: flex; flex-direction: column; gap: 0.5rem"><span class="disp" style="font-weight: 40; font-size: 1.375rem; line-height: 1.05; letter-spacing: -0.01em">Um prédio inteiro, com plantas e sol nas fachadas</span><span style="font-size: 0.8125rem; color: #c9c3ba">Abrir em 3D ↗</span></span>
+</a>
+</div>
+<h3 class="disp" style="margin: 0; font-weight: 44; font-size: 1.75rem; letter-spacing: -0.01em; line-height: 1.05; color: #ece7dd">Um tour 3D de um imóvel</h3>
+<p style="margin: 0; color: #b0a898">A partir da foto de uma planta baixa, você monta um modelo 3D navegável e manda por link para quem vai comprar, alugar ou reformar. Os dois exemplos acima rodam no navegador e foram feitos com o Claude.</p>
+</div>
+</div>
+<div class="rv d2" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem 3rem; align-items: start; border-top: 1px solid rgba(255,255,255,.08); padding-top: 2.5rem; margin-top: 1rem"><div style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">O que fica depois do curso</div><p class="disp" style="margin: 0; font-weight: 30; font-size: clamp(1.625rem, 3vw, 2.375rem); line-height: 1.12; letter-spacing: -0.01em; color: #ece7dd; grid-column: span 2; min-width: 0">O <span class="ital" style="color: #c8cfa8">jeito de pedir</span>: um método para descrever o que você quer, corrigir sem recomeçar do zero e aplicar em qualquer outro tema.</p></div>
+</div>
+</section>
+
+<section class="sec" style="border-top: 1px solid rgba(255,255,255,.06); padding: 7rem 1.5rem">
+<div style="max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem">
+<div style="display: flex; flex-direction: column; gap: 1.5rem">
+<div class="rv" style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">02 — Para quem</div>
+<div class="ml"><h2 class="disp rm" style="margin: 0; font-weight: 44; font-size: clamp(1.75rem, 4vw, 2.75rem); letter-spacing: -0.01em; color: #e0dbd1">É para você se</h2></div>
+<div class="rv d1" style="display: flex; flex-direction: column; gap: 1rem; border-top: 1px solid rgba(255,255,255,.08); padding-top: 1.25rem">
+<div style="display: flex; gap: 0.875rem"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8cfa8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none; margin-top: 0.25rem"><path d="M5 12l5 5L20 7"></path></svg><span>Dá aula e sente que alguns conteúdos só fazem sentido quando o aluno vê.</span></div>
+<div style="display: flex; gap: 0.875rem"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8cfa8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none; margin-top: 0.25rem"><path d="M5 12l5 5L20 7"></path></svg><span>Vende, aluga ou vai reformar um imóvel e quer mostrar o espaço antes da visita.</span></div>
+<div style="display: flex; gap: 0.875rem"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8cfa8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none; margin-top: 0.25rem"><path d="M5 12l5 5L20 7"></path></svg><span>Não tem intimidade com tecnologia e quer aprender fazendo, com alguém do lado.</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 1.5rem">
+<div style="font-size: 0.6875rem; letter-spacing: 0.14em; color: transparent" aria-hidden="true">—</div>
+<div class="ml"><h2 class="disp rm" style="margin: 0; font-weight: 44; font-size: clamp(1.75rem, 4vw, 2.75rem); letter-spacing: -0.01em; color: #8a857c">Não é para você se</h2></div>
+<div class="rv d2" style="display: flex; flex-direction: column; gap: 1rem; border-top: 1px solid rgba(255,255,255,.08); padding-top: 1.25rem; color: #b0a898">
+<div style="display: flex; gap: 0.875rem"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a857c" stroke-width="1.75" stroke-linecap="round" style="flex: none; margin-top: 0.25rem"><path d="M6 6l12 12M18 6L6 18"></path></svg><span>Quer aprender a programar. Aqui você não escreve código.</span></div>
+<div style="display: flex; gap: 0.875rem"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a857c" stroke-width="1.75" stroke-linecap="round" style="flex: none; margin-top: 0.25rem"><path d="M6 6l12 12M18 6L6 18"></path></svg><span>Quer aprender render fotorrealista em Blender. Isso é outro curso.</span></div>
+<div style="display: flex; gap: 0.875rem"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a857c" stroke-width="1.75" stroke-linecap="round" style="flex: none; margin-top: 0.25rem"><path d="M6 6l12 12M18 6L6 18"></path></svg><span>Procura um panorama teórico sobre IA na educação. A turma é mão na massa.</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="sec" style="border-top: 1px solid rgba(255,255,255,.06); padding: 7rem 1.5rem">
+<div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 3rem">
+<div style="display: flex; flex-direction: column; gap: 1rem">
+<div class="rv" style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">03 — Programa</div>
+<div class="ml"><h2 class="disp rm" style="margin: 0; font-weight: 30; font-size: clamp(2.125rem, 5vw, 3.875rem); line-height: 1; letter-spacing: -0.02em; color: #ece7dd">Dois encontros. Cada um termina com <span class="ital" style="color: #c8cfa8">algo pronto</span>.</h2></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem">
+<div class="card rv d1" style="padding: 2.25rem 1.75rem 2.5rem; border: 1px solid rgba(255,255,255,.06); border-radius: 20px; background: rgba(255,255,255,.014); box-shadow: 0 22px 44px -34px rgba(0,0,0,.72); display: flex; flex-direction: column; gap: 1.25rem">
+<div style="display: flex; justify-content: space-between; gap: 1rem; align-items: baseline"><span class="disp" style="font-weight: 24; font-size: 3.5rem; line-height: 1; color: #c8cfa8">01</span><span style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">2h · [data]</span></div>
+<h3 class="disp" style="margin: 0; font-weight: 44; font-size: 1.75rem; letter-spacing: -0.01em; color: #ece7dd">Do pedido ao interativo</h3>
+<div style="display: flex; flex-direction: column; gap: 0.75rem; color: #b0a898; border-top: 1px solid rgba(255,255,255,.08); padding-top: 1.125rem">
+<span>Como o Claude constrói uma página que funciona sozinha</span>
+<span>O jeito de pedir: o que descrever, em que ordem</span>
+<span>Corrigir e ajustar sem começar de novo</span>
+<span style="color: #e0dbd1">Prática: sua simulação para uma aula, publicada com link</span>
+</div>
+</div>
+<div class="card rv d2" style="padding: 2.25rem 1.75rem 2.5rem; border: 1px solid rgba(255,255,255,.06); border-radius: 20px; background: rgba(255,255,255,.014); box-shadow: 0 22px 44px -34px rgba(0,0,0,.72); display: flex; flex-direction: column; gap: 1.25rem">
+<div style="display: flex; justify-content: space-between; gap: 1rem; align-items: baseline"><span class="disp" style="font-weight: 24; font-size: 3.5rem; line-height: 1; color: #c8cfa8">02</span><span style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">2h · [data]</span></div>
+<h3 class="disp" style="margin: 0; font-weight: 44; font-size: 1.75rem; letter-spacing: -0.01em; color: #ece7dd">O espaço em 3D</h3>
+<div style="display: flex; flex-direction: column; gap: 0.75rem; color: #b0a898; border-top: 1px solid rgba(255,255,255,.08); padding-top: 1.125rem">
+<span>Da foto da planta baixa ao modelo 3D</span>
+<span>Medidas, cômodos, portas e móveis</span>
+<span>Navegação: girar, aproximar, percorrer</span>
+<span style="color: #e0dbd1">Prática: seu tour 3D enviado por link</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="sec" style="border-top: 1px solid rgba(255,255,255,.06); padding: 7rem 1.5rem">
+<div style="max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 1.5rem">
+<div class="rv" style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">04 — Quem conduz</div>
+<div class="rv d1" style="display: flex; gap: 1.25rem; align-items: center">
+<div class="media" style="width: 5.5rem; height: 5.5rem; flex: none; border-radius: 50%; border: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; font-size: 0.6875rem; color: #8a857c">[foto]</div>
+<h2 class="disp" style="margin: 0; font-weight: 40; font-size: clamp(1.75rem, 4vw, 2.75rem); letter-spacing: -0.01em; color: #ece7dd">Bruno Müller</h2>
+</div>
+<p class="rv d2" style="margin: 0; color: #b0a898">Diretor criativo e motion designer. Trabalho com imagem, vídeo e 3D há mais de [X] anos e uso o Claude no dia a dia para construir materiais visuais. Nessa turma eu mostro o que funciona, o que trava e como sair do travamento.</p>
+<a class="ulink rv d3" href="https://aue.productions" style="align-self: flex-start; font-size: 0.75rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase">Ver portfólio ↗</a>
+</div>
+<div class="card rv d2" style="padding: 2rem 1.75rem; border: 1px solid rgba(255,255,255,.06); border-radius: 20px; background: rgba(255,255,255,.014); display: flex; flex-direction: column; gap: 1.5rem">
+<h2 class="disp" style="margin: 0; font-weight: 44; font-size: 1.75rem; letter-spacing: -0.01em; color: #ece7dd">Como funciona</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem">
+<div style="display: flex; flex-direction: column; gap: 0.375rem"><span style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">Formato</span><span style="color: #e0dbd1">Online e ao vivo, com prática junto</span></div>
+<div style="display: flex; flex-direction: column; gap: 0.375rem"><span style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">Turma</span><span style="color: #e0dbd1">Até 15 pessoas</span></div>
+<div style="display: flex; flex-direction: column; gap: 0.375rem"><span style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">Você precisa de</span><span style="color: #e0dbd1">Computador com navegador e uma conta no Claude</span></div>
+<div style="display: flex; flex-direction: column; gap: 0.375rem"><span style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">Gravação</span><span style="color: #e0dbd1">Disponível por [30] dias</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="sec" style="border-top: 1px solid rgba(255,255,255,.06); padding: 7rem 1.5rem">
+<div style="max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 2.25rem">
+<div class="rv" style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">05 — Perguntas</div>
+<div style="display: flex; flex-direction: column">
+<div class="rv d1" style="display: flex; flex-direction: column; gap: 0.5rem; padding: 1.5rem 0; border-top: 1px solid rgba(255,255,255,.08)"><h3 class="disp" style="margin: 0; font-size: 1.375rem; font-weight: 44; color: #ece7dd">Preciso saber programar?</h3><p style="margin: 0; color: #b0a898">Não. Você descreve o que quer em português e o Claude escreve o código. Seu trabalho é saber pedir e saber corrigir.</p></div>
+<div class="rv d2" style="display: flex; flex-direction: column; gap: 0.5rem; padding: 1.5rem 0; border-top: 1px solid rgba(255,255,255,.08)"><h3 class="disp" style="margin: 0; font-size: 1.375rem; font-weight: 44; color: #ece7dd">Preciso instalar algum programa?</h3><p style="margin: 0; color: #b0a898">Não. Tudo acontece no navegador, no site do Claude. Antes da primeira aula eu te mando um passo a passo de como criar a conta e qual plano usar.</p></div>
+<div class="rv d3" style="display: flex; flex-direction: column; gap: 0.5rem; padding: 1.5rem 0; border-top: 1px solid rgba(255,255,255,.08)"><h3 class="disp" style="margin: 0; font-size: 1.375rem; font-weight: 44; color: #ece7dd">Não sou professor. Serve para mim?</h3><p style="margin: 0; color: #b0a898">Serve se você precisa explicar algo visualmente para alguém: um imóvel, um projeto, um processo. Os exemplos de aula e de imóvel são pontos de partida, o método serve para outros temas.</p></div>
+<div class="rv d4" style="display: flex; flex-direction: column; gap: 0.5rem; padding: 1.5rem 0; border-top: 1px solid rgba(255,255,255,.08)"><h3 class="disp" style="margin: 0; font-size: 1.375rem; font-weight: 44; color: #ece7dd">E se eu não puder estar ao vivo?</h3><p style="margin: 0; color: #b0a898">Os encontros ficam gravados. Mas a turma é pequena justamente para você praticar com ajuda, então vale tentar estar presente.</p></div>
+<div class="rv d4" style="display: flex; flex-direction: column; gap: 0.5rem; padding: 1.5rem 0; border-top: 1px solid rgba(255,255,255,.08); border-bottom: 1px solid rgba(255,255,255,.08)"><h3 class="disp" style="margin: 0; font-size: 1.375rem; font-weight: 44; color: #ece7dd">Por que é mais barato agora?</h3><p style="margin: 0; color: #b0a898">Porque é a turma piloto. Em troca do preço de lote fundador, peço seu retorno sincero no final para melhorar as próximas turmas.</p></div>
+</div>
+</div>
+</section>
+
+<section id="inscricao" class="contactbg sec" style="padding: 8rem 1.5rem 6rem">
+<div style="position: relative; z-index: 1; max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.75rem">
+<div class="ml"><h2 class="disp rm" style="margin: 0; font-weight: 28; font-size: clamp(2.75rem, 6.4vw, 5.5rem); line-height: 0.92; letter-spacing: -0.02em; max-width: 56rem; color: #ece7dd">Na próxima aula, em vez de explicar, <span class="ital" style="color: #c8cfa8">mostre</span>.</h2></div>
+<div class="rv d2" style="display: flex; flex-direction: column; align-items: center; gap: 0.375rem"><span class="disp" style="font-weight: 28; font-size: clamp(2.5rem, 5vw, 3.5rem); line-height: 1; color: #ece7dd">R$ 97</span><span style="font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #b0a898">Lote fundador · 15 vagas · [datas]</span></div>
+<form id="leadForm" class="rv d3 lead" novalidate>
+<div class="lf-grid">
+<label class="lf"><span>Nome</span><input name="nome" type="text" autocomplete="name" required></label>
+<label class="lf"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
+<label class="lf"><span>WhatsApp <em>opcional</em></span><input name="whatsapp" type="tel" autocomplete="tel" inputmode="tel"></label>
+<label class="lf"><span>Cidade <em>opcional</em></span><input name="cidade" type="text" autocomplete="address-level2"></label>
+</div>
+<fieldset class="lf-perfil"><legend>Você é</legend>
+<label class="chip"><input type="radio" name="perfil" value="professor" required><span>Professor(a)</span></label>
+<label class="chip"><input type="radio" name="perfil" value="imoveis"><span>Trabalho com imóveis</span></label>
+<label class="chip"><input type="radio" name="perfil" value="outro"><span>Outro</span></label>
+</fieldset>
+<label class="lf-ok"><input type="checkbox" name="consentimento" value="sim" required><span>Aceito receber e-mails sobre esta e as próximas turmas. Posso sair quando quiser.</span></label>
+<button type="submit" class="cta lf-btn">Garantir minha vaga</button>
+<p class="lf-msg" id="leadMsg" role="status" aria-live="polite"></p>
+</form>
+</div>
+</section>
+
+<footer style="padding: 2rem 1.5rem; display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; max-width: 1240px; margin: 0 auto; font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: #8a857c">
+<span>Bruno Müller · Florianópolis</span>
+<span>Curso independente · Claude é um produto da Anthropic</span>
+</footer>
+
+</div>
+
+<div id="cc" role="dialog" aria-label="Cookies"><p>Uso cookies para medir as visitas e melhorar esta página.</p><button type="button" id="ccNo">Recusar</button><button type="button" id="ccYes">Aceitar</button></div>
+<script>
+(function(){
+/* ── CONFIGURAÇÃO ── preencha e publique */
+var CFG={
+  SHEET_ENDPOINT:'',            /* URL do App da Web do Apps Script (planilha de inscrições) */
+  GA_ID:'',                     /* ex.: G-XXXXXXXXXX  (Google Analytics 4: regiões e cidades) */
+  CLARITY_ID:'',                /* ex.: abcd1234ef    (Microsoft Clarity: mapa de calor e gravações) */
+  WHATSAPP:'55XXXXXXXXXXX'      /* seu número com DDI e DDD, só dígitos */
+};
+var RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var root=document.getElementById('root');
+
+/* ── reveal: foco + máscara ao entrar na tela ── */
+if('IntersectionObserver' in window && !RM){
+  var secs=document.querySelectorAll('.sec');
+  root.classList.add('armed');
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});},{threshold:.12,rootMargin:'0px 0px -8% 0px'});
+  secs.forEach(function(s){io.observe(s);});
+}
+
+/* ── 3D ao vivo no hero: carrega o iframe só depois da página pronta ── */
+var live=document.getElementById('live3d');
+if(live && !RM){
+  window.addEventListener('message',function(e){ if(e.source===live.contentWindow && e.data==='b112-ready') live.style.opacity=1; });
+  var startLive=function(){live.src=live.getAttribute('data-src');};
+  if(document.readyState==='complete') setTimeout(startLive,600); else window.addEventListener('load',function(){setTimeout(startLive,600);});
+}
+
+/* ── galeria: corte entre os renders ── */
+var SL=[
+ {g:'p',l:'Boulevard · fachada'},{g:'a',l:'Apto B112 · sala'},{g:'a',l:'Apto B112 · jantar'},
+ {g:'a',l:'Apto B112 · cozinha'},{g:'a',l:'Apto B112 · escritório'},{g:'a',l:'Apto B112 · quarto'}];
+var P={p:{t:'Boulevard em 3D',d:'Um prédio inteiro para navegar: cada apartamento, as plantas, o sol nas fachadas e o andamento da obra.',h:'/boulevard/'},
+       a:{t:'Apto B112 decorado',d:'O mesmo prédio por dentro: um apartamento decorado cômodo por cômodo, de dia e de noite.',h:'/boulevard/b112/'}};
+var imgs=document.querySelectorAll('.cine .slide'), idx=0, touched=false;
+var $=function(id){return document.getElementById(id);};
+function show(i,user){
+  if(user) touched=true;
+  idx=(i+SL.length)%SL.length;
+  imgs.forEach(function(im,k){im.classList.toggle('on',k===idx);});
+  var g=SL[idx].g;
+  $('slLabel').textContent=SL[idx].l; $('gCount').textContent='0'+(idx+1)+' / 0'+SL.length;
+  $('pTitle').textContent=P[g].t; $('pDesc').textContent=P[g].d; $('pHref').href=P[g].h;
+  $('tabP').classList.toggle('act',g==='p'); $('tabA').classList.toggle('act',g==='a');
+}
+if(imgs.length){
+  $('gNext').onclick=function(){show(idx+1,true);}; $('gPrev').onclick=function(){show(idx-1,true);};
+  $('tabP').onclick=function(){show(0,true);}; $('tabA').onclick=function(){show(1,true);};
+  if(!RM) setInterval(function(){ if(!touched && !document.hidden) show(idx+1); },4500);
+}
+
+/* ── consentimento (LGPD) + medição ── */
+function loadGA(){ if(!CFG.GA_ID) return; var s=document.createElement('script'); s.async=true; s.src='https://www.googletagmanager.com/gtag/js?id='+CFG.GA_ID; document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[]; window.gtag=function(){dataLayer.push(arguments);}; gtag('js',new Date()); gtag('config',CFG.GA_ID); }
+function loadClarity(){ if(!CFG.CLARITY_ID) return; (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script",CFG.CLARITY_ID); }
+function track(name,params){ try{ if(window.gtag) gtag('event',name,params||{}); if(window.clarity) clarity('event',name); }catch(e){} }
+var cc=$('cc'), choice=null; try{choice=localStorage.getItem('cc-consent');}catch(e){}
+function grant(){ loadGA(); loadClarity(); }
+if(choice==='sim') grant(); else if(choice!=='nao' && (CFG.GA_ID||CFG.CLARITY_ID)) cc.classList.add('show');
+$('ccYes').onclick=function(){ try{localStorage.setItem('cc-consent','sim');}catch(e){} cc.classList.remove('show'); grant(); };
+$('ccNo').onclick=function(){ try{localStorage.setItem('cc-consent','nao');}catch(e){} cc.classList.remove('show'); };
+document.querySelectorAll('a.cta[href="#inscricao"]').forEach(function(a){a.addEventListener('click',function(){track('cta_click',{local:'hero'});});});
+
+/* ── formulário → planilha ── */
+var q=new URLSearchParams(location.search), f=$('leadForm'), msg=$('leadMsg');
+var wa='https://wa.me/'+CFG.WHATSAPP+'?text='+encodeURIComponent('Oi, Bruno! Acabei de me inscrever na turma piloto do curso.');
+f.addEventListener('submit',function(ev){
+  ev.preventDefault();
+  var bad=null;
+  ['nome','email'].forEach(function(n){var el=f.elements[n]; var ok=el.value.trim()&&(n!=='email'||/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(el.value.trim())); el.setAttribute('aria-invalid',ok?'false':'true'); if(!ok&&!bad) bad=el;});
+  if(bad){ msg.textContent='Confira nome e e-mail.'; bad.focus(); return; }
+  if(!f.querySelector('input[name="perfil"]:checked')){ msg.textContent='Escolha uma opção em "Você é".'; return; }
+  if(!f.elements.consentimento.checked){ msg.textContent='Marque o consentimento para eu poder te mandar os detalhes da turma.'; return; }
+  var d={data_hora:new Date().toISOString(),nome:f.elements.nome.value.trim(),email:f.elements.email.value.trim(),whatsapp:f.elements.whatsapp.value.trim(),
+    perfil:f.querySelector('input[name="perfil"]:checked').value,cidade:f.elements.cidade.value.trim(),consentimento:'sim',
+    origem_utm_source:q.get('utm_source')||'',origem_utm_medium:q.get('utm_medium')||'',origem_utm_campaign:q.get('utm_campaign')||'',
+    referrer:document.referrer||'',pagina:location.pathname};
+  var btn=f.querySelector('button[type="submit"]'); btn.disabled=true; msg.textContent='Enviando…';
+  var done=function(){ track('generate_lead',{perfil:d.perfil}); f.querySelectorAll('.lf-grid,.lf-perfil,.lf-ok,.lf-btn').forEach(function(el){el.style.display='none';});
+    msg.innerHTML='Inscrição recebida, '+d.nome.split(' ')[0].replace(/[<>&"]/g,'')+'. Te mando as datas por e-mail. Se quiser adiantar, <a href="'+wa+'">fala comigo no WhatsApp ↗</a>'; };
+  if(!CFG.SHEET_ENDPOINT){ btn.disabled=false; msg.innerHTML='As inscrições abrem em instantes. Enquanto isso, <a href="'+wa+'">garanta pelo WhatsApp ↗</a>'; return; }
+  fetch(CFG.SHEET_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(d)})
+    .then(done).catch(function(){ btn.disabled=false; msg.innerHTML='Não consegui enviar agora. Tente de novo ou <a href="'+wa+'">fale comigo no WhatsApp ↗</a>'; });
+});
+})();
+</script>
+</body>
+</html>
