@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Equilíbrio químico · N₂O₄ ⇌ 2 NO₂</title>
-<meta name="description" content="Simulação interativa do equilíbrio N₂O₄ ⇌ 2 NO₂: aqueça, resfrie e comprima o gás e veja o princípio de Le Chatelier acontecer.">
+<title>Laboratório: por que o gás escurece quando esquenta?</title>
+<meta name="description" content="Arraste o tubo de NO₂ para o gelo ou para a água fervendo, comprima o gás e veja o equilíbrio químico N₂O₄ ⇌ 2 NO₂ mudar de cor. Três desafios para a sala de aula.">
 <meta name="theme-color" content="#0c0c0b">
 <script>if(/[?&]embed=1/.test(location.search))document.documentElement.classList.add('embed');</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,216 +13,252 @@
 @font-face{font-family:'Franie';src:url('/fonts/franie.woff2') format('woff2');font-weight:1 100;font-display:swap}
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;background:#0c0c0b;color:#e0dbd1;font:300 16px/1.55 Inter,system-ui,sans-serif}
-.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 48px;display:flex;flex-direction:column;gap:22px}
-.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-end}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 18px 44px;display:flex;flex-direction:column;gap:18px}
 .eyebrow{font-size:11px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:#8a857c}
-h1{margin:6px 0 0;font-family:'Franie',Inter,sans-serif;font-weight:34;font-size:clamp(30px,4.4vw,52px);line-height:1;letter-spacing:-.02em;color:#ece7dd}
+h1{margin:6px 0 0;font-family:'Franie',Inter,sans-serif;font-weight:34;font-size:clamp(28px,4.2vw,50px);line-height:1;letter-spacing:-.02em;color:#ece7dd}
 h1 i{font-style:normal;font-variation-settings:"ital" 100;color:#c8cfa8}
-.lede{margin:0;color:#b0a898;max-width:46rem}
-.main{display:flex;flex-wrap:wrap;gap:20px;align-items:stretch}
-.stagecol{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:12px}
-.panel{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:18px;padding:22px;border:1px solid rgba(255,255,255,.06);border-radius:20px;background:rgba(255,255,255,.014)}
-.stage{position:relative;aspect-ratio:16/10;border-radius:18px;overflow:hidden;background:#0f0d0b;box-shadow:0 50px 100px -44px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05)}
+.missions{display:flex;flex-wrap:wrap;gap:8px}
+.mi{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);font-size:14px;color:#c9c3ba;flex:1 1 240px;transition:background .5s,border-color .5s,color .5s}
+.mi b{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,.2);font:400 12px Inter,sans-serif;flex:none;color:#b0a898;transition:all .5s}
+.mi.done{background:rgba(200,207,168,.1);border-color:rgba(200,207,168,.35);color:#ece7dd}
+.mi.done b{background:#c8cfa8;border-color:#c8cfa8;color:#12140e}
+.stage{position:relative;aspect-ratio:16/10;border-radius:20px;overflow:hidden;background:#0f0d0b;box-shadow:0 50px 100px -44px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05);touch-action:none;user-select:none;-webkit-user-select:none}
 canvas{display:block;width:100%;height:100%}
-.hud{position:absolute;left:14px;top:12px;padding:8px 12px 10px;border-radius:12px;background:rgba(15,13,11,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.06);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c9c3ba;pointer-events:none}
-.eq{font-family:'Franie',Inter,sans-serif;font-weight:40;font-size:22px;letter-spacing:0;text-transform:none;color:#ece7dd;display:block;margin-top:2px}
-.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:#b0a898}
-.legend span{display:inline-flex;align-items:center;gap:8px}
-.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
-.ctrl{display:flex;flex-direction:column;gap:8px}
-.ctrl label{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#b0a898}
-.ctrl output{font-family:'Franie',Inter,sans-serif;font-weight:40;font-size:20px;letter-spacing:0;color:#ece7dd;text-transform:none}
+.toast{position:absolute;left:50%;top:16px;transform:translate(-50%,-140%);padding:10px 18px;border-radius:100px;background:#c8cfa8;color:#12140e;font-weight:500;font-size:14px;white-space:nowrap;transition:transform .6s cubic-bezier(.16,1,.3,1);pointer-events:none;z-index:3}
+.toast.show{transform:translate(-50%,0)}
+.hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#b0a898;background:rgba(15,13,11,.72);border:1px solid rgba(255,255,255,.07);padding:8px 14px;border-radius:100px;pointer-events:none;transition:opacity .6s;white-space:nowrap}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:stretch}
+.why{flex:999 1 420px;margin:0;padding:16px 18px;border-radius:16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);color:#d6d2c7;font-size:15px;min-height:5em;transition:opacity .35s}
+.why strong{color:#ece7dd;font-weight:500}
+.ctrls{flex:1 1 300px;display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)}
+.ctrls .btns{display:flex;flex-wrap:wrap;gap:8px}
+.ctrls button{font:400 10px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8a857c;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:100px;padding:0 14px;min-height:44px;cursor:pointer;transition:color .3s,background .3s,border-color .3s}
+.ctrls button:hover{color:#e0dbd1}
+.ctrls button.act{color:#12140e;background:#c8cfa8;border-color:#c8cfa8}
+.ctrls label{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#b0a898}
 input[type=range]{width:100%;accent-color:#c8cfa8;height:28px}
-.presets{display:flex;flex-wrap:wrap;gap:8px}
-.presets button{font:400 10px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8a857c;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:100px;padding:0 14px;min-height:40px;cursor:pointer;transition:color .3s,background .3s,border-color .3s}
-.presets button:hover{color:#e0dbd1}
-.presets button.act{color:#12140e;background:#c8cfa8;border-color:#c8cfa8}
-.meter{display:flex;flex-direction:column;gap:8px}
-.bar{height:10px;border-radius:10px;background:rgba(255,255,255,.06);overflow:hidden;display:flex}
-.bar i{display:block;height:100%;background:#c8752f;transition:width .4s cubic-bezier(.16,1,.3,1)}
-.big{font-family:'Franie',Inter,sans-serif;font-weight:30;font-size:40px;line-height:1;color:#ece7dd}
-.why{margin:0;padding:14px 16px;border-radius:14px;background:rgba(200,207,168,.07);border:1px solid rgba(200,207,168,.16);color:#d6d2c7;font-size:14px;min-height:5.4em;transition:opacity .4s}
-.graph{height:120px;border-radius:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05)}
 .foot{font-size:12px;color:#8a857c}
 .foot a{color:#c9c3ba}
-html.embed body{background:#0f0d0b}
-html.embed .wrap{padding:0;max-width:none;height:100vh}
-html.embed .top,html.embed .panel,html.embed .legend,html.embed .graph,html.embed .foot{display:none}
-html.embed .stagecol{height:100%}
-html.embed .stage{position:fixed;inset:0;aspect-ratio:auto;height:auto;border-radius:0;box-shadow:none}
-html.embed .hud{left:10px;top:10px;padding:6px 10px 7px}html.embed .eq{font-size:16px}
-@media (max-width:600px){.hud{left:10px;top:10px;padding:6px 10px 7px}.eq{font-size:16px}}
-@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+@media (max-width:640px){.stage{aspect-ratio:4/3}.hint{display:none}}
+html.embed body{background:#0f0d0b;overflow:hidden}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .head,html.embed .missions,html.embed .row,html.embed .foot,html.embed .hint{display:none}
+html.embed .stage{position:fixed;inset:0;aspect-ratio:auto;border-radius:0;box-shadow:none}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
-    <div>
-      <div class="eyebrow">Química · equilíbrio · Le Chatelier</div>
-      <h1>Por que o gás <i>escurece</i> quando esquenta?</h1>
-    </div>
-    <p class="lede">Um tubo com N₂O₄, que é incolor, e NO₂, que é castanho. As duas moléculas se transformam uma na outra o tempo todo. Mude a temperatura e o volume e veja para que lado o equilíbrio se desloca.</p>
+  <div class="head">
+    <div class="eyebrow">Laboratório · equilíbrio químico · N₂O₄ ⇌ 2 NO₂</div>
+    <h1>Por que o gás <i>escurece</i> quando esquenta?</h1>
   </div>
-
-  <div class="main">
-    <div class="stagecol">
-      <div class="stage" id="stage">
-        <canvas id="cv" aria-label="Simulação de moléculas de N2O4 e NO2 dentro de um recipiente com pistão" role="img"></canvas>
-        <div class="hud"><span id="hudT">25 °C</span><span class="eq">N₂O₄ ⇌ 2 NO₂</span></div>
+  <div class="missions" id="missions">
+    <div class="mi" id="m1"><b>1</b>Deixe o gás quase transparente</div>
+    <div class="mi" id="m2"><b>2</b>Deixe o gás o mais escuro possível</div>
+    <div class="mi" id="m3"><b>3</b>Comprima o gás e observe a cor por alguns segundos</div>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="cv" role="img" aria-label="Bancada de laboratório com um banho de gelo, uma bancada e um béquer com água fervendo. Um tubo com gás pode ser arrastado entre eles, e uma lupa mostra as moléculas por dentro."></canvas>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="hint" id="hint">Arraste o tubo · puxe o êmbolo</div>
+  </div>
+  <div class="row">
+    <p class="why" id="why" aria-live="polite"><strong>O que tem no tubo:</strong> N₂O₄, que é incolor, e NO₂, que é castanho. As duas moléculas viram uma na outra o tempo todo. A cor do gás mostra quanto NO₂ existe ali dentro.</p>
+    <div class="ctrls">
+      <div class="btns" role="group" aria-label="Onde colocar o tubo">
+        <button type="button" data-st="0">Gelo</button>
+        <button type="button" data-st="1" class="act">Bancada</button>
+        <button type="button" data-st="2">Água fervendo</button>
       </div>
-      <div class="legend">
-        <span><i class="dot" style="background:#e7e2d6"></i>N₂O₄ · incolor</span>
-        <span><i class="dot" style="background:#c8752f"></i>NO₂ · castanho</span>
-        <span>A cor do gás acompanha a concentração de NO₂</span>
-      </div>
-      <canvas class="graph" id="gr" aria-label="Gráfico da quantidade de cada molécula ao longo do tempo" role="img"></canvas>
-    </div>
-
-    <div class="panel">
-      <div class="ctrl">
-        <label for="temp">Temperatura <output id="tOut">25 °C</output></label>
-        <input id="temp" type="range" min="-20" max="120" step="1" value="25">
-        <div class="presets">
-          <button type="button" data-t="0">Banho de gelo</button>
-          <button type="button" data-t="25" class="act">Ambiente</button>
-          <button type="button" data-t="100">Água fervendo</button>
-        </div>
-      </div>
-      <div class="ctrl">
-        <label for="vol">Volume do recipiente <output id="vOut">100%</output></label>
-        <input id="vol" type="range" min="35" max="100" step="1" value="100">
-      </div>
-      <div class="meter">
-        <div class="eyebrow">Moléculas de NO₂ no recipiente</div>
-        <div class="big" id="pct">0%</div>
-        <div class="bar"><i id="barNO2" style="width:0%"></i></div>
-      </div>
-      <p class="why" id="why" aria-live="polite">Mexa na temperatura ou no volume.</p>
-      <div class="foot">A reação direta (N₂O₄ → 2 NO₂) absorve calor: ΔH ≈ +57 kJ/mol. Modelo didático: as velocidades e as chances de reação são simplificadas.</div>
+      <label for="vol">Êmbolo <span id="vOut">solto</span></label>
+      <input id="vol" type="range" min="40" max="100" value="100" aria-label="Volume do tubo: arraste para comprimir o gás">
     </div>
   </div>
-  <div class="foot">Feito com o Claude para o curso <a href="/curso-claude/">Mostrar em vez de explicar</a>.</div>
+  <div class="foot">A reação N₂O₄ → 2 NO₂ absorve calor (ΔH ≈ +57 kJ/mol). Modelo didático: velocidades e chances de reação simplificadas. Feito com o Claude para o curso <a href="/curso-claude/">Mostrar em vez de explicar</a>.</div>
 </div>
-
 <script>
 (function(){
 var EMBED=document.documentElement.classList.contains('embed');
 var RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-var cv=document.getElementById('cv'), ctx=cv.getContext('2d');
-var gr=document.getElementById('gr'), gx=gr.getContext('2d');
+var cv=document.getElementById('cv'), ctx=cv.getContext('2d'), stageEl=document.getElementById('stage');
 var DPR=Math.min(window.devicePixelRatio||1,2);
-var W=800,H=500;                     // mundo lógico
-var R=6;                             // raio da partícula
-var N_N=0, parts=[];
-var state={T:298, vol:1, volShown:1};
-// cinética (modelo didático): dissociação tipo Arrhenius, recombinação por colisão NO2+NO2
-var K0=2.2e4, EA=5000, PREC=0.22;
-function rnd(a,b){return a+Math.random()*(b-a);}
-function speed(){return 1.15*Math.sqrt(state.T/298);}
-function boxW(){return W*state.volShown;}
-function add(type,x,y){var a=Math.random()*Math.PI*2,s=speed()*rnd(.6,1.4);parts.push({t:type,x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,ang:Math.random()*6.28,spin:rnd(-.05,.05),cool:0});}
-for(var i=0;i<90;i++) add(2,rnd(20,W-20),rnd(20,H-20)); // começa só com N2O4
-var hist=[];
-
-function setT(c){state.T=c+273.15; document.getElementById('temp').value=c; document.getElementById('tOut').textContent=Math.round(c)+' °C'; document.getElementById('hudT').textContent=Math.round(c)+' °C';
-  document.querySelectorAll('.presets button').forEach(function(b){b.classList.toggle('act',+b.dataset.t===Math.round(c));});}
-function rescale(old){ var f=Math.sqrt(state.T/old); parts.forEach(function(p){p.vx*=f;p.vy*=f;}); }
-
-var lastNO2=null, msgTimer=null;
-function why(text){var w=document.getElementById('why'); w.style.opacity=0; setTimeout(function(){w.textContent=text;w.style.opacity=1;},180);}
-
-document.getElementById('temp').addEventListener('input',function(e){var old=state.T,c=+e.target.value; setT(c); rescale(old);
-  why(state.T>old?'Aqueceu. A reação que forma NO₂ absorve calor, então o sistema "gasta" o calor extra quebrando N₂O₄. Mais NO₂, gás mais castanho.':'Esfriou. O sistema compensa liberando calor: NO₂ se junta de volta em N₂O₄. Menos NO₂, gás mais claro.');});
-document.querySelectorAll('.presets button').forEach(function(b){b.addEventListener('click',function(){var old=state.T,c=+b.dataset.t; setT(c); rescale(old);
-  why(c===0?'No gelo, o equilíbrio favorece o N₂O₄, que é incolor. É por isso que o tubo fica quase transparente.':c===100?'Na água fervendo, sobra calor: o N₂O₄ se quebra em NO₂ e o tubo fica castanho-escuro.':'Na temperatura ambiente, as duas moléculas convivem. A cor fica num meio-termo.');});});
-document.getElementById('vol').addEventListener('input',function(e){var v=+e.target.value/100, old=state.vol; state.vol=v; document.getElementById('vOut').textContent=Math.round(v*100)+'%';
-  why(v<old?'Comprimiu. Na hora, o gás fica mais concentrado e escurece. Depois o equilíbrio vai para o lado com menos moléculas (1 N₂O₄ no lugar de 2 NO₂) e a cor clareia um pouco.':'Expandiu. Com mais espaço, o lado com mais moléculas é favorecido: N₂O₄ se quebra em 2 NO₂.');});
-
-function step(dt){
-  // pistão anima até o volume escolhido
-  state.volShown+= (state.vol-state.volShown)*Math.min(1,dt*0.08);
-  var bw=boxW(), pd=K0*Math.exp(-EA/state.T)*dt;
-  var sp=speed();
-  for(var i=parts.length-1;i>=0;i--){var p=parts[i];
-    p.x+=p.vx*dt; p.y+=p.vy*dt; p.ang+=p.spin*dt; if(p.cool>0)p.cool-=dt;
-    var r=p.t===2?R*1.8:R;
-    if(p.x<r){p.x=r;p.vx=Math.abs(p.vx);} if(p.x>bw-r){p.x=bw-r;p.vx=-Math.abs(p.vx);}
-    if(p.y<r){p.y=r;p.vy=Math.abs(p.vy);} if(p.y>H-r){p.y=H-r;p.vy=-Math.abs(p.vy);}
-    // termaliza devagar a velocidade
-    var v=Math.hypot(p.vx,p.vy)||1, target=sp*(p.t===2?0.75:1); var k=1+(target/v-1)*0.02*dt; p.vx*=k; p.vy*=k;
-    if(p.t===2 && Math.random()<pd){ // dissociação N2O4 -> 2 NO2
-      parts.splice(i,1); var a=p.ang, c=Math.cos(a), s=Math.sin(a), e=sp*1.2;
-      parts.push({t:1,x:p.x+c*R,y:p.y+s*R,vx:c*e,vy:s*e,ang:0,spin:0,cool:25});
-      parts.push({t:1,x:p.x-c*R,y:p.y-s*R,vx:-c*e,vy:-s*e,ang:0,spin:0,cool:25});
-    }
-  }
-  // recombinação NO2 + NO2 -> N2O4 (por colisão)
-  var no2=[]; for(var j=0;j<parts.length;j++) if(parts[j].t===1 && parts[j].cool<=0) no2.push(parts[j]);
-  var used={};
-  for(var a=0;a<no2.length;a++){ if(used[a])continue; var A=no2[a];
-    for(var b=a+1;b<no2.length;b++){ if(used[b])continue; var B=no2[b], dx=A.x-B.x, dy=A.y-B.y;
-      if(dx*dx+dy*dy<(2*R)*(2*R)){ if(Math.random()<PREC){ used[a]=used[b]=1;
-          var nx=(A.x+B.x)/2, ny=(A.y+B.y)/2; A.dead=B.dead=1;
-          parts.push({t:2,x:nx,y:ny,vx:(A.vx+B.vx)/2,vy:(A.vy+B.vy)/2,ang:Math.atan2(dy,dx),spin:rnd(-.05,.05),cool:0}); }
-        break; } } }
-  parts=parts.filter(function(p){return !p.dead;});
-}
-function counts(){var n1=0,n2=0; parts.forEach(function(p){p.t===1?n1++:n2++;}); return {no2:n1,n2o4:n2};}
-
-function resize(){ var r=cv.getBoundingClientRect(); cv.width=Math.round(r.width*DPR); cv.height=Math.round(r.height*DPR); if(cv.height>0) W=Math.round(H*cv.width/cv.height);
-  var g=gr.getBoundingClientRect(); gr.width=Math.round(g.width*DPR); gr.height=Math.round(g.height*DPR); }
+var LW=1000, LH=625;                  // cena lógica
+var S={sc:1,ox:0,oy:0};
+function resize(){var r=cv.getBoundingClientRect(); cv.width=Math.round(r.width*DPR); cv.height=Math.round(r.height*DPR);
+  S.sc=Math.min(cv.width/860,cv.height/LH); S.ox=cv.width/2-500*S.sc; S.oy=(cv.height-LH*S.sc)/2;}
 window.addEventListener('resize',resize); resize();
+function toLogical(e){var r=cv.getBoundingClientRect(); var x=(e.clientX-r.left)*DPR, y=(e.clientY-r.top)*DPR; return {x:(x-S.ox)/S.sc, y:(y-S.oy)/S.sc};}
 
-function draw(){
-  var cw=cv.width,ch=cv.height, sx=cw/W, sy=ch/H, s=Math.min(sx,sy), ox=(cw-W*s)/2, oy=(ch-H*s)/2;
-  ctx.clearRect(0,0,cw,ch);
-  var c=counts(), bw=boxW();
-  // fundo: grid de mesa de corte
-  ctx.fillStyle='#0f0d0b'; ctx.fillRect(0,0,cw,ch);
-  ctx.save(); ctx.translate(ox,oy); ctx.scale(s,s);
-  // gás: cor ∝ concentração de NO2
-  var conc=c.no2/(bw*H)*W*H/180; var alpha=Math.min(.62,conc*.55);
-  ctx.fillStyle='rgba(176,92,34,'+alpha.toFixed(3)+')'; ctx.fillRect(0,0,bw,H);
-  ctx.strokeStyle='rgba(150,168,110,.07)'; ctx.lineWidth=1;
-  for(var gx2=0;gx2<=bw;gx2+=28){ctx.beginPath();ctx.moveTo(gx2,0);ctx.lineTo(gx2,H);ctx.stroke();}
-  for(var gy=0;gy<=H;gy+=28){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(bw,gy);ctx.stroke();}
-  // partículas
-  parts.forEach(function(p){
-    if(p.t===2){ var cx=Math.cos(p.ang)*R*.95, sy2=Math.sin(p.ang)*R*.95;
-      ctx.strokeStyle='rgba(231,226,214,.55)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(p.x-cx,p.y-sy2); ctx.lineTo(p.x+cx,p.y+sy2); ctx.stroke();
-      ctx.fillStyle='#e7e2d6'; ctx.beginPath(); ctx.arc(p.x-cx,p.y-sy2,R*.85,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(p.x+cx,p.y+sy2,R*.85,0,7); ctx.fill();
-    } else { ctx.fillStyle='#c8752f'; ctx.beginPath(); ctx.arc(p.x,p.y,R,0,7); ctx.fill();
-      ctx.fillStyle='rgba(255,214,170,.45)'; ctx.beginPath(); ctx.arc(p.x-R*.3,p.y-R*.3,R*.35,0,7); ctx.fill(); }
-  });
-  // paredes e pistão
-  ctx.strokeStyle='rgba(224,219,209,.35)'; ctx.lineWidth=3; ctx.strokeRect(1.5,1.5,bw-3,H-3);
-  ctx.fillStyle='#2D3320'; ctx.fillRect(bw,0,W-bw+40,H);
-  ctx.fillStyle='rgba(200,207,168,.85)'; ctx.fillRect(bw,0,8,H);
-  ctx.fillStyle='rgba(200,207,168,.35)'; ctx.fillRect(bw+8,H/2-6,W-bw+40,12);
+/* ── estações ── */
+var BENCH=520;
+var ST=[{name:'Gelo',x:215,T:273.15,dip:-8},{name:'Bancada',x:500,T:298.15,dip:0},{name:'Água fervendo',x:785,T:373.15,dip:-8}];
+var tube={x:500,y:BENCH-6,tx:500,ty:BENCH-6,st:1,drag:false,T:298.15,vol:1,volT:1};
+var TW=54, TH=250;      // tubo
+/* ── moléculas (mundo da lupa) ── */
+var MW=300, MH=300, R=6, K0=3e4, EA=5000, PREC=0.22;
+var parts=[];
+function rnd(a,b){return a+Math.random()*(b-a);}
+function spd(){return 1.15*Math.sqrt(tube.T/298);}
+for(var i=0;i<70;i++){var a=Math.random()*6.28,s=spd();parts.push({t:2,x:rnd(15,MW-15),y:rnd(15,MH-15),vx:Math.cos(a)*s,vy:Math.sin(a)*s,ang:Math.random()*6.28,spin:rnd(-.05,.05),cool:0});}
+function counts(){var n1=0,n2=0;for(var i=0;i<parts.length;i++)parts[i].t===1?n1++:n2++;return{no2:n1,n2o4:n2};}
+function step(dt){
+  var h=MH*tube.vol, pd=K0*Math.exp(-EA/tube.T)*dt, sp=spd();
+  for(var i=parts.length-1;i>=0;i--){var p=parts[i];
+    p.x+=p.vx*dt;p.y+=p.vy*dt;p.ang+=p.spin*dt;if(p.cool>0)p.cool-=dt;
+    var r=p.t===2?R*1.8:R, top=MH-h;
+    if(p.x<r){p.x=r;p.vx=Math.abs(p.vx);} if(p.x>MW-r){p.x=MW-r;p.vx=-Math.abs(p.vx);}
+    if(p.y<top+r){p.y=top+r;p.vy=Math.abs(p.vy)+0.3;} if(p.y>MH-r){p.y=MH-r;p.vy=-Math.abs(p.vy);}
+    var v=Math.hypot(p.vx,p.vy)||1,tg=sp*(p.t===2?.75:1),k=1+(tg/v-1)*.02*dt;p.vx*=k;p.vy*=k;
+    if(p.t===2&&Math.random()<pd){parts.splice(i,1);var c=Math.cos(p.ang),s=Math.sin(p.ang),e=sp*1.2;
+      parts.push({t:1,x:p.x+c*R,y:p.y+s*R,vx:c*e,vy:s*e,ang:0,spin:0,cool:25});
+      parts.push({t:1,x:p.x-c*R,y:p.y-s*R,vx:-c*e,vy:-s*e,ang:0,spin:0,cool:25});}
+  }
+  var no2=[];for(var j=0;j<parts.length;j++)if(parts[j].t===1&&parts[j].cool<=0)no2.push(parts[j]);
+  for(var a=0;a<no2.length;a++){var A=no2[a];if(A.dead)continue;
+    for(var b=a+1;b<no2.length;b++){var B=no2[b];if(B.dead)continue;var dx=A.x-B.x,dy=A.y-B.y;
+      if(dx*dx+dy*dy<4*R*R){if(Math.random()<PREC){A.dead=B.dead=1;parts.push({t:2,x:(A.x+B.x)/2,y:(A.y+B.y)/2,vx:(A.vx+B.vx)/2,vy:(A.vy+B.vy)/2,ang:Math.atan2(dy,dx),spin:rnd(-.05,.05),cool:0});}break;}}}
+  if(no2.length) parts=parts.filter(function(p){return !p.dead;});
+}
+/* cor do gás: concentração de NO2 */
+var colorAmt=0;
+function gasAmt(){var c=counts();return Math.min(1,(c.no2/(MW*MH*tube.vol))*MW*MH/120);}
+
+/* ── interação ── */
+var mode=null, grabDY=0, hintEl=document.getElementById('hint'), touched=false;
+function plungerY(){return tube.y-TH-8+(1-tube.vol)*TH*0.98;} // topo do gás
+function hitTube(p){return Math.abs(p.x-tube.x)<TW/2+22 && p.y<tube.y+6 && p.y>tube.y-TH+10;}
+function hitPlunger(p){var py=plungerY();return Math.abs(p.x-tube.x)<46 && p.y>py-70 && p.y<py+14;}
+function firstTouch(){if(!touched){touched=true;hintEl.style.opacity=0;}}
+stageEl.addEventListener('pointerdown',function(e){if(EMBED)return;var p=toLogical(e);
+  if(hitPlunger(p)){mode='plunger';firstTouch();stageEl.setPointerCapture(e.pointerId);}
+  else if(hitTube(p)){mode='tube';grabDY=p.y-tube.y;tube.drag=true;firstTouch();stageEl.setPointerCapture(e.pointerId);}});
+stageEl.addEventListener('pointermove',function(e){if(!mode)return;var p=toLogical(e);
+  if(mode==='tube'){tube.tx=Math.max(90,Math.min(910,p.x));tube.ty=Math.min(BENCH-6,Math.max(260,p.y-grabDY));}
+  else{var top=tube.y-TH-8;var v=1-Math.max(0,Math.min(.6,(p.y-top)/(TH*0.98)));setVol(v,true);}
+  stageEl.style.cursor='grabbing';});
+function endDrag(){if(mode==='tube'){tube.drag=false;var best=0,bd=1e9;ST.forEach(function(s,i){var d=Math.abs(s.x-tube.tx);if(d<bd){bd=d;best=i;}});place(best,true);}mode=null;stageEl.style.cursor='';}
+stageEl.addEventListener('pointerup',endDrag);stageEl.addEventListener('pointercancel',endDrag);
+stageEl.addEventListener('pointermove',function(e){if(mode||EMBED)return;var p=toLogical(e);stageEl.style.cursor=(hitPlunger(p)||hitTube(p))?'grab':'';});
+
+var btns=document.querySelectorAll('.ctrls button');
+btns.forEach(function(b){b.addEventListener('click',function(){firstTouch();place(+b.dataset.st,true);});});
+var volIn=document.getElementById('vol'), vOut=document.getElementById('vOut');
+volIn.addEventListener('input',function(){firstTouch();setVol(+volIn.value/100,true);});
+function setVol(v,user){var old=tube.volT;tube.volT=Math.round(v*100)/100;volIn.value=Math.round(tube.volT*100);
+  vOut.textContent=tube.volT>=.99?'solto':Math.round((1-tube.volT)*100)+'% comprimido';
+  if(user&&tube.volT<old-.02) onCompress(old); if(user&&tube.volT>old+.02) why('<strong>Soltou o êmbolo.</strong> Com mais espaço, o lado com mais moléculas é favorecido: N₂O₄ se quebra em 2 NO₂.');}
+function place(i,user){var old=tube.st;tube.st=i;tube.tx=ST[i].x;tube.ty=BENCH-6+ST[i].dip;
+  btns.forEach(function(b){b.classList.toggle('act',+b.dataset.st===i);});
+  if(!user||old===i)return;
+  if(i===0) why('<strong>No gelo.</strong> O frio favorece o lado que libera calor: NO₂ se junta de volta em N₂O₄, que é incolor. O gás vai clareando.');
+  if(i===2) why('<strong>Na água fervendo.</strong> A quebra do N₂O₄ absorve calor, então o calor extra empurra o equilíbrio para o NO₂. O gás fica castanho-escuro.');
+  if(i===1) why('<strong>De volta à bancada.</strong> Na temperatura ambiente, as duas moléculas convivem e a cor volta a um meio-termo.');}
+
+/* ── desafios ── */
+var M={m1:false,m2:false,m3:false}, hold1=0, hold2=0, comp=null;
+function done(id,msg){if(M[id])return;M[id]=true;document.getElementById(id).classList.add('done');toast(msg);
+  if(M.m1&&M.m2&&M.m3) setTimeout(function(){toast('Três de três. Isso é o princípio de Le Chatelier.');},2600);}
+var tt=null;function toast(t){var el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){el.classList.remove('show');},2400);}
+function onCompress(old){var a=gasAmt();comp={t0:performance.now(),from:old,peak:0,peakAt:0};
+  why('<strong>Comprimiu.</strong> Primeiro o gás fica mais concentrado e escurece. Agora observe: o equilíbrio vai para o lado com menos moléculas (1 N₂O₄ no lugar de 2 NO₂) e a cor volta a clarear um pouco.');}
+function checkMissions(dt){var c=counts(),frac=c.no2/(c.no2+c.n2o4);
+  if(frac<.24&&tube.st===0){hold1+=dt;if(hold1>40)done('m1','Quase transparente: o frio venceu.');}else hold1=0;
+  if(colorAmt>.72){hold2+=dt;if(hold2>40)done('m2','Castanho-escuro: o calor quebrou o N₂O₄.');}else hold2=0;
+  if(comp){var now=performance.now(),el=now-comp.t0;
+    if(el<2500){if(colorAmt>comp.peak){comp.peak=colorAmt;comp.peakAt=now;}}
+    else if(colorAmt<comp.peak*.9&&comp.from-tube.volT>.2){done('m3','Viu? Escureceu e depois clareou sozinho.');comp=null;}
+    else if(el>14000)comp=null;}}
+var whyEl=document.getElementById('why');
+function why(h){whyEl.style.opacity=0;setTimeout(function(){whyEl.innerHTML=h;whyEl.style.opacity=1;},180);}
+
+/* ── desenho ── */
+var t0=performance.now(), bubbles=[], steam=[];
+for(var k=0;k<22;k++)bubbles.push({x:rnd(-60,60),y:rnd(0,120),r:rnd(2,5),v:rnd(.6,1.6)});
+for(var k2=0;k2<10;k2++)steam.push({x:rnd(-50,50),y:rnd(0,90),ph:rnd(0,6)});
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function drawIce(s){var x=s.x,y=BENCH;
+  ctx.fillStyle='rgba(120,160,190,.10)';rr(x-110,y-70,220,90,18);ctx.fill();
+  ctx.strokeStyle='rgba(224,219,209,.28)';ctx.lineWidth=2;rr(x-110,y-70,220,90,18);ctx.stroke();
+  ctx.fillStyle='rgba(150,190,215,.18)';ctx.fillRect(x-106,y-46,212,62);
+  var cubes=[[-84,-52],[-46,-40],[38,-50],[70,-36],[-70,-20],[10,-30],[52,-14],[-20,-10]];
+  cubes.forEach(function(c,i){ctx.save();ctx.translate(x+c[0],y+c[1]);ctx.rotate((i%3-1)*.25);ctx.fillStyle='rgba(225,238,245,.55)';rr(-14,-14,28,28,5);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1.2;ctx.stroke();ctx.restore();});
+  label(x,y+44,'Banho de gelo · 0 °C');}
+function drawBeaker(s,t){var x=s.x,y=BENCH;
+  // placa aquecedora
+  ctx.fillStyle='#24221d';rr(x-118,y+2,236,22,6);ctx.fill();
+  var glow=.55+.25*Math.sin(t*3);ctx.fillStyle='rgba(220,90,40,'+(.35*glow)+')';rr(x-96,y+2,192,6,3);ctx.fill();
+  // água
+  ctx.fillStyle='rgba(120,160,190,.16)';ctx.fillRect(x-100,y-120,200,120);
+  bubbles.forEach(function(b){b.y+=b.v*(RM?0:1);if(b.y>120){b.y=0;b.x=rnd(-90,90);}ctx.strokeStyle='rgba(235,240,245,.45)';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(x+b.x,y-b.y,b.r,0,7);ctx.stroke();});
+  // vidro
+  ctx.strokeStyle='rgba(224,219,209,.32)';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x-104,y-160);ctx.lineTo(x-104,y);ctx.lineTo(x+104,y);ctx.lineTo(x+104,y-160);ctx.stroke();
+  steam.forEach(function(st){var yy=y-130-((t*22+st.y*3)%90),a=.16*(1-((t*22+st.y*3)%90)/90);ctx.strokeStyle='rgba(235,235,235,'+a+')';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+st.x,yy);ctx.quadraticCurveTo(x+st.x+10*Math.sin(t*2+st.ph),yy-14,x+st.x,yy-28);ctx.stroke();});
+  label(x,y+44,'Água fervendo · 100 °C');}
+function drawStand(s){var x=s.x,y=BENCH;ctx.fillStyle='#1d1c18';rr(x-60,y-4,120,10,4);ctx.fill();label(x,y+44,'Bancada · 25 °C');}
+function label(x,y,t){ctx.fillStyle='#8a857c';ctx.font='400 13px Inter, sans-serif';ctx.textAlign='center';ctx.fillText(t.toUpperCase(),x,y);}
+function gasRGBA(a){return 'rgba('+Math.round(200-30*a)+','+Math.round(105-45*a)+','+Math.round(40-15*a)+','+(.02+.88*Math.pow(a,1.4)).toFixed(3)+')';}
+function drawTube(){var x=tube.x,y=tube.y,gt=plungerY()+8;
+  // gás
+  ctx.save();rr(x-TW/2,y-TH,TW,TH,TW/2);ctx.clip();
+  ctx.fillStyle=gasRGBA(colorAmt);ctx.fillRect(x-TW/2,gt,TW,y-gt);
   ctx.restore();
-  // medidor
-  var tot=c.no2+2*c.n2o4, frac=tot?c.no2/(c.no2+c.n2o4):0;
-  var pct=Math.round(frac*100); document.getElementById('pct').textContent=pct+'%'; document.getElementById('barNO2').style.width=pct+'%';
-  // gráfico
-  var gw=gr.width, gh=gr.height; gx.clearRect(0,0,gw,gh);
-  gx.lineWidth=2*DPR; [['no2','#c8752f'],['n2o4','#e7e2d6']].forEach(function(k){ gx.strokeStyle=k[1]; gx.beginPath();
-    hist.forEach(function(h,i){ var x=i/(HMAX-1)*gw, y=gh-8*DPR-(h[k[0]]/170)*(gh-16*DPR); i?gx.lineTo(x,y):gx.moveTo(x,y); }); gx.stroke(); });
+  // vidro
+  ctx.strokeStyle='rgba(235,232,224,.55)';ctx.lineWidth=2.5;rr(x-TW/2,y-TH,TW,TH,TW/2);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-TW/2+9,y-TH+30);ctx.lineTo(x-TW/2+9,y-40);ctx.stroke();
+  // êmbolo
+  var py=plungerY();ctx.fillStyle='#4a4840';ctx.fillRect(x-TW/2+4,py,TW-8,10);
+  ctx.fillStyle='#6d6a60';ctx.fillRect(x-4,py-70,8,70);
+  ctx.fillStyle='#c8cfa8';rr(x-34,py-80,68,14,7);ctx.fill();
+  // etiqueta
+  ctx.fillStyle='rgba(15,13,11,.8)';rr(x+TW/2+10,y-TH+40,96,30,8);ctx.fill();
+  ctx.fillStyle='#e0dbd1';ctx.font='400 13px Inter, sans-serif';ctx.textAlign='left';ctx.fillText(Math.round(tube.T-273.15)+' °C',x+TW/2+22,y-TH+60);
+  // termômetro mini
+  var tf=Math.max(0,Math.min(1,(tube.T-263)/120));ctx.fillStyle='rgba(255,255,255,.12)';rr(x+TW/2+74,y-TH+46,6,18,3);ctx.fill();
+  ctx.fillStyle=tf>.6?'#d07a3a':tf<.2?'#8fb4cc':'#c8cfa8';rr(x+TW/2+74,y-TH+46+18*(1-tf),6,18*tf,3);ctx.fill();}
+var lensX=820;
+function drawLens(){lensX+=((tube.x>520?215:800)-lensX)*.06;var cx=lensX,cy=205,r=105,x=tube.x,y=tube.y-TH*.45;
+  ctx.strokeStyle='rgba(200,207,168,.35)';ctx.lineWidth=1.5;ctx.setLineDash([4,5]);ctx.beginPath();var sd=cx>x?1:-1;ctx.moveTo(x+sd*TW/2,y);ctx.lineTo(cx-sd*r*.92,cy+r*.35);ctx.stroke();ctx.setLineDash([]);
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.clip();
+  ctx.fillStyle='#14120f';ctx.fillRect(cx-r,cy-r,2*r,2*r);
+  ctx.fillStyle=gasRGBA(colorAmt*.7);ctx.fillRect(cx-r,cy-r,2*r,2*r);
+  var sc=(2*r)/MW;ctx.translate(cx-r,cy-r);ctx.scale(sc,sc);
+  var top=MH-MH*tube.vol;ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(0,0,MW,top);
+  parts.forEach(function(p){if(p.t===2){var c=Math.cos(p.ang)*R*.95,s=Math.sin(p.ang)*R*.95;ctx.strokeStyle='rgba(231,226,214,.6)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x-c,p.y-s);ctx.lineTo(p.x+c,p.y+s);ctx.stroke();ctx.fillStyle='#e7e2d6';ctx.beginPath();ctx.arc(p.x-c,p.y-s,R*.85,0,7);ctx.fill();ctx.beginPath();ctx.arc(p.x+c,p.y+s,R*.85,0,7);ctx.fill();}
+    else{ctx.fillStyle='#d27a32';ctx.beginPath();ctx.arc(p.x,p.y,R,0,7);ctx.fill();}});
+  ctx.restore();
+  ctx.strokeStyle='rgba(224,219,209,.55)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,cy,r,0,7);ctx.stroke();
+  var c=counts();ctx.textAlign='center';ctx.fillStyle='#b0a898';ctx.font='400 12px Inter, sans-serif';ctx.fillText('LUPA MOLECULAR',cx,cy+r+22);
+  ctx.fillStyle='#e7e2d6';ctx.fillText('● N₂O₄ '+c.n2o4,cx-46,cy+r+42);ctx.fillStyle='#d27a32';ctx.fillText('● NO₂ '+c.no2,cx+46,cy+r+42);}
+function draw(t){
+  ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#0f0d0b';ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.setTransform(S.sc,0,0,S.sc,S.ox,S.oy);
+  // grid mesa de corte + bancada
+  ctx.strokeStyle='rgba(150,168,110,.06)';ctx.lineWidth=1;for(var gx=0;gx<=LW;gx+=28){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,BENCH);ctx.stroke();}for(var gy=0;gy<=BENCH;gy+=28){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(LW,gy);ctx.stroke();}
+  ctx.fillStyle='#181712';ctx.fillRect(0,BENCH,LW,LH-BENCH);ctx.fillStyle='rgba(200,207,168,.12)';ctx.fillRect(0,BENCH,LW,2);
+  drawStand(ST[1]);drawIce(ST[0]);drawBeaker(ST[2],t);
+  drawTube();
+  // água por cima do tubo quando mergulhado (béquer) / gelo
+  if(Math.abs(tube.x-ST[2].x)<60){ctx.fillStyle='rgba(120,160,190,.22)';ctx.fillRect(Math.max(ST[2].x-100,tube.x-TW/2-3),BENCH-120,TW+6,120);}
+  if(Math.abs(tube.x-ST[0].x)<80){ctx.fillStyle='rgba(150,190,215,.22)';ctx.fillRect(tube.x-TW/2-3,BENCH-46,TW+6,46);
+    [[-20,-30],[18,-16],[-6,-8]].forEach(function(c,i){ctx.save();ctx.translate(tube.x+c[0],BENCH+c[1]);ctx.rotate((i-1)*.3);ctx.fillStyle='rgba(225,238,245,.6)';rr(-13,-13,26,26,5);ctx.fill();ctx.restore();});}
+  drawLens();
+  ctx.textAlign='left';ctx.fillStyle='#ece7dd';ctx.font='300 30px Franie, Inter, sans-serif';ctx.fillText('N₂O₄ ⇌ 2 NO₂',96,58);
+  ctx.fillStyle='#8a857c';ctx.font='400 12px Inter, sans-serif';ctx.fillText('INCOLOR       CASTANHO',100,82);
 }
-var HMAX=240, tick=0;
+/* ── loop ── */
 var last=performance.now();
-function loop(now){
-  var dt=Math.min(3,(now-last)/16.67); last=now;
-  if(!RM){ step(dt); }
-  else { step(0.5); }
-  if(++tick%6===0){ var c=counts(); hist.push(c); if(hist.length>HMAX) hist.shift(); }
-  draw(); requestAnimationFrame(loop);
-}
-// modo embed: demonstração automática (aquece e esfria devagar)
-if(EMBED){ var t0=performance.now(); setInterval(function(){ var ph=((performance.now()-t0)/1000)%24; var c=ph<12?0+ph/12*100:100-(ph-12)/12*100; var old=state.T; setT(c); rescale(old); },200); }
-setT(25); requestAnimationFrame(loop);
-window.__sim={step:step,counts:counts,state:state,setT:setT,rescale:rescale};
-if(window.parent!==window) setTimeout(function(){ try{ window.parent.postMessage('sim-ready','*'); }catch(e){} },400);
+function loop(now){var dt=Math.min(3,(now-last)/16.67);last=now;var t=(now-t0)/1000;
+  tube.x+=(tube.tx-tube.x)*Math.min(1,.22*dt);tube.y+=(tube.ty-tube.y)*Math.min(1,.22*dt);
+  tube.vol+=(tube.volT-tube.vol)*Math.min(1,.18*dt);
+  var targetT=tube.drag?tube.T:ST[tube.st].T;tube.T+=(targetT-tube.T)*Math.min(1,.012*dt);
+  step(RM?dt*.6:dt);
+  colorAmt+=(gasAmt()-colorAmt)*Math.min(1,.08*dt);
+  checkMissions(dt);
+  draw(t);requestAnimationFrame(loop);}
+if(EMBED&&!RM){var seq=[[0,7000],[1,3500],[2,7000],[1,3500]],si=0;(function nx(){place(seq[si][0],false);var d=seq[si][1];si=(si+1)%seq.length;setTimeout(nx,d);})();}
+requestAnimationFrame(loop);
+window.__sim={step:step,counts:counts,tube:tube,place:place,setVol:setVol};
+if(window.parent!==window)setTimeout(function(){try{window.parent.postMessage('sim-ready','*');}catch(e){}},500);
 })();
 </script>
 </body>
