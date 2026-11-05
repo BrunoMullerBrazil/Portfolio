@@ -238,7 +238,8 @@ code,.mono{font-family:var(--f-mono);font-size:.86em;color:var(--sage);backgroun
 /* motion: só liga com JS (sem JS, tudo aparece parado e legível) */
 .mo .slide{transition:scale calc(var(--f)*30) var(--settle),opacity calc(var(--f)*18) var(--ease)}
 .mo .slide:not(.in){scale:.975;opacity:.55}
-.mo .mw{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.1em;margin-bottom:-.1em}
+.mo .mw{display:inline-block;vertical-align:top;padding-bottom:.32em;margin-bottom:-.32em;clip-path:inset(-.7em -.6em 0 -.6em)}
+.mo .in .mw{clip-path:inset(-.7em -.6em -.7em -.6em);transition:clip-path 0s linear 2.6s}
 .mo .mw>span{display:inline-block;transform:translateY(108%);opacity:0;filter:blur(6px);transition:transform calc(var(--f)*26) var(--settle) calc(var(--i)*var(--f)*1.5),opacity calc(var(--f)*14) var(--ease) calc(var(--i)*var(--f)*1.5),filter calc(var(--f)*22) var(--ease) calc(var(--i)*var(--f)*1.5)}
 .mo .in .mw>span{transform:none;opacity:1;filter:none}
 .mo .rv{opacity:0;transform:translateY(28px);filter:blur(6px);transition:opacity calc(var(--f)*24) var(--ease) var(--d,0s),transform calc(var(--f)*30) var(--settle) var(--d,0s),filter calc(var(--f)*24) var(--ease) var(--d,0s)}
