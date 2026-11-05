@@ -50,7 +50,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--f-body);f
 .foot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;border-top:1px solid var(--line);font-family:var(--f-tag);font-size:clamp(8.5px,.85vw,10px);letter-spacing:.22em;text-transform:uppercase;color:var(--dim);position:relative;z-index:1}
 .foot span{padding:clamp(10px,1.2vw,15px) clamp(16px,2.2vw,28px)}
 .foot span+span{border-left:1px solid var(--line)}
-.foot span:last-child{color:var(--olive)}
+.foot span:last-child{color:var(--sage)}
 .eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--f-tag);font-size:clamp(8.5px,.85vw,10px);letter-spacing:.26em;text-transform:uppercase;color:var(--eyebrow);justify-self:start;background:none!important;padding:0}
 .eyebrow::before{content:"";width:14px;height:1px;background:currentColor}
 h1,h2,h3{margin:0;text-wrap:balance}
@@ -82,14 +82,14 @@ code,.mono{font-family:var(--f-mono);font-size:.86em;color:var(--sage);backgroun
 .part h1{font-size:clamp(46px,7.8vw,104px);line-height:.92;font-weight:26}
 .part .lead{color:var(--muted);font-size:clamp(13px,1.5vw,19px);max-width:46ch}
 .part .eyebrow{color:var(--sage)}
-.part .big{position:absolute;right:clamp(16px,4vw,56px);bottom:clamp(40px,5vw,72px);font-family:var(--f-tag);font-size:clamp(120px,22vw,300px);line-height:.8;color:rgba(255,255,255,.04);z-index:0}
+.part .big{position:absolute;right:clamp(16px,4vw,56px);bottom:clamp(40px,5vw,72px);font-family:var(--f-tag);font-size:clamp(120px,22vw,300px);line-height:.8;color:rgba(200,207,168,.1);z-index:0}
 
 /* blocos */
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(14px,2.2vw,30px);align-items:start}
 .parts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(8px,1.2vw,14px)}
 .parts a{display:grid;gap:6px;align-content:start;text-decoration:none;color:inherit;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:clamp(12px,1.4vw,18px);transition:border-color .3s,background .3s,transform calc(var(--f)*18) var(--settle)}
 .parts a:hover{border-color:var(--line2);background:rgba(255,255,255,.04);transform:translateY(-2px)}
-.parts .n{font-family:var(--f-tag);font-size:clamp(26px,3vw,40px);line-height:1;color:rgba(136,144,99,.5)}
+.parts .n{font-family:var(--f-tag);font-size:clamp(26px,3vw,40px);line-height:1;color:var(--sage)}
 .parts b{font-family:var(--f-title);font-weight:40;font-size:clamp(16px,1.8vw,22px);line-height:1.08;color:var(--ink)}
 .parts span{font-size:clamp(10px,1vw,13px);color:var(--muted)}
 .grid-t{display:grid;font-size:clamp(10px,1.05vw,13.5px)}
@@ -145,7 +145,7 @@ code,.mono{font-family:var(--f-mono);font-size:.86em;color:var(--sage);backgroun
 .decide{display:grid;gap:clamp(6px,.9vw,10px)}
 .decide>div{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.05fr);gap:clamp(12px,1.8vw,22px);align-items:center;border:1px solid var(--line);border-radius:14px;padding:clamp(8px,1.1vw,13px) clamp(14px,1.8vw,22px);background:var(--card);transition:border-color .3s,background .3s}
 .decide>div:hover{border-color:var(--line2);background:rgba(255,255,255,.04)}
-.decide .num{font-family:var(--f-tag);font-size:clamp(20px,2.6vw,34px);color:rgba(136,144,99,.55);line-height:1;min-width:1.2ch}
+.decide .num{font-family:var(--f-tag);font-size:clamp(20px,2.6vw,34px);color:var(--sage);line-height:1;min-width:1.2ch}
 .decide .q{font-family:var(--f-title);font-weight:40;font-size:clamp(15px,1.75vw,22px);line-height:1.08;color:var(--ink)}
 .decide .why{font-size:clamp(9.5px,.98vw,12.6px);color:var(--muted);line-height:1.45}
 .vision{display:grid;grid-template-columns:minmax(0,.8fr) auto minmax(0,2fr);gap:clamp(10px,1.4vw,18px);align-items:center;padding-block:clamp(7px,.9vw,11px);border-bottom:1px solid var(--line)}
@@ -165,7 +165,7 @@ code,.mono{font-family:var(--f-mono);font-size:.86em;color:var(--sage);backgroun
 .copy:focus-visible,.nav button:focus-visible,.parts a:focus-visible,.topnav a:focus-visible{outline:2px solid var(--sage);outline-offset:3px}
 .flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(6px,.9vw,10px)}
 .flow>div.hot{background:var(--sage);border-color:var(--sage)}.flow>div.hot b{color:var(--sage-ink)}.flow>div.hot span{color:#3a4128}.flow>div.hot .n{color:var(--sage-ink)}
-.flow .n{font-family:var(--f-tag);font-size:clamp(8px,.8vw,9.5px);letter-spacing:.2em;color:var(--olive)}
+.flow .n{font-family:var(--f-tag);font-size:clamp(14px,1.5vw,19px);letter-spacing:.06em;line-height:1;color:var(--sage)}
 .flow b{font-family:var(--f-title);font-weight:40;font-size:clamp(14px,1.45vw,18px);line-height:1.05;color:var(--ink)}
 .flow span{font-size:clamp(9px,.9vw,11.5px);color:var(--muted);line-height:1.4}
 .tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(8px,1.2vw,14px)}
@@ -221,7 +221,7 @@ code,.mono{font-family:var(--f-mono);font-size:.86em;color:var(--sage);backgroun
 #tc[data-state="play"] .tc-dot{opacity:1;animation:tcBlink .5s steps(2) infinite}
 @keyframes tcBlink{50%{opacity:.25}}
 .tc-sep{width:18px;height:1px;background:rgba(255,255,255,.12)}
-#tc-num{color:var(--olive)}
+#tc-num{color:var(--sage)}
 .tc-label-wrap{display:inline-block;overflow:hidden;line-height:1.2}
 #tc-label{display:inline-block;color:var(--text)}
 #tc-label.roll{animation:tcRoll calc(var(--f) * 17) var(--ease) both}
