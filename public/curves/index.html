@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>A cola das curvas · Bruno Müller</title>
+<meta name="description" content="As curvas de velocidade do vídeo do carro do Jane: nome técnico, cubic-bezier, onde mexer no After Effects e como pedir para a IA.">
+<meta property="og:title" content="A cola das curvas de velocidade">
+<meta property="og:description" content="Linear, ease in, ease out, ease in-out e overshoot: os números de cada uma, onde mexer no After e o que pedir pra IA.">
+<meta property="og:image" content="https://aue.productions/curves/og.jpg?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://aue.productions/curves/">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2f6a44">
+<link rel="icon" href="/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Special+Elite&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: uma folha de cola sobre o tapete de corte verde do vídeo; um cartão por curva, sempre na mesma ordem:
+   fita com o nome · gráfico + carro andando · o que diz · números · After · IA. */
+:root{
+  --mat:#2f6a44;--mat2:#285c3b;--grid:rgba(255,255,255,.09);--grid2:rgba(255,255,255,.2);
+  --paper:#f6f3ea;--paper2:#ece7da;--ink:#22201b;--muted:#5e5a50;--line:#d9d2c1;
+  --tape:#f7d626;--pen:#2c3f9e;--red:#d9502a;
+  --f-hand:"Permanent Marker","Comic Sans MS",cursive;--f-type:"Special Elite","Courier New",monospace;--f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);font-family:var(--f-body);line-height:1.55;background:var(--mat);
+  background-image:linear-gradient(var(--grid2) 1px,transparent 1px),linear-gradient(90deg,var(--grid2) 1px,transparent 1px),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:60px 60px,60px 60px,12px 12px,12px 12px}
+.wrap{max-width:760px;margin:0 auto;padding-block:clamp(28px,6vw,64px) 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:clamp(18px,3vw,28px)}
+.sheet{background:var(--paper);border-radius:3px;box-shadow:0 2px 0 rgba(0,0,0,.08),0 18px 40px -18px rgba(0,0,0,.55);padding:clamp(18px,4vw,36px);display:grid;gap:14px;min-width:0}
+.tape{justify-self:start;display:inline-block;background:var(--tape);color:var(--ink);font-family:var(--f-hand);font-size:clamp(20px,4.4vw,30px);line-height:1.1;padding:.25em .6em .2em;transform:rotate(-2deg);clip-path:polygon(0 0,100% 0,98.5% 20%,100% 40%,98.5% 60%,100% 80%,98.5% 100%,0 100%,1.5% 80%,0 60%,1.5% 40%,0 20%)}
+h1{font-family:var(--f-hand);font-weight:400;font-size:clamp(34px,8vw,58px);line-height:1.18;margin:0;text-wrap:balance}
+h1 span{background:linear-gradient(transparent 18%,var(--tape) 18% 92%,transparent 92%);padding:0 .12em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+h2{margin:0;font-family:var(--f-hand);font-weight:400;font-size:clamp(22px,4.6vw,30px);line-height:1.1}
+p{margin:0}
+.lead{font-size:clamp(15px,2.6vw,18px);color:var(--muted);max-width:56ch}
+.hand{font-family:var(--f-hand);color:var(--pen)}
+.type{font-family:var(--f-type)}
+code{font-family:var(--f-type);font-size:.95em;background:var(--paper2);padding:.05em .35em;border-radius:3px}
+.how{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:18px;align-items:center}
+.how svg{width:100%;height:auto;display:block}
+.how ul{margin:0;padding-left:1.1em;display:grid;gap:6px;color:var(--muted)}
+.how b{color:var(--ink)}
+/* cartão de curva */
+.curve .top{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.curve .says{font-size:clamp(15px,2.5vw,17px)}
+.demo{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:16px;align-items:center}
+.graph{background:#fff;border:1px solid var(--line);border-radius:3px;background-image:linear-gradient(#cfe0f1 1px,transparent 1px),linear-gradient(90deg,#cfe0f1 1px,transparent 1px);background-size:15px 15px}
+.graph svg{display:block;width:100%;height:auto;overflow:visible}
+.lane{position:relative;height:96px;border-bottom:2px solid var(--line);overflow:hidden;border-radius:3px;background:var(--mat2);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:12px 12px}
+.lane img{position:absolute;bottom:14px;left:0;width:108px;height:auto;will-change:transform;filter:drop-shadow(0 4px 3px rgba(0,0,0,.35))}
+.lane .g{position:absolute;bottom:14px;left:0;width:108px;opacity:.28;pointer-events:none}
+.lane .tick{position:absolute;bottom:0;width:2px;height:10px;background:var(--tape)}
+.lane .mark{position:absolute;top:12px;bottom:0;width:2px;background:#fff;opacity:.85}
+.nums{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.nums code{font-size:clamp(14px,2.6vw,17px);padding:.3em .6em}
+button.copy{font:600 13px/1 var(--f-body);border:1.5px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:9px 14px;cursor:pointer;min-height:38px}
+button.copy:hover{background:var(--ink);color:var(--paper)}
+button.copy:focus-visible,button.play:focus-visible,a:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+button.play{font:600 13px/1 var(--f-body);border:0;background:var(--ink);color:var(--paper);border-radius:999px;padding:9px 14px;cursor:pointer;min-height:38px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.box{border-top:2px solid var(--ink);padding-top:8px;display:grid;gap:6px;align-content:start;min-width:0}
+.box h3{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.box p,.box li{font-size:14.5px}
+.box ol{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.prompt{font-family:var(--f-type);font-size:14px;background:var(--paper2);border-radius:3px;padding:10px 12px;overflow-wrap:anywhere}
+.warn{border-left:4px solid var(--red);padding:6px 0 6px 14px;display:grid;gap:4px}
+.warn b{color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tw{overflow-x:auto}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;color:#e9efe6;font-size:14px}
+.foot a{color:#fff;font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translate(-50%,10px);background:var(--ink);color:var(--paper);font-size:14px;padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:620px){.how,.cols{grid-template-columns:1fr}.demo{grid-template-columns:minmax(0,110px) minmax(0,1fr)}.lane img,.lane .g{width:84px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+<section class="sheet">
+  <span class="tape">a cola</span>
+  <h1>As curvas de <span>velocidade</span></h1>
+  <p class="lead">Do vídeo do carro do Jane: o nome técnico de cada curva, os quatro números, onde mexer no After Effects e o que pedir para a IA. Toque em <b>Rodar</b> em cada cartão para ver o carro andar com ela.</p>
+</section>
+
+<section class="sheet">
+  <h2>Como ler o gráfico</h2>
+  <div class="how">
+    <div class="graph"><svg viewBox="0 0 120 120" role="img" aria-label="Gráfico de exemplo: tempo na horizontal, distância na vertical, com as duas alças da curva marcadas">
+      <line x1="12" y1="108" x2="112" y2="108" stroke="#22201b" stroke-width="1.6"/><line x1="12" y1="108" x2="12" y2="8" stroke="#22201b" stroke-width="1.6"/>
+      <path d="M12 108 C 54 108, 70 8, 112 8" fill="none" stroke="#2c3f9e" stroke-width="2.6"/>
+      <line x1="12" y1="108" x2="54" y2="108" stroke="#d9502a" stroke-width="1.4"/><circle cx="54" cy="108" r="3.2" fill="#fff" stroke="#d9502a" stroke-width="1.6"/>
+      <line x1="112" y1="8" x2="70" y2="8" stroke="#d9502a" stroke-width="1.4"/><circle cx="70" cy="8" r="3.2" fill="#fff" stroke="#d9502a" stroke-width="1.6"/>
+      <text x="62" y="119" font-size="8" text-anchor="middle" fill="#22201b" font-family="Permanent Marker">tempo →</text>
+      <text x="5" y="58" font-size="8" text-anchor="middle" fill="#22201b" font-family="Permanent Marker" transform="rotate(-90 5 58)">distância →</text>
+    </svg></div>
+    <ul>
+      <li><b>Deitado é o tempo, em pé é a distância.</b> A curva é só o desenho do espaçamento entre os quadros.</li>
+      <li><b>Inclinada = rápido. Deitada = devagar.</b></li>
+      <li><b>Os quatro números são as duas alças</b> (as bolinhas vermelhas): <code>cubic-bezier(x1, y1, x2, y2)</code>. A primeira alça controla a saída, a segunda, a chegada.</li>
+    </ul>
+  </div>
+</section>
+
+<div id="cards"></div>
+
+<section class="sheet">
+  <h2>A pegadinha dos nomes</h2>
+  <div class="warn"><p><b>No After, "Easy Ease In" freia chegando no keyframe.</b> Ou seja, ele faz o que quase todo o resto do mundo chama de <i>ease out</i>. Não é você que está confuso, é o nome.</p></div>
+  <div class="tw"><table>
+    <thead><tr><th>O que o movimento faz</th><th>CSS, IA, quase tudo</th><th>After Effects</th></tr></thead>
+    <tbody>
+      <tr><td>Sai devagar e acelera</td><td><code>ease-in</code></td><td>Easy Ease <b>Out</b> no 1º keyframe (Ctrl/Cmd + Shift + F9)</td></tr>
+      <tr><td>Chega rápido e freia</td><td><code>ease-out</code></td><td>Easy Ease <b>In</b> no 2º keyframe (Shift + F9)</td></tr>
+      <tr><td>Sai e chega devagar</td><td><code>ease-in-out</code></td><td>Easy Ease nos dois (F9)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="sheet">
+  <h2>Escolhendo a curva</h2>
+  <ul style="margin:0;padding-left:1.1em;display:grid;gap:6px">
+    <li><b>Escolha pelo que o movimento precisa dizer,</b> não pelo que está no padrão. O F9 em tudo é o que deixa o motion com cara de motion.</li>
+    <li><b>Coisa que chega em algum lugar quase sempre pede ease out.</b> É a que mais passa peso.</li>
+    <li><b>Se a curva começa rápida</b> (overshoot), faça o objeto entrar em cena já andando. Largar do zero num tranco denuncia o keyframe.</li>
+    <li><b>O que vem junto reage junto:</b> suspensão, cabelo, papel balançam com a aceleração, com um pequeno atraso.</li>
+  </ul>
+</section>
+
+<footer class="foot"><span>Feito por Bruno Müller</span><a href="/">aue.productions ↗</a></footer>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var C=[
+    {n:'LINEAR',v:[0,0,1,1],css:'linear',says:'Mesma velocidade do começo ao fim. Nenhum carro anda assim: parece carrinho de corda. Use para rotação contínua, esteira, coisa mecânica.',
+     ae:['Keyframes lineares são o padrão ao criar.','Para voltar a linear: Ctrl/Cmd + clique no keyframe.','No Graph Editor (velocidade), a linha fica reta e plana.'],
+     ia:'Anime o carro de x=0 a x=800 em 24 quadros com easing linear (velocidade constante).'},
+    {n:'EASE IN',v:[.42,0,1,1],css:'cubic-bezier(.42, 0, 1, 1)',says:'Sai devagar e vai embalando. É o carro saindo do sinal. Bom para saídas de cena: o objeto vai embora acelerando.',
+     ae:['No 1º keyframe: Easy Ease Out (Ctrl/Cmd + Shift + F9).','Para chegar nesses números: Keyframe Velocity (Ctrl/Cmd + Shift + K), saída do 1º com influência 42% e velocidade 0.','O 2º keyframe fica linear.'],
+     ia:'Anime o carro de x=0 a x=800 em 24 quadros com easing cubic-bezier(.42, 0, 1, 1): sai devagar e acelera até o fim.'},
+    {n:'EASE OUT',v:[0,0,.58,1],css:'cubic-bezier(0, 0, .58, 1)',says:'Chega rápido e vai freando. É a que mais passa peso. Quase todo movimento que chega em algum lugar pede essa.',
+     ae:['No 2º keyframe: Easy Ease In (Shift + F9). Sim, o nome é ao contrário.','Para chegar nesses números: entrada do 2º com influência 42% e velocidade 0.','O 1º keyframe fica linear.'],
+     ia:'Anime o carro de x=0 a x=800 em 24 quadros com easing cubic-bezier(0, 0, .58, 1): chega rápido e freia até parar.'},
+    {n:'EASE IN-OUT',v:[.42,0,.58,1],css:'cubic-bezier(.42, 0, .58, 1)',says:'Sai devagar e chega devagar. Funciona, mas é o padrão de todo mundo, então não diz nada sobre o seu movimento.',
+     ae:['F9 nos dois keyframes (Easy Ease, influência 33,33%).','Para chegar nesses números: influência 42% nas duas pontas.','Para fugir do padrão, deixe as duas pontas diferentes.'],
+     ia:'Anime o carro de x=0 a x=800 em 24 quadros com easing cubic-bezier(.42, 0, .58, 1): sai e chega devagar.'},
+    {n:'OVERSHOOT',v:[.34,1.56,.64,1],css:'cubic-bezier(.34, 1.56, .64, 1)',alt:'Em alguns programas: "Back" (back out).',says:'Passa do ponto e volta. Dá para sentir a freada. Ótimo para pouso de objeto, entrada de etiqueta, carimbo.',
+     ae:['Não sai com dois keyframes: a curva passa de 100% (o 1,56).','Faça com três keyframes: passa uns 8% da marca e volta, com ease out no último.','Ou use um plugin que aceite cubic-bezier direto, como o Flow.'],
+     ia:'Anime o carro de x=0 a x=800 em 24 quadros com easing cubic-bezier(.34, 1.56, .64, 1): ele passa um pouco do ponto e volta. Faça o carro entrar já andando e a suspensão afundar na freada.'}
+  ];
+  function bez(p,X){function b(a1,a2,t){var u=1-t;return 3*u*u*t*a1+3*u*t*t*a2+t*t*t}var lo=0,hi=1;for(var k=0;k<26;k++){var m=(lo+hi)/2;if(b(p[0],p[2],m)<X)lo=m;else hi=m}return b(p[1],p[3],(lo+hi)/2)}
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+  var host=document.getElementById('cards'),lanes=[];
+  C.forEach(function(c,i){
+    var v=c.v,S=120,P=12,x=function(u){return P+u*(S-2*P)},y=function(u){return S-P-u*(S-2*P)*.8-((S-2*P)*.1)};
+    var g='<svg viewBox="0 0 '+S+' '+S+'" role="img" aria-label="Gráfico da curva '+c.n+'"><line x1="'+x(0)+'" y1="'+y(0)+'" x2="'+x(1)+'" y2="'+y(0)+'" stroke="#22201b" stroke-width="1.4"/><line x1="'+x(0)+'" y1="'+y(0)+'" x2="'+x(0)+'" y2="'+(P-2)+'" stroke="#22201b" stroke-width="1.4"/>'+
+      '<line x1="'+x(0)+'" y1="'+y(0)+'" x2="'+x(v[0])+'" y2="'+y(v[1])+'" stroke="#d9502a" stroke-width="1.2"/><line x1="'+x(1)+'" y1="'+y(1)+'" x2="'+x(v[2])+'" y2="'+y(v[3])+'" stroke="#d9502a" stroke-width="1.2"/>'+
+      '<path d="M'+x(0)+' '+y(0)+' C '+x(v[0])+' '+y(v[1])+', '+x(v[2])+' '+y(v[3])+', '+x(1)+' '+y(1)+'" fill="none" stroke="#2c3f9e" stroke-width="2.6"/>'+
+      '<circle cx="'+x(v[0])+'" cy="'+y(v[1])+'" r="3" fill="#fff" stroke="#d9502a" stroke-width="1.4"/><circle cx="'+x(v[2])+'" cy="'+y(v[3])+'" r="3" fill="#fff" stroke="#d9502a" stroke-width="1.4"/></svg>';
+    var s=document.createElement('section'); s.className='sheet curve'; s.id='c'+i;
+    s.innerHTML='<div class="top"><span class="tape">'+c.n+'</span><button class="play" type="button" data-i="'+i+'">Rodar</button></div>'+
+      '<div class="demo"><div class="graph">'+g+'</div><div class="lane" id="lane'+i+'"></div></div>'+
+      '<p class="says">'+esc(c.says)+'</p>'+
+      '<div class="nums"><code id="n'+i+'">'+c.css+'</code><button class="copy" type="button" data-t="n'+i+'">Copiar números</button>'+(c.alt?'<span class="hand" style="font-size:15px">'+esc(c.alt)+'</span>':'')+'</div>'+
+      '<div class="cols"><div class="box"><h3>No After Effects</h3><ol>'+c.ae.map(function(a){return '<li>'+esc(a)+'</li>'}).join('')+'</ol><p style="color:var(--muted);font-size:13px">Influência e velocidade dão uma aproximação; para os números exatos, um plugin que aceite cubic-bezier.</p></div>'+
+      '<div class="box"><h3>Pra IA</h3><p class="prompt" id="p'+i+'">'+esc(c.ia)+'</p><button class="copy" type="button" data-t="p'+i+'" style="justify-self:start">Copiar prompt</button></div></div>';
+    host.appendChild(s);
+    var lane=s.querySelector('.lane'),car=new Image(); car.src='/curves/img/car.webp'; car.alt='';
+    lanes.push({el:lane,car:car,v:v,ghosts:[],t0:null,over:c.n==='OVERSHOOT'});
+  });
+  // monta pistas: cópias a cada 1/6 do tempo, marcas amarelas, carro
+  function layout(L){
+    L.el.innerHTML=''; var W=L.el.clientWidth, cw=L.el.querySelector('img')?0:(W<420?84:108), span=W-cw-16-(L.over?40:0);
+    L.span=span; L.cw=cw;
+    if(L.over){var m=document.createElement('span');m.className='mark';m.style.left=(8+span+cw)+'px';L.el.appendChild(m)}
+    for(var k=0;k<7;k++){var gx=8+span*Math.max(0,Math.min(1.2,bez(L.v,k/6)));
+      var g=new Image();g.src='/curves/img/car.webp';g.alt='';g.className='g';g.style.transform='translateX('+gx+'px)';g.hidden=!RM;L.el.appendChild(g);L.ghosts.push(g);
+      var t=document.createElement('span');t.className='tick';t.style.left=(gx+cw/2)+'px';t.hidden=!RM;L.el.appendChild(t);L.ghosts.push(t)}
+    L.car.style.transform='translateX('+(RM?8+span*bez(L.v,1):8)+'px)';L.el.appendChild(L.car);
+  }
+  lanes.forEach(function(L){L.ghosts=[];layout(L)});
+  addEventListener('resize',function(){lanes.forEach(function(L){L.ghosts=[];layout(L)})});
+  var D=1600;
+  function run(i){var L=lanes[i];L.t0=performance.now();L.ghosts.forEach(function(g){g.hidden=true});requestAnimationFrame(tick)}
+  function tick(now){var any=false;lanes.forEach(function(L){if(L.t0==null)return;var u=Math.min(1,(now-L.t0)/D);
+      L.car.style.transform='translateX('+(8+L.span*bez(L.v,u))+'px)';
+      for(var k=0;k<7;k++){if(u>=k/6){L.ghosts[2*k].hidden=false;L.ghosts[2*k+1].hidden=false}}
+      if(u<1)any=true;else L.t0=null});
+    if(any)requestAnimationFrame(tick)}
+  document.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+    if(b.classList.contains('play')){if(!RM)run(+b.dataset.i)}
+    if(b.classList.contains('copy')){var el=document.getElementById(b.dataset.t),txt=el.innerText;
+      var done=function(){say('Copiado')},sel=function(){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r);say('Selecionado: use Copiar')};
+      try{navigator.clipboard.writeText(txt).then(done,sel)}catch(_){sel()}}});
+  var toast=document.getElementById('toast'),tt;function say(m){toast.textContent=m;toast.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){toast.classList.remove('on')},1600)}
+  // roda cada pista uma vez quando aparece
+  if(!RM&&'IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){run(+e.target.id.slice(4));io.unobserve(e.target)}})},{threshold:.6});lanes.forEach(function(L){io.observe(L.el)})}
+})();
+</script>
+</body>
+</html>
