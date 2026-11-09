@@ -40,12 +40,17 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact">
+    <section
+      id="contact"
+      data-scene="05"
+      data-scene-label={t({ pt: "Contato", en: "Contact" }, lang)}
+    >
       <div className="reveal">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          data-depth="0.06"
           className="contact-hl-img"
-          src={withBasePath("/assets/logos/vamos.png")}
+          src={withBasePath("/assets/logos/vamos.webp")}
           alt="Vamos trabalhar juntos."
         />
       </div>

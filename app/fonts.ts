@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import { Inter, Anton, Playfair_Display, Space_Mono, Montserrat } from "next/font/google";
+import { Inter, Anton, Playfair_Display, Space_Mono } from "next/font/google";
 
 export const inter = Inter({
   subsets: ["latin"],
@@ -16,6 +16,7 @@ export const anton = Anton({
   weight: "400",
   variable: "--font-anton",
   display: "swap",
+  preload: false, // subpages only — the home never downloads it
 });
 
 export const playfair = Playfair_Display({
@@ -24,6 +25,7 @@ export const playfair = Playfair_Display({
   style: ["italic"],
   variable: "--font-playfair",
   display: "swap",
+  preload: false, // subpages only
 });
 
 export const spaceMono = Space_Mono({
@@ -31,15 +33,7 @@ export const spaceMono = Space_Mono({
   weight: ["400", "700"],
   variable: "--font-space-mono",
   display: "swap",
-});
-
-// Used only on /trajetoria's title/tag headlines (Figma source has these
-// set in Montserrat Black — a different font from the rest of the site).
-export const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: "900",
-  variable: "--font-montserrat",
-  display: "swap",
+  preload: false, // subpages + editors only
 });
 
 export const franie = localFont({

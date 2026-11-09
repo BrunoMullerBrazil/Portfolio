@@ -18,6 +18,8 @@ export default function NavDark() {
         <a href="#contact">{t(dict.navContact, lang)}</a>
         <LanguageSwitcher />
       </div>
+      {/* active-scene marker, positioned by MotionSystem */}
+      <span className="nav-ind" aria-hidden="true" />
     </nav>
   );
 }

@@ -113,18 +113,104 @@ export default function Hero() {
       heroMX = e.clientX / window.innerWidth - 0.5;
       heroMY = e.clientY / window.innerHeight - 0.5;
     }
-    document.addEventListener("mousemove", onMouseMove);
-
-    let raf: number;
+    // Mouse parallax: pointer devices only, and the loop only runs while the
+    // hero is on screen and the text is still easing — it used to spin every
+    // frame forever, on phones too.
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    let raf = 0;
+    let looping = false;
     function parallaxLoop() {
       heroLX += (heroMX - heroLX) * 0.07;
       heroLY += (heroMY - heroLY) * 0.07;
-      if (document.body.classList.contains("hero-mode")) applyHeroTransform();
+      const inHero = document.body.classList.contains("hero-mode");
+      if (inHero) applyHeroTransform();
+      if (inHero && (Math.abs(heroMX - heroLX) > 0.0005 || Math.abs(heroMY - heroLY) > 0.0005)) {
+        raf = requestAnimationFrame(parallaxLoop);
+      } else looping = false;
+    }
+    function kickParallax() {
+      if (looping || !finePointer) return;
+      looping = true;
       raf = requestAnimationFrame(parallaxLoop);
     }
-    raf = requestAnimationFrame(parallaxLoop);
+    function onMouseMoveKick(e: MouseEvent) {
+      onMouseMove(e);
+      kickParallax();
+    }
+    if (finePointer) document.addEventListener("mousemove", onMouseMoveKick);
 
     // ── Sticky hero media resize + scroll-driven state ──
+    let lastCss = "";
+    let lastScale = "";
+    // write a style only when its value changes — repeated identical writes
+    // still invalidate style on every scroll frame
+    const lastVals = new Map<string, string>();
+    function put(el: HTMLElement, key: string, prop: string, v: string) {
+      if (lastVals.get(key) === v) return;
+      lastVals.set(key, v);
+      // important: the cue and the role line have entrance animations that
+      // fill forwards, and a filling animation beats a plain inline style —
+      // they never faded out (the scroll cue sat on top of the full video)
+      el.style.setProperty(prop, v, "important");
+    }
+    let mode = "";
+
+    /*
+     * Desktop composition (measured, so it holds at any width / language):
+     *   - the signature sits on the baseline of "Bruno." — it closes the
+     *     sentence instead of floating in the right third;
+     *   - the card is centred in the free space between the text block and
+     *   the signature (not on the viewport, where the wide headline crowded
+     *     it), and glides to the viewport centre as it grows to full screen.
+     * Layout offsets, not rects: they ignore the text's parallax transform
+     * and the entrance animations.
+     */
+    let cardCx: number | null = null;
+    function relBox(el: HTMLElement) {
+      let x = 0, y = 0;
+      let n: HTMLElement | null = el;
+      while (n && n !== ht) {
+        x += n.offsetLeft;
+        y += n.offsetTop;
+        n = n.offsetParent as HTMLElement | null;
+      }
+      return { x, y, w: el.offsetWidth, h: el.offsetHeight };
+    }
+    function layoutDesktop() {
+      const vw = window.innerWidth;
+      const sig = ht!.querySelector<HTMLElement>(".hero-signature");
+      const img = sig?.querySelector<HTMLElement>("img");
+      const greet = ht!.querySelector<HTMLElement>(".hero-greeting");
+      const base = ht!.querySelector<HTMLElement>(".hg-base");
+      if (vw <= 768 || !sig || !img || !greet || !base) {
+        if (sig) {
+          sig.style.translate = "";
+          sig.classList.remove("sig-off");
+        }
+        cardCx = null;
+        return;
+      }
+      // the body of the signature (its arches) sits ~78% down the image
+      const b = relBox(base), im = relBox(img);
+      sig.style.translate = "0 " + (b.y - (im.y + im.h * 0.78)).toFixed(1) + "px";
+      const g = relBox(greet);
+      const free0 = g.x + g.w;
+      const { W0 } = baseMediaSize(vw, window.innerHeight);
+      const need = W0 + 96; // the card plus a breath on each side
+      if (im.x - free0 >= need) {
+        sig.classList.remove("sig-off");
+        cardCx = (free0 + im.x) / 2;
+      } else if (vw - 48 - free0 >= need) {
+        // narrow desktops / tablets: no room for all three — the signature
+        // is the one that steps out, the card takes its space
+        sig.classList.add("sig-off");
+        cardCx = (free0 + vw - 48) / 2;
+      } else {
+        sig.classList.remove("sig-off");
+        cardCx = null;
+      }
+    }
+
     function setM(w: number, h: number, r: number, top: number) {
       const vw = window.innerWidth;
       const isMobile = vw <= 768;
@@ -143,26 +229,41 @@ export default function Hero() {
         const centerX = rightAnchoredLeft + (centeredLeft - rightAnchoredLeft) * expansion;
         leftVal = Math.max(0, centerX) + "px";
         txVal = "none";
+      } else if (cardCx !== null) {
+        const { W0 } = baseMediaSize(vw, window.innerHeight);
+        const expansion = Math.max(0, Math.min((w - W0) / (vw - W0), 1));
+        const cx = cardCx + (vw / 2 - cardCx) * expansion;
+        leftVal = (cx - w / 2).toFixed(1) + "px";
+        txVal = "none";
       } else {
         leftVal = "50%";
         txVal = "translateX(-50%)";
       }
-      hm!.style.cssText =
+      const css =
         "position:absolute;overflow:hidden;cursor:none;z-index:5;" +
         "will-change:width,height,border-radius,top,left,transform;" +
-        "width:" + w + "px;height:" + h + "px;border-radius:" + r + "px;top:" + top + "px;" +
+        "width:" + w.toFixed(1) + "px;height:" + h.toFixed(1) + "px;border-radius:" + r.toFixed(2) + "px;top:" + top.toFixed(1) + "px;" +
         "left:" + leftVal + ";transform:" + txVal + ";";
+      // Every write here relayouts the card and the Vimeo iframe inside it:
+      // skip frames where nothing moved (most of the page, once the hero is
+      // behind us).
+      if (css === lastCss) return;
+      lastCss = css;
+      hm!.style.cssText = css;
 
       const iframe = hm!.querySelector<HTMLIFrameElement>("iframe");
       if (iframe) {
         const videoRatio = isMobile ? MOBILE_VIDEO_RATIO : DESKTOP_VIDEO_RATIO;
         const containerRatio = w / h;
         const scale = containerRatio < videoRatio ? videoRatio / containerRatio : containerRatio / videoRatio;
+        const scaleStr = scale.toFixed(4);
+        if (scaleStr === lastScale && iframe.style.width) return;
+        lastScale = scaleStr;
         iframe.style.setProperty("width", "100%", "important");
         iframe.style.setProperty("height", "100%", "important");
         iframe.style.setProperty("top", "0", "important");
         iframe.style.setProperty("left", "0", "important");
-        iframe.style.setProperty("transform", "scale(" + scale + ")", "important");
+        iframe.style.setProperty("transform", "scale(" + scaleStr + ")", "important");
         iframe.style.setProperty("transform-origin", "center center", "important");
       }
     }
@@ -171,8 +272,23 @@ export default function Hero() {
     // rotating past the 768px breakpoint) — resize fires continuously while
     // dragging a window, and resetting src on every tick would restart
     // playback each time.
+    // The hero video (Vimeo player — the heaviest thing on the page) starts
+    // loading only once the page itself has finished loading. The loader is
+    // still on screen then, so it's ready by the time the capsule lands.
+    let videoAllowed = false;
+    function allowVideo() {
+      if (videoAllowed) return;
+      videoAllowed = true;
+      lastIsMobile = null;
+      syncVideoSrc();
+    }
+    const onLoad = () => setTimeout(allowVideo, 150);
+    if (document.readyState === "complete") onLoad();
+    else window.addEventListener("load", onLoad, { once: true });
+
     let lastIsMobile: boolean | null = null;
     function syncVideoSrc() {
+      if (!videoAllowed) return;
       const isMobile = window.innerWidth <= 768;
       if (isMobile === lastIsMobile) return;
       lastIsMobile = isMobile;
@@ -185,9 +301,11 @@ export default function Hero() {
         vw = window.innerWidth;
       const { W0: W, H0: H } = baseMediaSize(vw, vh);
       syncVideoSrc();
+      layoutDesktop();
       setM(W, H, 20, (vh - H) / 2);
-      hm!.style.opacity = "0";
-      hm!.style.filter = "blur(16px)";
+      // Visibility before the loader hands over is gated in CSS
+      // (body:not(.media-ready)). Setting opacity inline here used to hide
+      // the video again on every window resize after load.
     }
     initM();
     window.addEventListener("resize", initM);
@@ -210,23 +328,28 @@ export default function Hero() {
         e2 = eic(t2);
       setM(cW, cH, cR, (vh - cH) / 2 - e2 * (vh + cH / 2));
       const uiF = Math.max(0, 1 - (t1 - 0.15) / 0.3);
-      ht!.style.opacity = String(uiF);
-      hr!.style.opacity = String(uiF);
-      heroScrollY = -(sy * 0.18);
-      applyHeroTransform();
-      hsc!.style.opacity = t1 < 0.02 ? "1" : t1 > 0.28 ? "0" : String(Math.max(0, 1 - (t1 - 0.02) / 0.26));
-      hn!.style.opacity = String(uiF);
-      hs!.style.backgroundColor = "rgba(245,243,239," + (1 - e2) + ")";
+      const uiS = uiF.toFixed(3);
+      put(ht!, "ht", "opacity", uiS);
+      put(hr!, "hr", "opacity", uiS);
+      // the hero text is gone past ~45% of the expansion: stop moving it
+      const hsy = -(Math.min(sy, vh * expandVh) * 0.18);
+      if (hsy !== heroScrollY) {
+        heroScrollY = hsy;
+        applyHeroTransform();
+      }
+      put(hsc!, "hsc", "opacity", t1 < 0.02 ? "1" : t1 > 0.28 ? "0" : Math.max(0, 1 - (t1 - 0.02) / 0.26).toFixed(3));
+      put(hn!, "hn", "opacity", uiS);
+      put(hs!, "hs", "background-color", "rgba(245,243,239," + (1 - e2).toFixed(3) + ")");
 
-      const nd = document.getElementById("nav-dark");
-      if (sy >= vh * (expandVh + 0.8)) {
-        document.body.classList.remove("hero-mode");
-        document.body.classList.add("dark-mode");
-        nd?.classList.add("visible");
-      } else {
-        document.body.classList.remove("dark-mode");
-        document.body.classList.add("hero-mode");
-        nd?.classList.remove("visible");
+      // Class changes on <body> restyle the whole page: only on a real flip
+      // (it used to remove + re-add them on every scroll frame).
+      const next = sy >= vh * (expandVh + 0.8) ? "dark" : "hero";
+      if (next !== mode) {
+        mode = next;
+        const nd = document.getElementById("nav-dark");
+        document.body.classList.toggle("hero-mode", next === "hero");
+        document.body.classList.toggle("dark-mode", next === "dark");
+        nd?.classList.toggle("visible", next === "dark");
       }
     }
     // Coalesce scroll events into one recompute per frame — updH() does
@@ -245,19 +368,48 @@ export default function Hero() {
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     updH();
+    // re-measure once the display font and the signature have their real size
+    function relayout() {
+      initM();
+      updH();
+    }
+    document.fonts?.ready.then(relayout);
+    // the text block changes width with the language and the display font
+    const greetEl = ht.querySelector<HTMLElement>(".hero-greeting");
+    let roW = 0;
+    const ro = new ResizeObserver(() => {
+      const w = greetEl?.offsetWidth || 0;
+      if (w && w !== roW) {
+        roW = w;
+        relayout();
+      }
+    });
+    if (greetEl) ro.observe(greetEl);
+    // late font swaps can move things without changing the block's width
+    window.addEventListener("load", relayout);
+    const sigImg = ht.querySelector<HTMLImageElement>(".hero-signature img");
+    if (sigImg && !sigImg.complete) sigImg.addEventListener("load", relayout, { once: true });
 
     return () => {
       cancelAnimationFrame(raf);
       if (scrollRaf !== null) cancelAnimationFrame(scrollRaf);
       window.removeEventListener("scroll", onScroll);
       revealObserver?.disconnect();
-      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mousemove", onMouseMoveKick);
+      window.removeEventListener("load", onLoad);
       window.removeEventListener("resize", initM);
+      ro.disconnect();
+      window.removeEventListener("load", relayout);
     };
   }, []);
 
   return (
-    <section id="hero" ref={rootRef}>
+    <section
+      id="hero"
+      ref={rootRef}
+      data-scene="01"
+      data-scene-label={t({ pt: "Abertura", en: "Opening" }, lang)}
+    >
       <div id="hero-sticky" ref={heroStickyRef}>
         <div className="hero-nav" id="heroNav" ref={heroNavRef}>
           <div className="hero-nav-logo">
@@ -274,6 +426,7 @@ export default function Hero() {
         <div className="hero-text-wrap" id="heroTexts" ref={heroTextsRef}>
           <div
             className="hero-greeting"
+            data-kinetic-block
             aria-label={`${t(dict.heroGreeting1, lang)} ${t(dict.heroGreeting2, lang)} ${t(dict.heroGreeting3, lang)}. ${t(dict.heroSubtitle, lang)}`}
           >
             <div className="hg-line">
@@ -288,6 +441,7 @@ export default function Hero() {
               <span className="hg-w" style={{ transitionDelay: ".24s" }}>
                 {t(dict.heroGreeting3, lang)}
                 <em>.</em>
+                <span className="hg-base" aria-hidden="true" />
               </span>
             </div>
             <div className="hg-line hg-line-subtitle">
@@ -298,7 +452,7 @@ export default function Hero() {
           </div>
           <div className="hero-signature">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={withBasePath("/assets/signature.png")} alt="" />
+            <img src={withBasePath("/assets/signature-bruno.webp")} alt="" />
           </div>
         </div>
 
@@ -309,7 +463,7 @@ export default function Hero() {
         <div id="heroMedia" ref={heroMediaRef}>
           <div className="hero-media-inner">
             <iframe
-              src={vimeoSrc(DESKTOP_VIMEO_ID)}
+              title="Showreel"
               frameBorder="0"
               allow="autoplay; fullscreen"
               allowFullScreen

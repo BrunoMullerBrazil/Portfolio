@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Equilíbrio químico · N₂O₄ ⇌ 2 NO₂</title>
+<meta name="description" content="Simulação interativa do equilíbrio N₂O₄ ⇌ 2 NO₂: aqueça, resfrie e comprima o gás e veja o princípio de Le Chatelier acontecer.">
+<meta name="theme-color" content="#0c0c0b">
+<script>if(/[?&]embed=1/.test(location.search))document.documentElement.classList.add('embed');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Franie';src:url('/fonts/franie.woff2') format('woff2');font-weight:1 100;font-display:swap}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:#0c0c0b;color:#e0dbd1;font:300 16px/1.55 Inter,system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 48px;display:flex;flex-direction:column;gap:22px}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-end}
+.eyebrow{font-size:11px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:#8a857c}
+h1{margin:6px 0 0;font-family:'Franie',Inter,sans-serif;font-weight:34;font-size:clamp(30px,4.4vw,52px);line-height:1;letter-spacing:-.02em;color:#ece7dd}
+h1 i{font-style:normal;font-variation-settings:"ital" 100;color:#c8cfa8}
+.lede{margin:0;color:#b0a898;max-width:46rem}
+.main{display:flex;flex-wrap:wrap;gap:20px;align-items:stretch}
+.stagecol{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.panel{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:18px;padding:22px;border:1px solid rgba(255,255,255,.06);border-radius:20px;background:rgba(255,255,255,.014)}
+.stage{position:relative;aspect-ratio:16/10;border-radius:18px;overflow:hidden;background:#0f0d0b;box-shadow:0 50px 100px -44px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05)}
+canvas{display:block;width:100%;height:100%}
+.hud{position:absolute;left:14px;top:12px;padding:8px 12px 10px;border-radius:12px;background:rgba(15,13,11,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.06);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c9c3ba;pointer-events:none}
+.eq{font-family:'Franie',Inter,sans-serif;font-weight:40;font-size:22px;letter-spacing:0;text-transform:none;color:#ece7dd;display:block;margin-top:2px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:#b0a898}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.ctrl{display:flex;flex-direction:column;gap:8px}
+.ctrl label{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#b0a898}
+.ctrl output{font-family:'Franie',Inter,sans-serif;font-weight:40;font-size:20px;letter-spacing:0;color:#ece7dd;text-transform:none}
+input[type=range]{width:100%;accent-color:#c8cfa8;height:28px}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.presets button{font:400 10px Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8a857c;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:100px;padding:0 14px;min-height:40px;cursor:pointer;transition:color .3s,background .3s,border-color .3s}
+.presets button:hover{color:#e0dbd1}
+.presets button.act{color:#12140e;background:#c8cfa8;border-color:#c8cfa8}
+.meter{display:flex;flex-direction:column;gap:8px}
+.bar{height:10px;border-radius:10px;background:rgba(255,255,255,.06);overflow:hidden;display:flex}
+.bar i{display:block;height:100%;background:#c8752f;transition:width .4s cubic-bezier(.16,1,.3,1)}
+.big{font-family:'Franie',Inter,sans-serif;font-weight:30;font-size:40px;line-height:1;color:#ece7dd}
+.why{margin:0;padding:14px 16px;border-radius:14px;background:rgba(200,207,168,.07);border:1px solid rgba(200,207,168,.16);color:#d6d2c7;font-size:14px;min-height:5.4em;transition:opacity .4s}
+.graph{height:120px;border-radius:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05)}
+.foot{font-size:12px;color:#8a857c}
+.foot a{color:#c9c3ba}
+html.embed body{background:#0f0d0b}
+html.embed .wrap{padding:0;max-width:none;height:100vh}
+html.embed .top,html.embed .panel,html.embed .legend,html.embed .graph,html.embed .foot{display:none}
+html.embed .stagecol{height:100%}
+html.embed .stage{position:fixed;inset:0;aspect-ratio:auto;height:auto;border-radius:0;box-shadow:none}
+html.embed .hud{left:10px;top:10px;padding:6px 10px 7px}html.embed .eq{font-size:16px}
+@media (max-width:600px){.hud{left:10px;top:10px;padding:6px 10px 7px}.eq{font-size:16px}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="eyebrow">Química · equilíbrio · Le Chatelier</div>
+      <h1>Por que o gás <i>escurece</i> quando esquenta?</h1>
+    </div>
+    <p class="lede">Um tubo com N₂O₄, que é incolor, e NO₂, que é castanho. As duas moléculas se transformam uma na outra o tempo todo. Mude a temperatura e o volume e veja para que lado o equilíbrio se desloca.</p>
+  </div>
+
+  <div class="main">
+    <div class="stagecol">
+      <div class="stage" id="stage">
+        <canvas id="cv" aria-label="Simulação de moléculas de N2O4 e NO2 dentro de um recipiente com pistão" role="img"></canvas>
+        <div class="hud"><span id="hudT">25 °C</span><span class="eq">N₂O₄ ⇌ 2 NO₂</span></div>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:#e7e2d6"></i>N₂O₄ · incolor</span>
+        <span><i class="dot" style="background:#c8752f"></i>NO₂ · castanho</span>
+        <span>A cor do gás acompanha a concentração de NO₂</span>
+      </div>
+      <canvas class="graph" id="gr" aria-label="Gráfico da quantidade de cada molécula ao longo do tempo" role="img"></canvas>
+    </div>
+
+    <div class="panel">
+      <div class="ctrl">
+        <label for="temp">Temperatura <output id="tOut">25 °C</output></label>
+        <input id="temp" type="range" min="-20" max="120" step="1" value="25">
+        <div class="presets">
+          <button type="button" data-t="0">Banho de gelo</button>
+          <button type="button" data-t="25" class="act">Ambiente</button>
+          <button type="button" data-t="100">Água fervendo</button>
+        </div>
+      </div>
+      <div class="ctrl">
+        <label for="vol">Volume do recipiente <output id="vOut">100%</output></label>
+        <input id="vol" type="range" min="35" max="100" step="1" value="100">
+      </div>
+      <div class="meter">
+        <div class="eyebrow">Moléculas de NO₂ no recipiente</div>
+        <div class="big" id="pct">0%</div>
+        <div class="bar"><i id="barNO2" style="width:0%"></i></div>
+      </div>
+      <p class="why" id="why" aria-live="polite">Mexa na temperatura ou no volume.</p>
+      <div class="foot">A reação direta (N₂O₄ → 2 NO₂) absorve calor: ΔH ≈ +57 kJ/mol. Modelo didático: as velocidades e as chances de reação são simplificadas.</div>
+    </div>
+  </div>
+  <div class="foot">Feito com o Claude para o curso <a href="/curso-claude/">Mostrar em vez de explicar</a>.</div>
+</div>
+
+<script>
+(function(){
+var EMBED=document.documentElement.classList.contains('embed');
+var RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+var gr=document.getElementById('gr'), gx=gr.getContext('2d');
+var DPR=Math.min(window.devicePixelRatio||1,2);
+var W=800,H=500;                     // mundo lógico
+var R=6;                             // raio da partícula
+var N_N=0, parts=[];
+var state={T:298, vol:1, volShown:1};
+// cinética (modelo didático): dissociação tipo Arrhenius, recombinação por colisão NO2+NO2
+var K0=2.2e4, EA=5000, PREC=0.22;
+function rnd(a,b){return a+Math.random()*(b-a);}
+function speed(){return 1.15*Math.sqrt(state.T/298);}
+function boxW(){return W*state.volShown;}
+function add(type,x,y){var a=Math.random()*Math.PI*2,s=speed()*rnd(.6,1.4);parts.push({t:type,x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,ang:Math.random()*6.28,spin:rnd(-.05,.05),cool:0});}
+for(var i=0;i<90;i++) add(2,rnd(20,W-20),rnd(20,H-20)); // começa só com N2O4
+var hist=[];
+
+function setT(c){state.T=c+273.15; document.getElementById('temp').value=c; document.getElementById('tOut').textContent=Math.round(c)+' °C'; document.getElementById('hudT').textContent=Math.round(c)+' °C';
+  document.querySelectorAll('.presets button').forEach(function(b){b.classList.toggle('act',+b.dataset.t===Math.round(c));});}
+function rescale(old){ var f=Math.sqrt(state.T/old); parts.forEach(function(p){p.vx*=f;p.vy*=f;}); }
+
+var lastNO2=null, msgTimer=null;
+function why(text){var w=document.getElementById('why'); w.style.opacity=0; setTimeout(function(){w.textContent=text;w.style.opacity=1;},180);}
+
+document.getElementById('temp').addEventListener('input',function(e){var old=state.T,c=+e.target.value; setT(c); rescale(old);
+  why(state.T>old?'Aqueceu. A reação que forma NO₂ absorve calor, então o sistema "gasta" o calor extra quebrando N₂O₄. Mais NO₂, gás mais castanho.':'Esfriou. O sistema compensa liberando calor: NO₂ se junta de volta em N₂O₄. Menos NO₂, gás mais claro.');});
+document.querySelectorAll('.presets button').forEach(function(b){b.addEventListener('click',function(){var old=state.T,c=+b.dataset.t; setT(c); rescale(old);
+  why(c===0?'No gelo, o equilíbrio favorece o N₂O₄, que é incolor. É por isso que o tubo fica quase transparente.':c===100?'Na água fervendo, sobra calor: o N₂O₄ se quebra em NO₂ e o tubo fica castanho-escuro.':'Na temperatura ambiente, as duas moléculas convivem. A cor fica num meio-termo.');});});
+document.getElementById('vol').addEventListener('input',function(e){var v=+e.target.value/100, old=state.vol; state.vol=v; document.getElementById('vOut').textContent=Math.round(v*100)+'%';
+  why(v<old?'Comprimiu. Na hora, o gás fica mais concentrado e escurece. Depois o equilíbrio vai para o lado com menos moléculas (1 N₂O₄ no lugar de 2 NO₂) e a cor clareia um pouco.':'Expandiu. Com mais espaço, o lado com mais moléculas é favorecido: N₂O₄ se quebra em 2 NO₂.');});
+
+function step(dt){
+  // pistão anima até o volume escolhido
+  state.volShown+= (state.vol-state.volShown)*Math.min(1,dt*0.08);
+  var bw=boxW(), pd=K0*Math.exp(-EA/state.T)*dt;
+  var sp=speed();
+  for(var i=parts.length-1;i>=0;i--){var p=parts[i];
+    p.x+=p.vx*dt; p.y+=p.vy*dt; p.ang+=p.spin*dt; if(p.cool>0)p.cool-=dt;
+    var r=p.t===2?R*1.8:R;
+    if(p.x<r){p.x=r;p.vx=Math.abs(p.vx);} if(p.x>bw-r){p.x=bw-r;p.vx=-Math.abs(p.vx);}
+    if(p.y<r){p.y=r;p.vy=Math.abs(p.vy);} if(p.y>H-r){p.y=H-r;p.vy=-Math.abs(p.vy);}
+    // termaliza devagar a velocidade
+    var v=Math.hypot(p.vx,p.vy)||1, target=sp*(p.t===2?0.75:1); var k=1+(target/v-1)*0.02*dt; p.vx*=k; p.vy*=k;
+    if(p.t===2 && Math.random()<pd){ // dissociação N2O4 -> 2 NO2
+      parts.splice(i,1); var a=p.ang, c=Math.cos(a), s=Math.sin(a), e=sp*1.2;
+      parts.push({t:1,x:p.x+c*R,y:p.y+s*R,vx:c*e,vy:s*e,ang:0,spin:0,cool:25});
+      parts.push({t:1,x:p.x-c*R,y:p.y-s*R,vx:-c*e,vy:-s*e,ang:0,spin:0,cool:25});
+    }
+  }
+  // recombinação NO2 + NO2 -> N2O4 (por colisão)
+  var no2=[]; for(var j=0;j<parts.length;j++) if(parts[j].t===1 && parts[j].cool<=0) no2.push(parts[j]);
+  var used={};
+  for(var a=0;a<no2.length;a++){ if(used[a])continue; var A=no2[a];
+    for(var b=a+1;b<no2.length;b++){ if(used[b])continue; var B=no2[b], dx=A.x-B.x, dy=A.y-B.y;
+      if(dx*dx+dy*dy<(2*R)*(2*R)){ if(Math.random()<PREC){ used[a]=used[b]=1;
+          var nx=(A.x+B.x)/2, ny=(A.y+B.y)/2; A.dead=B.dead=1;
+          parts.push({t:2,x:nx,y:ny,vx:(A.vx+B.vx)/2,vy:(A.vy+B.vy)/2,ang:Math.atan2(dy,dx),spin:rnd(-.05,.05),cool:0}); }
+        break; } } }
+  parts=parts.filter(function(p){return !p.dead;});
+}
+function counts(){var n1=0,n2=0; parts.forEach(function(p){p.t===1?n1++:n2++;}); return {no2:n1,n2o4:n2};}
+
+function resize(){ var r=cv.getBoundingClientRect(); cv.width=Math.round(r.width*DPR); cv.height=Math.round(r.height*DPR); if(cv.height>0) W=Math.round(H*cv.width/cv.height);
+  var g=gr.getBoundingClientRect(); gr.width=Math.round(g.width*DPR); gr.height=Math.round(g.height*DPR); }
+window.addEventListener('resize',resize); resize();
+
+function draw(){
+  var cw=cv.width,ch=cv.height, sx=cw/W, sy=ch/H, s=Math.min(sx,sy), ox=(cw-W*s)/2, oy=(ch-H*s)/2;
+  ctx.clearRect(0,0,cw,ch);
+  var c=counts(), bw=boxW();
+  // fundo: grid de mesa de corte
+  ctx.fillStyle='#0f0d0b'; ctx.fillRect(0,0,cw,ch);
+  ctx.save(); ctx.translate(ox,oy); ctx.scale(s,s);
+  // gás: cor ∝ concentração de NO2
+  var conc=c.no2/(bw*H)*W*H/180; var alpha=Math.min(.62,conc*.55);
+  ctx.fillStyle='rgba(176,92,34,'+alpha.toFixed(3)+')'; ctx.fillRect(0,0,bw,H);
+  ctx.strokeStyle='rgba(150,168,110,.07)'; ctx.lineWidth=1;
+  for(var gx2=0;gx2<=bw;gx2+=28){ctx.beginPath();ctx.moveTo(gx2,0);ctx.lineTo(gx2,H);ctx.stroke();}
+  for(var gy=0;gy<=H;gy+=28){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(bw,gy);ctx.stroke();}
+  // partículas
+  parts.forEach(function(p){
+    if(p.t===2){ var cx=Math.cos(p.ang)*R*.95, sy2=Math.sin(p.ang)*R*.95;
+      ctx.strokeStyle='rgba(231,226,214,.55)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(p.x-cx,p.y-sy2); ctx.lineTo(p.x+cx,p.y+sy2); ctx.stroke();
+      ctx.fillStyle='#e7e2d6'; ctx.beginPath(); ctx.arc(p.x-cx,p.y-sy2,R*.85,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(p.x+cx,p.y+sy2,R*.85,0,7); ctx.fill();
+    } else { ctx.fillStyle='#c8752f'; ctx.beginPath(); ctx.arc(p.x,p.y,R,0,7); ctx.fill();
+      ctx.fillStyle='rgba(255,214,170,.45)'; ctx.beginPath(); ctx.arc(p.x-R*.3,p.y-R*.3,R*.35,0,7); ctx.fill(); }
+  });
+  // paredes e pistão
+  ctx.strokeStyle='rgba(224,219,209,.35)'; ctx.lineWidth=3; ctx.strokeRect(1.5,1.5,bw-3,H-3);
+  ctx.fillStyle='#2D3320'; ctx.fillRect(bw,0,W-bw+40,H);
+  ctx.fillStyle='rgba(200,207,168,.85)'; ctx.fillRect(bw,0,8,H);
+  ctx.fillStyle='rgba(200,207,168,.35)'; ctx.fillRect(bw+8,H/2-6,W-bw+40,12);
+  ctx.restore();
+  // medidor
+  var tot=c.no2+2*c.n2o4, frac=tot?c.no2/(c.no2+c.n2o4):0;
+  var pct=Math.round(frac*100); document.getElementById('pct').textContent=pct+'%'; document.getElementById('barNO2').style.width=pct+'%';
+  // gráfico
+  var gw=gr.width, gh=gr.height; gx.clearRect(0,0,gw,gh);
+  gx.lineWidth=2*DPR; [['no2','#c8752f'],['n2o4','#e7e2d6']].forEach(function(k){ gx.strokeStyle=k[1]; gx.beginPath();
+    hist.forEach(function(h,i){ var x=i/(HMAX-1)*gw, y=gh-8*DPR-(h[k[0]]/170)*(gh-16*DPR); i?gx.lineTo(x,y):gx.moveTo(x,y); }); gx.stroke(); });
+}
+var HMAX=240, tick=0;
+var last=performance.now();
+function loop(now){
+  var dt=Math.min(3,(now-last)/16.67); last=now;
+  if(!RM){ step(dt); }
+  else { step(0.5); }
+  if(++tick%6===0){ var c=counts(); hist.push(c); if(hist.length>HMAX) hist.shift(); }
+  draw(); requestAnimationFrame(loop);
+}
+// modo embed: demonstração automática (aquece e esfria devagar)
+if(EMBED){ var t0=performance.now(); setInterval(function(){ var ph=((performance.now()-t0)/1000)%24; var c=ph<12?0+ph/12*100:100-(ph-12)/12*100; var old=state.T; setT(c); rescale(old); },200); }
+setT(25); requestAnimationFrame(loop);
+window.__sim={step:step,counts:counts,state:state,setT:setT,rescale:rescale};
+if(window.parent!==window) setTimeout(function(){ try{ window.parent.postMessage('sim-ready','*'); }catch(e){} },400);
+})();
+</script>
+</body>
+</html>

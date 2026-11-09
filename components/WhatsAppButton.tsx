@@ -3,7 +3,7 @@
 import { useLanguage, t } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
 
-const WHATSAPP_NUMBER = "5548991879579";
+export const WHATSAPP_NUMBER = "5548988711132";
 
 export default function WhatsAppButton() {
   const { lang } = useLanguage();

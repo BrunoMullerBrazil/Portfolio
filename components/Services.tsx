@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { WHATSAPP_NUMBER } from "./WhatsAppButton";
 import { useLanguage, t } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
+import { SplitText } from "./SplitText";
 
 const SERVICES = [
   {
@@ -52,28 +54,20 @@ export default function Services() {
     );
     sio.observe(svcGrid);
 
-    function onScroll() {
-      const vh = window.innerHeight;
-      svcGrid!.querySelectorAll<HTMLElement>(".svc").forEach((card) => {
-        const r = card.getBoundingClientRect();
-        const mid = r.top + r.height / 2;
-        const rel = (mid - vh / 2) / vh;
-        const num = card.querySelector<HTMLElement>(".svc-n");
-        if (num) num.style.transform = "translateY(" + rel * 18 + "px)";
-      });
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      sio.disconnect();
-      window.removeEventListener("scroll", onScroll);
-    };
+    // The service numbers' scroll drift now lives in MotionSystem
+    // (data-depth on .svc-n) instead of a per-section scroll listener.
+    return () => sio.disconnect();
   }, []);
 
   return (
-    <section id="services">
+    <section
+      id="services"
+      data-scene="04"
+      data-scene-label={t({ pt: "Serviços", en: "Services" }, lang)}
+    >
       <div
-        className="section-head reveal"
+        className="section-head reveal m-head"
+        data-guided
         style={{
           display: "flex",
           justifyContent: "space-between",
@@ -83,13 +77,20 @@ export default function Services() {
           margin: "0 0 0 0",
         }}
       >
-        <div className="section-title">{t(dict.servicesEyebrow, lang)}</div>
+        <div className="section-title">
+          <span className="gmark gmark-lg" data-guide-mark data-guide-reveal="#services .section-head" />
+          <span className="mline">
+            <SplitText text={t(dict.servicesEyebrow, lang)} />
+          </span>
+        </div>
       </div>
 
       <div className="services-grid" ref={gridRef}>
         {SERVICES.map((s) => (
-          <div className="svc" key={s.n}>
-            <div className="svc-n">{s.n}</div>
+          <div className="svc" key={s.n} data-spot>
+            <div className="svc-n" data-depth="-0.02">
+              {s.n}
+            </div>
             <div className="svc-name">{t(s.name, lang)}</div>
             <div className="svc-desc">{t(s.desc, lang)}</div>
           </div>
@@ -97,7 +98,7 @@ export default function Services() {
       </div>
 
       <div className="svc-cta-wrap reveal">
-        <a href="https://wa.me/5548991879579" target="_blank" rel="noopener" className="svc-cta-btn">
+        <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener" className="svc-cta-btn">
           {t(dict.servicesCta, lang)}
           <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
             <path

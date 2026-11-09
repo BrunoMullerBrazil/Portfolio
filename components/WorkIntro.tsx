@@ -3,154 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useLanguage, t, type Translated } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
+import { SplitText } from "./SplitText";
+import { FEATURED, vimeoPlayerUrl, type Project } from "@/lib/projects";
+import WorksArchive from "./WorksArchive";
 
-type Project = {
-  id: number;
-  num: string;
-  name: Translated;
-  client: string;
-  year: string;
-  desc: Translated;
-  tags: Translated;
-  filter: "brand-film" | "bts" | "motion" | "institucional";
-  vimeoId: string;
-  orientation: "horizontal" | "vertical";
-};
-
-// Fixed card format (never vary): título, "Cliente • Ano", uma descrição
-// curta (a decisão de direção + o que ela resolveu), créditos. Entries
-// without copy yet are left blank on purpose.
-//
-// `name`/`client`/`year` aren't translated (real campaign titles and
-// proper nouns/numbers) — only `desc`/`tags` have an English version.
-const PROJECTS: Project[] = [
-  {
-    id: 6,
-    num: "01",
-    name: { pt: "Vídeo Tráfego Dinâmico", en: "Vídeo Tráfego Dinâmico" },
-    client: "Gloss Company",
-    year: "2026",
-    desc: { pt: "", en: "" },
-    tags: { pt: "Brand film", en: "Brand film" },
-    filter: "brand-film",
-    vimeoId: "1222793243",
-    orientation: "vertical",
-  },
-  {
-    id: 1,
-    num: "02",
-    name: {
-      pt: "Gloss na Estrada — Transição Floripa–Curitiba",
-      en: "Gloss na Estrada — Transição Floripa–Curitiba",
-    },
-    client: "Gloss Express",
-    year: "2025",
-    desc: {
-      pt: "Sistema de transições que transforma a viagem entre Florianópolis e Curitiba em passagem narrativa.",
-      en: "A transition system that turns the trip between Florianópolis and Curitiba into a narrative passage.",
-    },
-    tags: {
-      pt: "Motion design, composição, edição audiovisual",
-      en: "Motion design, compositing, video editing",
-    },
-    filter: "motion",
-    vimeoId: "1218890209",
-    orientation: "horizontal",
-  },
-  {
-    id: 2,
-    num: "03",
-    name: { pt: "Motion Outubro Gloss", en: "Motion Outubro Gloss" },
-    client: "Gloss Express",
-    year: "2025",
-    desc: {
-      pt: "Direção que transformou a bisnaga Gloss em Torre Eiffel, revelando a vencedora e seu prêmio: Paris.",
-      en: "Direction that turned the Gloss tube into the Eiffel Tower, revealing the winner and her prize: Paris.",
-    },
-    tags: { pt: "Motion, storytelling, direção", en: "Motion, storytelling, direction" },
-    filter: "motion",
-    vimeoId: "1218434521",
-    orientation: "horizontal",
-  },
-  {
-    id: 3,
-    num: "04",
-    name: { pt: "Institucional Retenção Day Toyota", en: "Institucional Retenção Day Toyota" },
-    client: "Hai Toyota",
-    year: "2025",
-    desc: {
-      pt: "Direção que priorizou a mobilização real das equipes — e transformou a ação em prova institucional.",
-      en: "Direction that prioritized the team's real mobilization — turning the initiative into institutional proof.",
-    },
-    tags: { pt: "Direção, montagem, cor, captação", en: "Direction, editing, color grading, filming" },
-    filter: "institucional",
-    vimeoId: "1218901316",
-    orientation: "horizontal",
-  },
-  {
-    id: 4,
-    num: "05",
-    name: { pt: "Vídeo Promocional Campanha", en: "Vídeo Promocional Campanha" },
-    client: "",
-    year: "2026",
-    desc: {
-      pt: "Introdução dos benefícios da campanha para clientes B2B.",
-      en: "An introduction to the campaign's benefits for B2B clients.",
-    },
-    tags: { pt: "Motion, tráfego pago", en: "Motion, paid traffic" },
-    filter: "motion",
-    vimeoId: "1218435106",
-    orientation: "vertical",
-  },
-  {
-    id: 5,
-    num: "06",
-    name: { pt: "Vídeo Institucional para LP Tráfego", en: "Vídeo Institucional para LP Tráfego" },
-    client: "Gloss Company",
-    year: "2025",
-    desc: { pt: "", en: "" },
-    tags: { pt: "Institucional, brand film", en: "Institutional, brand film" },
-    filter: "institucional",
-    vimeoId: "1218435477",
-    orientation: "horizontal",
-  },
-  {
-    id: 7,
-    num: "07",
-    name: { pt: "Vídeo Reel Viral Depoimento", en: "Vídeo Reel Viral Depoimento" },
-    client: "Gloss Company",
-    year: "2026",
-    desc: { pt: "", en: "" },
-    tags: { pt: "Depoimento, reel", en: "Testimonial, reel" },
-    filter: "brand-film",
-    vimeoId: "1222794098",
-    orientation: "vertical",
-  },
-  {
-    id: 8,
-    num: "08",
-    name: { pt: "Chamada para Campanha Prêmio B2B", en: "Chamada para Campanha Prêmio B2B" },
-    client: "Gloss Company",
-    year: "2026",
-    desc: { pt: "", en: "" },
-    tags: { pt: "Campanha B2B, chamada", en: "B2B campaign, call-to-action" },
-    filter: "brand-film",
-    vimeoId: "1222795141",
-    orientation: "vertical",
-  },
-  {
-    id: 9,
-    num: "09",
-    name: { pt: "WhatsApp Bundle", en: "WhatsApp Bundle" },
-    client: "",
-    year: "",
-    desc: { pt: "", en: "" },
-    tags: { pt: "", en: "" },
-    filter: "brand-film",
-    vimeoId: "1222803437",
-    orientation: "horizontal",
-  },
-];
+// The stage shows the featured cut; the archive (WorksArchive) shows everything.
+const PROJECTS = FEATURED;
 
 const GRADS = [
   "radial-gradient(120% 120% at 30% 18%,#232a2c 0%,#12161a 60%,#0a0b0d 100%)",
@@ -166,6 +24,35 @@ const FILTERS: { label: Translated; value: "all" | Project["filter"] }[] = [
   { label: dict.filterBts, value: "bts" },
   { label: dict.filterMotion, value: "motion" },
 ];
+
+// The project title is painted imperatively (this whole stage is driven
+// outside React state), so it gets the same char split as <SplitText>
+// here: readable copy in .sr-only, aria-hidden glyphs with a --i stagger
+// index. New spans on every swap means the CSS entrance replays per cut.
+function setSplitTitle(el: HTMLElement, text: string) {
+  el.textContent = "";
+  const sr = document.createElement("span");
+  sr.className = "sr-only";
+  sr.textContent = text;
+  el.appendChild(sr);
+  let i = 0;
+  text.split(" ").forEach((word, wi) => {
+    const wrap = document.createElement("span");
+    wrap.setAttribute("aria-hidden", "true");
+    if (wi > 0) wrap.appendChild(document.createTextNode(" "));
+    const sw = document.createElement("span");
+    sw.className = "sw";
+    Array.from(word).forEach((c) => {
+      const ch = document.createElement("span");
+      ch.className = "ch";
+      ch.style.setProperty("--i", String(i++));
+      ch.textContent = c;
+      sw.appendChild(ch);
+    });
+    wrap.appendChild(sw);
+    el.appendChild(wrap);
+  });
+}
 
 function pad(n: number) {
   return ("0" + n).slice(-2);
@@ -247,9 +134,9 @@ export default function WorkIntro() {
     // muted=1 is required for the iframe to autoplay without a prior user
     // gesture (browser autoplay policy) — native Vimeo controls still let
     // the visitor unmute.
-    function mountVideo(vimeoId: string) {
+    function mountVideo(p: Project) {
       const iframe = document.createElement("iframe");
-      iframe.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&title=0&byline=0&portrait=0`;
+      iframe.src = vimeoPlayerUrl(p, "autoplay=1&muted=1&title=0&byline=0&portrait=0");
       iframe.allow = "autoplay; fullscreen; picture-in-picture";
       iframe.allowFullscreen = true;
       iframe.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;";
@@ -264,7 +151,7 @@ export default function WorkIntro() {
       media!.style.background = GRADS[(p.id - 1) % GRADS.length];
       frame!.classList.toggle("vertical", p.orientation === "vertical");
       numEl!.textContent = p.num + t(dict.workIntroNumSuffix, currentLang);
-      titleEl!.textContent = t(p.name, currentLang);
+      setSplitTitle(titleEl!, t(p.name, currentLang));
       clientEl!.textContent = [p.client, p.year].filter(Boolean).join(" • ");
       descEl!.textContent = t(p.desc, currentLang);
       tagsEl!.textContent = t(p.tags, currentLang);
@@ -272,28 +159,43 @@ export default function WorkIntro() {
       totalEl!.textContent = pad(filtered.length);
       if (fsCurrRef.current) fsCurrRef.current.textContent = pad(current + 1);
       if (fsTotalRef.current) fsTotalRef.current.textContent = pad(filtered.length);
-      if (inView) mountVideo(p.vimeoId);
+      if (inView) mountVideo(p);
     }
     paintRef.current = paint;
 
+    // "Corte": the outgoing project is wiped off in the travel direction,
+    // the new one wiped on from the opposite edge (see .cine-swap /
+    // .cine-swap-in in globals.css). swap-in snaps the mask to the far
+    // edge with transitions off, a forced reflow commits it, then removing
+    // both classes lets the incoming wipe animate.
     let swapTimer: ReturnType<typeof setTimeout>;
-    function render() {
+    function render(dir = 1) {
       if (filtered.length === 0) return;
+      clearTimeout(swapTimer);
       unmountVideo();
+      const d = dir < 0 ? "prev" : "next";
+      frame!.dataset.dir = d;
+      meta!.dataset.dir = d;
       frame!.classList.add("cine-swap");
       meta!.classList.add("cine-swap");
       swapTimer = setTimeout(() => {
         paint();
-        frame!.classList.remove("cine-swap");
+        frame!.classList.add("cine-swap-in");
+        void frame!.offsetWidth;
+        frame!.classList.remove("cine-swap", "cine-swap-in");
         meta!.classList.remove("cine-swap");
-      }, 210);
+        // the guide dot rides the edge of the incoming wipe
+        window.dispatchEvent(
+          new CustomEvent("guide:cut", { detail: { rect: mediaRef.current!.getBoundingClientRect(), dir: d } })
+        );
+      }, 250); // 6 frames @24fps — matches the CSS exit
     }
 
     function go(d: number) {
       const N = filtered.length;
       if (!N) return;
       current = (current + d + N) % N;
-      render();
+      render(d);
     }
 
     function onNext() {
@@ -334,7 +236,7 @@ export default function WorkIntro() {
 
     function onPlayClick() {
       const p = filtered[current];
-      if (p) mountVideo(p.vimeoId);
+      if (p) mountVideo(p);
     }
     playBtn.addEventListener("click", onPlayClick);
 
@@ -382,7 +284,7 @@ export default function WorkIntro() {
           inView = entries[0].isIntersecting;
           if (inView && !wasInView) {
             const p = filtered[current];
-            if (p) mountVideo(p.vimeoId);
+            if (p) mountVideo(p);
           } else if (!inView && wasInView) {
             unmountVideo();
           }
@@ -412,10 +314,22 @@ export default function WorkIntro() {
   }, []);
 
   return (
-    <section id="work-intro" ref={sectionRef}>
+    <section
+      id="work-intro"
+      ref={sectionRef}
+      data-scene="02"
+      data-scene-label={t({ pt: "Trabalho", en: "Work" }, lang)}
+    >
       <div className="cine-wrap">
-        <div className="wi-eyebrow reveal">{t(dict.workIntroEyebrow, lang)}</div>
-        <h2 className="wi-line reveal reveal-d1">{t(dict.workIntroHeading, lang)}</h2>
+        <div className="wi-eyebrow reveal">
+          <span className="gmark" data-guide-mark data-guide-reveal="#work-intro .wi-line" />
+          {t(dict.workIntroEyebrow, lang)}
+        </div>
+        <h2 className="wi-line reveal reveal-d1 m-head" data-guided>
+          <span className="mline">
+            <SplitText text={t(dict.workIntroHeading, lang)} />
+          </span>
+        </h2>
 
         <div className="cine-filters reveal reveal-d1">
           {FILTERS.map((f, i) => (
@@ -433,8 +347,8 @@ export default function WorkIntro() {
         </div>
 
         <div className="cine-stage reveal reveal-d2">
-          <div className="cine-frame" id="cineFrame" data-cursor="click" ref={frameRef}>
-            <div className="cine-media" id="cineMedia" ref={mediaRef} />
+          <div className="cine-frame" id="cineFrame" data-cursor="click" data-dolly ref={frameRef}>
+            <div className="cine-media" id="cineMedia" data-lens ref={mediaRef} />
             <button className="cine-play" aria-label={t(dict.ariaWatch, lang)} ref={playBtnRef}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M6 4L15 10L6 16V4Z" fill="rgba(255,255,255,.9)" />
@@ -488,7 +402,7 @@ export default function WorkIntro() {
             <div className="cine-num" id="cineNum" ref={numRef}>
               01 — Projeto
             </div>
-            <h3 className="cine-title" id="cineTitle" ref={titleRef}>
+            <h3 className="cine-title" id="cineTitle" data-kinetic="40" ref={titleRef}>
               Projeto 01
             </h3>
             <div className="cine-client" id="cineClient" ref={clientRef} />
@@ -515,6 +429,8 @@ export default function WorkIntro() {
             </svg>
           </button>
         </div>
+
+        <WorksArchive />
       </div>
     </section>
   );

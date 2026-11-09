@@ -5,6 +5,11 @@
   min-height: 260vh;
 }
 
+/* ── Blank canvas: room for the editor's free layers ── */
+.canvas {
+  min-height: 300vh;
+}
+
 /* ── Content ── */
 .content {
   position: relative;
@@ -30,162 +35,21 @@
   gap: 12px;
 }
 
-/* ── Title zone ──
-   Positioned as a 1:1 scaled stage of the Figma source (frame width
-   1279px, scale 0.594 → 760px = .content's max-width). Every child below
-   carries an inline style with its exact left/top/width/height computed
-   from the Figma node coords — see the comment above each JSX element for
-   its source node id. Do not "neaten" these into flexbox; the numbers are
-   the point. */
-/* Full-bleed: escapes .content's max-width so the collage (and the
-   glimmer-shadow overlay) reaches the actual viewport edges — the ruler
-   strips — like the reference, instead of sitting in a narrower text
-   column with visible margins either side. aspect-ratio locks height to
-   width at the Figma frame's own 1279:1888 ratio (1888 = the 1454px tall
-   glimmer overlay + the 434px top bleed), so every child below can be
-   positioned in plain percentages (of this box) instead of fixed px tied
-   to one specific rendered width — no more scale-assumption bugs. */
-.stage {
+/* ── Title zone ── */
+.titleZone {
   position: relative;
-  width: 100vw;
-  max-width: 1279px;
-  margin: 30px auto 60px;
-  margin-left: max(calc(-50vw + 50%), calc(50% - 639.5px));
-  margin-right: max(calc(-50vw + 50%), calc(50% - 639.5px));
-  aspect-ratio: 1279 / 1888;
-  overflow: visible;
-}
-/* Figma node 2027:2 "Glimmer Shadow Overlays 6 1" — a soft uneven-light
-   texture blended mix-blend-mode:color-burn at 56% opacity over the title
-   art (source Mask group 2051:45, x:-157 y:0 w:1583 h:2448). The exact
-   asset couldn't be fetched (figma.com isn't reachable from here), so this
-   reproduces the same blend recipe with a hand-built soft-light/shadow
-   gradient standing in for the photographed texture. */
-.glimmerOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 77.01%;
-  object-fit: cover;
-  object-position: top;
-  pointer-events: none;
-  z-index: 4;
-  mix-blend-mode: color-burn;
-  opacity: 0.56;
-}
-.stageItem {
-  position: absolute;
-}
-/* Visual-only now — position/size come from inline style (exact Figma
-   coords) on the stageItem element itself. */
-/* Native aspect ratio (869x435) preserved and rotated 45deg, rather than
-   stretched to Figma's axis-aligned bounding box — solved from the node's
-   own unrotated size vs its reported (square) bbox: a plain box-stretch
-   was squishing this to half width. */
-.glasses {
-  transform: rotate(45deg);
-  filter: drop-shadow(8px 14px 14px rgba(0, 0, 0, 0.45));
-  pointer-events: none;
-  z-index: 1;
-}
-.coffeeCup {
-  pointer-events: none;
-  z-index: 1;
-}
-.cloudSticker {
-  transform: rotate(-6deg);
-  filter: drop-shadow(6px 10px 10px rgba(0, 0, 0, 0.4));
-  pointer-events: none;
-  z-index: 1;
-}
-.welcomeBubble {
-  transform: rotate(-3deg);
-  pointer-events: none;
-  z-index: 2;
-}
-.fallingPerson {
-  z-index: 3;
-  pointer-events: none;
-}
-.arrowClusterTR {
-  pointer-events: none;
-  z-index: 1;
-  filter: drop-shadow(4px 6px 6px rgba(0, 0, 0, 0.35));
-}
-.arrowClusterBL {
-  pointer-events: none;
-  z-index: 1;
-  filter: drop-shadow(4px 6px 6px rgba(0, 0, 0, 0.35));
-}
-.titleMinhaWrap {
-  z-index: 2;
-}
-.profTagWrap {
-  z-index: 2;
-}
-.profTag {
-  display: inline-block;
-  font-family: var(--font-montserrat), sans-serif;
-  font-weight: 900;
-  font-size: 23.3px;
-  line-height: 0.898;
-  letter-spacing: -0.7px;
-  text-align: center;
-  color: #f4f1ea;
-  background: #2f5fd8;
-  padding: 6px 18px 8px;
-  transform: rotate(-1deg);
-}
-.profTagLine {
-  position: absolute;
-  bottom: -34px;
-  right: 22px;
-  width: 2px;
-  height: 32px;
-  background: #2f5fd8;
-}
-.profTagDot {
-  position: absolute;
-  bottom: -42px;
-  right: 15px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #2f5fd8;
-}
-.deskNote {
-  z-index: 1;
-}
-.deskNoteImg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.5));
-}
-.deskNoteIcons {
-  position: absolute;
-  display: flex;
-  gap: 6%;
-  top: 18%;
-  left: 12%;
-  width: 60%;
-}
-.deskNoteIcons img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
+  margin: 48px 0 64px;
 }
 /* A real pen render, thrown slightly out of focus — like the camera is
    racked onto the paper in front of it, not the desk clutter behind. */
-/* Native aspect ratio (1100x123, a thin diagonal strip) preserved and
-   rotated ~36deg instead of stretched into the bbox — same fix as
-   .glasses, solved from this asset's own dimensions. */
 .penProp {
-  z-index: 1;
-  transform: rotate(36deg);
-  filter: blur(2px) drop-shadow(16px 24px 22px rgba(0, 0, 0, 0.55));
+  position: absolute;
+  z-index: -1;
+  top: -34px;
+  right: -170px;
+  width: clamp(300px, 34vw, 460px);
+  transform: rotate(-21deg);
+  filter: blur(2.2px) drop-shadow(16px 24px 22px rgba(0, 0, 0, 0.55));
   opacity: 0.9;
   pointer-events: none;
 }
@@ -221,7 +85,7 @@
 }
 .titleBig {
   font-family: var(--font-franie), sans-serif;
-  font-weight: 92;
+  font-weight: 700;
   font-size: clamp(25px, 9.2vw, 92px);
   line-height: 0.92;
   letter-spacing: -0.01em;
@@ -230,16 +94,6 @@
   transform: rotate(-1deg);
   transform-origin: left top;
   white-space: nowrap;
-}
-.titleMinha {
-  font-family: var(--font-montserrat), sans-serif;
-  font-weight: 900;
-  font-size: 58.1px;
-  line-height: 0.898;
-  letter-spacing: -1.75px;
-  color: #f4f1ea;
-  text-align: center;
-  margin: 0;
 }
 .titleBig .hl {
   color: #142850;
@@ -263,7 +117,6 @@
 /* ── Manifesto ── */
 .manifestoZone {
   position: relative;
-  margin-top: 40px;
 }
 .manifestoP {
   font-size: 15px;
@@ -271,119 +124,6 @@
   color: rgba(244, 241, 234, 0.86);
   max-width: 60ch;
   margin: 0 0 26px;
-}
-.manifestoTyped {
-  font-size: 15px;
-  line-height: 1.9;
-  color: rgba(244, 241, 234, 0.9);
-  max-width: 52ch;
-  margin: 0 0 22px;
-}
-
-/* ── Browser-window quote mockup ── */
-.browserWindow {
-  background: #f4f1ea;
-  color: #142850;
-  margin: 40px 0 60px;
-  max-width: 500px;
-  box-shadow: 0 26px 50px -22px rgba(0, 0, 0, 0.55);
-}
-.browserChrome {
-  display: flex;
-  gap: 7px;
-  padding: 12px 14px;
-}
-.browserDot {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-}
-.browserDot:nth-child(1) {
-  background: #ec6a5e;
-}
-.browserDot:nth-child(2) {
-  background: #f4bf4f;
-}
-.browserDot:nth-child(3) {
-  background: #61c454;
-}
-.browserBody {
-  padding: 26px 30px 46px;
-  text-align: center;
-}
-.browserQuote {
-  font-family: var(--font-franie), sans-serif;
-  font-weight: 60;
-  font-size: clamp(18px, 3.2vw, 25px);
-  line-height: 1.4;
-  color: #142850;
-  text-decoration: underline;
-  text-decoration-color: #2f5fd8;
-  text-underline-offset: 5px;
-}
-.browserQuote strong {
-  font-weight: 96;
-  box-shadow: inset 0 -3px 0 #2f5fd8;
-}
-
-/* ── "A câmera veio em 2020" reveal ── */
-.cameraPanel {
-  position: relative;
-  background-color: #ede6d8;
-  background-repeat: repeat-y;
-  background-size: 100% auto;
-  background-position: top center;
-  margin: 10px calc(-1 * 56px) 60px -56px;
-  padding: 56px 40px 0;
-  overflow: hidden;
-}
-@media (max-width: 720px) {
-  .cameraPanel {
-    margin: 10px -20px 60px -24px;
-    padding: 40px 20px 0;
-  }
-}
-.cameraLead {
-  display: block;
-  width: min(320px, 60%);
-  height: auto;
-  margin-bottom: -14px;
-}
-.cameraYear {
-  display: block;
-  width: min(560px, 92%);
-  height: auto;
-}
-.atlasScene {
-  position: relative;
-  margin-top: -30px;
-  height: clamp(260px, 44vw, 420px);
-}
-.mountainsImg {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120%;
-  max-width: none;
-  object-fit: contain;
-  object-position: bottom;
-}
-.atlasFigure {
-  position: absolute;
-  bottom: 8%;
-  left: 50%;
-  transform: translateX(-64%);
-  width: clamp(140px, 22vw, 210px);
-  z-index: 2;
-}
-.cameraSony {
-  position: absolute;
-  bottom: 38%;
-  left: 50%;
-  transform: translateX(-30%) rotate(-6deg);
-  width: clamp(90px, 13vw, 130px);
-  z-index: 3;
 }
 
 .closerWrap {
@@ -514,7 +254,7 @@
 }
 .chapterLabel {
   font-family: var(--font-franie), sans-serif;
-  font-weight: 92;
+  font-weight: 700;
   font-size: clamp(24px, 3.6vw, 30px);
   letter-spacing: -0.005em;
   color: #142850;

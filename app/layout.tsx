@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { franie, gcgrind, inter, anton, playfair, spaceMono, montserrat } from "./fonts";
+import { franie, gcgrind, inter, anton, playfair, spaceMono } from "./fonts";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import Cursor from "@/components/Cursor";
 import Loader from "@/components/Loader";
-import RevealObserver from "@/components/RevealObserver";
-import MagneticCursor from "@/components/MagneticCursor";
+import MotionSystem from "@/components/MotionSystem";
+import Timecode from "@/components/Timecode";
+import FilmGrain from "@/components/FilmGrain";
+import Guide from "@/components/Guide";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { withBasePath } from "@/lib/basePath";
 import { LanguageProvider } from "@/lib/LanguageContext";
@@ -36,15 +38,8 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     images: [OG_IMAGE.url],
   },
-  // TEMPORARY — the site still has pending content (e.g. /trajetoria isn't
-  // linked from anywhere yet), so indexing is intentionally off until Bruno
-  // approves going live in search. To re-enable: delete this whole `robots`
-  // block (Next.js defaults to index/follow without it) AND update
-  // app/robots.ts to match — see the comment there.
-  robots: {
-    index: false,
-    follow: false,
-  },
+  // Live in search since Oct 2026 (approved by Bruno). /design stays out:
+  // it's placeholder-only — see app/design/layout.tsx and app/robots.ts.
 };
 
 export default function RootLayout({
@@ -55,14 +50,14 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${franie.variable} ${gcgrind.variable} ${inter.variable} ${anton.variable} ${playfair.variable} ${spaceMono.variable} ${montserrat.variable}`}
+      className={`${franie.variable} ${gcgrind.variable} ${inter.variable} ${anton.variable} ${playfair.variable} ${spaceMono.variable}`}
     >
       <body
         style={
           {
             // Overrides globals.css's static `/assets/...` value so the
             // window-shadow asset still resolves under a GitHub Pages basePath.
-            "--winshadow": `url(${withBasePath("/assets/window-shadow.png")})`,
+            "--winshadow": `url(${withBasePath("/assets/window-shadow.webp")})`,
           } as React.CSSProperties
         }
       >
@@ -74,8 +69,10 @@ export default function RootLayout({
           <Loader />
           <Cursor />
           <SmoothScroll />
-          <RevealObserver />
-          <MagneticCursor />
+          <MotionSystem />
+          <Timecode />
+          <FilmGrain />
+          <Guide />
           <WhatsAppButton />
           {children}
         </LanguageProvider>

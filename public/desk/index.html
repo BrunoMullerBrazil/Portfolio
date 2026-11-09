@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Caderno DESK · Bruno Müller</title>
+<meta name="description" content="O caderno de direção por trás do Reels DESK: transição, corte, curva, lente, tempo, som e como dirigir a IA para o motion não sair genérico.">
+<meta property="og:title" content="Caderno DESK · A IA executa. O molho é de quem dirige.">
+<meta property="og:description" content="Transições, curvas, lente, tempo, som e prompts prontos para dirigir a IA no motion.">
+<meta property="og:image" content="https://aue.productions/desk/og.jpg?v=3">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://aue.productions/desk/">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2B331E">
+<link rel="icon" href="/icon.png">
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: slides 16:9 empilhados, um por tela, rodapé de linhas finas e etiquetas em mono; navegação por setas.
+   Identidade fixa Müller: papel osso, tinta musgo, marca-texto amarelo só no que importa, luz de janela na capa. */
+:root{
+  --moss:#2B331E;--moss2:#3A4428;--olive:#889063;--sand:#BCAE95;--bone:#E0DBD1;--paper:#F0ECE2;--ink:#0C0C0B;--hl:#F5D90A;
+  --muted:#565B47;--line:#CFC8B8;--soft:#E7E2D6;--bg:#D6D0C3;
+  --f-title:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-tag:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.5}
+.deck{display:grid;gap:28px;padding-block:28px 88px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));justify-items:center}
+.slide{width:min(1120px,100%);min-height:calc(min(1120px,100vw - 32px) * 9 / 16);background:var(--paper);border-radius:4px;position:relative;overflow:hidden;display:grid;grid-template-rows:1fr auto;scroll-margin-top:24px;box-shadow:0 1px 0 var(--line)}
+.slide::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .33 0 0 0 0 .26 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E")}
+.inner{padding:clamp(20px,4.2vw,56px) clamp(20px,5vw,64px) clamp(20px,3vw,40px);display:grid;align-content:start;gap:clamp(10px,1.6vw,20px);min-height:0;position:relative;z-index:1}
+.foot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;border-top:1px solid var(--line);font-family:var(--f-tag);font-size:clamp(8.5px,.95vw,11.5px);color:var(--muted);position:relative;z-index:1;letter-spacing:.02em}
+.foot span{padding:clamp(8px,1.1vw,14px) clamp(14px,2vw,24px)}
+.foot span+span{border-left:1px solid var(--line)}
+.eyebrow{font-family:var(--f-tag);font-weight:600;font-size:clamp(8.5px,.95vw,11.5px);letter-spacing:.1em;text-transform:uppercase;color:var(--paper);background:var(--moss);padding:4px 10px;border-radius:2px;justify-self:start}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1,h2{font-family:var(--f-title);font-weight:400;letter-spacing:-.01em}
+h2{font-size:clamp(24px,3.7vw,48px);line-height:1;max-width:24ch}
+h2 em,h1 em{font-style:italic}
+mark{background:linear-gradient(transparent 52%,var(--hl) 52% 92%,transparent 92%);color:inherit;padding:0 .08em}
+p{margin:0}
+.lead{font-size:clamp(12px,1.45vw,18px);color:var(--muted);max-width:60ch}
+.ic{width:1.15em;height:1.15em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.2em}
+code,.mono{font-family:var(--f-tag);font-size:.92em;background:var(--soft);padding:0 .3em;border-radius:2px;white-space:nowrap}
+
+/* capa: luz de janela real sobre papel */
+.cover{background:var(--bone);color:var(--moss)}
+.cover .win{position:absolute;inset:-10% -20% -10% -10%;background:url("/desk/img/window-shadow.webp") center/cover no-repeat;transform:rotate(90deg) scale(1.9);opacity:.55;mix-blend-mode:multiply;pointer-events:none}
+.cover .inner{align-content:center;gap:clamp(8px,1.5vw,18px);padding-block:clamp(16px,3vw,40px)}
+.cover h1{font-size:clamp(46px,8.4vw,112px);line-height:.86;letter-spacing:-.02em}
+.cover h1 em{display:block}
+.cover .lead{color:var(--moss);font-size:clamp(13px,1.7vw,21px);max-width:44ch}
+.logo{width:clamp(90px,11vw,150px);height:auto;color:var(--moss);display:block}
+.trio{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:clamp(14px,3vw,44px);margin-top:clamp(4px,1vw,12px);border-top:1px solid rgba(43,51,30,.35);padding-top:clamp(8px,1.2vw,14px)}
+.trio b{display:block;font-family:var(--f-title);font-weight:400;font-size:clamp(22px,3.2vw,42px);line-height:1}
+.trio span{font-family:var(--f-tag);font-size:clamp(8.5px,.95vw,11.5px);color:var(--muted)}
+.cover .foot{border-color:rgba(43,51,30,.3)}.cover .foot span+span{border-color:rgba(43,51,30,.3)}
+
+/* capas de parte: musgo chapado */
+.part{background:var(--moss);color:var(--paper)}
+.part::after{opacity:.5;mix-blend-mode:soft-light}
+.part .inner{align-content:center}
+.part h1{font-size:clamp(44px,7.6vw,100px);line-height:.9}
+.part h1 em{color:var(--hl)}
+.part .lead{color:#D9D4C4;font-size:clamp(13px,1.6vw,20px);max-width:46ch}
+.part .eyebrow{background:var(--hl);color:var(--ink)}
+.part .foot{border-color:rgba(240,236,226,.22);color:#BFB9A8}.part .foot span+span{border-color:rgba(240,236,226,.22)}
+.part .big{position:absolute;right:clamp(16px,4vw,56px);bottom:clamp(36px,5vw,70px);font-family:var(--f-title);font-style:italic;font-size:clamp(120px,22vw,300px);line-height:.8;color:var(--moss2);z-index:0}
+
+/* blocos */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(12px,2vw,28px);align-items:start}
+.parts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(8px,1.2vw,14px)}
+.parts a{display:grid;gap:4px;align-content:start;text-decoration:none;color:inherit;border-top:3px solid var(--moss);padding-top:clamp(6px,.9vw,10px)}
+.parts a:hover b{text-decoration:underline;text-decoration-color:var(--hl);text-decoration-thickness:3px}
+.parts .n{font-family:var(--f-title);font-style:italic;font-size:clamp(24px,3.2vw,42px);line-height:1;color:var(--olive)}
+.parts b{font-family:var(--f-title);font-weight:400;font-size:clamp(16px,2vw,25px);line-height:1.05}
+.parts span{font-size:clamp(9.5px,1.05vw,13px);color:var(--muted)}
+.grid-t{display:grid;font-size:clamp(9.5px,1.08vw,13.5px)}
+.grid-t>div{display:grid;grid-template-columns:var(--cols);gap:clamp(8px,1.4vw,18px);padding:clamp(5px,.75vw,9px) 0;border-bottom:1px solid var(--line);align-items:baseline}
+.grid-t>div>span:first-child{font-weight:600;color:var(--ink)}
+.grid-t>div>span{color:var(--muted)}
+.grid-t>div>span.dir{color:var(--ink)}
+.grid-t .hd{border-bottom:2px solid var(--moss)}
+.grid-t .hd span{font-family:var(--f-tag);font-weight:600;font-size:clamp(8px,.9vw,11px);letter-spacing:.08em;text-transform:uppercase;color:var(--moss)!important}
+.quote.sm{font-size:clamp(14px,1.8vw,22px)}
+#s4 .grid-t>div{padding:clamp(3px,.5vw,6px) 0}
+.quote{font-family:var(--f-title);font-size:clamp(17px,2.3vw,30px);line-height:1.15;border-left:3px solid var(--hl);padding-left:clamp(10px,1.6vw,20px);max-width:46ch;color:var(--moss)}
+.rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,1.5vw,18px) clamp(12px,2vw,26px)}
+.rules>div{display:grid;gap:4px;align-content:start;border-top:1px solid var(--line);padding-top:clamp(6px,.9vw,10px)}
+.rules b{font-family:var(--f-title);font-weight:400;font-size:clamp(16px,2vw,25px);line-height:1.05;display:flex;gap:8px;align-items:center}
+.rules b .ic{color:var(--olive)}
+.rules span{font-size:clamp(9.5px,1.06vw,13.3px);color:var(--muted);line-height:1.4}
+.sw{display:flex;gap:3px;margin-top:2px}.sw i{width:clamp(16px,2vw,24px);aspect-ratio:1;background:var(--c);border:1px solid rgba(12,12,11,.12)}
+.trans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(8px,1.2vw,14px)}
+.trans>div{background:var(--soft);padding:clamp(8px,1.2vw,14px);display:grid;gap:4px;align-content:start;border-radius:2px}
+.trans>div.dry{background:var(--moss);color:var(--paper)}.trans>div.dry span{color:#D3CEBE}.trans>div.dry i{color:var(--hl)}
+.trans b{font-family:var(--f-title);font-weight:400;font-size:clamp(16px,1.9vw,24px);line-height:1}
+.trans span{font-size:clamp(9px,1vw,12.5px);color:var(--muted);line-height:1.35}
+.trans i{font-style:normal;font-family:var(--f-tag);font-size:clamp(8px,.88vw,11px);color:var(--moss);font-weight:600;border-top:1px solid rgba(12,12,11,.15);padding-top:4px;margin-top:2px}
+.pairs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,26px)}
+.pair{display:grid;gap:6px;align-content:start;min-width:0}
+.pair .shots{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.pair figure{margin:0;display:grid;gap:3px;min-width:0}
+.pair img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;border-radius:2px;background:var(--soft)}
+.pair figcaption{font-family:var(--f-tag);font-size:clamp(7.5px,.8vw,10px);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pair figure.after figcaption{color:var(--ink)}
+.pair figure.after figcaption::before{content:"";display:inline-block;width:.7em;height:.7em;background:var(--hl);margin-right:4px;vertical-align:-.05em}
+.pair figure.before img{filter:saturate(.85)}
+.pair b{font-family:var(--f-title);font-weight:400;font-size:clamp(16px,1.9vw,23px);line-height:1}
+.pair b small{font-family:var(--f-tag);font-size:.48em;color:var(--olive);margin-left:6px;letter-spacing:.04em}
+.pair p{font-size:clamp(9px,1vw,12.5px);color:var(--muted);line-height:1.35}
+.pair p i{font-style:normal;color:var(--ink);font-weight:600}
+.credit{font-size:clamp(8px,.85vw,10.5px);color:var(--muted)}
+.no{font-size:clamp(10px,1.1vw,13.5px);color:var(--muted);border-left:3px solid var(--ink);padding-left:12px}
+.no b{color:var(--ink)}
+.curves{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(8px,1.2vw,14px)}
+.curves>div{display:grid;gap:3px;align-content:start}
+.curves svg{width:100%;height:auto;display:block;background:var(--soft);border-radius:2px}
+.curves .grid{stroke:var(--line);stroke-width:1}
+.curves .lin{stroke:#AFA894;stroke-width:1;stroke-dasharray:3 3}
+.curves .c{stroke:var(--moss);stroke-width:2.5;fill:none}
+.curves .h{stroke:var(--olive);stroke-width:1}
+.curves .p{fill:var(--hl);stroke:var(--moss);stroke-width:1.2}
+.curves b{font-family:var(--f-title);font-weight:400;font-size:clamp(15px,1.8vw,22px);line-height:1}
+.curves code{justify-self:start;font-size:clamp(8px,.9vw,11px)}
+.curves span{font-size:clamp(8.5px,.95vw,12px);color:var(--muted);line-height:1.3}
+.curves .bad svg{background:#E3DCCB}.curves .bad b{text-decoration:line-through;text-decoration-color:var(--ink)}
+.layers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.layers>div{background:var(--soft);padding:clamp(8px,1vw,12px);display:grid;gap:2px;align-content:start}
+.layers>div:nth-child(1){background:#DED7C6}.layers>div:nth-child(2){background:#E2DCCD}
+.layers b{font-family:var(--f-title);font-weight:400;font-size:clamp(15px,1.7vw,21px);line-height:1}
+.layers code{justify-self:start}
+.layers span{font-size:clamp(8.5px,.95vw,12px);color:var(--muted);line-height:1.3}
+.kpi3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,1.6vw,20px)}
+.kpi{border-top:3px solid var(--moss);padding-top:clamp(6px,1vw,12px);display:grid;gap:4px}
+.kpi strong{font-family:var(--f-title);font-weight:400;font-size:clamp(26px,4vw,52px);line-height:1;color:var(--moss);font-variant-numeric:tabular-nums}
+.kpi span{font-size:clamp(9.5px,1.1vw,13.5px);color:var(--muted)}
+.lst{display:grid;gap:clamp(3px,.5vw,6px);font-size:clamp(9.5px,1.06vw,13.3px);color:var(--muted);line-height:1.4}
+.lst b{color:var(--ink)}
+.lst h3{font-family:var(--f-tag);font-weight:600;font-size:clamp(8px,.9vw,11px);letter-spacing:.08em;text-transform:uppercase;color:var(--moss)}
+.decide{display:grid;gap:clamp(6px,.9vw,11px)}
+.decide>div{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.05fr);gap:clamp(10px,1.6vw,20px);align-items:center;border:1px solid var(--line);border-radius:2px;padding:clamp(6px,1vw,12px) clamp(12px,1.8vw,20px);background:rgba(240,236,226,.6)}
+.decide .num{font-family:var(--f-title);font-style:italic;font-size:clamp(22px,3vw,38px);color:var(--olive);line-height:1;min-width:1ch}
+.decide .q{font-family:var(--f-title);font-size:clamp(15px,1.9vw,24px);line-height:1.05}
+.decide .why{font-size:clamp(9px,1.02vw,12.8px);color:var(--muted);line-height:1.35}
+.vision{display:grid;grid-template-columns:minmax(0,.8fr) auto minmax(0,2fr);gap:clamp(8px,1.4vw,18px);align-items:center;padding-block:clamp(5px,.8vw,10px);border-bottom:1px solid var(--line)}
+.vision .said{font-family:var(--f-title);font-style:italic;font-size:clamp(17px,2.2vw,28px);line-height:1}
+.vision .arrow{font-family:var(--f-tag);color:var(--olive)}
+.vision .did{font-size:clamp(9.5px,1.1vw,13.5px);color:var(--muted)}
+.vision .did b{color:var(--ink);font-weight:600}
+.prompts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.5vw,18px)}
+.pbox{border:1px solid var(--line);background:#F6F3EC;border-radius:2px;display:grid;grid-template-rows:auto 1fr;min-width:0}
+.pbox header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:clamp(6px,.8vw,10px) clamp(10px,1.2vw,14px);border-bottom:1px solid var(--line)}
+.pbox header b{font-family:var(--f-title);font-weight:400;font-size:clamp(15px,1.8vw,22px);line-height:1}
+.pbox header small{display:block;font-family:var(--f-tag);font-size:clamp(7.5px,.82vw,10px);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.pbox pre{margin:0;padding:clamp(8px,1vw,12px) clamp(10px,1.2vw,14px);font-family:var(--f-tag);font-size:clamp(8px,.86vw,11px);line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;color:#2E3324;overflow:auto;max-height:100%}
+.pbox pre .v{background:var(--hl);color:var(--ink);padding:0 .15em}
+.copy{font-family:var(--f-tag);font-weight:600;font-size:clamp(9px,.95vw,11.5px);border:1px solid var(--moss);background:var(--paper);color:var(--moss);border-radius:2px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+.copy:hover{background:var(--moss);color:var(--paper)}
+.copy:focus-visible,.nav button:focus-visible,.parts a:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+.flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.flow>div{background:var(--soft);padding:clamp(7px,.9vw,11px);display:grid;gap:3px;align-content:start}
+.flow>div.hot{background:var(--moss);color:var(--paper)}.flow>div.hot span{color:#D3CEBE}.flow>div.hot .n{color:var(--hl)}
+.flow .n{font-family:var(--f-tag);font-weight:600;font-size:clamp(8px,.88vw,11px);color:var(--olive)}
+.flow b{font-family:var(--f-title);font-weight:400;font-size:clamp(14px,1.55vw,19px);line-height:1.02}
+.flow span{font-size:clamp(8.5px,.92vw,11.5px);color:var(--muted);line-height:1.3}
+.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(8px,1.2vw,14px)}
+.tools>div{border-top:1px solid var(--line);padding-top:6px;display:grid;gap:2px;align-content:start}
+.tools b{font-weight:600;font-size:clamp(10.5px,1.2vw,14.5px)}
+.tools span{font-size:clamp(8.5px,.95vw,12px);color:var(--muted);line-height:1.3}
+.ck{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(8px,1.2vw,14px)}
+.ck>div{display:grid;gap:5px;align-content:start;border-top:3px solid var(--moss);padding-top:clamp(6px,.8vw,10px)}
+.ck b{font-family:var(--f-title);font-weight:400;font-size:clamp(16px,1.9vw,23px);line-height:1}
+.ck label{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px;align-items:start;font-size:clamp(9px,.98vw,12.2px);color:var(--muted);line-height:1.3;cursor:pointer}
+.ck input{appearance:none;width:.95em;height:.95em;border:1.5px solid var(--moss);border-radius:1px;margin:.15em 0 0;display:grid;place-items:center;cursor:pointer;background:var(--paper)}
+.ck input:checked{background:var(--hl)}
+.ck input:checked::after{content:"";width:.45em;height:.25em;border-left:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(-45deg) translate(1px,-1px)}
+.ck input:checked+span{color:var(--ink);text-decoration:line-through;text-decoration-color:rgba(12,12,11,.45)}
+.ck input:focus-visible{outline:2px solid var(--moss);outline-offset:2px}
+.gloss{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 clamp(12px,2vw,26px)}
+.gloss>div{border-bottom:1px solid var(--line);padding:clamp(4px,.6vw,8px) 0;font-size:clamp(9px,.98vw,12.2px);color:var(--muted);line-height:1.32}
+.gloss b{color:var(--ink);font-weight:600;display:block;font-size:1.04em}
+.end{background:var(--moss);color:var(--paper)}
+.end .inner{align-content:center}
+.end h1{font-size:clamp(42px,7vw,92px);line-height:.92}
+.end h1 em{color:var(--hl)}
+.end .lead{color:#D9D4C4}
+.end .logo{color:var(--paper)}
+.end .foot{border-color:rgba(240,236,226,.22);color:#BFB9A8}.end .foot span+span{border-color:rgba(240,236,226,.22)}
+.nav{position:fixed;right:max(16px, calc(env(safe-area-inset-right, 0px) + 16px));bottom:calc(env(safe-area-inset-bottom, 0px) + 16px);display:flex;gap:8px;z-index:5}
+.nav button{font-family:var(--f-tag);font-weight:600;font-size:13px;border:0;border-radius:2px;background:var(--moss);color:var(--paper);padding:10px 16px;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translate(-50%,10px);background:var(--ink);color:var(--paper);font-family:var(--f-tag);font-size:13px;padding:9px 14px;border-radius:2px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:6}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.slide.dense h2{font-size:clamp(22px,3.1vw,40px)}
+.slide.dense .inner{gap:clamp(8px,1.2vw,14px);padding-top:clamp(18px,3.4vw,44px)}
+@media (min-width:1150px){.slide.dense h2{font-size:38px}.slide.dense .inner{padding-top:40px;gap:13px}}
+@media (max-width:1000px){
+  .curves,.flow{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ck{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .trans,.rules,.layers,.tools,.gloss{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .parts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .prompts{grid-template-columns:1fr}
+  .decide>div{grid-template-columns:auto minmax(0,1fr)}.decide .why{grid-column:2}
+  .part .big{opacity:.5}
+}
+@media (max-width:820px){.pairs{grid-template-columns:repeat(2,minmax(0,1fr))}.two,.kpi3{grid-template-columns:1fr}.part .big{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media (max-width:640px){
+  .slide{min-height:0}
+  .inner{padding-bottom:20px}
+  .curves{grid-template-columns:1fr 1fr!important}
+  .pairs{grid-template-columns:1fr}
+  .two,.parts,.rules,.trans,.layers,.kpi3,.prompts,.flow,.tools,.ck,.gloss{grid-template-columns:1fr}
+  .grid-t>div{grid-template-columns:1fr!important;gap:2px}.grid-t .hd{display:none!important}
+  .decide>div{grid-template-columns:auto minmax(0,1fr)}.decide .why{grid-column:2}
+  .vision{grid-template-columns:1fr}.vision .arrow{display:none}
+  .trio{grid-template-columns:1fr 1fr}
+  .part .big{display:none}
+  .pbox pre{max-height:none}
+  .cover{min-height:88vh}
+}
+</style>
+
+</head>
+<body>
+<main class="deck" id="deck">
+
+<section class="slide cover" id="s1">
+  <div class="win" aria-hidden="true"></div>
+  <div class="inner">
+    <svg class="logo" role="img" aria-label="Müller" xmlns="http://www.w3.org/2000/svg" viewBox="160 720 1700 480"><path fill="currentColor" d="M 1518.79 1011.41 C 1523.83 990.24 1518.79 968.86 1498.35 964.86 C 1469.22 959.17 1444.71 983.48 1434.93 1011.35 ZM 1545.67 926.24 C 1581.04 942.65 1593.33 972.9 1586.75 1011.15 L 1575.54 1051.06 L 1421.0 1051.01 C 1412.0 1080.86 1410.49 1124.99 1444.72 1126.95 C 1456.53 1127.62 1467.49 1122.73 1476.73 1115.26 C 1488.65 1105.16 1496.91 1092.21 1501.67 1076.62 L 1566.94 1076.63 C 1557.61 1104.91 1542.6 1129.58 1520.82 1149.3 C 1483.69 1182.92 1431.56 1194.59 1384.04 1178.84 C 1364.28 1172.29 1348.78 1159.18 1338.79 1141.18 C 1327.7 1153.85 1316.59 1164.29 1302.39 1171.73 C 1267.04 1190.26 1214.6 1189.56 1199.29 1150.88 C 1174.47 1176.74 1139.85 1188.78 1105.69 1181.18 C 1088.78 1177.42 1075.66 1167.63 1069.19 1151.49 C 1043.66 1178.14 1008.32 1189.45 973.8 1180.54 C 956.33 1176.03 943.33 1163.49 938.57 1145.82 C 912.57 1174.44 876.56 1189.76 838.59 1181.02 C 825.24 1177.95 813.98 1171.2 805.88 1159.28 C 786.64 1182.86 752.19 1190.63 723.22 1182.76 C 681.21 1171.35 683.1 1125.18 691.89 1086.69 C 702.74 1039.18 719.02 994.04 738.03 949.02 C 738.17 947.75 737.73 947.11 736.93 947.64 C 678.2 1020.99 629.25 1098.81 583.55 1179.94 L 503.99 1179.92 L 517.35 1112.65 L 546.36 951.27 C 503.19 1029.57 447.8 1131.61 370.64 1175.52 C 338.38 1193.89 301.69 1202.06 264.97 1195.86 C 217.69 1187.89 180.78 1151.87 173.63 1104.41 C 166.89 1059.67 183.19 1016.06 215.22 984.57 L 316.8 984.77 C 292.75 1001.23 276.79 1025.27 273.81 1053.87 C 273.04 1065.74 275.51 1076.79 283.48 1085.31 C 305.77 1104.95 340.89 1097.06 364.98 1080.14 C 414.0 1045.71 457.09 983.08 483.95 929.44 L 533.14 831.2 C 537.09 823.32 538.49 813.43 535.66 805.52 C 532.54 796.77 523.83 794.1 515.05 792.75 L 397.76 792.81 L 427.16 741.36 L 673.88 741.37 C 664.84 766.75 656.27 791.24 650.49 817.45 L 632.94 897.14 C 627.22 926.47 622.34 954.69 619.76 985.14 C 650.8 949.64 679.63 914.46 708.16 877.51 C 741.66 833.46 772.46 788.5 801.39 740.9 L 924.61 741.03 C 889.55 797.32 858.78 853.6 832.43 913.5 C 812.88 957.59 797.11 1002.05 786.35 1048.95 C 781.69 1069.27 773.09 1117.47 782.01 1126.08 C 786.16 1130.08 792.5 1125.73 794.34 1120.85 L 851.14 970.35 C 861.28 943.49 885.54 926.02 913.59 926.0 L 959.68 925.96 L 907.85 1063.2 L 895.09 1107.75 C 894.44 1110.05 895.61 1115.08 896.73 1116.97 C 897.98 1119.08 902.52 1121.2 905.43 1121.55 C 925.17 1123.95 940.58 1096.84 947.83 1077.94 L 986.58 977.01 C 991.11 965.22 996.78 954.5 1005.65 945.49 C 1017.85 933.09 1034.73 926.12 1052.35 926.01 L 1098.05 925.72 L 1049.51 1054.98 L 1034.1 1105.38 C 1032.44 1110.82 1032.85 1118.49 1036.29 1122.9 C 1039.38 1126.86 1046.21 1127.71 1050.55 1126.29 C 1054.04 1125.14 1059.44 1121.34 1061.1 1116.93 L 1081.15 1063.64 L 1165.9 829.95 C 1170.52 817.22 1176.72 806.3 1185.9 796.66 C 1198.63 783.29 1216.31 775.12 1235.05 775.04 L 1281.28 774.85 L 1177.03 1056.17 L 1162.71 1104.14 C 1161.19 1109.23 1161.1 1117.15 1163.77 1121.52 C 1168.25 1128.86 1178.68 1128.56 1185.33 1123.71 C 1190.71 1119.79 1194.61 1113.43 1197.17 1106.47 L 1299.42 828.57 C 1310.72 797.86 1336.01 775.26 1368.32 775.06 L 1414.29 774.78 C 1375.32 874.69 1338.21 972.58 1302.95 1072.46 L 1292.54 1110.67 C 1291.17 1115.7 1293.68 1122.03 1297.42 1124.62 C 1308.15 1132.08 1320.52 1122.34 1329.37 1109.24 C 1326.18 1069.62 1336.23 1030.8 1355.5 995.48 C 1381.7 947.47 1429.76 917.42 1484.79 915.66 C 1506.04 914.98 1526.49 917.34 1545.67 926.24 M 1597.8 1179.75 L 1548.37 1179.82 L 1579.13 1100.4 L 1614.08 990.58 L 1624.75 960.7 C 1634.2 940.69 1653.02 926.27 1675.54 926.14 L 1723.52 925.87 L 1712.62 954.77 C 1725.4 943.33 1737.17 933.83 1752.32 926.96 C 1787.74 910.89 1829.23 916.07 1854.36 947.39 L 1802.25 1023.33 C 1791.36 1004.01 1770.23 994.46 1748.14 997.0 C 1732.24 998.82 1719.03 1007.46 1708.16 1019.02 C 1697.81 1031.3 1690.2 1045.08 1685.56 1060.71 L 1668.25 1119.06 C 1658.54 1151.81 1633.35 1179.7 1597.8 1179.75 M 903.67 901.07 L 917.57 865.07 L 1000.43 860.4 L 986.43 898.06 Z M 1009.6 900.91 L 1023.37 864.87 L 1105.18 860.3 L 1091.3 898.12 Z"/></svg>
+    <span class="eyebrow">Caderno de direção · para quem comentou DESK</span>
+    <h1>A IA executa.<em>O molho é de quem dirige.</em></h1>
+    <p class="lead">O que eu decido antes, durante e depois de cada cena para o motion de IA não sair genérico: transição, corte, curva, lente, tempo, som, e como passar tudo isso para a IA.</p>
+    <div class="trio"><div><b>31,6 s</b><span>de Reels feito em código</span></div><div><b>29</b><span>olhos num match cut só</span></div><div><b>0</b><span>meio segundo parado</span></div></div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Capa</span><span>01</span></div>
+</section>
+
+<section class="slide" id="s2">
+  <div class="inner">
+    <span class="eyebrow">Como usar</span>
+    <h2>Quatro partes. <em>Leia uma vez, depois use o fim como ferramenta.</em></h2>
+    <div class="parts">
+      <a href="#s3"><span class="n">1</span><b>Por que fica genérico</b><span>O que a IA decide quando você não decide, e o antes e depois do DESK</span></a>
+      <a href="#s5"><span class="n">2</span><b>O mundo antes do prompt</b><span>Bíblia do mundo e roteiro em batidas</span></a>
+      <a href="#s8"><span class="n">3</span><b>Gramática do movimento</b><span>Transições, curvas, física, câmera, lente, tempo, som e tela</span></a>
+      <a href="#s14"><span class="n">4</span><b>Dirigindo a IA</b><span>Princípios, dicionário, prompts prontos e checklist</span></a>
+    </div>
+    <div class="two">
+      <div class="lst"><h3>Isto aqui não é um preset</h3>
+        <span>Nada neste caderno obriga você a usar a minha estética (papel, musgo, janela). O que se repete de um projeto para outro é o <b>critério</b>: por que cortar ali, por que acelerar aqui, por que essa lente nesse momento. A identidade visual é sua.</span></div>
+      <div class="lst"><h3>As ferramentas que eu usei</h3>
+        <span><b>Claude Code</b> escrevendo as cenas em código (Revideo), <b>ffmpeg</b> e <b>Python</b> para lente, som e legenda. Os números deste caderno são os do Reels DESK, a 24 fps. Troque pelos seus, mas mantenha a lógica.</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Como usar</span><span>02</span></div>
+</section>
+
+<section class="slide part" id="s3">
+  <span class="big" aria-hidden="true">1</span>
+  <div class="inner">
+    <span class="eyebrow">Parte 1 de 4</span>
+    <h1>Por que fica<em>genérico.</em></h1>
+    <p class="lead">A IA não erra por falta de talento. Ela preenche com a média cada decisão que você deixou em branco.</p>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Parte 1</span><span>03</span></div>
+</section>
+
+<section class="slide dense" id="s4">
+  <div class="inner">
+    <span class="eyebrow">O diagnóstico</span>
+    <h2>O que você não decide, <em>a IA decide por você.</em></h2>
+    <div class="grid-t" style="--cols:minmax(0,.8fr) minmax(0,1.1fr) minmax(0,1.8fr)">
+      <div class="hd"><span>Decisão</span><span>O padrão da IA</span><span>O que eu decidi no DESK</span></div>
+      <div><span>Curva</span><span>ease-in-out simétrico em tudo</span><span class="dir">Uma curva por intenção. O voo sai rápido e pousa devagar: <code>0.62, 0, 0.12, 1</code></span></div>
+      <div><span>Duração</span><span>0,5 s para qualquer coisa</span><span class="dir">Contada em quadros e presa à batida: 17,4 quadros por tempo a 83 BPM</span></div>
+      <div><span>Transição</span><span>fade, slide, zoom de template</span><span class="dir">Match cut que carrega sentido: o ponto do "i" vira pupila, o copo em pixel vira o copo real</span></div>
+      <div><span>Luz</span><span>gradiente sem fonte</span><span class="dir">Uma janela fora do quadro, no alto à esquerda. Toda sombra cai para baixo e para a direita</span></div>
+      <div><span>Câmera</span><span>parada, ou zoom digital</span><span class="dir">2.5D: planos em profundidade, parallax, foco que acompanha, mão leve</span></div>
+      <div><span>Objeto</span><span>"um copo de café"</span><span class="dir">O copinho de vidro americano do café de padaria. Objeto específico, com dono</span></div>
+      <div><span>Som</span><span>música de banco por cima</span><span class="dir">Efeito em cada corte, voz sempre na frente, efeitos 9 dB abaixo</span></div>
+    </div>
+    <p class="quote sm">Genérico é o nome que a gente dá para <mark>sete decisões não tomadas</mark>.</p>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Por que fica genérico</span><span>04</span></div>
+</section>
+
+<section class="slide dense" id="s4b">
+  <div class="inner">
+    <span class="eyebrow">Antes e depois · 1 de 2</span>
+    <h2>Mesmo mundo, mesma narração, mesmo trecho. <em>Muda a direção.</em></h2>
+    <p class="lead" style="font-size:clamp(10.5px,1.2vw,15px)">A primeira versão do DESK já tinha a bíblia do mundo (luz, paleta, objetos). O movimento ainda estava por conta da IA. Cada par abaixo é o mesmo trecho da fala, antes e depois de uma frase de direção.</p>
+    <div class="pairs"><div class="pair"><div class="shots"><figure class="before"><img src="/desk/img/identidade_antes.webp" alt="Primeira versão, 3,7 s: a palavra entra em itálico, numa fonte só, deslizando sobre o card roxo."><figcaption>Primeira versão</figcaption></figure><figure class="after"><img src="/desk/img/identidade_depois.webp" alt="Versão final, 3,7 s: a palavra trocando de fonte com glitch"><figcaption>Com direção</figcaption></figure></div>
+        <b>"identidade?"<small>3,7 s</small></b><p><i>Antes:</i> a palavra entra em itálico, numa fonte só, deslizando sobre o card roxo.</p><p><i>Direção:</i> "use 10 fontes que alternam pelo menos 20 vezes, um match cut com glitch". A palavra é o tema, então a forma dela vira a cena.</p></div><div class="pair"><div class="shots"><figure class="before"><img src="/desk/img/copo_antes.webp" alt="Primeira versão, 6,5–7 s: o copo aparece parado na mesa, sem chegada e sem peso."><figcaption>Primeira versão</figcaption></figure><figure class="after"><img src="/desk/img/copo_depois.webp" alt="Versão final, 6,5–7 s: o copo girando e pousando, com luz e lente"><figcaption>Com direção</figcaption></figure></div>
+        <b>O copinho<small>6,5–7 s</small></b><p><i>Antes:</i> o copo aparece parado na mesa, sem chegada e sem peso.</p><p><i>Direção:</i> "falta uma sequência real entre as telas: gráfico de velocidade, curvas, motion blur". A sombra chega antes, o copo gira, pousa com tilintar e a câmera mergulha no café.</p></div><div class="pair"><div class="shots"><figure class="before"><img src="/desk/img/olho_antes.webp" alt="Primeira versão, 8,5–10,4 s: um olho vetorial com anzol, chapado."><figcaption>Primeira versão</figcaption></figure><figure class="after"><img src="/desk/img/olho_depois.webp" alt="Versão final, 8,5–10,4 s: retrato de acervo com o olho alinhado"><figcaption>Com direção</figcaption></figure></div>
+        <b>O detalhe<small>8,5–10,4 s</small></b><p><i>Antes:</i> um olho vetorial com anzol, chapado.</p><p><i>Direção:</i> "usa fotos, o olho ficou feio". Retratos de acervo aberto, 29 olhos com o centro da pupila no mesmo pixel, cortes na grade da música.</p></div></div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Antes e depois</span><span>05</span></div>
+</section>
+
+<section class="slide dense" id="s4c">
+  <div class="inner">
+    <span class="eyebrow">Antes e depois · 2 de 2</span>
+    <h2>A bíblia do mundo não basta. <em>O movimento também precisa de dono.</em></h2>
+    <div class="pairs"><div class="pair"><div class="shots"><figure class="before"><img src="/desk/img/mundo_antes.webp" alt="Primeira versão, 12,3 s: o olho vira um círculo, que vira bola, que vira mundo. Transição de forma sem sentido nenhum."><figcaption>Primeira versão</figcaption></figure><figure class="after"><img src="/desk/img/mundo_depois.webp" alt="Versão final, 12,3 s: o globo depois do corte seco"><figcaption>Com direção</figcaption></figure></div>
+        <b>"mundo"<small>12,3 s</small></b><p><i>Antes:</i> o olho vira um círculo, que vira bola, que vira mundo. Transição de forma sem sentido nenhum.</p><p><i>Direção:</i> "do olho pra bola não faz sentido: monta a rajada de olhos e faz um corte seco em mundo". O único corte seco do vídeo, na virada da fala.</p></div><div class="pair"><div class="shots"><figure class="before"><img src="/desk/img/executa_antes.webp" alt="Primeira versão, 18,5 s: três cartões pequenos carimbados embaixo de um título. Ilegível no celular."><figcaption>Primeira versão</figcaption></figure><figure class="after"><img src="/desk/img/executa_depois.webp" alt="Versão final, 18,5 s: cópias do storyboard perdendo detalhe"><figcaption>Com direção</figcaption></figure></div>
+        <b>"A IA executa"<small>18,5 s</small></b><p><i>Antes:</i> três cartões pequenos carimbados embaixo de um título. Ilegível no celular.</p><p><i>Direção:</i> A prancha de storyboard real, uma copiadora que tira cópias perdendo detalhe, lente chapada só para a máquina.</p></div><div class="pair"><div class="shots"><figure class="before"><img src="/desk/img/molho_antes.webp" alt="Primeira versão, 19,8 s: a palavra "molho" com marca-texto. Literal e genérica."><figcaption>Primeira versão</figcaption></figure><figure class="after"><img src="/desk/img/molho_depois.webp" alt="Versão final, 19,8 s: Bad Bunny com a frase pero le falta sazón"><figcaption>Com direção</figcaption></figure></div>
+        <b>"o molho"<small>19,8 s</small></b><p><i>Antes:</i> a palavra "molho" com marca-texto. Literal e genérica.</p><p><i>Direção:</i> "o molho, ou el sazón, é referência ao Bad Bunny e ao tempero latino". Um recorte dele com a frase, colado como figurinha na prancha.</p></div></div>
+    <p class="credit">Foto do Bad Bunny: © Glenn Francis, www.PacificProDigital.com (CC BY-SA 4.0). Retratos: The Met e National Gallery of Art, acervo aberto.</p>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Antes e depois</span><span>06</span></div>
+</section>
+
+<section class="slide part" id="s5">
+  <span class="big" aria-hidden="true">2</span>
+  <div class="inner">
+    <span class="eyebrow">Parte 2 de 4</span>
+    <h1>O mundo antes<em>do prompt.</em></h1>
+    <p class="lead">Antes de pedir uma cena, escreva onde ela acontece. Uma página de regras de mundo poupa vinte rodadas de correção.</p>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Parte 2</span><span>07</span></div>
+</section>
+
+<section class="slide dense" id="s6">
+  <div class="inner">
+    <span class="eyebrow">A bíblia do mundo</span>
+    <h2>Seis regras de mundo, <em>coladas no início de toda conversa.</em></h2>
+    <div class="rules">
+      <div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><path d="M5 21l6-6M10 21l6-6M15 21l5-5"/></svg>Luz única</b><span>Uma fonte, com direção e temperatura. Luz quente puxa para areia, sombra fria puxa para musgo. A fonte pode ficar fora do quadro: ela existe pela sombra que joga.</span></div>
+      <div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="15.5" cy="10" r="1.2"/></svg>Paleta fechada</b><span>No máximo seis cores, e um acento só para o que importa em cada cena.</span><span class="sw"><i style="--c:#2B331E"></i><i style="--c:#889063"></i><i style="--c:#BCAE95"></i><i style="--c:#E0DBD1"></i><i style="--c:#0C0C0B"></i><i style="--c:#F5D90A"></i></span></div>
+      <div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>Materiais</b><span>Do que o mundo é feito: papel, vidro, grão, retícula. Material dá tato. Sem material, tudo vira vetor liso.</span></div>
+      <div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10l-1.5 16h-7z"/><path d="M8 9h8"/></svg>Objetos com dono</b><span>Troque o genérico pelo específico: o copinho americano, a prancha de storyboard com fita, a foto de museu. Especificidade é o que o espectador lembra.</span></div>
+      <div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg>Antirreferência</b><span>Escreva o que o vídeo não é. Melhor ainda: mostre a antirreferência no próprio vídeo. O DESK abre com o motion roxo genérico para ter do que fugir.</span></div>
+      <div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Textura com significado</b><span>Cada textura quer dizer uma coisa. No DESK: liso e lente perfeita é o genérico; grão, vidro e luz são o mundo; pixel é o gesto digital (o comentário).</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>O mundo · bíblia</span><span>08</span></div>
+</section>
+
+<section class="slide dense" id="s7">
+  <div class="inner">
+    <span class="eyebrow">Roteiro em batidas</span>
+    <h2>Uma linha por ideia: <em>fala, imagem, entrada, saída e som.</em></h2>
+    <div class="grid-t" style="--cols:minmax(0,.55fr) minmax(0,1.2fr) minmax(0,1.3fr) minmax(0,1.3fr) minmax(0,.9fr)">
+      <div class="hd"><span>Tempo</span><span>Fala</span><span>Imagem</span><span>Como entra e sai</span><span>Som</span></div>
+      <div><span>0,0–2,9 s</span><span>"Todo mundo já mostrou o Claude fazendo motion"</span><span>O motion roxo genérico</span><span>Lente perfeita, ease padrão: é a antirreferência</span><span>Liso, sem efeito</span></div>
+      <div><span>2,9–4,4 s</span><span>"mas cadê a identidade?"</span><span>A palavra troca de fonte</span><span>10 fontes, 20+ trocas: match cut com glitch</span><span>Cliques secos</span></div>
+      <div><span>5,9–7,1 s</span><span>"o copinho de vidro carioca"</span><span>O copo gira e pousa</span><span>A sombra chega 3 quadros antes; mergulho no café</span><span>Tilintar no pouso</span></div>
+      <div><span>8,8–12,1 s</span><span>"o detalhe que te prende?"</span><span>29 olhos, pupila no mesmo pixel</span><span>Cortes de 1/16 que aceleram para 1/32</span><span>Clique mecânico em cada corte</span></div>
+      <div><span>12,1 s</span><span>"mundo"</span><span>O globo</span><span>Corte seco: a virada da fala</span><span>Impacto e silêncio</span></div>
+    </div>
+    <div class="two">
+      <p class="no"><b>Regra de sincronia:</b> a entrada de objeto cai na <b>palavra</b>; o corte cai na <b>batida</b>. Se as duas brigarem, a palavra vence e o corte seguinte vai para a batida mais próxima (±2 quadros).</p>
+      <p class="no"><b>Dica:</b> transcreva a narração com tempo por palavra (faster-whisper faz isso) e cole na conversa. A IA passa a trabalhar em segundos e quadros reais, sem chute.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>O mundo · batidas</span><span>09</span></div>
+</section>
+
+<section class="slide part" id="s8">
+  <span class="big" aria-hidden="true">3</span>
+  <div class="inner">
+    <span class="eyebrow">Parte 3 de 4</span>
+    <h1>Gramática do<em>movimento.</em></h1>
+    <p class="lead">Transição, curva, câmera, lente, tempo e som. É aqui que o motion ganha fluidez ou tropeça.</p>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Parte 3</span><span>10</span></div>
+</section>
+
+<section class="slide dense" id="s9">
+  <div class="inner">
+    <span class="eyebrow">Transições</span>
+    <h2>Toda transição diz uma coisa. <em>Se não diz nada, é enfeite.</em></h2>
+    <div class="trans">
+      <div><b>Match cut de forma</b><span>Uma forma vira outra no mesmo lugar e tamanho: o ponto vira pupila, o copo em pixel vira o real.</span><i>Alinhe o ponto de atenção no mesmo pixel</i></div>
+      <div><b>Rajada de match cuts</b><span>Muitas imagens com o mesmo eixo (29 olhos, pupila fixa). Dá a sensação de mergulho sem mexer a câmera.</span><i>Cortes na grade: 1/16 acelerando para 1/32</i></div>
+      <div><b>Mergulho</b><span>A câmera acelera para dentro de um objeto, e a cena seguinte nasce lá dentro: o café, a bolinha, o olho.</span><i>A cena B herda a velocidade da A</i></div>
+      <div><b>Chicote</b><span>Saída brusca com rastro, chegada que desacelera. Liga dois lugares sem fade.</span><i>Curva <code>0.05, 0.9, 0.2, 1</code> e motion blur</i></div>
+      <div><b>Glitch tipográfico</b><span>A mesma palavra trocando de fonte. Use quando a palavra é o tema, como "identidade".</span><i>10 fontes, 20+ trocas, pixel em algumas</i></div>
+      <div class="dry"><b>Corte seco</b><span>Reservado para a virada de sentido. Se tudo vira transição, nada vira virada.</span><i>No DESK, um só: em "mundo"</i></div>
+    </div>
+    <p class="no"><b>Fica de fora:</b> crossfade, slide lateral, zoom de template e qualquer transição que funcionaria igual em outro vídeo.</p>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Movimento · transições</span><span>11</span></div>
+</section>
+
+<section class="slide dense" id="s10">
+  <div class="inner">
+    <span class="eyebrow">Curvas de velocidade</span>
+    <h2>Uma curva por intenção. <em>A simétrica é a assinatura do genérico.</em></h2>
+    <div class="curves" id="curves"></div>
+    <div class="two">
+      <p class="no"><b>Continuidade de velocidade:</b> a cena B começa na velocidade em que a A terminou. Se cada cena parte do zero, o vídeo soluça a cada corte. No DESK, o fim de uma parte e o começo da próxima usam a mesma tangente (interpolação Hermite).</p>
+      <p class="no"><b>Como ler:</b> eixo horizontal é tempo e eixo vertical é progresso. Inclinação forte significa rápido; trecho deitado significa devagar. Os pontos amarelos são as alças da Bézier, os quatro números que você passa para a IA.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Movimento · curvas</span><span>12</span></div>
+</section>
+
+<section class="slide dense" id="s11">
+  <div class="inner">
+    <span class="eyebrow">Nunca meio segundo parado</span>
+    <h2>Quando a cena para, <em>as camadas de baixo continuam vivas.</em></h2>
+    <div class="layers">
+      <div><b>Deriva de luz</b><code>2–3% do quadro por segundo</code><span>A sombra da janela passa devagar, como nuvem.</span></div>
+      <div><b>Partículas</b><code>poeira e vapor</code><span>Sobem em planos diferentes e dão profundidade.</span></div>
+      <div><b>Mão de câmera</b><code>0,6 px de tremor</code><span>Quase invisível, mas tira o ar de render.</span></div>
+      <div><b>Grão</b><code>12 desenhos por segundo</code><span>Animado em 2s ("on twos"): orgânico contra o liso do 24.</span></div>
+      <div><b>Pulso na batida</b><code>barril +0,035 por 3 quadros</code><span>A lente respira no tempo da música.</span></div>
+      <div><b>Foco</b><code>puxada de foco</code><span>O desfoque muda de plano e guia o olho sem cortar.</span></div>
+    </div>
+    <div class="two">
+      <p class="no"><b>Regra prática:</b> se um trecho passa de 12 quadros sem nada mudando, falta uma camada. Comece pela mais barata: luz que deriva.</p>
+      <p class="no"><b>Contraste de cadência:</b> o que é digital anda a 24 fps, liso. O que é feito à mão anda a 12 (em 2s). Misturar as duas cadências de propósito também é linguagem.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Movimento · camadas</span><span>13</span></div>
+</section>
+
+<section class="slide dense" id="s12">
+  <div class="inner">
+    <span class="eyebrow">Câmera e lente</span>
+    <h2>A lente também é roteiro: <em>muda de acordo com o que acontece.</em></h2>
+    <div class="two">
+      <div class="grid-t" style="--cols:minmax(0,.75fr) minmax(0,1.6fr)">
+        <div class="hd"><span>Câmera 2.5D</span><span>O que pedir</span></div>
+        <div><span>Planos em z</span><span>Fundo, meio e frente em profundidades diferentes; ao mover, cada um anda numa velocidade (parallax)</span></div>
+        <div><span>Profundidade de campo</span><span>Desfoque proporcional à distância do foco, com teto. O foco acompanha o objeto principal</span></div>
+        <div><span>Motion blur</span><span>Obturador de 180°: renderize 4 subquadros por quadro e misture metade deles. Nada de blur direcional por cima</span></div>
+        <div><span>Sombra antecipada</span><span>Quando algo surge do nada, a sombra aparece 3 quadros antes. O olho entende que algo vai chegar</span></div>
+      </div>
+      <div class="grid-t" style="--cols:minmax(0,.75fr) minmax(0,1.6fr)">
+        <div class="hd"><span>Lente</span><span>Quando usar</span></div>
+        <div><span>Barril / olho de peixe</span><span>Picos nos mergulhos (k entre 0,22 e 0,34) e quase nada no resto (0,06)</span></div>
+        <div><span>Aberração cromática</span><span>Só nas bordas e só nos movimentos bruscos. O centro (os olhos) fica sempre nítido</span></div>
+        <div><span>Uma objetiva por corte</span><span>Na rajada de olhos, cada corte troca de vidro: barril, anamórfica, aberração forte ou fraca</span></div>
+        <div><span>Lente perfeita</span><span>Para o genérico e para a máquina. A falta de vidro também significa alguma coisa</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Movimento · câmera e lente</span><span>14</span></div>
+</section>
+
+<section class="slide dense" id="s13">
+  <div class="inner">
+    <span class="eyebrow">Tempo e som</span>
+    <h2>Corte na grade da música, <em>efeito em cada corte, voz na frente.</em></h2>
+    <div class="kpi3">
+      <div class="kpi"><strong>24 × 60 ÷ BPM</strong><span>quadros por tempo. É a régua de todos os cortes</span></div>
+      <div class="kpi"><strong>17,4 quadros</strong><span>um tempo a 83 BPM (a música do DESK). Colcheia 8,7 · semicolcheia 4,35 · fusa 2,2</span></div>
+      <div class="kpi"><strong>−14 LUFS</strong><span>volume final para Reels, com pico em −1 dBTP</span></div>
+    </div>
+    <div class="two">
+      <div class="grid-t" style="--cols:minmax(0,.7fr) minmax(0,1.6fr)">
+        <div class="hd"><span>Efeito</span><span>Onde entra</span></div>
+        <div><span>Swoosh</span><span>Saída de câmera, chicote, mergulho</span></div>
+        <div><span>Pop</span><span>Entrada de objeto, colado na palavra</span></div>
+        <div><span>Clique mecânico</span><span>Cada corte de match cut (é o que dá ritmo à rajada)</span></div>
+        <div><span>Tilintar / impacto</span><span>Pouso de objeto, corte seco</span></div>
+      </div>
+      <div class="lst"><h3>Mixagem</h3>
+        <span><b>Voz &gt; efeitos &gt; música.</b> Efeitos 9 dB abaixo da voz e abaixando sozinhos quando ela fala (sidechain). Música 12 dB abaixo da voz.</span>
+        <span><b>Voz de celular:</b> corte abaixo de 80 Hz, tire um pouco em 250 Hz, some em 3 kHz e comprima de leve.</span>
+        <h3>Acelerar sem correr</h3>
+        <span>Para criar tensão, aumente a subdivisão dos cortes (tempo → colcheia → semicolcheia → fusa) em vez de acelerar o movimento.</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Movimento · tempo e som</span><span>15</span></div>
+</section>
+
+<section class="slide dense" id="s13b">
+  <div class="inner">
+    <span class="eyebrow">Física do movimento</span>
+    <h2>O que se move junto <em>precisa reagir junto.</em></h2>
+    <div class="rules"><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h13M12 7l5 5-5 5"/><path d="M19 5v14"/></svg>Chega andando</b><span>Se a curva começa rápida (overshoot, chicote), o objeto entra em cena já nessa velocidade e só então freia. Largar do zero num tranco denuncia o keyframe.</span></div><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16M6 4l12 3-12 3 12 3-12 3 12 3M4 20h16"/></svg>Mola, não pose</b><span>Suspensão, cabelo, papel: o movimento secundário é uma mola amortecida empurrada pela aceleração. Reage durante a freada, com atraso, balança e assenta.</span></div><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="5"/><rect x="3" y="14" width="18" height="5"/><path d="M8 7.5h.01M15 16.5h.01"/></svg>Uma variável por vez</b><span>Para ensinar ou comparar: mesmo objeto, mesmo caminho, mesma duração. Só a curva muda. O olho compara sem esforço.</span></div><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l2 2"/></svg>Câmera lenta é o mesmo movimento</b><span>Repetir em câmera lenta é dividir o tempo físico do movimento, não animar outro. A física (e a suspensão) tem que ser a mesma.</span></div><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h10M3 12h14M3 16h10"/><circle cx="19" cy="12" r="2"/></svg>Blur na medida da velocidade</b><span>Deslize pede 4 subquadros; chicote pede 12. Com poucos subquadros, o rastro vira estroboscópio.</span></div><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l4 6M21 9l-4 6"/></svg>Silêncio também é corte</b><span>A única pausa permitida é a intencional: 1 a 1,5 s com tudo parado e a música cortada junto. É ali que a piada ou a virada respira.</span></div></div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Movimento · física</span><span>16</span></div>
+</section>
+
+<section class="slide dense" id="s13c">
+  <div class="inner">
+    <span class="eyebrow">Mesa, camadas e tela</span>
+    <h2>A câmera anda por <em>uma mesa só.</em></h2>
+    <div class="rules"><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M3 12h18"/><path d="M12 8v8M9 13l3 3 3-3"/></svg>Uma mesa só</b><span>A troca de cena é a câmera deslizando por uma superfície contínua (duas telas de altura ou largura). Nada é montado em telas separadas, então nada é cortado na emenda.</span></div><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>Três camadas</b><span>Chapado no tapete (mapa, papel, fita) por baixo dos gráficos. Objeto com volume (xícara, caneta, fone) por cima deles. Luz (janela, folha) por cima de tudo.</span></div><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="3"/><path d="M14 20l7-7"/><rect x="3" y="3" width="18" height="18"/></svg>Pouco objeto por cena</b><span>Um conjunto pequeno de objetos por cena, cortado pela borda do quadro. Alterne conjuntos entre as cenas em vez de juntar tudo de uma vez.</span></div><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h14l4 4-4 4H3z"/></svg>Etiqueta fixa</b><span>O nome técnico entra sempre na mesma fita, no mesmo lugar, com a mesma batida. O padrão ensina sem precisar explicar.</span></div><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><rect x="8" y="5" width="8" height="10" stroke-dasharray="2 2"/></svg>Área segura</b><span>Texto dentro de 130 px nas laterais, 250 em cima e 520 embaixo (em 1080×1920). As etiquetas ficam acima da legenda, nunca na mesma altura.</span></div><div><b><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h4M13 15h4"/></svg>Legenda que não repete</b><span>Palavra por palavra, sempre no mesmo lugar, e escondida quando a tela já escreve a palavra (nome da curva, CTA, piada escrita).</span></div></div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Movimento · camadas e tela</span><span>17</span></div>
+</section>
+
+<section class="slide part" id="s14">
+  <span class="big" aria-hidden="true">4</span>
+  <div class="inner">
+    <span class="eyebrow">Parte 4 de 4</span>
+    <h1>Dirigindo<em>a IA.</em></h1>
+    <p class="lead">A IA é uma equipe técnica rápida e literal. Ela faz exatamente o que foi pedido, então o trabalho é pedir certo.</p>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Parte 4</span><span>18</span></div>
+</section>
+
+<section class="slide dense" id="s15">
+  <div class="inner">
+    <span class="eyebrow">Seis princípios</span>
+    <h2>Como eu converso com a IA <em>durante um projeto.</em></h2>
+    <div class="decide">
+      <div><span class="num">1</span><span class="q">O mundo antes da tarefa</span><span class="why">Cole a bíblia do mundo no início. A IA só para de inventar luz e paleta quando já recebeu as suas.</span></div>
+      <div><span class="num">2</span><span class="q">Parâmetro no lugar de adjetivo</span><span class="why">"Fluido" vira curva, duração e motion blur. Adjetivo dá margem para a média; número não.</span></div>
+      <div><span class="num">3</span><span class="q">Partes de 3 a 6 segundos</span><span class="why">Peça uma parte, renderize, critique e só então siga. O vídeo inteiro de uma vez volta genérico e difícil de corrigir.</span></div>
+      <div><span class="num">4</span><span class="q">Tudo em função do quadro</span><span class="why">Peça cenas determinísticas (estado = f(quadro)). Assim dá para renderizar trechos, ligar motion blur e ajustar um quadro só.</span></div>
+      <div><span class="num">5</span><span class="q">Crítica com quadro e pixel</span><span class="why">"No quadro 212 a pupila está 14 px à esquerda do ponto" resolve em uma rodada. "Ficou estranho" leva cinco.</span></div>
+      <div><span class="num">6</span><span class="q">Imagem de referência e de antirreferência</span><span class="why">Mande o que quer e o que não quer. Fotos de acervo aberto (Met, NGA) servem de matéria-prima com licença limpa.</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Dirigindo a IA · princípios</span><span>19</span></div>
+</section>
+
+<section class="slide dense" id="s16">
+  <div class="inner">
+    <span class="eyebrow">Dicionário de direção</span>
+    <h2>Quando você pensar no adjetivo, <em>peça o parâmetro.</em></h2>
+    <div>
+      <div class="vision"><span class="said">fluido</span><span class="arrow">→</span><span class="did"><b>Curva assimétrica</b> por intenção, <b>velocidade contínua</b> entre cenas, <b>motion blur 180°</b> com 4 subquadros</span></div>
+      <div class="vision"><span class="said">impactante</span><span class="arrow">→</span><span class="did"><b>Mergulho acelerando</b> até o corte, <b>barril 0,3</b> no pico, <b>corte seco na batida</b>, impacto no som</span></div>
+      <div class="vision"><span class="said">orgânico</span><span class="arrow">→</span><span class="did">Animação <b>em 2s (12 fps)</b>, <b>mão de câmera 0,6 px</b>, grão animado, borda de papel cortado</span></div>
+      <div class="vision"><span class="said">cinematográfico</span><span class="arrow">→</span><span class="did"><b>Profundidade de campo</b> com foco puxado, <b>lente com vidro</b> (barril leve, aberração nas bordas), 24 fps</span></div>
+      <div class="vision"><span class="said">dinâmico</span><span class="arrow">→</span><span class="did"><b>Subdivisão de corte crescente</b> (semicolcheia para fusa), entradas na palavra, cortes na grade</span></div>
+      <div class="vision"><span class="said">premium</span><span class="arrow">→</span><span class="did"><b>Menos elementos</b>, uma fonte de luz, paleta de 6 cores, <b>tempo para respirar</b> no fim</span></div>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Dirigindo a IA · dicionário</span><span>20</span></div>
+</section>
+
+<section class="slide dense" id="s17">
+  <div class="inner">
+    <span class="eyebrow">Prompts prontos · 1 de 2</span>
+    <h2>Abra a conversa <em>com o mundo e as batidas.</em></h2>
+    <div class="prompts">
+      <div class="pbox"><header><span><small>Prompt A</small><b>Bíblia do mundo</b></span><button class="copy" type="button" data-p="pA">Copiar</button></header>
+<pre id="pA">Antes de qualquer cena, estas são as regras do mundo deste vídeo. Siga todas em todas as cenas e me avise se alguma pedir exceção.
+Formato: <span class="v">9:16, 1080×1920, 24 fps</span>.
+Luz: uma fonte só, <span class="v">[onde, temperatura]</span>. Toda sombra cai para <span class="v">[direção]</span>.
+Paleta fechada: <span class="v">[até 6 hex]</span>. Acento único: <span class="v">[hex]</span>, só no que importa na cena.
+Materiais: <span class="v">[papel, vidro, grão…]</span>.
+Objetos com dono: <span class="v">[lista específica]</span>.
+Antirreferência (o que o vídeo NÃO é): <span class="v">[descrição + imagem]</span>.
+Texturas e o que significam: <span class="v">[ex.: liso = genérico, grão = mundo]</span>.
+Nunca: fade, slide de template, gradiente sem fonte de luz, ease-in-out simétrico como padrão.</pre></div>
+      <div class="pbox"><header><span><small>Prompt B</small><b>Roteiro em batidas</b></span><button class="copy" type="button" data-p="pB">Copiar</button></header>
+<pre id="pB">Aqui está a narração com o tempo de cada palavra: <span class="v">[cole o JSON ou a lista]</span>.
+A música tem <span class="v">[BPM]</span>, com o primeiro tempo em <span class="v">[segundos]</span>. Calcule a grade em quadros (24 × 60 ÷ BPM).
+Monte uma tabela com uma linha por ideia: tempo | fala | imagem | como entra | como sai | som.
+Regras: entrada de objeto na palavra; corte na batida; se brigarem, a palavra vence e o corte seguinte vai para a batida mais próxima (±2 quadros). Só um corte seco, na virada de sentido: <span class="v">[qual]</span>.
+Toda transição precisa dizer por que existe. Não escreva código ainda.</pre></div>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Dirigindo a IA · prompts</span><span>21</span></div>
+</section>
+
+<section class="slide dense" id="s18">
+  <div class="inner">
+    <span class="eyebrow">Prompts prontos · 2 de 2</span>
+    <h2>Depois, uma parte por vez <em>e crítica com número.</em></h2>
+    <div class="prompts">
+      <div class="pbox"><header><span><small>Prompt C</small><b>Cena (uma parte)</b></span><button class="copy" type="button" data-p="pC">Copiar</button></header>
+<pre id="pC">Faça só a parte <span class="v">[n]</span>: quadros <span class="v">[início–fim]</span>, linhas <span class="v">[x–y]</span> da tabela.
+Escreva a cena em código, determinística: todo estado é função do quadro.
+Câmera 2.5D com planos em z, parallax e profundidade de campo; foco em <span class="v">[objeto]</span>.
+Curvas: <span class="v">[nome + 4 números]</span> para <span class="v">[movimento]</span>. A primeira velocidade desta parte é a última da parte anterior.
+Nenhum trecho com mais de 12 quadros sem mudança: use deriva de luz, partículas e mão de câmera.
+Renderize em baixa resolução e me mostre uma folha de contato com um quadro a cada 6.</pre></div>
+      <div class="pbox"><header><span><small>Prompt D</small><b>Crítica / revisão</b></span><button class="copy" type="button" data-p="pD">Copiar</button></header>
+<pre id="pD">Revisão da parte <span class="v">[n]</span>:
+1. Quadro <span class="v">[f]</span>: <span class="v">[o que está errado, em px, quadros ou graus]</span> → <span class="v">[o que eu quero]</span>.
+2. Quadro <span class="v">[f]</span>: …
+Mantenha tudo o que não citei. Antes de corrigir, diga a causa de cada erro em uma linha.
+Depois de renderizar, confira você mesmo os quadros citados e me mostre antes e depois lado a lado.</pre></div>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Dirigindo a IA · prompts</span><span>22</span></div>
+</section>
+
+<section class="slide dense" id="s19">
+  <div class="inner">
+    <span class="eyebrow">Do roteiro ao arquivo</span>
+    <h2>O fluxo que eu sigo, <em>na ordem.</em></h2>
+    <div class="flow">
+      <div><span class="n">01</span><b>Narração</b><span>Grave e transcreva com tempo por palavra</span></div>
+      <div><span class="n">02</span><b>Batidas</b><span>Tabela de fala, imagem, transição e som (Prompt B)</span></div>
+      <div><span class="n">03</span><b>Mundo</b><span>Bíblia de luz, paleta e materiais (Prompt A)</span></div>
+      <div class="hot"><span class="n">04</span><b>Cena por cena</b><span>Partes de 3 a 6 s com render, crítica e ajuste (Prompts C e D)</span></div>
+      <div><span class="n">05</span><b>Acabamento</b><span>Motion blur, lente, grão e legenda</span></div>
+      <div><span class="n">06</span><b>Som</b><span>Efeitos na grade, mixagem e −14 LUFS</span></div>
+    </div>
+    <div class="tools">
+      <div><b>Claude Code</b><span>Escreve as cenas, os scripts de lente e som e corrige com base na sua crítica</span></div>
+      <div><b>Revideo ou Remotion</b><span>Vídeo em código (TypeScript): tudo vira função do quadro</span></div>
+      <div><b>ffmpeg</b><span>Junta as partes, mistura os subquadros, faz loudnorm, legenda e exportação</span></div>
+      <div><b>Python</b><span>OpenCV (lente, olhos), rembg (recorte), librosa (batidas), faster-whisper (fala)</span></div>
+    </div>
+    <p class="no"><b>Imagens:</b> acervos abertos como The Met (CC0) e National Gallery of Art servem sem crédito obrigatório. Wikimedia exige crédito do autor na legenda do post.</p>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Dirigindo a IA · fluxo</span><span>23</span></div>
+</section>
+
+<section class="slide dense" id="s20">
+  <div class="inner">
+    <span class="eyebrow">Checklist antes de exportar</span>
+    <h2>Vinte e cinco perguntas. <em>Marque o que já passou.</em></h2>
+    <div class="ck" id="ck">
+      <div><b>Movimento</b>
+        <label><input type="checkbox" id="c1"><span>Nenhum trecho com mais de 12 quadros parado</span></label>
+        <label><input type="checkbox" id="c2"><span>Nenhuma curva simétrica por padrão</span></label>
+        <label><input type="checkbox" id="c3"><span>Velocidade contínua entre as partes</span></label>
+        <label><input type="checkbox" id="c4"><span>Motion blur real (subquadros), não filtro</span></label>
+        <label><input type="checkbox" id="c21"><span>Movimento secundário reage à aceleração, com atraso</span></label></div>
+      <div><b>Transição</b>
+        <label><input type="checkbox" id="c5"><span>Cada transição tem um motivo</span></label>
+        <label><input type="checkbox" id="c6"><span>Ponto de atenção alinhado nos match cuts</span></label>
+        <label><input type="checkbox" id="c7"><span>Corte seco só na virada</span></label>
+        <label><input type="checkbox" id="c8"><span>Nada que funcionaria igual em outro vídeo</span></label>
+        <label><input type="checkbox" id="c22"><span>Passagem de cena numa mesa contínua: nada cortado na borda</span></label></div>
+      <div><b>Tempo e som</b>
+        <label><input type="checkbox" id="c9"><span>Cortes na grade da música</span></label>
+        <label><input type="checkbox" id="c10"><span>Entradas coladas na palavra</span></label>
+        <label><input type="checkbox" id="c11"><span>Efeito em cada corte, abaixo da voz</span></label>
+        <label><input type="checkbox" id="c12"><span>−14 LUFS e pico em −1 dBTP</span></label>
+        <label><input type="checkbox" id="c23"><span>Silêncio de verdade onde a virada pede</span></label></div>
+      <div><b>Luz e lente</b>
+        <label><input type="checkbox" id="c13"><span>Uma fonte de luz, sombras no mesmo ângulo</span></label>
+        <label><input type="checkbox" id="c14"><span>Aberração só nas bordas e em movimento</span></label>
+        <label><input type="checkbox" id="c15"><span>Centro de atenção sempre nítido</span></label>
+        <label><input type="checkbox" id="c16"><span>Cada textura quer dizer alguma coisa</span></label>
+        <label><input type="checkbox" id="c24"><span>Volume por cima dos gráficos, chapado por baixo</span></label></div>
+      <div><b>Entrega</b>
+        <label><input type="checkbox" id="c17"><span>Legenda fora das áreas da interface do Reels (cerca de 250 px em cima, 520 embaixo, 130 nas laterais)</span></label>
+        <label><input type="checkbox" id="c18"><span>Crédito de imagens com licença</span></label>
+        <label><input type="checkbox" id="c19"><span>Fim que volta ao começo (loop)</span></label>
+        <label><input type="checkbox" id="c20"><span>Assistido sem som e ainda faz sentido</span></label>
+        <label><input type="checkbox" id="c25"><span>Legenda abaixo das etiquetas e escondida quando a tela já escreve</span></label></div>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Dirigindo a IA · checklist</span><span>24</span></div>
+</section>
+
+<section class="slide dense" id="s21">
+  <div class="inner">
+    <span class="eyebrow">Glossário</span>
+    <h2>Os termos que aparecem <em>neste caderno.</em></h2>
+    <div class="gloss">
+      <div><b>Match cut</b>Corte entre dois planos que compartilham forma, posição ou movimento.</div>
+      <div><b>Speed graph</b>Gráfico de velocidade de um movimento ao longo do tempo.</div>
+      <div><b>Easing / Bézier</b>Curva de aceleração. Quatro números definem as duas alças.</div>
+      <div><b>Hermite</b>Interpolação que respeita a velocidade de entrada e saída.</div>
+      <div><b>Obturador 180°</b>Motion blur equivalente a meio quadro de exposição.</div>
+      <div><b>Subquadros</b>Quadros intermediários renderizados e misturados para gerar o blur.</div>
+      <div><b>Parallax</b>Planos em profundidades diferentes andando em velocidades diferentes.</div>
+      <div><b>Profundidade de campo</b>Faixa nítida da imagem. Fora dela, o desfoque cresce.</div>
+      <div><b>Foco puxado</b>Mudança de foco de um plano para outro durante o plano.</div>
+      <div><b>Barril / olho de peixe</b>Distorção que estufa o centro. Mais forte, mais imersão.</div>
+      <div><b>Aberração cromática</b>Separação de vermelho e azul nas bordas da lente.</div>
+      <div><b>Anamórfica</b>Lente que comprime na horizontal e alonga reflexos.</div>
+      <div><b>On twos (em 2s)</b>Um desenho a cada 2 quadros: 12 por segundo.</div>
+      <div><b>Grade musical</b>Os quadros onde caem tempo, colcheia e semicolcheia.</div>
+      <div><b>Sidechain / ducking</b>Um som abaixa sozinho quando outro (a voz) toca.</div>
+      <div><b>LUFS</b>Unidade de volume percebido. O padrão do Reels é −14.</div>
+      <div><b>Área segura</b>Parte da tela que a interface do app não cobre.</div>
+      <div><b>Determinístico</b>A cena sai igual sempre que você renderiza o mesmo quadro.</div>
+    </div>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Glossário</span><span>25</span></div>
+</section>
+
+<section class="slide end" id="s22">
+  <div class="inner">
+    <svg class="logo" role="img" aria-label="Müller" xmlns="http://www.w3.org/2000/svg" viewBox="160 720 1700 480"><path fill="currentColor" d="M 1518.79 1011.41 C 1523.83 990.24 1518.79 968.86 1498.35 964.86 C 1469.22 959.17 1444.71 983.48 1434.93 1011.35 ZM 1545.67 926.24 C 1581.04 942.65 1593.33 972.9 1586.75 1011.15 L 1575.54 1051.06 L 1421.0 1051.01 C 1412.0 1080.86 1410.49 1124.99 1444.72 1126.95 C 1456.53 1127.62 1467.49 1122.73 1476.73 1115.26 C 1488.65 1105.16 1496.91 1092.21 1501.67 1076.62 L 1566.94 1076.63 C 1557.61 1104.91 1542.6 1129.58 1520.82 1149.3 C 1483.69 1182.92 1431.56 1194.59 1384.04 1178.84 C 1364.28 1172.29 1348.78 1159.18 1338.79 1141.18 C 1327.7 1153.85 1316.59 1164.29 1302.39 1171.73 C 1267.04 1190.26 1214.6 1189.56 1199.29 1150.88 C 1174.47 1176.74 1139.85 1188.78 1105.69 1181.18 C 1088.78 1177.42 1075.66 1167.63 1069.19 1151.49 C 1043.66 1178.14 1008.32 1189.45 973.8 1180.54 C 956.33 1176.03 943.33 1163.49 938.57 1145.82 C 912.57 1174.44 876.56 1189.76 838.59 1181.02 C 825.24 1177.95 813.98 1171.2 805.88 1159.28 C 786.64 1182.86 752.19 1190.63 723.22 1182.76 C 681.21 1171.35 683.1 1125.18 691.89 1086.69 C 702.74 1039.18 719.02 994.04 738.03 949.02 C 738.17 947.75 737.73 947.11 736.93 947.64 C 678.2 1020.99 629.25 1098.81 583.55 1179.94 L 503.99 1179.92 L 517.35 1112.65 L 546.36 951.27 C 503.19 1029.57 447.8 1131.61 370.64 1175.52 C 338.38 1193.89 301.69 1202.06 264.97 1195.86 C 217.69 1187.89 180.78 1151.87 173.63 1104.41 C 166.89 1059.67 183.19 1016.06 215.22 984.57 L 316.8 984.77 C 292.75 1001.23 276.79 1025.27 273.81 1053.87 C 273.04 1065.74 275.51 1076.79 283.48 1085.31 C 305.77 1104.95 340.89 1097.06 364.98 1080.14 C 414.0 1045.71 457.09 983.08 483.95 929.44 L 533.14 831.2 C 537.09 823.32 538.49 813.43 535.66 805.52 C 532.54 796.77 523.83 794.1 515.05 792.75 L 397.76 792.81 L 427.16 741.36 L 673.88 741.37 C 664.84 766.75 656.27 791.24 650.49 817.45 L 632.94 897.14 C 627.22 926.47 622.34 954.69 619.76 985.14 C 650.8 949.64 679.63 914.46 708.16 877.51 C 741.66 833.46 772.46 788.5 801.39 740.9 L 924.61 741.03 C 889.55 797.32 858.78 853.6 832.43 913.5 C 812.88 957.59 797.11 1002.05 786.35 1048.95 C 781.69 1069.27 773.09 1117.47 782.01 1126.08 C 786.16 1130.08 792.5 1125.73 794.34 1120.85 L 851.14 970.35 C 861.28 943.49 885.54 926.02 913.59 926.0 L 959.68 925.96 L 907.85 1063.2 L 895.09 1107.75 C 894.44 1110.05 895.61 1115.08 896.73 1116.97 C 897.98 1119.08 902.52 1121.2 905.43 1121.55 C 925.17 1123.95 940.58 1096.84 947.83 1077.94 L 986.58 977.01 C 991.11 965.22 996.78 954.5 1005.65 945.49 C 1017.85 933.09 1034.73 926.12 1052.35 926.01 L 1098.05 925.72 L 1049.51 1054.98 L 1034.1 1105.38 C 1032.44 1110.82 1032.85 1118.49 1036.29 1122.9 C 1039.38 1126.86 1046.21 1127.71 1050.55 1126.29 C 1054.04 1125.14 1059.44 1121.34 1061.1 1116.93 L 1081.15 1063.64 L 1165.9 829.95 C 1170.52 817.22 1176.72 806.3 1185.9 796.66 C 1198.63 783.29 1216.31 775.12 1235.05 775.04 L 1281.28 774.85 L 1177.03 1056.17 L 1162.71 1104.14 C 1161.19 1109.23 1161.1 1117.15 1163.77 1121.52 C 1168.25 1128.86 1178.68 1128.56 1185.33 1123.71 C 1190.71 1119.79 1194.61 1113.43 1197.17 1106.47 L 1299.42 828.57 C 1310.72 797.86 1336.01 775.26 1368.32 775.06 L 1414.29 774.78 C 1375.32 874.69 1338.21 972.58 1302.95 1072.46 L 1292.54 1110.67 C 1291.17 1115.7 1293.68 1122.03 1297.42 1124.62 C 1308.15 1132.08 1320.52 1122.34 1329.37 1109.24 C 1326.18 1069.62 1336.23 1030.8 1355.5 995.48 C 1381.7 947.47 1429.76 917.42 1484.79 915.66 C 1506.04 914.98 1526.49 917.34 1545.67 926.24 M 1597.8 1179.75 L 1548.37 1179.82 L 1579.13 1100.4 L 1614.08 990.58 L 1624.75 960.7 C 1634.2 940.69 1653.02 926.27 1675.54 926.14 L 1723.52 925.87 L 1712.62 954.77 C 1725.4 943.33 1737.17 933.83 1752.32 926.96 C 1787.74 910.89 1829.23 916.07 1854.36 947.39 L 1802.25 1023.33 C 1791.36 1004.01 1770.23 994.46 1748.14 997.0 C 1732.24 998.82 1719.03 1007.46 1708.16 1019.02 C 1697.81 1031.3 1690.2 1045.08 1685.56 1060.71 L 1668.25 1119.06 C 1658.54 1151.81 1633.35 1179.7 1597.8 1179.75 M 903.67 901.07 L 917.57 865.07 L 1000.43 860.4 L 986.43 898.06 Z M 1009.6 900.91 L 1023.37 864.87 L 1105.18 860.3 L 1091.3 898.12 Z"/></svg>
+    <span class="eyebrow" style="background:var(--hl);color:var(--ink)">Agora é com você</span>
+    <h1>O método é o mesmo.<em>O mundo tem que ser seu.</em></h1>
+    <p class="lead">Fez um motion com este caderno? Me marca. Eu quero ver o mundo que você criou, e os melhores eu comento no perfil.</p>
+  </div>
+  <div class="foot"><span>Bruno Müller | Caderno DESK</span><span>Fim</span><span>26</span></div>
+</section>
+
+</main>
+
+<div class="nav"><button type="button" id="prev" aria-label="Slide anterior">←</button><button type="button" id="next" aria-label="Próximo slide">→</button></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  // curvas: desenhadas na escala exata da Bézier cúbica (0,0)→(1,1)
+  var C=[
+    {n:'Voo',v:[.62,0,.12,1],t:'Sai firme e pousa devagar. O movimento padrão de câmera.'},
+    {n:'Mergulho',v:[.85,0,.95,.55],t:'Começa lento e chega ao corte ainda acelerando. A cena seguinte herda essa velocidade.'},
+    {n:'Chicote',v:[.05,.9,.2,1],t:'Quase tudo acontece no começo. Saídas bruscas, com rastro.'},
+    {n:'Pouso',v:[.5,0,.2,1],t:'O objeto assenta e só depois a câmera recua. Fechamentos.'},
+    {n:'Padrão',v:[.42,0,.58,1],t:'O ease-in-out simétrico. Serve para tudo e por isso não diz nada.',bad:1}
+  ];
+  var host=document.getElementById('curves');
+  C.forEach(function(c){
+    var S=120,P=10,x=function(u){return P+u*(S-2*P)},y=function(u){return S-P-u*(S-2*P)};
+    var v=c.v,g='';
+    for(var i=1;i<4;i++){g+='<line class="grid" x1="'+x(i/4)+'" y1="'+y(0)+'" x2="'+x(i/4)+'" y2="'+y(1)+'"/><line class="grid" x1="'+x(0)+'" y1="'+y(i/4)+'" x2="'+x(1)+'" y2="'+y(i/4)+'"/>';}
+    var svg='<svg viewBox="0 0 '+S+' '+S+'" role="img" aria-label="Curva '+c.n+': cubic-bezier('+v.join(', ')+')">'+g+
+      '<line class="lin" x1="'+x(0)+'" y1="'+y(0)+'" x2="'+x(1)+'" y2="'+y(1)+'"/>'+
+      '<line class="h" x1="'+x(0)+'" y1="'+y(0)+'" x2="'+x(v[0])+'" y2="'+y(v[1])+'"/><line class="h" x1="'+x(1)+'" y1="'+y(1)+'" x2="'+x(v[2])+'" y2="'+y(v[3])+'"/>'+
+      '<path class="c" d="M'+x(0)+' '+y(0)+' C '+x(v[0])+' '+y(v[1])+', '+x(v[2])+' '+y(v[3])+', '+x(1)+' '+y(1)+'"/>'+
+      '<circle class="p" cx="'+x(v[0])+'" cy="'+y(v[1])+'" r="3.4"/><circle class="p" cx="'+x(v[2])+'" cy="'+y(v[3])+'" r="3.4"/></svg>';
+    var d=document.createElement('div'); if(c.bad) d.className='bad';
+    d.innerHTML=svg+'<b>'+c.n+'</b><code>'+v.join(', ')+'</code><span>'+c.t+'</span>';
+    host.appendChild(d);
+  });
+
+  // copiar prompts
+  var toast=document.getElementById('toast'),tt;
+  function say(m){toast.textContent=m;toast.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){toast.classList.remove('on')},1800)}
+  document.querySelectorAll('.copy').forEach(function(b){
+    b.addEventListener('click',function(){
+      var el=document.getElementById(b.dataset.p),txt=el.innerText;
+      function sel(){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r);say('Texto selecionado: use Copiar do seu aparelho')}
+      try{navigator.clipboard.writeText(txt).then(function(){say('Prompt copiado')},sel)}catch(e){sel()}
+    });
+  });
+
+  // checklist: lembrado só neste navegador
+  var K='desk-ck';
+  var st={};try{st=JSON.parse(localStorage.getItem(K)||'{}')}catch(e){}
+  document.querySelectorAll('#ck input').forEach(function(i){
+    if(st[i.id]) i.checked=true;
+    i.addEventListener('change',function(){st[i.id]=i.checked;try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}});
+  });
+
+  // navegação
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  function cur(){var m=innerHeight*.35,b=0;slides.forEach(function(s,i){if(s.getBoundingClientRect().top<=m)b=i});return b}
+  function go(d){var i=Math.max(0,Math.min(slides.length-1,cur()+d));slides[i].scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}
+  document.getElementById('prev').onclick=function(){go(-1)};
+  document.getElementById('next').onclick=function(){go(1)};
+  addEventListener('keydown',function(e){
+    if(e.target.closest&&e.target.closest('input,textarea'))return;
+    if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();go(1)}
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1)}
+  });
+})();
+</script>
+
+</body>
+</html>
