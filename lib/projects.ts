@@ -35,7 +35,7 @@ export const FEATURED: Project[] = PROJECT_DATA.filter((p) => p.featured !== fal
 
 export function vimeoPlayerUrl(p: Pick<ProjectData, "vimeoId" | "vimeoHash">, params: string) {
   const h = p.vimeoHash ? `h=${p.vimeoHash}&` : "";
-  return `https://player.vimeo.com/video/${p.vimeoId}?${h}${params}`;
+  return `https://player.vimeo.com/video/${p.vimeoId}?${h}dnt=1&${params}`;
 }
 
 export function vimeoPageUrl(p: Pick<ProjectData, "vimeoId" | "vimeoHash">) {

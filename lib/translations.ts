@@ -68,6 +68,8 @@ export const dict = {
   cookieAccept: { pt: "Aceitar", en: "Accept" },
   cookieDecline: { pt: "Recusar", en: "Decline" },
   cookieSettings: { pt: "Cookies", en: "Cookies" },
+  privacyPolicy: { pt: "Política de privacidade", en: "Privacy policy" },
+  privacyShort: { pt: "Privacidade", en: "Privacy" },
   whatsappMessage: {
     pt: "Oi, Bruno. Vim pelo teu portfólio — tenho um projeto em mente e queria trocar uma ideia.",
     en: "Hi Bruno. I found you through your portfolio — I have a project in mind and would love to chat.",

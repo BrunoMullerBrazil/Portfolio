@@ -17,7 +17,7 @@ const DESKTOP_VIDEO_RATIO = 16 / 9;
 const MOBILE_VIDEO_RATIO = 9 / 16;
 
 function vimeoSrc(id: string) {
-  return `https://player.vimeo.com/video/${id}?background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0`;
+  return `https://player.vimeo.com/video/${id}?dnt=1&background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0`;
 }
 
 // Base (pre-scroll) size of the hero media card. The desktop floor (200x280)
