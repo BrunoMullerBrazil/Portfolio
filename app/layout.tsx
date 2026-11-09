@@ -9,6 +9,7 @@ import Timecode from "@/components/Timecode";
 import FilmGrain from "@/components/FilmGrain";
 import Guide from "@/components/Guide";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import Analytics from "@/components/Analytics";
 import { withBasePath } from "@/lib/basePath";
 import { LanguageProvider } from "@/lib/LanguageContext";
 import { SITE_URL, SITE_NAME, TITLE_SUFFIX, DEFAULT_TITLE, DEFAULT_DESCRIPTION, OG_IMAGE } from "@/lib/seo";
@@ -76,6 +77,7 @@ export default function RootLayout({
           <WhatsAppButton />
           {children}
         </LanguageProvider>
+        <Analytics />
       </body>
     </html>
   );
