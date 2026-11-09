@@ -1,5 +1,7 @@
-// Google tag (Tag Manager container). GA4 and Clarity are configured inside
-// the container, not here, so tags can be added or changed without a deploy.
+// GA4 is loaded here directly — don't also add a Google tag with this ID in
+// the GTM container, or every hit is counted twice. The container carries
+// everything else (Clarity, future pixels), editable without a deploy.
+export const GA_MEASUREMENT_ID = "G-CL9DR6S172";
 export const GTM_ID = "GTM-PVCZGJDN";
 
 declare global {
