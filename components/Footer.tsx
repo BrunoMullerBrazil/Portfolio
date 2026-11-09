@@ -3,6 +3,7 @@
 import { LOGO_PATH, LOGO_BODY, LOGO_DOTS } from "./Logo";
 import { WRITE_STROKES } from "./logoWriting";
 import { useLanguage, t } from "@/lib/LanguageContext";
+import Link from "next/link";
 import { dict } from "@/lib/translations";
 import { openCookieSettings } from "./CookieConsent";
 
@@ -71,9 +72,14 @@ export default function Footer() {
 
       <div className="credits-row">
         <div className="footer-copy">© {YEAR} Bruno Müller</div>
-        <button type="button" className="footer-copy footer-cookies" data-cursor="click" onClick={openCookieSettings}>
-          {t(dict.cookieSettings, lang)}
-        </button>
+        <div className="footer-legal">
+          <Link href="/privacidade" className="footer-copy footer-cookies" data-cursor="click">
+            {t(dict.privacyShort, lang)}
+          </Link>
+          <button type="button" className="footer-copy footer-cookies" data-cursor="click" onClick={openCookieSettings}>
+            {t(dict.cookieSettings, lang)}
+          </button>
+        </div>
         <div className="footer-copy credits-end">
           {t({ pt: "Fim", en: "The End" }, lang)}
           {/* the guide's last landing: the film's full stop */}

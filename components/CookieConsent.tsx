@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useLanguage, t } from "@/lib/LanguageContext";
 import { dict } from "@/lib/translations";
 import Analytics from "./Analytics";
@@ -76,7 +77,12 @@ export default function CookieConsent() {
       {choice === "granted" && <Analytics />}
       {open && (
         <div className="cookie-banner" role="dialog" aria-label={t(dict.cookieLabel, lang)}>
-          <p>{t(dict.cookieText, lang)}</p>
+          <p>
+            {t(dict.cookieText, lang)}{" "}
+            <Link href="/privacidade" data-cursor="click">
+              {t(dict.privacyPolicy, lang)}
+            </Link>
+          </p>
           <div className="cookie-actions">
             <button type="button" className="cookie-btn" data-cursor="click" onClick={() => decide("denied")}>
               {t(dict.cookieDecline, lang)}
