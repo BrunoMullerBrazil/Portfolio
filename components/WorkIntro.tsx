@@ -6,6 +6,7 @@ import { dict } from "@/lib/translations";
 import { SplitText } from "./SplitText";
 import { FEATURED, vimeoPlayerUrl, type Project } from "@/lib/projects";
 import WorksArchive from "./WorksArchive";
+import { trackEvent } from "@/lib/analytics";
 
 // The stage shows the featured cut; the archive (WorksArchive) shows everything.
 const PROJECTS = FEATURED;
@@ -196,6 +197,8 @@ export default function WorkIntro() {
       if (!N) return;
       current = (current + d + N) % N;
       render(d);
+      const p = filtered[current];
+      trackEvent("gallery_project_view", { project: p.name.pt, vimeo_id: p.vimeoId });
     }
 
     function onNext() {
@@ -236,7 +239,9 @@ export default function WorkIntro() {
 
     function onPlayClick() {
       const p = filtered[current];
-      if (p) mountVideo(p);
+      if (!p) return;
+      mountVideo(p);
+      trackEvent("gallery_play", { project: p.name.pt, vimeo_id: p.vimeoId });
     }
     playBtn.addEventListener("click", onPlayClick);
 
@@ -249,6 +254,7 @@ export default function WorkIntro() {
         filtered = activeFilter === "all" ? PROJECTS.slice() : PROJECTS.filter((p) => p.filter === activeFilter);
         current = 0;
         render();
+        trackEvent("gallery_filter", { filter: value });
       };
     }
     const filterHandlers = filterButtons.map((btn, i) => makeFilterHandler(btn, FILTERS[i].value));
