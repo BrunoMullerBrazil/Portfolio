@@ -59,6 +59,15 @@ export const dict = {
   ariaExitFullscreen: { pt: "Sair da tela cheia", en: "Exit fullscreen" },
 
   whatsappLabel: { pt: "Fale comigo", en: "Message me" },
+
+  cookieLabel: { pt: "Aviso de cookies", en: "Cookie notice" },
+  cookieText: {
+    pt: "Uso cookies do Google Analytics e do Microsoft Clarity pra entender como o site é usado: quais páginas são vistas e onde as pessoas clicam. Nada é vendido nem usado pra anúncios.",
+    en: "I use Google Analytics and Microsoft Clarity cookies to understand how the site is used: which pages are viewed and where people click. Nothing is sold or used for ads.",
+  },
+  cookieAccept: { pt: "Aceitar", en: "Accept" },
+  cookieDecline: { pt: "Recusar", en: "Decline" },
+  cookieSettings: { pt: "Cookies", en: "Cookies" },
   whatsappMessage: {
     pt: "Oi, Bruno. Vim pelo teu portfólio — tenho um projeto em mente e queria trocar uma ideia.",
     en: "Hi Bruno. I found you through your portfolio — I have a project in mind and would love to chat.",
