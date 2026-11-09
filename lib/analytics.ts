@@ -1,7 +1,6 @@
-// Public IDs — they end up in every page's source anyway, so they live here
-// rather than in build env vars. Leave one empty to switch that tool off.
-export const GA_MEASUREMENT_ID = ""; // Google Analytics 4, "G-XXXXXXXXXX"
-export const CLARITY_PROJECT_ID = ""; // Microsoft Clarity, e.g. "abcd1234ef"
+// Google tag (Tag Manager container). GA4 and Clarity are configured inside
+// the container, not here, so tags can be added or changed without a deploy.
+export const GTM_ID = "GTM-PVCZGJDN";
 
 declare global {
   interface Window {
