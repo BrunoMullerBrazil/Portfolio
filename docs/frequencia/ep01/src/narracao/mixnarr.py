@@ -18,9 +18,10 @@ def add(s,t,g=1,pan=0):
 def fade(n,a,r):
     e=np.ones(n); a=int(a*SR); r=int(r*SR); e[:a]=np.linspace(0,1,a); e[-r:]=np.minimum(e[-r:],np.linspace(1,0,r)); return e
 cue={c[0]:c for c in d['cues']}
-for i,tp,t,dur,tx in d['cues']:
+for c in d['cues']:
+    i,tp,t,dur,tx=c[:5]; lead=c[5] if len(c)>5 else 0
     subprocess.run(['ffmpeg','-y','-v','error','-i',f'seg_{i:02d}_{tp}.wav','-af',FX[tp]+',aresample=48000','-ac','1',f'p_{i:02d}.wav'],check=True)
-    a,_=sf.read(f'p_{i:02d}.wav'); tgt={'I':-20,'C':-22,'O':-23,'F':-21}[tp]; r=np.sqrt((a[np.abs(a)>0.01*np.abs(a).max()]**2).mean()); a=a*(10**(tgt/20)/r); a=np.tanh(a*1.2)/1.2; add(a,t+0.3,g=1.0)
+    a,_=sf.read(f'p_{i:02d}.wav'); tgt={'I':-20,'C':-22,'O':-23,'F':-21}[tp]; r=np.sqrt((a[np.abs(a)>0.01*np.abs(a).max()]**2).mean()); a=a*(10**(tgt/20)/r); a=np.tanh(a*1.2)/1.2; add(a,t+0.3-lead,g=1.0)
 # beds
 room=norm(band(nz(TOT),40,300))*.035; L+=room; R+=room*.9
 w=norm(band(nz(TOT),60,500))*np.interp(np.arange(N)/SR,[0,8,60,TOT],[0,.05,.03,.02]); L+=w; R+=w[::-1]*.8
