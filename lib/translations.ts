@@ -20,6 +20,8 @@ export const dict = {
   },
   heroRoleLine: { pt: "Florianópolis · Brasil", en: "Florianópolis · Brazil" },
   heroScrollCue: { pt: "role para baixo", en: "scroll down" },
+  heroWatchSound: { pt: "Assistir com som", en: "Watch with sound" },
+  heroCloseReel: { pt: "Fechar o vídeo", en: "Close video" },
 
   workIntroEyebrow: { pt: "Portfólio", en: "Portfolio" },
   workIntroHeading: { pt: "Veja o trabalho.", en: "See the work." },
