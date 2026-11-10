@@ -21,15 +21,15 @@ def add(sig,t,g=1.0,pan=0.0):
     i=int(t*SR); j=min(N,i+len(l));
     if j<=i: return
     L[i:j]+=l[:j-i]*g*(1-max(0,pan)); R[i:j]+=r[:j-i]*g*(1+min(0,pan))
-def inv(o):
+def inv(o,end=False):
     for s in E:
         if s[2]=='flat' or s[3]-s[2]<0.05: continue
-        if s[2]<=o<=s[3]: return s[0]+(o-s[2])/(s[3]-s[2])*(s[1]-s[0]), (s[1]-s[0])/(s[3]-s[2])
+        if (s[2]<o<=s[3]) if end else (s[2]<=o<s[3]): return s[0]+(o-s[2])/(s[3]-s[2])*(s[1]-s[0]), 1
     return None,1
 # --- cold open & title from old mix
 old,sr=readwav('mix.wav'); 
-co=old[:int(4.0*sr)].copy(); co[-int(.3*sr):]*=np.linspace(1,0,int(.3*sr))[:,None]; add(co,0,.9)
-ti=old[int(82.5*sr):int(88*sr)].copy(); add(ti,127.6,.9)
+co=old[:int(4.0*sr)].copy(); co[-int(.3*sr):]*=np.linspace(1,0,int(.3*sr))[:,None]; add(co,0,.5)
+ti=old[int(82.5*sr):int(88*sr)].copy(); add(ti,127.6,.6)
 # --- narration (pre-loudnorm mix) at 4.0
 nar,_=readwav(TT+'narracao_raw.wav'); add(nar,4.0,1.0)
 # --- foley generators
@@ -56,10 +56,11 @@ def tick(g=.25):
 def ev(o,sig,g=1,pan=0):
     t,_=inv(o)
     if t is not None: add(sig,t,g,pan)
-def evd(a,b,fn,g=1):  # duration event, stretched
-    t,k=inv(a)
-    if t is not None: add(fn((b-a)*k),t,g)
-FG=.8
+def evd(a,b,fn,g=1):  # duration event mapped start->end, capped
+    t,_=inv(a); t2,_=inv(b,True)
+    if t is None or t2 is None or t2<=t: return
+    add(fn(min(t2-t,(b-a)*2.2)),t,g)
+FG=.42
 evd(18.5,19.2,lambda d:scratch(d,.22,1200,5000),FG)
 for t in (20.4,21.0,21.6): ev(t,thump(.45),FG,(t-21)/2)
 ev(22.6,swish(1.0,.22),FG)

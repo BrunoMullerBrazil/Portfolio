@@ -33,9 +33,9 @@ c=find('Eu abro.'); s=norm(band(nz(.7),300,5000))*np.sin(np.linspace(0,np.pi,int
 c=find('Se você está'); s=norm(band(nz(c[3]+.6),2000,7000))*np.abs(np.sin(np.cumsum(rng.uniform(5,10,int((c[3]+.6)*SR)))*2*np.pi/SR))**.6*.025; add(s,c[2]+.3)
 # radio section: click + static from operator to end of tape
 o=find('Sete. Dois'); f2=find('Você esqueceu'); a0=o[2]+0.1; a1=f2[2]+f2[3]+0.35
-n=int((a1-a0)*SR); st=norm(band(nz(a1-a0),400,4200))*.05*fade(n,.05,.02)
-pops=np.zeros(n); idx=rng.integers(0,n,int((a1-a0)*40)); pops[idx]=rng.uniform(-1,1,len(idx)); st+=band(pops,1500,None)*1.2
-mud=find('Aí a estática'); k=int((mud[2]+0.3-a0)*SR); st[k:]*=1.5
+n=int((a1-a0)*SR); st=norm(band(nz(a1-a0),400,4200))*.022*fade(n,.3,.02)
+pops=np.zeros(n); idx=rng.integers(0,n,int((a1-a0)*40)); pops[idx]=rng.uniform(-1,1,len(idx)); st+=band(pops,1500,None)*.5
+mud=find('Aí a estática'); k=int((mud[2]+0.3-a0)*SR); st[k:]*=1.4
 add(st,a0); add(band(nz(.02),1500,7000)*np.exp(-np.linspace(0,8,int(.02*SR)))*.6,a0-0.05)
 # drone under tape, hard cut after "não foi?"
 def drone(f,dd):
