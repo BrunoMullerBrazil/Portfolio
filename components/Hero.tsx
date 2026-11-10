@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Logo } from "./Logo";
 import { withBasePath } from "@/lib/basePath";
 import { useLanguage, t } from "@/lib/LanguageContext";
@@ -18,6 +19,12 @@ const MOBILE_VIDEO_RATIO = 9 / 16;
 
 function vimeoSrc(id: string) {
   return `https://player.vimeo.com/video/${id}?dnt=1&background=1&autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0`;
+}
+
+// Background mode can't play sound, so "watch with sound" opens the same reel
+// in a regular player with controls.
+function vimeoPlayerSrc(id: string) {
+  return `https://player.vimeo.com/video/${id}?dnt=1&autoplay=1&title=0&byline=0&portrait=0`;
 }
 
 // Base (pre-scroll) size of the hero media card. The desktop floor (200x280)
@@ -57,6 +64,32 @@ export default function Hero() {
   const heroNavRef = useRef<HTMLDivElement>(null);
   const heroStickyRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLElement>(null);
+  const soundBtnRef = useRef<HTMLButtonElement>(null);
+  const reelCloseRef = useRef<HTMLButtonElement>(null);
+  const [reel, setReel] = useState<{ id: string; vertical: boolean } | null>(null);
+
+  const openReel = useCallback(() => {
+    const vertical = window.innerWidth <= 768;
+    setReel({ id: vertical ? MOBILE_VIMEO_ID : DESKTOP_VIMEO_ID, vertical });
+  }, []);
+  const closeReel = useCallback(() => {
+    setReel(null);
+    soundBtnRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (!reel) return;
+    window._lenis?.stop();
+    reelCloseRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeReel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window._lenis?.start();
+    };
+  }, [reel, closeReel]);
 
   useEffect(() => {
     const hm = heroMediaRef.current;
@@ -470,6 +503,19 @@ export default function Hero() {
               style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}
             />
           </div>
+          <button
+            type="button"
+            className="hero-sound"
+            ref={soundBtnRef}
+            onClick={openReel}
+            aria-label={t(dict.heroWatchSound, lang)}
+            data-cursor="click"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M3 1.8v8.4L10 6z" fill="currentColor" />
+            </svg>
+            <span className="hero-sound-lbl">{t(dict.heroWatchSound, lang)}</span>
+          </button>
         </div>
 
         <div className="hero-scroll-cue" id="heroScrollCue" ref={heroScrollCueRef}>
@@ -479,6 +525,25 @@ export default function Hero() {
           <span className="scroll-txt">{t(dict.heroScrollCue, lang)}</span>
         </div>
       </div>
+      {reel &&
+        createPortal(
+          <div className="reel-player" role="dialog" aria-modal="true" aria-label={t(dict.heroWatchSound, lang)} onClick={closeReel}>
+            <div className={"reel-frame" + (reel.vertical ? " vertical" : "")} onClick={(e) => e.stopPropagation()}>
+              <iframe
+                src={vimeoPlayerSrc(reel.id)}
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title="Showreel"
+              />
+            </div>
+            <button type="button" className="arc-close reel-close" ref={reelCloseRef} onClick={closeReel} aria-label={t(dict.heroCloseReel, lang)} data-cursor="click">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>,
+          document.body
+        )}
     </section>
   );
 }

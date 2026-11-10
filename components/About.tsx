@@ -81,17 +81,18 @@ export default function About() {
         data-scene="03"
         data-scene-label={tr({ pt: "Sobre", en: "About" }, lang)}
       >
-        <div>
+        <div className="about-head">
           <div className="about-eyebrow reveal">
             <span className="gmark" data-guide-mark />
             {tr(dict.aboutEyebrow, lang)}
           </div>
           <Scrub className="about-lead" range=".88 .5" text={tr(dict.aboutPara1, lang)} />
+        </div>
+        <div className="about-body">
           <Scrub className="about-text" range=".92 .5" text={tr(dict.aboutPara2, lang)} />
           {/* MotionSystem watches for nodes mounted later (this one only
               exists in one language), so late blocks get scrubbed too. */}
           {para3 && <Scrub className="about-text" range=".92 .5" text={para3} />}
-        </div>
         {/* EN only: in PT the client logos below carry the proof on their own */}
         {lang === "en" && (
         <div className="about-stats" ref={statsWrapRef}>
@@ -109,6 +110,7 @@ export default function About() {
           </div>
         </div>
         )}
+        </div>
       </section>
 
       {/* eslint-disable @next/next/no-img-element */}
