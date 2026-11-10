@@ -10,3 +10,8 @@ Requisitos: Node + Playwright (Chromium), ffmpeg, Python 3 com numpy e piper-tts
 
 Pré-visualizar quadros: `node preview.js <pasta> 9 36 60.5` gera PNGs dos tempos indicados.
 Cada cena é uma função `S*()` em `ep01.html`; tudo é determinístico a partir do tempo `T`.
+
+## Versão narrada (Scheila)
+- `edl.py` gera `edl.json` (mapa de montagem: tempo novo → tempo do vídeo original, com zoom) e `subs.json` (legendas a partir da transcrição palavra a palavra).
+- `ep01b.html` carrega o mapa e as legendas; renderize com `renderb.js` (3206 frames).
+- `audio2.py` monta o áudio: abertura do rádio + narração + ruídos de cena reposicionados pelo mapa + título.
