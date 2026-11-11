@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Oswald;font-weight:600;src:url(fonts/oswald-latin-600-normal.woff2)}
+@font-face{font-family:Mono;font-weight:700;src:url(fonts/jetbrains-mono-latin-700-normal.woff2)}
+body{margin:0;background:#000}</style></head><body><canvas id="c" width="1080" height="1080"></canvas>
+<script>
+const cv=document.getElementById('c'),X=cv.getContext('2d'),S=1080;
+const CARVAO='#141414',PAPEL='#E9DFC8',AMBAR='#E08A2E';
+function h1(a){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
+function base(){X.fillStyle=CARVAO;X.fillRect(0,0,S,S);
+  const g=X.createRadialGradient(540,330,10,540,330,420);g.addColorStop(0,'rgba(224,138,46,.13)');g.addColorStop(1,'rgba(224,138,46,0)');X.fillStyle=g;X.fillRect(0,0,S,S);const v=X.createRadialGradient(540,540,300,540,540,780);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.6)');X.fillStyle=v;X.fillRect(0,0,S,S);
+  const id=X.getImageData(0,0,S,S),d=id.data;for(let i=0;i<d.length;i+=4){const n=(h1(i)-.5)*10;d[i]+=n;d[i+1]+=n;d[i+2]+=n;}X.putImageData(id,0,0);}
+function wave(cx,cy,w,amp,lw,cyc){X.beginPath();for(let i=0;i<=160;i++){const u=i/160,x=cx-w/2+u*w;const tri=(.5-Math.abs(u-.5))*2*amp;const env=Math.pow(Math.sin(u*Math.PI),2);const o=Math.sin(u*Math.PI*cyc*2)*amp*.10*env;X.lineTo(x,cy-tri+o);}
+  X.strokeStyle=AMBAR;X.lineWidth=lw;X.lineJoin='round';X.lineCap='round';X.shadowColor='rgba(224,138,46,.55)';X.shadowBlur=28;X.stroke();X.shadowBlur=0;}
+function A(){base();X.font='600 600px Oswald';X.fillStyle=PAPEL;X.textAlign='center';X.textBaseline='alphabetic';X.fillText('E',540,905);wave(540,345,300,90,40,4);}
+function Bv(){base();X.beginPath();for(let x=150;x<=930;x+=4){const u=(x-150)/780,win=Math.sin(Math.PI*u);const y=540+win*(Math.sin(x*.05)*120*Math.sin(x*.011+1)+Math.sin(x*.13)*40);X.lineTo(x,y);}
+  X.strokeStyle=AMBAR;X.lineWidth=22;X.lineJoin='round';X.shadowColor='rgba(224,138,46,.6)';X.shadowBlur=30;X.stroke();X.shadowBlur=0;}
+function Cv(){base();X.font='600 520px Oswald';X.fillStyle=PAPEL;X.textAlign='center';X.fillText('41',540,780);
+  X.strokeStyle=AMBAR;X.lineWidth=26;X.beginPath();X.moveTo(250,860);X.lineTo(830,860);X.stroke();}
+window.draw=(k)=>{({A,B:Bv,C:Cv})[k]();};window.READY=true;
+</script></body></html>
