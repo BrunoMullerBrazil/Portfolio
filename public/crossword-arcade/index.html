@@ -207,6 +207,10 @@ kbd{font:600 12px var(--f-ui);border:1px solid var(--soft);padding:1px 5px;backg
 .sfx{display:inline-flex;align-items:center;color:var(--mute)}
 .sfx:hover{color:var(--fg)}
 @media (prefers-reduced-motion:reduce){.cell.L.good,.cell.L.bad,.board.shake,.pt,.tplus,.stagebn,#sCombo.bump,.timer.low{animation:none}.pt{display:none}}
+.cluebar.float{position:fixed;left:0;right:0;top:0;z-index:15;background:var(--bg);border-top:2px solid var(--line);padding:10px max(16px,env(safe-area-inset-left,0px)) 10px max(16px,env(safe-area-inset-right,0px));box-shadow:0 -8px 20px rgba(29,29,33,.12)}
+.cluebar.float .ct{font-size:17px}
+.cluebar.float .len{display:none}
+.cluebar.float .dir{width:28px;height:28px}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -255,7 +259,7 @@ kbd{font:600 12px var(--f-ui);border:1px solid var(--soft);padding:1px 5px;backg
     </div>
   </div>
 
-  <div class="cluebar" id="cluebar"></div>
+  <div id="clueslot"><div class="cluebar" id="cluebar"></div></div>
   <div class="banco" id="banco" hidden></div>
 
   <div class="tools">
@@ -1404,7 +1408,8 @@ function render(){
   const bc=$('#banco');
   if(rare.length){const g={};rare.forEach(w=>(g[w.length]=g[w.length]||[]).push(w.toLowerCase()));bc.innerHTML='<b>BANCO</b><span>'+Object.entries(g).map(([n,ws])=>`${n}/${ws.join(' — ')}`).join('. ')+'.</span>';bc.hidden=false}else bc.hidden=true;
   const cb=$('#cluebar');
-  cb.className='cluebar'+(ao&&ao.locked?' lk':'');
+  cb.className='cluebar'+(ao&&ao.locked?' lk':'')+(clueFloat?' float':'');
+  if(clueFloat)requestAnimationFrame(placeClue);
   if(ao&&ao.locked)cb.innerHTML=`<span class="dir" title="Travada">${_ic('lock')}</span><span class="ct">${esc(ao.clue)}: ${ao.w}</span><span class="len">Travada. Sai quando você resolver uma palavra que a cruza.</span>`;
   else if(ao)cb.innerHTML=`<span class="dir" title="${ao.dir==='a'?'Horizontal':'Vertical'}">${_ic(ao.dir==='a'?'right':'down')}</span><span class="ct">${esc(ao.clue)}</span><span class="len">${ao.w.length} letras</span>`;
   else cb.innerHTML=`<span class="dir">${_ic('info')}</span><span class="ct e">Toque numa casa ou numa dica.</span>`;
@@ -1633,6 +1638,33 @@ function timePlus(n){if(n<=0)return;const el=document.createElement('span');el.c
 function stageBanner(n,sub){const el=document.createElement('div');el.className='stagebn';el.innerHTML='<b></b><span></span>';el.firstChild.textContent='Fase '+n;el.lastChild.textContent=sub;$('#board').appendChild(el);setTimeout(()=>el.remove(),1800);SFX.stage();buzz(30)}
 function setSfx(on){sfxOn=on;save(':sfx',on);const b=$('#sfx');b.innerHTML=`<svg class="ic"><use href="#i-${on?'sound':'mute'}"/></svg>`;b.setAttribute('aria-label',on?'Som ligado':'Som desligado')}
 $('#sfx').addEventListener('click',()=>setSfx(!sfxOn));setSfx(sfxOn);
+
+/* ---------- dica acima do teclado do celular ---------- */
+let clueFloat=false;
+const VV=window.visualViewport;
+let vvMax=VV?VV.height:0;
+addEventListener('orientationchange',()=>{vvMax=0;setTimeout(placeClue,400)});
+function placeClue(){
+  const cb=$('#cluebar'),slot=$('#clueslot');
+  if(VV)vvMax=Math.max(vvMax,VV.height);
+  const kbOpen=!!VV&&document.activeElement===kbd&&VV.height<vvMax-120;
+  if(kbOpen!==clueFloat){
+    clueFloat=kbOpen;
+    slot.style.minHeight=kbOpen?cb.offsetHeight+'px':'';
+    cb.classList.toggle('float',kbOpen);
+  }
+  if(!clueFloat){cb.style.top='';return}
+  const h=cb.offsetHeight;
+  cb.style.top=(VV.offsetTop+VV.height-h)+'px';
+  // mantém a casa atual visível entre o topo e a dica
+  const el=gridEl.querySelector('.cell.cur');
+  if(el){const r=el.getBoundingClientRect(),vis=VV.offsetTop+VV.height-h-8;
+    if(r.bottom>vis)window.scrollBy(0,r.bottom-vis);
+    else if(r.top<VV.offsetTop+8)window.scrollBy(0,r.top-VV.offsetTop-8);}
+}
+if(VV){VV.addEventListener('resize',placeClue);VV.addEventListener('scroll',placeClue)}
+kbd.addEventListener('focus',()=>setTimeout(placeClue,350));
+kbd.addEventListener('blur',()=>setTimeout(placeClue,50));
 
 /* ---------- modos e botões ---------- */
 function setMode(m){
