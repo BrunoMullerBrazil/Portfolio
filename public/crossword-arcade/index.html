@@ -8,19 +8,18 @@
 <meta name="description" content="Palavras cruzadas diretas em modo arcade: cada palavra resolvida é trocada por outra que cruza as que ficaram. Cronômetro, combo, fases e recorde. Dá para escrever à mão com caneta ou mesa digitalizadora.">
 <meta property="og:title" content="Cruzada Sem Fim">
 <meta property="og:description" content="Palavras cruzadas em modo arcade: resolva, a palavra troca, o relógio acelera. Até onde você aguenta?">
-<meta property="og:image" content="https://aue.productions/crossword-arcade/og.jpg?v=1">
+<meta property="og:image" content="https://aue.productions/crossword-arcade/og.jpg?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://aue.productions/crossword-arcade/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#26272b">
+<meta name="theme-color" content="#efede6">
 <link rel="icon" href="/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;600&family=Archivo:wght@400;600;800&family=JetBrains+Mono:wght@700&family=Permanent+Marker&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;600&family=Archivo:wght@400;600;700;800&family=Patrick+Hand&display=swap">
 <style>
-*,*::before,*::after{box-sizing:content-box}
 html{-webkit-text-size-adjust:100%}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 body{margin:0;font-size:14px}
@@ -30,158 +29,221 @@ img{max-width:100%}
 </head>
 <body>
 <style>
-/* Layout: uma coluna central — faixa do cronômetro, folha de papel com aba numerada, barra da dica ativa, trilho de ferramentas. Mundo único escuro (estúdio de gravação), tema fixo por escolha. */
+/* Layout: o tabuleiro é a peça; o resto vira número e ícone em volta dele. Folha clara, linha preta, uma tinta azul (a do jogador). Tema único claro, por escolha. */
 :root{
-  --bg:#26272b; --bg2:#1b1c1f; --bg3:#323338;
-  --paper:#f3f1ea; --cluebg:#e6e3d9; --line:#1d1d21;
-  --ink:#1739d6; --red:#d9262c; --ok:#2f9e5c;
-  --fg:#ecebe6; --mute:#8b8d94; --hl:#ffe17a; --hl2:#fff2c2;
+  --bg:#efede6; --cell:#fbfaf6; --cluebg:#e5e2d8; --line:#1d1d21; --soft:#d6d3c9;
+  --fg:#1d1d21; --mute:#77756d;
+  --ink:#1739d6; --ink2:#c9d4ff; --ink3:#e8ecff;
+  --red:#d9262c; --ok:#2f9e5c;
   --f-ui:"Archivo",system-ui,sans-serif;
   --f-clue:"Archivo Narrow","Arial Narrow",sans-serif;
-  --f-hand:"Permanent Marker","Comic Sans MS",cursive;
-  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --f-hand:"Patrick Hand","Comic Sans MS",cursive;
   --cf:9px; --lf:34px;
-  color-scheme:dark;
+  color-scheme:light;
 }
+*{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--fg)}
-body{font-family:var(--f-ui);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
-button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible,input:focus-visible{outline:2px solid var(--hl);outline-offset:2px}
-.wrap{max-width:660px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+body{font-family:var(--f-ui);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wrap{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.timer{background:#000;color:#fff;font-family:var(--f-mono);font-weight:700;font-size:clamp(22px,6vw,32px);padding:2px 12px;border:2px solid #fff;border-radius:3px;font-variant-numeric:tabular-nums;line-height:1.25}
-.timer.low{color:var(--red);border-color:var(--red);animation:blink .6s steps(2) infinite}
-@keyframes blink{50%{opacity:.45}}
-.stats{display:flex;gap:20px;font-variant-numeric:tabular-nums}
-.stat{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
-.stat b{font-size:22px;font-weight:800;line-height:1}
-.stat span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
-.stat.combo b{color:var(--hl)}
+/* topo: tempo e pontos grandes, o resto em linha */
+.top{display:grid;grid-template-columns:1fr auto;align-items:end;gap:4px 16px}
+.timer{font:800 clamp(40px,11vw,56px)/.9 var(--f-ui);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.timer.low{color:var(--red);animation:blink .6s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+.score{text-align:right;font:800 clamp(28px,7vw,36px)/.9 var(--f-ui);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.score small{font-size:13px;font-weight:600;color:var(--mute);letter-spacing:0;margin-left:4px}
+.meta{grid-column:1/-1;display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center;font-size:13px;font-weight:600;color:var(--mute);font-variant-numeric:tabular-nums;border-top:1px solid var(--line);padding-top:8px}
+.meta span{display:inline-flex;align-items:center;gap:5px}
+.meta .ic{width:16px;height:16px}
+.meta b{color:var(--fg);font-weight:700}
+.meta .lvname{color:var(--fg)}
+.meta .end{margin-left:auto}
+#sCombo.hot{color:var(--ink)}
 
-.board{position:relative;margin-top:16px;transition:filter .2s}
+.board{position:relative}
 .board.blur .gridbox{filter:blur(9px)}
-.tab{position:absolute;left:50%;top:-22px;transform:translateX(-50%);background:var(--bg3);color:#fff;font-family:var(--f-mono);font-size:14px;padding:3px 18px 8px;border-radius:9px 9px 0 0;font-variant-numeric:tabular-nums}
-.paper{background:var(--paper);padding:10px;box-shadow:0 14px 34px rgba(0,0,0,.4);position:relative}
 .gridbox{position:relative;touch-action:manipulation}
 #grid{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));border:2px solid var(--line);background:var(--line);gap:1px}
-.cell{aspect-ratio:1;background:var(--paper);position:relative;overflow:hidden;color:#151517;user-select:none;-webkit-user-select:none}
-.cell.x{background:#36363b}
+.cell{aspect-ratio:1;background:var(--cell);position:relative;overflow:hidden;color:var(--fg);user-select:none;-webkit-user-select:none}
+.cell.x{background:var(--line)}
 .cell.clue{background:var(--cluebg);display:flex;flex-direction:column;font-family:var(--f-clue);font-size:var(--cf);line-height:1.05;cursor:pointer}
 .cq{flex:1 1 0;min-height:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:1px 6px 1px 2px;position:relative;overflow:hidden;hyphens:auto;-webkit-hyphens:auto}
 .cq.d1{padding:1px 2px 7px}
-.cq + .cq{border-top:1px solid #8c8a82}
-.cq.on{background:var(--hl)}
-.cq.new{background:#cfe9d6}
-.ar{position:absolute;font-family:var(--f-ui);font-weight:800;color:#111;font-size:calc(var(--cf) * 1.15);line-height:1}
+.cq + .cq{border-top:1px solid #a9a69c}
+.cq.on{background:var(--ink2)}
+.cq.new{background:#d9eedf}
+.ar{position:absolute;font-family:var(--f-ui);font-weight:800;color:var(--fg);font-size:calc(var(--cf) * 1.15);line-height:1}
 .ar.a{right:1px;top:50%;transform:translateY(-50%)}
 .ar.d{bottom:0;left:50%;transform:translateX(-50%)}
 .cell.L{cursor:pointer}
-.cell.L.inw{background:var(--hl2)}
-.cell.L.cur{background:var(--hl)}
-.cell.L.lock{background:#d3e8d8}
-.cq.lk{color:#6f7f73;background:#dde9df}
+.cell.L.inw{background:var(--ink3)}
+.cell.L.cur{background:var(--ink2)}
+.cell.L.lock{background:#d6ebdb}
+.cq.lk{color:#5f7465;background:#dcebe0}
 .cq.lk::before{content:"✓ ";font-weight:700;color:var(--ok)}
 .cell.L.good{background:#bfe6cb}
 .cell.L.bad{background:#f6c9c7}
-.ch{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-hand);color:var(--ink);font-size:var(--lf);line-height:1;padding-top:6%}
-.cell.hint .ch{color:#7a7e88}
-.rd{position:absolute;right:2px;bottom:1px;font:normal 700 9px/1 var(--f-mono);color:#a3a29b}
+.ch{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-hand);font-weight:400;padding-top:4%;color:var(--ink);font-size:var(--lf);line-height:1}
+.cell.hint .ch{color:#8b8a84}
+.rd{position:absolute;right:2px;bottom:1px;font:600 9px/1 var(--f-ui);color:#a3a29b}
 #ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;touch-action:none}
 #ink.live{pointer-events:auto;cursor:crosshair}
 #kbd{position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;font-size:16px;border:0;padding:0}
-.pop{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font:800 34px/1 var(--f-ui);color:var(--ok);text-shadow:0 2px 0 #fff;pointer-events:none;animation:pop 1s ease-out forwards;white-space:nowrap}
-@keyframes pop{from{opacity:1;transform:translate(-50%,-30%) scale(.8)}to{opacity:0;transform:translate(-50%,-140%) scale(1.1)}}
+.pop{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font:800 36px/1 var(--f-ui);color:var(--ink);letter-spacing:-.02em;pointer-events:none;animation:pop 1s ease-out forwards;white-space:nowrap;text-shadow:0 0 0 #fff,0 2px 8px rgba(251,250,246,.9)}
+@keyframes pop{from{opacity:1;transform:translate(-50%,-20%)}to{opacity:0;transform:translate(-50%,-130%)}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);width:min(calc(100% - 32px),588px);bottom:max(16px,env(safe-area-inset-bottom,0px));background:var(--line);color:#fff;font:600 14px/1.35 var(--f-ui);padding:10px 14px;display:flex;gap:10px;align-items:center;pointer-events:none;animation:toast 2.8s ease forwards;z-index:5}
+.toast .ic{width:18px;height:18px}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,8px)}8%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,0)}}
 
-.cluebar{background:var(--bg2);border-radius:8px;padding:10px 14px;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap}
-.banco{font:600 13px/1.4 var(--f-clue);color:#cfcec8;margin-top:-6px}
-.banco b{font-family:var(--f-ui);font-weight:800;letter-spacing:.08em;margin-right:6px;color:var(--fg)}
-.pat{display:flex;gap:3px;flex-wrap:wrap}
-.pat i{width:22px;height:26px;border:1px solid #4a4b52;border-radius:3px;display:grid;place-items:center;font:normal 400 15px/1 var(--f-hand);color:#b9c6ff;padding-top:2px}
-.pat i.cu{border-color:var(--hl);box-shadow:inset 0 -2px 0 var(--hl)}
-.lvls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.lv{background:var(--bg3);border:2px solid transparent;border-radius:10px;padding:12px 10px;text-align:left;display:flex;flex-direction:column;gap:6px}
-.lv b{font:400 22px/1 var(--f-hand);color:#fff}
-.lv span{font-size:12px;line-height:1.35;color:#c6c5bf}
-.lv em{font:normal 700 11px/1 var(--f-mono);color:var(--mute);margin-top:auto}
-.lv.on{border-color:var(--hl);background:#3b3a2f}
-.lv.on em{color:var(--hl)}
-@media (max-width:420px){.lvls{grid-template-columns:1fr}}
-.cluebar .dir{font:700 12px/1 var(--f-mono);color:var(--hl);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
-.cluebar .ct{font-size:19px;font-weight:600;flex:1 1 220px;min-width:0;text-wrap:balance}
-.cluebar .len{font:700 12px/1 var(--f-mono);color:var(--mute);white-space:nowrap}
+/* dica ativa */
+.cluebar{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;align-items:center;min-height:44px}
+.cluebar .dir{width:32px;height:32px;display:grid;place-items:center;background:var(--line);color:#fff}
+.cluebar .dir .ic{width:18px;height:18px}
+.cluebar.lk .dir{background:var(--ok)}
+.cluebar .ct{font:600 19px/1.25 var(--f-ui);min-width:0;text-wrap:balance}
+.cluebar .ct.e{font-weight:400;color:var(--mute);font-size:16px}
+.cluebar .len{grid-column:2;font-size:13px;color:var(--mute)}
+.pat{grid-column:2;display:flex;gap:3px;flex-wrap:wrap}
+.pat i{width:24px;height:28px;border:1px solid var(--line);background:var(--cell);display:grid;place-items:center;font:normal 700 14px/1 var(--f-ui);color:var(--ink)}
+.pat i.cu{background:var(--ink2)}
+.banco{font:600 13px/1.4 var(--f-clue);color:var(--mute);display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.banco b{font:800 11px/1 var(--f-ui);letter-spacing:.08em;color:var(--fg)}
 
-.tools{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between}
-.seg{display:flex;background:var(--bg2);border-radius:8px;padding:3px;gap:2px;flex-wrap:wrap}
-.seg button{background:none;border:0;padding:8px 12px;border-radius:6px;font-size:13px;font-weight:600;color:var(--mute)}
-.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg2)}
-.acts{display:flex;gap:6px;flex-wrap:wrap}
-.acts button{background:var(--bg3);border:0;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:600}
-.acts button small{color:var(--mute);font-weight:400;margin-left:4px}
-.note{font-size:12.5px;color:var(--mute);line-height:1.5;max-width:65ch}
-.note b{color:var(--fg);font-weight:600}
+/* ferramentas: só ícones */
+.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) 10px repeat(4,minmax(0,1fr));gap:4px}
+.tools .sp{width:10px}
+.tb{height:48px;border:1px solid var(--line);display:grid;place-items:center;position:relative;color:var(--fg);background:var(--cell)}
+.tb .ic{width:22px;height:22px}
+.tb[aria-pressed="true"]{background:var(--line);color:#fff}
+.tb.mk[aria-pressed="true"]{background:var(--red);border-color:var(--red)}
+.tb small{position:absolute;right:3px;bottom:2px;font:700 10px/1 var(--f-ui);color:var(--red);font-variant-numeric:tabular-nums}
+.tb:hover{background:#fff}
+.tb[aria-pressed="true"]:hover{background:var(--line)}
+.tb.mk[aria-pressed="true"]:hover{background:var(--red)}
+.tb:active{transform:translateY(1px)}
+.cap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) 10px repeat(4,minmax(0,1fr));gap:4px;margin-top:-8px;font-size:11px;color:var(--mute);text-align:center}
 
+/* telas */
 #ov[hidden]{display:none}
-#ov{position:fixed;inset:0;background:rgba(18,18,20,.72);display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-left,0px));z-index:20;backdrop-filter:blur(2px)}
-.panel{background:var(--bg2);border:1px solid #3c3d43;border-radius:12px;padding:24px;max-width:480px;width:100%;display:flex;flex-direction:column;gap:14px;max-height:100%;overflow:auto}
-.panel h1{margin:0;font:400 38px/1 var(--f-hand);color:#fff;text-wrap:balance}
-.panel h2{margin:0;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600}
-.panel p{margin:0;line-height:1.5;font-size:14px;color:#cfcec8}
-.panel ul{margin:0;padding-left:18px;font-size:14px;line-height:1.55;color:#cfcec8}
-.big{font:800 48px/1 var(--f-ui);font-variant-numeric:tabular-nums}
-.btn{background:var(--hl);color:#141414;border:0;border-radius:8px;padding:12px 16px;font-weight:800;font-size:15px}
-.btn.ghost{background:var(--bg3);color:var(--fg)}
+#ov{position:fixed;inset:0;background:rgba(239,237,230,.97);display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-left,0px));z-index:20;overflow:auto}
+.panel{max-width:440px;width:100%;display:flex;flex-direction:column;gap:22px;max-height:100%;overflow:auto;padding:4px}
+.logo{display:grid;gap:4px;justify-items:start}
+.logo div{display:flex;gap:4px}
+.logo i{width:clamp(32px,9vw,40px);aspect-ratio:1;border:2px solid var(--line);display:grid;place-items:center;font:normal 800 clamp(17px,5vw,22px)/1 var(--f-ui);background:var(--cell)}
+.logo i.x{background:var(--line)}
+.logo i.b{color:var(--ink)}
+.panel p{margin:0;line-height:1.5;font-size:15px;color:var(--mute);max-width:40ch}
+.panel h2{margin:0 0 -12px;font:700 12px/1 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.lvls{display:grid;border-top:1px solid var(--line)}
+.lv{display:grid;grid-template-columns:28px 1fr auto;gap:2px 12px;align-items:center;padding:12px 10px;border-bottom:1px solid var(--line);text-align:left}
+.lv .bars{grid-row:span 2;display:flex;gap:2px;align-items:flex-end;height:18px}
+.lv .bars span{width:5px;background:var(--soft)}
+.lv .bars span.f{background:currentColor}
+.lv b{font:800 17px/1.1 var(--f-ui)}
+.lv span.d{font-size:13px;color:var(--mute);grid-column:2}
+.lv em{grid-row:1/span 2;grid-column:3;font:normal 700 15px/1 var(--f-ui);font-variant-numeric:tabular-nums;display:flex;gap:5px;align-items:center}
+.lv em .ic{width:15px;height:15px;color:var(--mute)}
+.lv em.no{color:var(--mute);font-weight:400;font-size:13px}
+.lv.on{background:var(--line);color:#fff}
+.lv.on span.d,.lv.on em .ic{color:#b9b8b2}
+.lv.on .bars span{background:#55555b}.lv.on .bars span.f{background:#fff}
+.big{font:800 clamp(64px,20vw,96px)/.85 var(--f-ui);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.facts{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:14px;font-weight:600;color:var(--mute)}
+.facts span{display:inline-flex;gap:6px;align-items:center}
+.facts .ic{width:17px;height:17px}
+.facts b{color:var(--fg)}
+.btn{height:52px;padding:0 20px;background:var(--line);color:#fff;font:700 16px/1 var(--f-ui);display:inline-flex;gap:10px;align-items:center;justify-content:center;flex:1}
+.btn .ic{width:18px;height:18px}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn:hover{background:#000}.btn.ghost:hover{background:#fff}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .rank{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
-.rank td{padding:5px 4px;border-bottom:1px solid #2e2f34}
-.rank td:first-child{color:var(--mute);width:2.2em}
-.rank td.n{font-family:var(--f-mono);letter-spacing:.12em}
+.rank td{padding:7px 4px;border-bottom:1px solid var(--soft)}
+.rank td:first-child{color:var(--mute);width:2em}
+.rank td.n{font-weight:800;letter-spacing:.14em}
+.rank td.w{color:var(--mute);font-size:12px}
 .rank td.s{text-align:right;font-weight:800}
-.rank tr.me td{color:var(--hl)}
-#ini{background:#000;color:#fff;border:2px solid #fff;border-radius:4px;font:700 26px/1 var(--f-mono);letter-spacing:.3em;width:6.2em;padding:6px 8px;text-transform:uppercase}
-@media (prefers-reduced-motion:reduce){.pop,.timer.low{animation:none}}
-@media (max-width:520px){.stats{gap:14px}.stat b{font-size:18px}.cluebar .ct{font-size:16px}}
+.rank tr.me td{color:var(--ink)}
+.empty{font-size:14px;color:var(--mute);border-top:1px solid var(--soft);padding-top:10px}
+.ini{display:flex;gap:10px;align-items:end}
+#ini{background:transparent;color:var(--fg);border:0;border-bottom:2px solid var(--line);font:800 34px/1 var(--f-ui);letter-spacing:.35em;width:5.2em;padding:0 0 4px;text-transform:uppercase;border-radius:0}
+.pz{display:grid;place-items:center;gap:18px;text-align:center}
+.pz .ic{width:56px;height:56px;stroke-width:1.5}
+.help dl{margin:0;display:grid;grid-template-columns:28px 1fr;gap:12px 12px;align-items:start;font-size:14px;line-height:1.45}
+.help dt{display:grid;place-items:center;height:22px}
+.help dd{margin:0}
+.help dd b{display:block}
+kbd{font:600 12px var(--f-ui);border:1px solid var(--soft);padding:1px 5px;background:var(--cell)}
+@media (prefers-reduced-motion:reduce){.pop,.timer.low,.toast{animation:none}}
+@media (max-width:440px){.tb{height:44px}.tb .ic{width:20px;height:20px}.cluebar .ct{font-size:17px}.cap{display:none}}
 </style>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9.5 17h5"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5zM3 12.5l9 5 9-5M3 17l9 5 9-5"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c.5 3 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2.2 1-3.8 2.2-4.8.2 1.9 1 3 2.3 3.3-.6-3 .2-6 .5-9z"/></symbol>
+  <symbol id="i-words" viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 13h7v7h-7zM13 4h7v7h-7z"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="1.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M7.5 14h9"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l1-4.5L16 4.5l3.5 3.5L8.5 19zM14 7l3 3"/></symbol>
+  <symbol id="i-mark" viewBox="0 0 24 24"><path d="M3 20c3-1 4-4 7-4s3 3 6 3 4-2 5-3M9 13l7-9 3 2.5-6.5 9.5z"/></symbol>
+  <symbol id="i-erase" viewBox="0 0 24 24"><path d="M9 20h11M4.5 15.5l9-9 5 5-8.5 8.5H8z M9 11l5 5"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1 1-1.1 1.8M12 17h.01"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v15M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></symbol>
+</svg>
 <div class="wrap">
   <div class="top">
-    <div class="timer" id="timer" aria-live="off">00:02:00</div>
-    <div class="stats">
-      <div class="stat"><b id="sScore">0</b><span>pontos</span></div>
-      <div class="stat"><b id="sStage">1</b><span id="sClock">fase · ⏱×1,00</span></div>
-      <div class="stat combo"><b id="sCombo">×1</b><span>combo</span></div>
-      <div class="stat"><b id="sBest">0</b><span>recorde</span></div>
+    <div class="timer" id="timer" aria-label="Tempo restante">1:00</div>
+    <div class="score"><span id="sScore">0</span><small>pts</small></div>
+    <div class="meta">
+      <span class="lvname" id="sLevel">Médio</span>
+      <span title="Fase"><svg class="ic"><use href="#i-layers"/></svg>fase <b id="sStage">1</b><span id="sClock"></span></span>
+      <span title="Combo"><svg class="ic"><use href="#i-flame"/></svg><b id="sCombo">×1</b></span>
+      <span title="Palavras resolvidas"><svg class="ic"><use href="#i-words"/></svg><b id="tab">0</b></span>
+      <span class="end" title="Recorde"><svg class="ic"><use href="#i-trophy"/></svg><b id="sBest">0</b></span>
     </div>
   </div>
 
   <div class="board" id="board">
-    <div class="tab" id="tab">Nº 000</div>
-    <div class="paper">
-      <div class="gridbox" id="gridbox">
-        <div id="grid"></div>
-        <canvas id="ink"></canvas>
-        <input id="kbd" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Entrada de letras">
-      </div>
+    <div class="gridbox" id="gridbox">
+      <div id="grid"></div>
+      <canvas id="ink"></canvas>
+      <input id="kbd" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Entrada de letras">
     </div>
   </div>
 
-  <div class="banco" id="banco" hidden></div>
   <div class="cluebar" id="cluebar"></div>
+  <div class="banco" id="banco" hidden></div>
 
   <div class="tools">
-    <div class="seg" id="modes" role="group" aria-label="Modo de entrada">
-      <button data-mode="key" aria-pressed="true">Teclado</button>
-      <button data-mode="pen" aria-pressed="false">Caneta</button>
-      <button data-mode="mark" aria-pressed="false">Marcador</button>
-      <button data-mode="erase" aria-pressed="false">Borracha</button>
+    <div id="modes" role="group" aria-label="Modo de entrada" style="display:contents">
+      <button class="tb" data-mode="key" aria-pressed="true" aria-label="Teclado" title="Teclado"><svg class="ic"><use href="#i-key"/></svg></button>
+      <button class="tb" data-mode="pen" aria-pressed="false" aria-label="Caneta" title="Caneta: escreva a letra na casa"><svg class="ic"><use href="#i-pen"/></svg></button>
+      <button class="tb mk" data-mode="mark" aria-pressed="false" aria-label="Marcador" title="Marcador: rabisco que some sozinho"><svg class="ic"><use href="#i-mark"/></svg></button>
+      <button class="tb" data-mode="erase" aria-pressed="false" aria-label="Borracha" title="Borracha"><svg class="ic"><use href="#i-erase"/></svg></button>
     </div>
-    <div class="acts">
-      <button data-act="hint">Letra<small id="cHint">−8s</small></button>
-      <button data-act="skip">Trocar<small id="cSkip">−15s</small></button>
-      <button data-act="pause">Pausar</button>
+    <span class="sp"></span>
+    <div class="acts" style="display:contents">
+      <button class="tb" data-act="hint" aria-label="Revelar letra" title="Revelar letra"><svg class="ic"><use href="#i-bulb"/></svg><small id="cHint">−8s</small></button>
+      <button class="tb" data-act="skip" aria-label="Trocar palavra" title="Trocar palavra"><svg class="ic"><use href="#i-swap"/></svg><small id="cSkip">−15s</small></button>
+      <button class="tb" data-act="pause" aria-label="Pausar" title="Pausar"><svg class="ic"><use href="#i-pause"/></svg></button>
+      <button class="tb" data-act="help" aria-label="Como jogar" title="Como jogar"><svg class="ic"><use href="#i-help"/></svg></button>
     </div>
   </div>
-  <p class="note"><b>Caneta:</b> escreva a letra maiúscula dentro da casa; a letra lida aparece no canto. <b>Marcador:</b> rabisco livre que some sozinho. Teclado: setas, Tab troca de palavra, espaço troca a direção.</p>
+  <div class="cap" aria-hidden="true"><span>teclado</span><span>caneta</span><span>marcador</span><span>borracha</span><span></span><span>letra</span><span>trocar</span><span>pausa</span><span>ajuda</span></div>
 </div>
 
 <div id="ov"></div>
@@ -1246,7 +1308,7 @@ function solve(ids){
     const rp=replaceWords(ids,true);
     giftLetters(rp.added);
     const added=rp.added.concat(fill());
-    if(rp.kept.some(id=>ids.includes(id)))toast('Sem substituta: a palavra fica travada até você resolver uma que a cruza.');
+    if(rp.kept.some(id=>ids.includes(id)))toast('Sem substituta: a palavra fica travada até você resolver uma que a cruza.','lock');
     fixCursor(added);
     busy=false; render();
   },520);
@@ -1306,21 +1368,25 @@ function render(){
   drawInk();
   const rare=[...words.values()].filter(o=>RARE.has(o.w)).map(o=>o.w).sort((a,b)=>a.length-b.length||a.localeCompare(b));
   const bc=$('#banco');
-  if(rare.length){const g={};rare.forEach(w=>(g[w.length]=g[w.length]||[]).push(w.toLowerCase()));bc.innerHTML='<b>BANCO</b> '+Object.entries(g).map(([n,ws])=>`${n}/${ws.join(' — ')}`).join('. ')+'.';bc.hidden=false}else bc.hidden=true;
+  if(rare.length){const g={};rare.forEach(w=>(g[w.length]=g[w.length]||[]).push(w.toLowerCase()));bc.innerHTML='<b>BANCO</b><span>'+Object.entries(g).map(([n,ws])=>`${n}/${ws.join(' — ')}`).join('. ')+'.</span>';bc.hidden=false}else bc.hidden=true;
   const cb=$('#cluebar');
-  if(ao&&ao.locked)cb.innerHTML=`<span class="dir">✓ travada</span><span class="ct">${esc(ao.clue)}: ${ao.w}</span><span class="len">sai quando uma palavra que a cruza for resolvida</span>`;
-  else if(ao)cb.innerHTML=`<span class="dir">${ao.dir==='a'?'→ horizontal':'↓ vertical'}</span><span class="ct">${esc(ao.clue)}</span><span class="pat" aria-label="${ao.w.length} letras">${ao.cells.map(([r,c])=>`<i class="${r===cur.r&&c===cur.c?'cu':''}">${grid[r][c].ent||''}</i>`).join('')}</span>`;
-  else cb.innerHTML=`<span class="ct" style="color:var(--mute)">Toque numa casa ou numa dica para começar.</span>`;
+  cb.className='cluebar'+(ao&&ao.locked?' lk':'');
+  if(ao&&ao.locked)cb.innerHTML=`<span class="dir" title="Travada">${_ic('lock')}</span><span class="ct">${esc(ao.clue)}: ${ao.w}</span><span class="len">Travada. Sai quando você resolver uma palavra que a cruza.</span>`;
+  else if(ao)cb.innerHTML=`<span class="dir" title="${ao.dir==='a'?'Horizontal':'Vertical'}">${_ic(ao.dir==='a'?'right':'down')}</span><span class="ct">${esc(ao.clue)}</span><span class="len">${ao.w.length} letras</span>`;
+  else cb.innerHTML=`<span class="dir">${_ic('info')}</span><span class="ct e">Toque numa casa ou numa dica.</span>`;
   hud();
 }
-function fmt(s){s=Math.max(0,Math.ceil(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return [h,m,x].map(n=>String(n).padStart(2,'0')).join(':')}
+function fmt(s){s=Math.max(0,Math.ceil(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${x}`:`${m}:${x}`}
 function hud(){
-  const t=$('#timer');t.textContent=fmt(timeLeft);t.classList.toggle('low',playing&&timeLeft<=10);
-  $('#sScore').textContent=score.toLocaleString('pt-BR');
-  $('#sCombo').textContent='×'+(playing&&performance.now()-lastSolve<R.win()?combo:1);
-  $('#cHint').textContent='−'+R.cost(LV.hint)+'s';$('#cSkip').textContent='−'+R.cost(LV.skip)+'s';$('#sStage').textContent=stage;$('#sClock').textContent='fase · ⏱×'+R.clock().toFixed(2).replace('.',',');
-  $('#sBest').textContent=(ranking[0]?.s||0).toLocaleString('pt-BR');
-  $('#tab').textContent=LV.name.toUpperCase()+' · Nº '+String(solved).padStart(3,'0');
+  const set=(id,v)=>{const e=$(id);if(e.textContent!==v)e.textContent=v};
+  const t=$('#timer');set('#timer',fmt(timeLeft));t.classList.toggle('low',playing&&timeLeft<=10);
+  set('#sScore',score.toLocaleString('pt-BR'));
+  const c=playing&&performance.now()-lastSolve<R.win()?combo:1;
+  set('#sCombo','×'+c);$('#sCombo').classList.toggle('hot',c>1);
+  set('#cHint','−'+R.cost(LV.hint)+'s');set('#cSkip','−'+R.cost(LV.skip)+'s');
+  set('#sStage',String(stage));set('#sClock',stage>1?' · relógio ×'+R.clock().toFixed(2).replace('.',','):'');
+  set('#sBest',(ranking[0]?.s||0).toLocaleString('pt-BR'));
+  set('#sLevel',LV.name);set('#tab',String(solved));
 }
 
 /* ---------- tinta ---------- */
@@ -1330,7 +1396,7 @@ function resize(){
   canvas.width=Math.round(r.width*dpr); canvas.height=Math.round(r.height*dpr);
   cw=r.width/COLS; chh=r.height/ROWS;
   document.documentElement.style.setProperty('--cf',Math.max(7,Math.min(12.5,cw*.165))+'px');
-  document.documentElement.style.setProperty('--lf',(cw*.6)+'px');
+  document.documentElement.style.setProperty('--lf',(cw*.62)+'px');
   drawInk();
 }
 function stroke(pts,color,w,alpha=1){
@@ -1503,7 +1569,7 @@ $('#modes').addEventListener('click',e=>{const b=e.target.closest('button');if(b
 document.querySelector('.acts').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   const a=b.dataset.act;
-  if(a==='hint')hint();else if(a==='skip')skip();else if(a==='pause')togglePause();
+  if(a==='hint')hint();else if(a==='skip')skip();else if(a==='pause')togglePause();else if(a==='help')showHelp();
 });
 gridEl.addEventListener('pointerdown',e=>{
   if(e.pointerType==='pen'&&mode==='key'){setMode('pen');toast('Caneta detectada. Modo caneta ativo.')}
@@ -1532,26 +1598,27 @@ kbd.addEventListener('input',()=>{
   const v=norm(kbd.value);kbd.value='';
   for(const ch of v)if(/[A-Z]/.test(ch))typeLetter(ch);
 });
-function toast(t){const el=document.createElement('div');el.className='pop';el.style.cssText='font-size:15px;color:#fff;text-shadow:none;background:#000;padding:8px 12px;border-radius:6px;top:8%;white-space:normal;width:min(90%,420px);text-align:center;animation-duration:2.8s';el.textContent=t;$('#board').appendChild(el);setTimeout(()=>el.remove(),2800)}
+function toast(t,icon='info'){const el=document.createElement('div');el.className='toast';el.innerHTML=`<svg class="ic"><use href="#i-${icon}"/></svg><span></span>`;el.lastChild.textContent=t;$('#board').appendChild(el);setTimeout(()=>el.remove(),2800)}
 
 /* ---------- jogo ---------- */
 let startedAt=0;
 const ov=$('#ov');
 function rankTable(hi){
-  if(!ranking.length)return '<p>Nenhum recorde ainda.</p>';
-  return `<table class="rank">${ranking.map((x,i)=>`<tr class="${i===hi?'me':''}"><td>${i+1}º</td><td class="n">${esc(x.n)}</td><td>${x.f?'fase '+x.f+' · ':''}${x.w} pal.</td><td class="s">${x.s.toLocaleString('pt-BR')}</td></tr>`).join('')}</table>`;
+  if(!ranking.length)return '<p class="empty">Nenhum recorde ainda neste aparelho.</p>';
+  return `<table class="rank">${ranking.map((x,i)=>`<tr class="${i===hi?'me':''}"><td>${i+1}</td><td class="n">${esc(x.n)}</td><td class="w">${x.f?'fase '+x.f+' · ':''}${x.w} pal.</td><td class="s">${x.s.toLocaleString('pt-BR')}</td></tr>`).join('')}</table>`;
 }
+function _ic(n){return `<svg class="ic"><use href="#i-${n}"/></svg>`}
 function levelCards(){
-  return `<div class="lvls" role="radiogroup" aria-label="Dificuldade">${Object.entries(LEVELS).map(([k,v])=>{const best=(load(':rank-'+k)||[])[0];return `<button class="lv${k===level?' on':''}" role="radio" aria-checked="${k===level}" data-lv="${k}"><b>${v.name}</b><span>${v.desc}</span><em>${best?'Recorde '+best.s.toLocaleString('pt-BR'):'Sem recorde'}</em></button>`}).join('')}</div>`;
+  return `<div class="lvls" role="radiogroup" aria-label="Dificuldade">${Object.entries(LEVELS).map(([k,v],i)=>{const best=(load(':rank-'+k)||[])[0];const bars=[0,1,2].map(j=>`<span class="${j<=i?'f':''}" style="height:${6+j*6}px"></span>`).join('');return `<button class="lv${k===level?' on':''}" role="radio" aria-checked="${k===level}" data-lv="${k}"><span class="bars" aria-hidden="true">${bars}</span><b>${v.name}</b><span class="d">${v.desc}</span>${best?`<em>${_ic('trophy')}${best.s.toLocaleString('pt-BR')}</em>`:'<em class="no">sem recorde</em>'}</button>`}).join('')}</div>`;
 }
 function showStart(){
   ov.hidden=false;
   ov.innerHTML=`<div class="panel" role="dialog" aria-label="Início">
-    <h1>Cruzada Sem Fim</h1>
-    <p>Cada palavra resolvida sai do tabuleiro e outra entra cruzando as que ficaram. As letras compartilhadas continuam escritas. Acertos dão tempo e, em sequência, combo até ×5.</p>
+    <h1 class="logo" aria-label="Cruzada Sem Fim"><div>${[...'CRUZADA'].map(c=>`<i>${c}</i>`).join('')}</div><div><i>S</i><i>E</i><i>M</i><i class="x"></i><i>F</i><i class="b">I</i><i>M</i></div></h1>
+    <p>Resolva a palavra e ela troca por outra que cruza as que ficaram. O relógio acelera a cada fase.</p>
     <h2>Dificuldade</h2>${levelCards()}
     <h2>Recordes · <span id="rkname">${LV.name}</span></h2><div id="rk">${rankTable(-1)}</div>
-    <div class="row"><button class="btn" data-go="start">Começar</button></div>
+    <div class="row"><button class="btn" data-go="start">${_ic('play')}Começar</button><button class="btn ghost" data-go="help" style="flex:0 0 52px;padding:0" aria-label="Como jogar">${_ic('help')}</button></div>
   </div>`;
 }
 function startGame(){
@@ -1564,9 +1631,27 @@ function startGame(){
 function togglePause(){
   if(!playing)return;
   paused=!paused;$('#board').classList.toggle('blur',paused);
-  document.querySelector('[data-act="pause"]').textContent=paused?'Continuar':'Pausar';
-  if(paused){ov.hidden=false;ov.innerHTML=`<div class="panel"><h1>Pausado</h1><p>O tabuleiro fica escondido enquanto o tempo está parado.</p><div class="row"><button class="btn" data-go="resume">Continuar</button></div></div>`}
+  const pb=document.querySelector('[data-act="pause"]');pb.innerHTML=_ic(paused?'play':'pause');pb.setAttribute('aria-label',paused?'Continuar':'Pausar');
+  if(paused){ov.hidden=false;ov.innerHTML=`<div class="panel pz">${_ic('pause')}<p>Tempo parado. O tabuleiro fica escondido.</p><div class="row" style="width:100%"><button class="btn" data-go="resume">${_ic('play')}Continuar</button></div></div>`}
   else{ov.hidden=true;ov.innerHTML=''}
+}
+function showHelp(){
+  const live=playing&&!paused;
+  if(live)togglePause();
+  ov.hidden=false;
+  ov.innerHTML=`<div class="panel help" role="dialog" aria-label="Como jogar">
+    <h2>Como jogar</h2>
+    <dl>
+      <dt>${_ic('key')}</dt><dd><b>Teclado</b>Digite as letras. <kbd>Tab</kbd> pula de palavra, <kbd>espaço</kbd> troca a direção, setas andam no grid.</dd>
+      <dt>${_ic('pen')}</dt><dd><b>Caneta</b>Escreva a letra maiúscula dentro da casa, com dedo, mouse ou mesa digitalizadora. A letra lida aparece no canto.</dd>
+      <dt>${_ic('mark')}</dt><dd><b>Marcador</b>Rabisco vermelho livre para circular dicas. Some sozinho.</dd>
+      <dt>${_ic('erase')}</dt><dd><b>Borracha</b>Toque na casa para apagar. A ponta borracha da caneta também apaga.</dd>
+      <dt>${_ic('bulb')}</dt><dd><b>Letra e trocar</b>Revelam uma letra ou trocam a palavra. Custam tempo.</dd>
+      <dt>${_ic('lock')}</dt><dd><b>Palavra travada</b>Quando não há substituta, ela fica até você resolver uma palavra que a cruza.</dd>
+      <dt>${_ic('layers')}</dt><dd><b>Fases</b>A cada 6 palavras o relógio acelera e as dicas ficam mais difíceis.</dd>
+    </dl>
+    <div class="row"><button class="btn" data-go="${playing?'resume':'menu'}">${_ic(playing?'play':'back')}${playing?'Voltar ao jogo':'Voltar'}</button></div>
+  </div>`;
 }
 function gameOver(){
   playing=false;finalize();
@@ -1575,10 +1660,10 @@ function gameOver(){
   ov.innerHTML=`<div class="panel" role="dialog" aria-label="Fim de jogo">
     <h2>Tempo esgotado · ${LV.name}</h2>
     <div class="big">${score.toLocaleString('pt-BR')}</div>
-    <p>Fase ${stage} · ${solved} palavra${solved===1?'':'s'} · combo máximo ×${bestCombo}</p>
-    ${qualifies?`<h2>Entrou no ranking. Suas iniciais:</h2><div class="row"><input id="ini" maxlength="3" value="${esc(load(':ini')||'')}" aria-label="Iniciais"><button class="btn" data-go="save">Salvar</button></div>`:''}
+    <div class="facts"><span>${_ic('layers')}fase <b>${stage}</b></span><span>${_ic('words')}<b>${solved}</b> palavra${solved===1?'':'s'}</span><span>${_ic('flame')}combo <b>×${bestCombo}</b></span></div>
+    ${qualifies?`<h2>Novo recorde · suas iniciais</h2><div class="ini"><input id="ini" maxlength="3" value="${esc(load(':ini')||'')}" aria-label="Iniciais"><button class="btn" data-go="save" style="flex:0 0 auto">${_ic('check')}Salvar</button></div>`:''}
     <h2>Recordes</h2><div id="rk">${rankTable(-1)}</div>
-    <div class="row"><button class="btn${qualifies?' ghost':''}" data-go="start">Jogar de novo</button><button class="btn ghost" data-go="menu">Trocar dificuldade</button></div>
+    <div class="row"><button class="btn${qualifies?' ghost':''}" data-go="start">${_ic('play')}Jogar de novo</button><button class="btn ghost" data-go="menu">${_ic('back')}Dificuldade</button></div>
   </div>`;
   if(qualifies)setTimeout(()=>{const i=$('#ini');i&&i.focus();i&&i.select()},50);
   hud();
@@ -1588,7 +1673,7 @@ function saveScore(){
   const n=(norm(i.value).replace(/[^A-Z]/g,'')||'???').slice(0,3);save(':ini',n);
   const entry={n,s:score,w:solved,f:stage,t:Date.now()};
   ranking.push(entry);ranking.sort((a,b)=>b.s-a.s);ranking=ranking.slice(0,10);save(RK(),ranking);
-  i.parentElement.previousElementSibling.remove();i.parentElement.remove();
+  const blk=i.closest('.ini');blk.previousElementSibling.remove();blk.remove();
   $('#rk').innerHTML=rankTable(ranking.indexOf(entry));
   ov.querySelector('[data-go="start"]').classList.remove('ghost');hud();
 }
@@ -1597,6 +1682,7 @@ ov.addEventListener('click',e=>{
   const g=b.dataset.go;
   if(b.dataset.lv){setLevel(b.dataset.lv);ov.querySelectorAll('.lv').forEach(x=>{const on=x.dataset.lv===level;x.classList.toggle('on',on);x.setAttribute('aria-checked',on)});$('#rkname').textContent=LV.name;$('#rk').innerHTML=rankTable(-1);hud();return}
   if(g==='menu'){showStart();return}
+  if(g==='help'){showHelp();return}
   if(g==='start')startGame();else if(g==='resume')togglePause();else if(g==='save')saveScore();
 });
 ov.addEventListener('keydown',e=>{if(e.target.id==='ini'&&e.key==='Enter')saveScore()});
