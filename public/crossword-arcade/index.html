@@ -1,0 +1,1621 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Cruzada Sem Fim · Bruno Müller</title>
+<meta name="description" content="Palavras cruzadas diretas em modo arcade: cada palavra resolvida é trocada por outra que cruza as que ficaram. Cronômetro, combo, fases e recorde. Dá para escrever à mão com caneta ou mesa digitalizadora.">
+<meta property="og:title" content="Cruzada Sem Fim">
+<meta property="og:description" content="Palavras cruzadas em modo arcade: resolva, a palavra troca, o relógio acelera. Até onde você aguenta?">
+<meta property="og:image" content="https://aue.productions/crossword-arcade/og.jpg?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://aue.productions/crossword-arcade/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#26272b">
+<link rel="icon" href="/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;600&family=Archivo:wght@400;600;800&family=JetBrains+Mono:wght@700&family=Permanent+Marker&display=swap">
+<style>
+*,*::before,*::after{box-sizing:content-box}
+html{-webkit-text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-size:14px}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<style>
+/* Layout: uma coluna central — faixa do cronômetro, folha de papel com aba numerada, barra da dica ativa, trilho de ferramentas. Mundo único escuro (estúdio de gravação), tema fixo por escolha. */
+:root{
+  --bg:#26272b; --bg2:#1b1c1f; --bg3:#323338;
+  --paper:#f3f1ea; --cluebg:#e6e3d9; --line:#1d1d21;
+  --ink:#1739d6; --red:#d9262c; --ok:#2f9e5c;
+  --fg:#ecebe6; --mute:#8b8d94; --hl:#ffe17a; --hl2:#fff2c2;
+  --f-ui:"Archivo",system-ui,sans-serif;
+  --f-clue:"Archivo Narrow","Arial Narrow",sans-serif;
+  --f-hand:"Permanent Marker","Comic Sans MS",cursive;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --cf:9px; --lf:34px;
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--f-ui);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--hl);outline-offset:2px}
+.wrap{max-width:660px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.timer{background:#000;color:#fff;font-family:var(--f-mono);font-weight:700;font-size:clamp(22px,6vw,32px);padding:2px 12px;border:2px solid #fff;border-radius:3px;font-variant-numeric:tabular-nums;line-height:1.25}
+.timer.low{color:var(--red);border-color:var(--red);animation:blink .6s steps(2) infinite}
+@keyframes blink{50%{opacity:.45}}
+.stats{display:flex;gap:20px;font-variant-numeric:tabular-nums}
+.stat{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.stat b{font-size:22px;font-weight:800;line-height:1}
+.stat span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.stat.combo b{color:var(--hl)}
+
+.board{position:relative;margin-top:16px;transition:filter .2s}
+.board.blur .gridbox{filter:blur(9px)}
+.tab{position:absolute;left:50%;top:-22px;transform:translateX(-50%);background:var(--bg3);color:#fff;font-family:var(--f-mono);font-size:14px;padding:3px 18px 8px;border-radius:9px 9px 0 0;font-variant-numeric:tabular-nums}
+.paper{background:var(--paper);padding:10px;box-shadow:0 14px 34px rgba(0,0,0,.4);position:relative}
+.gridbox{position:relative;touch-action:manipulation}
+#grid{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));border:2px solid var(--line);background:var(--line);gap:1px}
+.cell{aspect-ratio:1;background:var(--paper);position:relative;overflow:hidden;color:#151517;user-select:none;-webkit-user-select:none}
+.cell.x{background:#36363b}
+.cell.clue{background:var(--cluebg);display:flex;flex-direction:column;font-family:var(--f-clue);font-size:var(--cf);line-height:1.05;cursor:pointer}
+.cq{flex:1 1 0;min-height:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:1px 6px 1px 2px;position:relative;overflow:hidden;hyphens:auto;-webkit-hyphens:auto}
+.cq.d1{padding:1px 2px 7px}
+.cq + .cq{border-top:1px solid #8c8a82}
+.cq.on{background:var(--hl)}
+.cq.new{background:#cfe9d6}
+.ar{position:absolute;font-family:var(--f-ui);font-weight:800;color:#111;font-size:calc(var(--cf) * 1.15);line-height:1}
+.ar.a{right:1px;top:50%;transform:translateY(-50%)}
+.ar.d{bottom:0;left:50%;transform:translateX(-50%)}
+.cell.L{cursor:pointer}
+.cell.L.inw{background:var(--hl2)}
+.cell.L.cur{background:var(--hl)}
+.cell.L.lock{background:#d3e8d8}
+.cq.lk{color:#6f7f73;background:#dde9df}
+.cq.lk::before{content:"✓ ";font-weight:700;color:var(--ok)}
+.cell.L.good{background:#bfe6cb}
+.cell.L.bad{background:#f6c9c7}
+.ch{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-hand);color:var(--ink);font-size:var(--lf);line-height:1;padding-top:6%}
+.cell.hint .ch{color:#7a7e88}
+.rd{position:absolute;right:2px;bottom:1px;font:normal 700 9px/1 var(--f-mono);color:#a3a29b}
+#ink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;touch-action:none}
+#ink.live{pointer-events:auto;cursor:crosshair}
+#kbd{position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;font-size:16px;border:0;padding:0}
+.pop{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font:800 34px/1 var(--f-ui);color:var(--ok);text-shadow:0 2px 0 #fff;pointer-events:none;animation:pop 1s ease-out forwards;white-space:nowrap}
+@keyframes pop{from{opacity:1;transform:translate(-50%,-30%) scale(.8)}to{opacity:0;transform:translate(-50%,-140%) scale(1.1)}}
+
+.cluebar{background:var(--bg2);border-radius:8px;padding:10px 14px;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap}
+.banco{font:600 13px/1.4 var(--f-clue);color:#cfcec8;margin-top:-6px}
+.banco b{font-family:var(--f-ui);font-weight:800;letter-spacing:.08em;margin-right:6px;color:var(--fg)}
+.pat{display:flex;gap:3px;flex-wrap:wrap}
+.pat i{width:22px;height:26px;border:1px solid #4a4b52;border-radius:3px;display:grid;place-items:center;font:normal 400 15px/1 var(--f-hand);color:#b9c6ff;padding-top:2px}
+.pat i.cu{border-color:var(--hl);box-shadow:inset 0 -2px 0 var(--hl)}
+.lvls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lv{background:var(--bg3);border:2px solid transparent;border-radius:10px;padding:12px 10px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.lv b{font:400 22px/1 var(--f-hand);color:#fff}
+.lv span{font-size:12px;line-height:1.35;color:#c6c5bf}
+.lv em{font:normal 700 11px/1 var(--f-mono);color:var(--mute);margin-top:auto}
+.lv.on{border-color:var(--hl);background:#3b3a2f}
+.lv.on em{color:var(--hl)}
+@media (max-width:420px){.lvls{grid-template-columns:1fr}}
+.cluebar .dir{font:700 12px/1 var(--f-mono);color:var(--hl);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.cluebar .ct{font-size:19px;font-weight:600;flex:1 1 220px;min-width:0;text-wrap:balance}
+.cluebar .len{font:700 12px/1 var(--f-mono);color:var(--mute);white-space:nowrap}
+
+.tools{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between}
+.seg{display:flex;background:var(--bg2);border-radius:8px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{background:none;border:0;padding:8px 12px;border-radius:6px;font-size:13px;font-weight:600;color:var(--mute)}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg2)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts button{background:var(--bg3);border:0;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:600}
+.acts button small{color:var(--mute);font-weight:400;margin-left:4px}
+.note{font-size:12.5px;color:var(--mute);line-height:1.5;max-width:65ch}
+.note b{color:var(--fg);font-weight:600}
+
+#ov[hidden]{display:none}
+#ov{position:fixed;inset:0;background:rgba(18,18,20,.72);display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-left,0px));z-index:20;backdrop-filter:blur(2px)}
+.panel{background:var(--bg2);border:1px solid #3c3d43;border-radius:12px;padding:24px;max-width:480px;width:100%;display:flex;flex-direction:column;gap:14px;max-height:100%;overflow:auto}
+.panel h1{margin:0;font:400 38px/1 var(--f-hand);color:#fff;text-wrap:balance}
+.panel h2{margin:0;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.panel p{margin:0;line-height:1.5;font-size:14px;color:#cfcec8}
+.panel ul{margin:0;padding-left:18px;font-size:14px;line-height:1.55;color:#cfcec8}
+.big{font:800 48px/1 var(--f-ui);font-variant-numeric:tabular-nums}
+.btn{background:var(--hl);color:#141414;border:0;border-radius:8px;padding:12px 16px;font-weight:800;font-size:15px}
+.btn.ghost{background:var(--bg3);color:var(--fg)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.rank{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+.rank td{padding:5px 4px;border-bottom:1px solid #2e2f34}
+.rank td:first-child{color:var(--mute);width:2.2em}
+.rank td.n{font-family:var(--f-mono);letter-spacing:.12em}
+.rank td.s{text-align:right;font-weight:800}
+.rank tr.me td{color:var(--hl)}
+#ini{background:#000;color:#fff;border:2px solid #fff;border-radius:4px;font:700 26px/1 var(--f-mono);letter-spacing:.3em;width:6.2em;padding:6px 8px;text-transform:uppercase}
+@media (prefers-reduced-motion:reduce){.pop,.timer.low{animation:none}}
+@media (max-width:520px){.stats{gap:14px}.stat b{font-size:18px}.cluebar .ct{font-size:16px}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="timer" id="timer" aria-live="off">00:02:00</div>
+    <div class="stats">
+      <div class="stat"><b id="sScore">0</b><span>pontos</span></div>
+      <div class="stat"><b id="sStage">1</b><span id="sClock">fase · ⏱×1,00</span></div>
+      <div class="stat combo"><b id="sCombo">×1</b><span>combo</span></div>
+      <div class="stat"><b id="sBest">0</b><span>recorde</span></div>
+    </div>
+  </div>
+
+  <div class="board" id="board">
+    <div class="tab" id="tab">Nº 000</div>
+    <div class="paper">
+      <div class="gridbox" id="gridbox">
+        <div id="grid"></div>
+        <canvas id="ink"></canvas>
+        <input id="kbd" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Entrada de letras">
+      </div>
+    </div>
+  </div>
+
+  <div class="banco" id="banco" hidden></div>
+  <div class="cluebar" id="cluebar"></div>
+
+  <div class="tools">
+    <div class="seg" id="modes" role="group" aria-label="Modo de entrada">
+      <button data-mode="key" aria-pressed="true">Teclado</button>
+      <button data-mode="pen" aria-pressed="false">Caneta</button>
+      <button data-mode="mark" aria-pressed="false">Marcador</button>
+      <button data-mode="erase" aria-pressed="false">Borracha</button>
+    </div>
+    <div class="acts">
+      <button data-act="hint">Letra<small id="cHint">−8s</small></button>
+      <button data-act="skip">Trocar<small id="cSkip">−15s</small></button>
+      <button data-act="pause">Pausar</button>
+    </div>
+  </div>
+  <p class="note"><b>Caneta:</b> escreva a letra maiúscula dentro da casa; a letra lida aparece no canto. <b>Marcador:</b> rabisco livre que some sozinho. Teclado: setas, Tab troca de palavra, espaço troca a direção.</p>
+</div>
+
+<div id="ov"></div>
+
+<script>
+(()=>{
+const COLS=9, ROWS=9, MAXW=18;
+
+/* ---------- dicionário ---------- */
+const RAW=`ASA|Membro da ave para voar
+ALA|Parte lateral de um prédio
+AMOR|Sentimento de afeição
+ARCO|Dispara flechas
+AREIA|Grãos da praia
+ANEL|Joia usada no dedo
+ANO|Doze meses
+AVE|Animal com penas
+BOLA|Objeto do futebol
+BOCA|Abertura para comer
+BARCO|Navega no rio
+BANDA|Conjunto de músicos
+BALDE|Recipiente com alça
+BOLO|Doce de aniversário
+CASA|Lar
+CAMA|Móvel para dormir
+CAFE|Bebida da manhã
+CANETA|Serve para escrever
+CARRO|Veículo de quatro rodas
+CEU|Onde ficam as nuvens
+CHAVE|Abre a fechadura
+CINEMA|Sala de projeção
+COPO|Recipiente para beber
+CORDA|Usada no cabo de guerra
+DADO|Cubo de seis faces
+DENTE|Fica na gengiva
+DOCE|Contrário de salgado
+DIA|Vinte e quatro horas
+DEDO|Há cinco em cada mão
+ESCOLA|Lugar de aprender
+ESTRELA|Brilha no céu noturno
+ELO|Anel de corrente
+ERA|Período histórico
+FACA|Talher de cortar
+FOGO|Chama
+FOLHA|Parte verde da árvore
+FESTA|Comemoração
+FARO|Olfato do cão
+FILME|Exibido no cinema
+GATO|Felino doméstico
+GELO|Água congelada
+GOL|Grito da torcida
+GARFO|Talher com dentes
+HORA|Sessenta minutos
+HINO|Canção da pátria
+ILHA|Terra cercada de água
+IDOSO|Paciente do geriatra
+IRMA|Filha dos mesmos pais
+JANELA|Abertura na parede
+JOGO|Partida
+LAGO|Água parada cercada de terra
+LUA|Satélite da Terra
+LIVRO|Tem capa e páginas
+LEAO|Rei da selva
+LAPIS|Escreve e apaga
+LUVA|Veste a mão
+MAR|Água salgada
+MESA|Móvel das refeições
+MAPA|Representa um território
+MALA|Bagagem
+MEL|Feito pelas abelhas
+MOTO|Veículo de duas rodas
+MUSICA|Arte dos sons
+NAVIO|Grande embarcação
+NEVE|Cai no inverno europeu
+NOITE|Contrário de dia
+NOME|Como alguém se chama
+NUVEM|Traz a chuva
+OVO|Posto pela galinha
+OLHO|Órgão da visão
+ONDA|Movimento do mar
+OURO|Metal precioso amarelo
+OSSO|Parte do esqueleto
+PATO|Ave de lagoa
+PEIXE|Vive na água
+PEDRA|Rocha pequena
+PORTA|Entrada da casa
+PRATO|Onde se serve a comida
+PIANO|Instrumento de teclas
+PONTE|Liga duas margens
+PAPEL|Folha para escrever
+QUEIJO|Feito de leite
+RATO|Roedor
+REDE|Para deitar na varanda
+RIO|Curso de água
+RODA|Parte do carro que gira
+ROSA|Flor com espinhos
+SAL|Tempero branco
+SAPO|Anfíbio que coaxa
+SOL|Estrela do sistema solar
+SONO|Vontade de dormir
+SOPA|Prato quente com caldo
+SELO|Vai no envelope
+TATU|Animal com carapaça
+TELA|Superfície do monitor
+TREM|Anda nos trilhos
+TERRA|Nosso planeta
+TIGRE|Felino listrado
+URSO|Grande mamífero peludo
+UVA|Fruta do vinho
+VACA|Dá leite
+VELA|Ilumina sem energia
+VENTO|Ar em movimento
+VIDRO|Material da janela
+VOZ|Som da fala
+ZEBRA|Equino listrado
+APARAR|Cortar as pontas
+ARAR|Preparar a terra
+ADEPTO|Seguidor de uma ideia
+RODAR|Girar
+ROER|Cortar com os dentes
+SESTA|Dormir após o almoço
+ABRIR|Contrário de fechar
+REMO|Move a canoa
+ARENA|Palco de lutas
+ATOR|Interpreta papéis
+ALVO|Mira do arqueiro
+ALHO|Tempero de dentes
+ANTA|Mamífero brasileiro
+ARARA|Ave azul e amarela
+ASTRO|Corpo celeste
+ATLAS|Livro de mapas
+AULA|Lição na escola
+AVIAO|Voa com passageiros
+BANCO|Guarda o dinheiro
+BEIJO|Toque dos lábios
+BOTA|Calçado de cano alto
+CABO|Fio grosso
+CALOR|Sensação de verão
+CAMPO|Área rural
+CANTO|Esquina interna
+CARTA|Vai pelo correio
+CERA|Material da vela
+CIRCO|Tem palhaço e lona
+COLA|Gruda papel
+CORAL|Grupo de cantores
+CORPO|Cabeça, tronco e membros
+COURO|Pele curtida
+CRAVO|Flor ou especiaria
+CUBO|Sólido de seis faces
+DAMA|Peça de tabuleiro
+DIETA|Regime alimentar
+DUNA|Monte de areia
+EIXO|Linha de rotação
+ESPADA|Arma de lâmina
+FADA|Ser mágico com varinha
+FARINHA|Pó do pão
+FERRO|Passa a roupa
+FITA|Tira de tecido
+FLOR|Rosa ou margarida
+FONTE|Chafariz
+FRIO|Contrário de quente
+FRUTA|Maçã ou banana
+GALO|Canta de manhã
+GAVETA|Parte da cômoda
+GENTE|Pessoas
+GOTA|Pingo
+GRAMA|Relva do jardim
+GUERRA|Conflito armado
+HOTEL|Hospedagem
+IDEIA|Pensamento novo
+IGREJA|Templo cristão
+JARDIM|Área de flores
+JOIA|Adorno precioso
+JUIZ|Apita o jogo
+LADO|Face de um objeto
+LAMA|Terra molhada
+LATA|Embalagem de metal
+LEITE|Bebida da vaca
+LENTE|Peça dos óculos
+LIMAO|Fruta azeda
+LINHA|Fio de costura
+LOJA|Ponto de venda
+LOUSA|Quadro da sala de aula
+MAE|Quem nos deu à luz
+MANGA|Fruta ou parte da camisa
+MARTE|Planeta vermelho
+MEDO|Pavor
+MEIA|Vai no pé antes do sapato
+METRO|Cem centímetros
+MILHO|Grão da pipoca
+MOEDA|Dinheiro de metal
+MONTE|Elevação de terra
+MURO|Parede externa
+NARIZ|Órgão do olfato
+NINHO|Casa do passarinho
+NOTA|Dó, ré ou mi
+NOVELA|Folhetim da TV
+OBRA|Construção
+OCEANO|Atlântico ou Pacífico
+ORELHA|Órgão da audição
+PADRE|Celebra a missa
+PALCO|Onde o ator se apresenta
+PALHA|Material do chapéu caipira
+PANELA|Cozinha o feijão
+PASTA|Guarda documentos
+PELE|Maior órgão do corpo
+PENA|Cobre a ave
+PERA|Fruta em forma de lâmpada
+PIPA|Voa presa na linha
+PNEU|Borracha da roda
+POTE|Recipiente com tampa
+POVO|População
+PRAIA|Tem mar e areia
+PRATA|Metal do segundo lugar
+PULGA|Inseto saltador
+QUADRO|Pintura emoldurada
+RADIO|Aparelho AM/FM
+RAIZ|Parte da planta sob a terra
+REI|Usa coroa
+RELOGIO|Marca as horas
+RIMA|Som igual no fim do verso
+ROCHA|Pedra grande
+ROUPA|O que vestimos
+SABAO|Faz espuma
+SACO|Embrulho de papel
+SAIA|Peça de roupa feminina
+SALA|Cômodo de estar
+SAPATO|Calçado social
+SEDE|Vontade de beber
+SERRA|Corta madeira
+SETA|Flecha
+SINO|Toca na torre da igreja
+SOFA|Assento estofado
+SOMBRA|Projeção escura
+TACO|Bate na bola de sinuca
+TAMPA|Fecha o pote
+TELHA|Cobre a casa
+TENIS|Esporte de raquete
+TINTA|Usada para pintar
+TOALHA|Seca o corpo
+TOURO|Macho da vaca
+TRIGO|Cereal do pão
+TROFEU|Prêmio do campeão
+TUBO|Cano
+UNHA|Ponta do dedo
+URNA|Recebe os votos
+VARAL|Seca a roupa
+VASO|Abriga a planta
+VERAO|Estação quente
+VIOLA|Instrumento caipira
+VOTO|Escolha na eleição
+XICARA|Serve o café
+ZERO|Nenhum
+ODOR|Cheiro
+OPERA|Teatro cantado
+ORLA|Beira da praia
+ATUM|Peixe enlatado
+AMIGO|Companheiro
+ALUNO|Estuda na escola
+AGULHA|Usada para costurar
+ABELHA|Produz mel
+ARROZ|Acompanha o feijão
+AZUL|Cor do céu
+BRANCO|Cor da paz
+VERDE|Cor da esperança
+ROXO|Cor da uva
+TIME|Equipe esportiva
+TRONO|Cadeira do rei
+ROMA|Capital da Itália
+PARIS|Capital da França
+LIMA|Capital do Peru
+NATAL|Festa de dezembro
+CARNAVAL|Festa de fevereiro
+SAMBA|Ritmo brasileiro
+TANGO|Dança argentina
+ETAPA|Fase
+EDITAR|Corrigir um texto
+ASSAR|Cozinhar no forno
+NADAR|Mover-se na água
+CANTAR|Soltar a voz
+DORMIR|Repousar à noite
+LER|Decifrar um texto
+REMAR|Mover o barco
+SALTAR|Pular
+SORRIR|Mostrar alegria no rosto
+TOCAR|Encostar
+VOAR|Ir pelo ar
+AMAR|Querer bem
+ANDAR|Caminhar
+RIR|Achar graça
+UNIR|Pôr junto
+SOMAR|Adicionar
+SECAR|Tirar a umidade
+LAVAR|Limpar com água
+ORAR|Rezar
+ATAR|Amarrar
+AVISO|Advertência
+ENIGMA|Mistério
+TESOURO|Riqueza escondida
+PIRATA|Ladrão dos mares
+ROBO|Máquina autômata
+PLANETA|Gira em torno do Sol
+COMETA|Astro com cauda
+SATURNO|Planeta dos anéis
+COELHO|Animal da Páscoa
+CAVALO|Animal de montaria
+GIRAFA|Pescoço mais longo
+MACACO|Primata
+CORUJA|Ave noturna
+TUCANO|Ave de bico grande
+POLVO|Tem oito tentáculos
+BALEIA|Maior mamífero
+LOBO|Uiva para a lua
+RAPOSA|Animal astuto
+PANDA|Urso que come bambu
+CAMELO|Tem corcova
+ESQUILO|Roedor de cauda peluda
+TECLADO|Tem teclas
+SENHA|Código secreto
+NUMERO|Algarismo
+LETRA|Parte da palavra
+PALAVRA|Conjunto de letras
+TEXTO|Conjunto de frases
+POEMA|Composição em versos
+CANCAO|Música cantada
+TEATRO|Casa de espetáculos
+MUSEU|Guarda obras de arte
+ESTADIO|Arena do futebol
+ESTRADA|Via para carros
+CIDADE|Área urbana
+PAIS|Nação
+BRASIL|Terra do samba
+ITALIA|País da pizza
+AMEIXA|Fruta roxa
+CEREJA|Vai no topo do bolo
+MORANGO|Fruta vermelha com sementes
+ABACAXI|Fruta com coroa
+BANANA|Fruta do macaco
+LARANJA|Fruta cítrica
+CENOURA|Legume laranja
+TOMATE|Base do molho
+BATATA|Vira purê
+CEBOLA|Faz chorar na cozinha
+PIMENTA|Arde na boca
+SALADA|Prato de folhas
+PIZZA|Prato italiano redondo
+PAO|Feito na padaria
+CHA|Bebida de ervas
+SUCO|Bebida de fruta
+AGUA|H2O
+VINHO|Bebida da uva
+OLEO|Usado na fritura
+ACUCAR|Adoça o café
+TORTA|Doce de forno
+SORVETE|Doce gelado
+PUDIM|Doce de leite condensado
+PIPOCA|Lanche do cinema
+LANCHE|Refeição leve
+JANTAR|Refeição da noite
+ALMOCO|Refeição do meio-dia
+PILATOS|O antigo governador Pôncio
+RESINA|Seiva grudenta
+ESCORA|Segura uma parede
+ERRAR|Cometer uma falha
+ALIAR|Pôr junto, reunir
+TOCO|Resto de árvore
+SALAO|Sala grande
+NAVE|Espaçonave
+ROTA|Caminho do navio
+TRILHA|Caminho na mata
+VILA|Pequena povoação
+OASIS|Água no deserto
+ICONE|Símbolo na tela
+RECADO|Mensagem deixada
+SORTE|Contrário de azar
+TALHER|Garfo ou faca
+BAILE|Festa dançante
+RODEIO|Festa do peão
+ALOE|Babosa
+ARAME|Fio de metal`;
+
+const RAW_HARD=`GATO|Bichano
+CASA|Morada
+CAMA|Leito
+CAFE|Bebida que tira o sono
+AMOR|Cupido o provoca
+ARCO|Precede "-íris"
+ANEL|Aliança
+AVE|Saudação latina
+BOLA|Pelota
+BOCA|Foz do rio
+BANDA|Lado, faixa
+CEU|Firmamento
+CHAVE|Solução do enigma
+COPO|Recipiente do chope
+DADO|Informação
+DENTE|O alho tem vários
+DOCE|Meigo
+FACA|Peixeira
+FOGO|Incêndio
+FESTA|Arrasta-pé
+FARO|Intuição para negócios
+GELO|Tratamento frio
+GOL|Tento no futebol
+HORA|Ocasião certa
+HINO|Canto de louvor
+ILHA|Atol
+LUA|Selene
+LIVRO|Volume
+LEAO|Signo de agosto
+LUVA|Vai na mão do goleiro
+MESA|Banca examinadora
+MAPA|Carta geográfica
+MALA|Pessoa chata (pop.)
+MEL|Produto da colmeia
+NOITE|Período do breu
+NOME|Fama, reputação
+NUVEM|Cúmulo ou cirro
+OVO|Gema e clara
+OLHO|Vista
+ONDA|Moda passageira
+OURO|Naipe do baralho
+OSSO|Fêmur ou tíbia
+PEDRA|Calhau
+PORTA|Pessoa obtusa (pop.)
+PONTE|Feriado prolongado
+RATO|Ladrão (gíria)
+REDE|Malha de pesca
+RIO|Curso fluvial
+RODA|Ciranda
+ROSA|Cor do flamingo
+SAL|Graça, espírito
+SOL|Astro-rei
+SONO|Morfeu o traz
+SELO|Gravadora de discos
+TELA|Pintura a óleo
+TERRA|Solo, chão
+UVA|Fruta da videira
+VACA|Rateio entre amigos
+VELA|Pano do barco
+VOZ|Direito de opinar
+ZEBRA|Resultado inesperado
+ROER|Corroer
+SESTA|Soneca da tarde
+ARENA|Estádio de gladiadores
+ATOR|Protagonista
+ALVO|Branco, cândido
+ANTA|Tapir
+ARARA|Furioso, em "fiquei uma..."
+ASTRO|Estrela de cinema
+AULA|Preleção
+BANCO|Assento de praça
+BOTA|Calçado do caubói
+CABO|Patente militar
+CALOR|Entusiasmo
+CANTO|Ângulo
+CERA|Enrolação, em "fazer..."
+CORAL|Recife marinho
+CRAVO|Antecessor do piano
+DAMA|Senhora
+DUNA|Medão
+EIXO|Liga os polos
+FERRO|Fe na tabela periódica
+FONTE|Tipo de letra
+GALO|Inchaço na testa
+GOTA|Doença das articulações
+GRAMA|Unidade de massa
+JUIZ|Magistrado
+LAMA|Sacerdote tibetano
+LATA|Rosto (gíria)
+LINHA|Fileira
+LOUSA|Quadro-negro
+MANGA|Quadrinho japonês
+MARTE|Deus romano da guerra
+MEDO|Temor
+METRO|Trem urbano
+MONTE|Pilha, montão
+NOTA|Cédula de dinheiro
+PADRE|Vigário
+PALCO|Tablado
+PELE|O Rei do futebol
+PENA|Castigo
+PERA|Cavanhaque
+PIPA|Papagaio de papel
+POVO|Plebe
+PRATA|Medalha do vice
+QUADRO|Time, equipe
+RAIZ|Origem
+REI|Monarca
+ROCHA|Penedo
+SACO|Paciência (pop.)
+SEDE|Matriz da empresa
+SERRA|Cordilheira
+SINO|Campânula
+SOFA|Divã
+TACO|Peça do assoalho
+TELHA|Ideia fixa (pop.)
+TINTA|Nanquim
+TOURO|Signo de maio
+TRONO|Poder real
+TUBO|Cânula
+URNA|Vaso funerário
+VASO|Veia ou artéria
+VERAO|Estio
+VIOLA|Instrumento de dez cordas
+VOTO|Promessa religiosa
+ZERO|Nulo
+ODOR|Aroma
+ORLA|Borda, margem
+ATUM|Peixe do sashimi
+ALUNO|Discente
+ETAPA|Estágio
+UNIR|Ligar, juntar
+ORAR|Discursar
+ATAR|Prender com nó
+ROMA|Cidade Eterna
+LIMA|Ferramenta de unha
+NATAL|Capital potiguar
+TANGO|Dança de Gardel
+ENIGMA|Charada
+ROBO|Autômato
+LOBO|Fera do Chapeuzinho
+PANDA|Mascote do WWF
+POLVO|Cefalópode
+CORUJA|Mãe babona (pop.)
+TUCANO|Bico avantajado
+ESTRELA|Astro com luz própria
+ATLAS|Titã que segura o céu
+ARAME|Fio metálico
+ESCORA|Apoio, esteio
+OASIS|Refúgio no deserto
+OCRE|Amarelo-terroso
+EGO|O eu, na psicanálise
+OBOE|Palheta dupla
+ESTIO|Verão
+ERMO|Lugar deserto
+ALVA|Aurora
+ARAUTO|Mensageiro
+AURA|Halo
+ACEPIPE|Petisco
+ANZOL|Gancho do pescador
+BRASA|Carvão em fogo
+CAIS|Ancoradouro
+CERNE|Âmago
+DOGMA|Verdade indiscutível
+EPICO|Heroico
+ESMERO|Capricho
+FASTIO|Falta de apetite
+IATE|Barco de luxo
+INOX|Aço que não enferruja
+LEGADO|Herança
+LUME|Fogo
+MOTE|Tema de glosa
+NICHO|Mercado específico
+OBICE|Obstáculo
+OLEIRO|Faz potes de barro
+PERITO|Especialista
+RITO|Cerimônia
+SAGAZ|Astuto
+SINA|Destino
+TENAZ|Persistente
+TRAMA|Enredo
+UFANO|Orgulhoso
+VATE|Poeta
+VIGIA|Sentinela
+ZELO|Cuidado
+AMENO|Suave
+ARIDO|Seco
+ATRIO|Saguão
+ETER|Anestésico antigo
+IRA|Fúria
+MAGO|Merlin
+OPACO|Sem brilho
+OCIO|Folga
+PROSA|Conversa fiada
+RUMO|Direção
+SOBRIO|Comedido
+TEOR|Conteúdo
+EPOPEIA|Poema heroico`;
+const LEVELS={
+  easy:{name:'Fácil',time:90,bonus:5,hint:5,skip:8,win:25000,mult:1,gift:true,desc:'90 s · dicas diretas · 1ª letra de presente'},
+  med:{name:'Médio',time:60,bonus:3,hint:8,skip:15,win:20000,mult:1.5,gift:false,desc:'60 s · dicas diretas · pontos ×1,5'},
+  hard:{name:'Difícil',time:45,bonus:1,hint:12,skip:20,win:15000,mult:2.5,gift:false,desc:'45 s · dicas de charada · pontos ×2,5'}
+};
+const RAW_FILL=`AA|Alcoólicos Anônimos (sigla)|1
+MJ|Michael Jackson (iniciais)|1
+SP|São Paulo (sigla)|1
+RJ|Rio de Janeiro (sigla)|1
+BA|Estado de Salvador (sigla)|1
+MG|Minas Gerais (sigla)|1
+PE|Estado do Recife (sigla)|1
+RS|Estado dos gaúchos (sigla)|1
+SC|Estado de Florianópolis (sigla)|2
+AM|Estado de Manaus (sigla)|2
+PA|Estado de Belém (sigla)|2
+CE|Estado de Fortaleza (sigla)|2
+AC|Estado de Rio Branco (sigla)|2
+ES|Estado de Vitória (sigla)|2
+GO|Estado de Goiânia (sigla)|2
+PR|Estado de Curitiba (sigla)|2
+TV|Aparelho da novela (sigla)|1
+DJ|Comanda o som da festa|1
+CD|Disco a laser (sigla)|1
+DVD|Sucessor da fita VHS (sigla)|1
+PC|Computador pessoal (sigla)|1
+QI|Medida de inteligência (sigla)|1
+RH|Setor que contrata (sigla)|1
+UTI|Terapia intensiva (sigla)|1
+ONU|Tem sede em Nova York (sigla)|1
+ONG|Entidade sem fins lucrativos (sigla)|2
+CPF|Documento da Receita (sigla)|1
+RG|Carteira de identidade (sigla)|1
+CEP|Código do endereço (sigla)|1
+SUS|Saúde pública no Brasil (sigla)|1
+PIX|Pagamento instantâneo|1
+EUA|País de Washington (sigla)|1
+UE|Bloco com sede em Bruxelas (sigla)|2
+FAB|Força Aérea Brasileira (sigla)|2
+OMS|Órgão mundial da saúde (sigla)|2
+CBF|Comanda a Seleção (sigla)|1
+FIFA|Entidade da Copa (sigla)|1
+NASA|Agência espacial dos EUA|1
+IBGE|Faz o Censo (sigla)|2
+INSS|Paga a aposentadoria (sigla)|2
+DNA|Molécula da hereditariedade (sigla)|1
+LED|Lâmpada econômica (sigla)|2
+USB|Porta do pen drive (sigla)|2
+HD|Disco rígido (sigla)|2
+IA|Inteligência artificial (sigla)|1
+URL|Endereço na web (sigla)|3
+SR|Senhor (abrev.)|1
+SRA|Senhora (abrev.)|1
+DR|Doutor (abrev.)|1
+PROF|Professor (abrev.)|1
+ETC|E assim por diante (abrev.)|1
+OBS|Observação (abrev.)|1
+PS|Pós-escrito (abrev.)|2
+APP|Aplicativo (abrev.)|1
+OK|Tudo certo (abrev.)|1
+KM|Quilômetro (símbolo)|1
+KG|Quilograma (símbolo)|1
+CM|Centímetro (símbolo)|1
+ML|Mililitro (símbolo)|2
+AU|Ouro (símbolo químico)|2
+AG|Prata (símbolo químico)|2
+FE|Ferro (símbolo químico)|2
+NA|Sódio (símbolo químico)|3
+HE|Hélio (símbolo químico)|3
+ZN|Zinco (símbolo químico)|3
+PB|Chumbo (símbolo químico)|3
+PH|Mede a acidez|2
+OHM|Unidade de resistência elétrica|3
+WATT|Unidade de potência|2
+VOLT|Unidade de tensão elétrica|2
+ARE|Unidade agrária de 100 m²|3
+IV|Quatro, em romanos|2
+VI|Seis, em romanos|2
+XI|Onze, em romanos|2
+XX|Vinte, em romanos|2
+XL|Quarenta, em romanos|3
+LX|Sessenta, em romanos|3
+CC|Duzentos, em romanos|3
+MM|Dois mil, em romanos|3
+RE|Nota após o dó|1
+MI|Nota entre ré e fá|1
+FA|Nota após o mi|1
+LA|Nota antes do si|1
+SI|Nota antes do dó agudo|1
+DO|Primeira nota da escala|1
+PI|3,14 (letra grega)|2
+ALFA|Primeira letra grega|2
+BETA|Versão de teste (Inform.)|2
+GAMA|Terceira letra grega|2
+DELTA|Foz em leque (Geog.)|2
+TAU|Letra grega do "T"|3
+PSI|Letra grega da Psicologia|3
+EU|Pronome da 1ª pessoa|1
+TU|Pronome da 2ª pessoa|1
+ELE|Pronome masculino|1
+ELA|Pronome feminino|1
+NOS|Pronome da 1ª do plural|1
+VOS|Pronome de tratamento arcaico|3
+ME|Pronome oblíquo da 1ª pessoa|1
+TE|Pronome oblíquo da 2ª pessoa|1
+LHE|"A ele" (pronome)|2
+MEU|Possessivo da 1ª pessoa|1
+TEU|Possessivo da 2ª pessoa|1
+SEU|Possessivo da 3ª pessoa|1
+ESTE|Demonstrativo de proximidade|2
+ISSO|Demonstrativo neutro|1
+QUEM|Pronome interrogativo de pessoa|1
+ALGO|Pronome indefinido|1
+NADA|Contrário de tudo|1
+UM|Artigo indefinido|1
+UMA|Artigo indefinido feminino|1
+OS|Artigo definido plural|1
+DE|Preposição de posse|1
+EM|Preposição de lugar|1
+COM|Preposição de companhia|1
+SEM|Contrário de "com"|1
+AO|"A" + "o"|2
+SE|Conjunção condicional|1
+OU|Conjunção alternativa|1
+MAS|Conjunção adversativa|1
+PARE|Ordem da placa octogonal (imperativo)|1
+CORRA|Fuja depressa! (imperativo)|1
+LEIA|Ordem diante do texto (imperativo)|1
+OLHE|Repare! (imperativo)|1
+DIGA|Fale! (imperativo)|1
+VEM|"Chega mais!" (imperativo)|1
+TOMA|Pega! (imperativo)|1
+ENTRE|"Fique à vontade!" à porta (imperativo)|2
+ABRE|"(?)-te, Sésamo"|1
+BOI|Bumba meu (?)|1
+TECO|Tico e (?)|2
+SAO|(?) Paulo|1
+FLU|Fla-(?), clássico carioca|1
+ALTO|Mãos ao (?)!|1
+AMARELO|Sítio do Picapau (?)|1
+VERMELHO|Chapeuzinho (?)|1
+UAI|Interjeição mineira|1
+TCHE|Vocativo gaúcho|2
+BAH|Espanto gaúcho|2
+OXENTE|Espanto nordestino|1
+GURI|Menino, no Sul|2
+PIA|Menino, no Paraná|3
+MAINHA|Mãe, na Bahia|2
+PAINHO|Pai, na Bahia|2
+VISSE|"Viu?", no Recife|3
+AIPIM|Mandioca, no Sul|2
+JERIMUM|Abóbora, no Nordeste|3
+CUIA|Recipiente do chimarrão|2
+ARRETADO|Muito bom, no Nordeste|2
+MANO|Parceiro (gíria)|1
+TRETA|Briga (gíria)|1
+ROLE|Passeio (gíria)|1
+BALADA|Festa noturna (gíria)|1
+MICO|Vexame (gíria)|1
+GRANA|Dinheiro (gíria)|1
+BUSAO|Ônibus (gíria)|1
+TOP|Excelente (gíria)|1
+ZOEIRA|Bagunça divertida (gíria)|1
+BOLADO|Irritado (gíria)|2
+SUAVE|Tranquilo (gíria)|2
+YES|"Sim", em inglês|1
+LOVE|"Amor", em inglês|1
+DOG|"Cão", em inglês|1
+RED|"Vermelho", em inglês|2
+SUN|"Sol", em inglês|2
+BOY|"Menino", em inglês|2
+ECO|Repetição do som|1
+OCA|Casa indígena|1
+TUPI|Língua indígena|2
+ANU|Ave preta do pasto|3
+EMA|Ave corredora do cerrado|2
+ARIA|Canto solo na ópera (Mús.)|2
+ATA|Registro da reunião|1
+IPE|Árvore de flores amarelas|2
+JACA|Fruta de gomos grandes|1`;
+const parse=raw=>{const m=new Map();for(const line of raw.split("\n")){const [w,c]=line.split("|");if(!w||!c)continue;const W=w.trim().toUpperCase();if(/^[A-Z]{2,8}$/.test(W)&&!m.has(W))m.set(W,c.trim())}return m};
+const BASE=parse(RAW), HARDC=parse(RAW_HARD);
+const FILLS=RAW_FILL.split("\n").map(l=>{const [w,clue,lv]=l.split("|");return {w:w.trim(),clue:clue.trim(),lv:+lv}});
+const RARE=new Set(FILLS.filter(f=>f.lv===3).map(f=>f.w));
+for(const [w] of HARDC)if(!BASE.has(w))RARE.add(w);
+const fillFor=max=>FILLS.filter(f=>f.lv<=max).map(({w,clue})=>({w,clue}));
+const POOLS={
+  easy:[...BASE].filter(([w])=>w.length<=6).map(([w,clue])=>({w,clue})).concat(fillFor(1)),
+  med:[...BASE].map(([w,clue])=>({w,clue})).concat(fillFor(2)),
+  hard:[...HARDC].map(([w,clue])=>({w,clue})).concat(fillFor(3))
+};
+for(const k in POOLS){const seen=new Set();POOLS[k]=POOLS[k].filter(e=>!seen.has(e.w)&&seen.add(e.w))}
+let level='med', LV=LEVELS.med, DICT=POOLS.med;
+
+/* ---------- estado ---------- */
+let grid, words, nextId=1, recent=[];
+let cur={r:0,c:0}, dir='a';
+let mode='key', playing=false, paused=false, busy=false;
+let score=0, combo=1, bestCombo=1, lastSolve=-1e9, timeLeft=120, solved=0;
+const goodCells=new Set(), badCells=new Set();
+let marks=[];
+const LS='cruzada-sem-fim-v1';
+const load=k=>{try{return JSON.parse(localStorage.getItem(LS+k))}catch(e){return null}};
+const save=(k,v)=>{try{localStorage.setItem(LS+k,JSON.stringify(v))}catch(e){}};
+const RK=()=>':rank-'+level;
+let ranking=[];
+{const old=load(':rank');if(old&&!load(':rank-med'))save(':rank-med',old);}
+level=LEVELS[load(':level')]?load(':level'):'med';
+function setLevel(l){level=l;LV=LEVELS[l];stage=1;DICT=dictFor();ranking=load(RK())||[];save(':level',l)}
+/* rampa: a cada 6 palavras sobe uma fase. O relógio acelera, cada acerto devolve menos tempo,
+   ajuda custa mais, a janela de combo encolhe e as dicas migram para o nível de cima. */
+const PER_STAGE=6;
+let stage=1;
+const STEPS={easy:[[1,['easy']],[3,['easy','med']],[6,['med','hard']]],med:[[1,['med']],[3,['med','hard']],[6,['hard']]],hard:[[1,['hard']]]};
+function dictFor(){
+  const mix=STEPS[level].filter(([s])=>stage>=s).pop()[1], m=new Map();
+  mix.forEach(k=>POOLS[k].forEach(e=>m.set(e.w,e)));
+  return [...m.values()];
+}
+const R={
+  clock:()=>Math.min(2.2,1+.15*(stage-1)),
+  bonus:n=>Math.max(stage>=8?0:1,Math.round((LV.bonus+n)*Math.pow(.85,stage-1))),
+  cost:c=>Math.round(c*(1+.25*(stage-1))),
+  win:()=>LV.win*Math.max(.5,1-.08*(stage-1)),
+  gift:()=>LV.gift&&stage<4
+};
+function stageCheck(){
+  const ns=1+Math.floor(solved/PER_STAGE);
+  if(ns<=stage)return;
+  stage=ns;DICT=dictFor();
+  const msg=['','','Fase 2 · o relógio acelera','Fase 3 · dicas mais difíceis','Fase 4 · combo mais curto'][stage]||`Fase ${stage} · relógio ×${R.clock().toFixed(2).replace('.',',')}`;
+  setTimeout(()=>toast(msg),550);
+}
+setLevel(level);
+mode=load(':mode')||'key';
+
+const $=s=>document.querySelector(s);
+const gridEl=$('#grid'), gridBox=$('#gridbox'), canvas=$('#ink'), ctx=canvas.getContext('2d'), kbd=$('#kbd');
+const esc=s=>s.replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* ---------- tabuleiro ---------- */
+const inB=(r,c)=>r>=0&&r<ROWS&&c>=0&&c<COLS;
+const cell=(r,c)=>inB(r,c)?grid[r][c]:null;
+const isL=(r,c)=>{const g=cell(r,c);return !!g&&g.t==='L'};
+const other=d=>d==='a'?'d':'a';
+
+function emptyBoard(){grid=Array.from({length:ROWS},()=>Array(COLS).fill(null));words=new Map();}
+
+function canPlace(w,r0,c0,d){
+  const dr=d==='d'?1:0, dc=d==='a'?1:0, n=w.length;
+  const cr=r0-dr, cc=c0-dc; if(!inB(cr,cc))return null;
+  const cg=grid[cr][cc]; if(cg&&(cg.t!=='C'||cg[d]))return null;
+  if(!inB(r0+dr*(n-1),c0+dc*(n-1)))return null;
+  if(isL(r0+dr*n,c0+dc*n))return null;
+  let x=0,nw=0;
+  for(let i=0;i<n;i++){
+    const r=r0+dr*i,c=c0+dc*i,g=grid[r][c];
+    if(g){ if(g.t!=='L'||g.sol!==w[i]||g.w[d])return null; x++; }
+    else{ if(isL(r+dc,c+dr)||isL(r-dc,c-dr))return null; nw++; }
+  }
+  return {x,nw};
+}
+function place(entry,r0,c0,d){
+  const id=nextId++, dr=d==='d'?1:0, dc=d==='a'?1:0, cells=[];
+  for(let i=0;i<entry.w.length;i++){
+    const r=r0+dr*i,c=c0+dc*i;
+    if(!grid[r][c])grid[r][c]={t:'L',sol:entry.w[i],ent:'',ink:null,read:null,hint:false,w:{a:null,d:null}};
+    grid[r][c].w[d]=id; cells.push([r,c]);
+  }
+  const cr=r0-dr,cc=c0-dc;
+  if(!grid[cr][cc])grid[cr][cc]={t:'C',a:null,d:null};
+  grid[cr][cc][d]=id;
+  words.set(id,{id,w:entry.w,clue:entry.clue,dir:d,cells,clueAt:[cr,cc],born:performance.now()});
+  recent.push(entry.w); if(recent.length>70)recent.shift();
+  return id;
+}
+function removeWord(id){
+  const o=words.get(id); if(!o)return;
+  for(const [r,c] of o.cells){const g=grid[r][c];g.w[o.dir]=null;if(!g.w.a&&!g.w.d)grid[r][c]=null;}
+  const [cr,cc]=o.clueAt, cg=grid[cr][cc]; cg[o.dir]=null; if(!cg.a&&!cg.d)grid[cr][cc]=null;
+  words.delete(id);
+}
+function fillOnce(){
+  let guard=0, added=[];
+  while(words.size<MAXW&&guard++<40){
+    const onBoard=new Set([...words.values()].map(o=>o.w)), empty=words.size===0;
+    const pool=shuffle(DICT.filter(d=>!onBoard.has(d.w)&&!recent.includes(d.w)));
+    let best=null;
+    const twoCount=[...words.values()].filter(o=>o.w.length===2).length;
+    for(const e of pool)for(const d of ['a','d'])for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      if(e.w.length===2&&twoCount>=5)continue;
+      const res=canPlace(e.w,r,c,d); if(!res||res.nw<Math.min(2,e.w.length-1))continue;
+      // cruzar é o objetivo; palavra solta só entra se nada cruzar
+      const s=res.x*5+res.nw*.7+Math.random()*3-(res.x?0:9)-(empty?(Math.abs(r-1)+Math.abs(c-1))*2:0);
+      if(!best||s>best.s)best={s,e,r,c,d};
+    }
+    if(!best)break;
+    added.push(place(best.e,best.r,best.c,best.d));
+  }
+  return added;
+}
+function boardValue(){
+  let L=0,X=0,C=0;
+  for(const row of grid)for(const g of row){if(!g)continue;if(g.t==='C')C++;else{L++;if(g.w.a&&g.w.d)X++}}
+  return L+C+X*2;
+}
+const snap=()=>({grid:grid.map(r=>r.map(g=>g&&JSON.parse(JSON.stringify(g)))),words:new Map([...words].map(([k,v])=>[k,{...v,cells:v.cells.map(x=>x.slice())}])),nextId,recent:recent.slice()});
+const restore=s=>{grid=s.grid;words=s.words;nextId=s.nextId;recent=s.recent};
+function fill(tries=8){const ad=fillRaw(tries);if(R.gift())ad.forEach(id=>{const o=words.get(id);if(!o)return;const em=o.cells.filter(([r,c])=>!grid[r][c].ent);if(em.length<2)return;const [r,c]=em[0];setEntry(r,c,grid[r][c].sol,{hint:true})});return ad}
+function fillRaw(tries){
+  const base=snap(); let best=null;
+  for(let i=0;i<tries;i++){
+    if(i)restore(cloneOf(base));
+    const added=fillOnce(), v=boardValue()+Math.random();
+    if(!best||v>best.v)best={v,state:snap(),added};
+  }
+  restore(best.state);
+  const now=performance.now(); best.added.forEach(id=>{const o=words.get(id);if(o)o.born=now});
+  if(best.added.length)setTimeout(render,2700);
+  return best.added;
+}
+function cloneOf(s){return {grid:s.grid.map(r=>r.map(g=>g&&JSON.parse(JSON.stringify(g)))),words:new Map([...s.words].map(([k,v])=>[k,{...v,cells:v.cells.map(x=>x.slice())}])),nextId:s.nextId,recent:s.recent.slice()}}
+
+/* troca no mesmo lugar: a nova palavra respeita as letras que cruzam.
+   Sem substituta possível, a palavra resolvida fica travada até uma palavra que a cruza ser resolvida. */
+const isLocked=id=>!!(id&&words.get(id)?.locked);
+const lockedCell=(r,c)=>{const g=cell(r,c);return !!g&&g.t==='L'&&(isLocked(g.w.a)||isLocked(g.w.d))};
+function bestFor(slot){
+  const onBoard=new Set([...words.values()].map(o=>o.w));
+  const two=[...words.values()].filter(o=>o.w.length===2).length;
+  let best=null;
+  for(const e of DICT){
+    const n=e.w.length;
+    if(n>slot.len||onBoard.has(e.w)||recent.includes(e.w)||(n===2&&two>=5))continue;
+    const res=canPlace(e.w,slot.r,slot.c,slot.dir); if(!res||res.nw<Math.min(2,n-1))continue;
+    const sc=(n===slot.len?8:0)+n+res.x*3+Math.random()*4;
+    if(!best||sc>best.sc)best={sc,e};
+  }
+  return best&&best.e;
+}
+function replaceWords(ids,lockKept){
+  const S=new Set(ids);
+  for(const id of ids){const o=words.get(id);for(const [r,c] of o.cells){const ot=grid[r][c].w[other(o.dir)];if(isLocked(ot))S.add(ot)}}
+  const base=snap(), keep=new Set(), drop=new Set();
+  let out=null;
+  for(let guard=0;guard<=S.size&&!out;guard++){
+    restore(cloneOf(base));
+    const slots=[...S].filter(id=>!keep.has(id)).map(id=>{const o=words.get(id);return {id,r:o.cells[0][0],c:o.cells[0][1],dir:o.dir,len:o.w.length}});
+    slots.forEach(sl=>removeWord(sl.id));
+    const added=[];let failed=null;
+    for(const sl of shuffle(slots.filter(sl=>!drop.has(sl.id)))){const e=bestFor(sl);if(!e){failed=sl.id;break}added.push(place(e,sl.r,sl.c,sl.dir))}
+    if(failed===null)out={added,kept:[...keep]};
+    else if(ids.includes(failed))keep.add(failed);   // recém-resolvida sem substituta: fica
+    else drop.add(failed);                             // travada antiga: a vez dela chegou, sai sem substituta
+  }
+  if(!out){restore(cloneOf(base));out={added:[],kept:[...ids]}}
+  if(lockKept)out.kept.forEach(id=>{const o=words.get(id);if(o)o.locked=true});
+  releaseStuck();
+  return out;
+}
+// uma travada só sai quando uma palavra que a cruza é resolvida; se nenhuma jogável a cruza, ela sai já
+function releaseStuck(){
+  let again=true;
+  while(again){
+    again=false;
+    for(const o of [...words.values()]){
+      if(!o.locked)continue;
+      const live=o.cells.some(([r,c])=>{const ot=grid[r][c].w[other(o.dir)];return ot&&!isLocked(ot)});
+      if(!live){removeWord(o.id);again=true}
+    }
+  }
+}
+function giftLetters(ids){
+  if(!R.gift())return;
+  ids.forEach(id=>{const o=words.get(id);if(!o)return;const em=o.cells.filter(([r,c])=>!grid[r][c].ent);if(em.length<2)return;const [r,c]=em[0];setEntry(r,c,grid[r][c].sol,{hint:true})});
+}
+
+/* ---------- seleção ---------- */
+function activeId(){const g=cell(cur.r,cur.c);if(!g||g.t!=='L')return null;const a=g.w[dir],b=g.w[other(dir)];if(a&&isLocked(a)&&b&&!isLocked(b))return b;return a||b}
+function selectWord(id){
+  const o=words.get(id); if(!o)return; dir=o.dir;
+  const e=o.cells.find(([r,c])=>grid[r][c].ent!==grid[r][c].sol)||o.cells[0];
+  cur={r:e[0],c:e[1]};
+}
+function fixCursor(prefer){
+  const g=cell(cur.r,cur.c);
+  if(g&&g.t==='L'){if(!g.w[dir])dir=other(dir);if(!isLocked(activeId()))return}
+  const live=id=>words.has(id)&&!isLocked(id);
+  const ids=(prefer||[]).filter(live);
+  const pick=ids.length?ids[ids.length-1]:[...words.keys()].filter(live).pop();
+  if(pick)selectWord(pick);
+}
+function handleTap(r,c,wid){
+  if(wid){selectWord(wid);render();return}
+  const g=cell(r,c); if(!g)return;
+  if(g.t==='L'){
+    if(cur.r===r&&cur.c===c&&g.w[other(dir)])dir=other(dir);
+    else{cur={r,c};if(!g.w[dir])dir=other(dir)}
+  }else if(g.t==='C'){
+    const ids=[g.a,g.d].filter(Boolean), act=activeId();
+    selectWord(ids.length===2&&ids[0]===act?ids[1]:ids[0]);
+  }
+  render();
+}
+
+/* ---------- entrada ---------- */
+function setEntry(r,c,ch,opts={}){
+  if(lockedCell(r,c))return;
+  const g=cell(r,c); if(!g||g.t!=='L')return;
+  g.ent=ch; g.ink=opts.ink||null; g.read=opts.read||null; g.hint=!!opts.hint;
+}
+function advance(){
+  const id=activeId(), o=words.get(id); if(!o)return;
+  const i=o.cells.findIndex(([r,c])=>r===cur.r&&c===cur.c);
+  let nx=o.cells.slice(i+1).find(([r,c])=>!grid[r][c].ent);
+  if(!nx&&i+1<o.cells.length)nx=o.cells[i+1];
+  if(nx)cur={r:nx[0],c:nx[1]};
+}
+function typeLetter(ch){
+  if(!playing||paused||busy)return;
+  const {r,c}=cur; if(!isL(r,c))return;
+  setEntry(r,c,ch); advance(); render(); check(r,c);
+}
+function backspace(){
+  if(!playing||paused||busy)return;
+  const g=cell(cur.r,cur.c); if(!g||g.t!=='L')return;
+  if(g.ent){setEntry(cur.r,cur.c,'');}
+  else{
+    const o=words.get(activeId()); if(o){const i=o.cells.findIndex(([r,c])=>r===cur.r&&c===cur.c);if(i>0){cur={r:o.cells[i-1][0],c:o.cells[i-1][1]};setEntry(cur.r,cur.c,'');}}
+  }
+  render();
+}
+function moveArrow(dr,dc){
+  let r=cur.r+dr,c=cur.c+dc;
+  while(inB(r,c)&&!isL(r,c)){r+=dr;c+=dc}
+  if(inB(r,c)){cur={r,c};const d=dc?'a':'d';const g=grid[r][c];dir=g.w[d]?d:other(d)}
+  render();
+}
+function nextWord(back){
+  const ids=[...words.keys()].sort((a,b)=>{const A=words.get(a).clueAt,B=words.get(b).clueAt;return A[0]-B[0]||A[1]-B[1]});
+  if(!ids.length)return;
+  const i=ids.indexOf(activeId());
+  selectWord(ids[(i+(back?-1:1)+ids.length)%ids.length]);render();
+}
+
+/* ---------- conferência e pontuação ---------- */
+function check(r,c){
+  const g=cell(r,c); if(!g||g.t!=='L')return;
+  const done=[], wrong=[];
+  for(const id of [g.w.a,g.w.d]){
+    if(isLocked(id))continue;
+    if(!id)continue; const o=words.get(id);
+    if(!o.cells.every(([r,c])=>grid[r][c].ent))continue;
+    if(o.cells.every(([r,c])=>grid[r][c].ent===grid[r][c].sol))done.push(id);
+    else wrong.push(o);
+  }
+  if(wrong.length){
+    wrong.forEach(o=>o.cells.forEach(([r,c])=>{if(grid[r][c].ent!==grid[r][c].sol)badCells.add(r*COLS+c)}));
+    render(); setTimeout(()=>{badCells.clear();render()},700);
+  }
+  if(done.length)solve(done);
+}
+function solve(ids){
+  busy=true;
+  const now=performance.now();
+  combo=(now-lastSolve<R.win())?Math.min(combo+1,5):1; lastSolve=now; bestCombo=Math.max(bestCombo,combo);
+  let pts=0;
+  for(const id of ids){
+    const o=words.get(id);
+    pts+=o.w.length*10;
+    timeLeft+=R.bonus(o.w.length);
+    solved++;
+    o.cells.forEach(([r,c])=>goodCells.add(r*COLS+c));
+  }
+  pts=Math.round(pts*combo*LV.mult*(1+.1*(stage-1))); if(ids.length>1)pts=Math.round(pts*1.5);
+  score+=pts;
+  stageCheck();
+  popup(`+${pts}${combo>1?'  ×'+combo:''}${ids.length>1?'  DUPLA':''}`);
+  render();
+  setTimeout(()=>{
+    goodCells.clear();
+    const rp=replaceWords(ids,true);
+    giftLetters(rp.added);
+    const added=rp.added.concat(fill());
+    if(rp.kept.some(id=>ids.includes(id)))toast('Sem substituta: a palavra fica travada até você resolver uma que a cruza.');
+    fixCursor(added);
+    busy=false; render();
+  },520);
+}
+function popup(t){
+  const el=document.createElement('div');el.className='pop';el.textContent=t;
+  $('#board').appendChild(el);setTimeout(()=>el.remove(),1000);
+}
+function hint(){
+  if(!playing||paused||busy)return;
+  if(isLocked(activeId()))fixCursor();
+  const o=words.get(activeId()); if(!o)return;
+  let tgt=null; const g=cell(cur.r,cur.c);
+  if(g&&g.ent!==g.sol)tgt=[cur.r,cur.c]; else tgt=o.cells.find(([r,c])=>grid[r][c].ent!==grid[r][c].sol);
+  if(!tgt)return;
+  setEntry(tgt[0],tgt[1],grid[tgt[0]][tgt[1]].sol,{hint:true});
+  timeLeft=Math.max(0,timeLeft-R.cost(LV.hint)); cur={r:tgt[0],c:tgt[1]}; advance(); render(); check(tgt[0],tgt[1]);
+}
+function skip(){
+  if(!playing||paused||busy)return;
+  const id=activeId(); if(!id)return;
+  timeLeft=Math.max(0,timeLeft-R.cost(LV.skip)); combo=1;
+  const rp=replaceWords([id],false);
+  if(rp.kept.includes(id)){timeLeft+=R.cost(LV.skip);toast('Ainda não há outra palavra que caiba aqui.');render();return}
+  giftLetters(rp.added);const added=rp.added.concat(fill()); fixCursor(added); render();
+}
+
+/* ---------- render ---------- */
+function render(){
+  const act=activeId(), ao=act?words.get(act):null;
+  const inw=new Set(ao?ao.cells.map(([r,c])=>r*COLS+c):[]);
+  const now=performance.now();
+  let h='';
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const g=grid[r][c], k=r*COLS+c, at=`data-r="${r}" data-c="${c}"`;
+    if(!g){h+=`<div class="cell x" ${at}></div>`;continue}
+    if(g.t==='C'){
+      const parts=[];
+      for(const d of ['a','d'])if(g[d]){
+        const o=words.get(g[d]);
+        const cls=['cq'];if(o.locked)cls.push('lk');if(g[d]===act)cls.push('on');else if(now-o.born<2500&&o.born>startedAt)cls.push('new');
+        if(d==='d')cls.push('d1');
+        parts.push(`<div class="${cls.join(' ')}" data-w="${o.id}">${esc(o.clue)}<span class="ar ${d}" aria-hidden="true">${d==='a'?'▸':'▾'}</span></div>`);
+      }
+      h+=`<div class="cell clue" ${at}>${parts.join('')}</div>`;continue;
+    }
+    const cls=['cell','L'];
+    if(inw.has(k))cls.push('inw');
+    if(cur.r===r&&cur.c===c)cls.push('cur');
+    if(g.hint)cls.push('hint');
+    if(lockedCell(r,c))cls.push('lock');
+    if(goodCells.has(k))cls.push('good');
+    if(badCells.has(k))cls.push('bad');
+    h+=`<div class="${cls.join(' ')}" ${at}>${g.ent&&!g.ink?`<span class="ch">${g.ent}</span>`:''}${g.read?`<i class="rd">${g.read}</i>`:''}</div>`;
+  }
+  gridEl.innerHTML=h;
+  drawInk();
+  const rare=[...words.values()].filter(o=>RARE.has(o.w)).map(o=>o.w).sort((a,b)=>a.length-b.length||a.localeCompare(b));
+  const bc=$('#banco');
+  if(rare.length){const g={};rare.forEach(w=>(g[w.length]=g[w.length]||[]).push(w.toLowerCase()));bc.innerHTML='<b>BANCO</b> '+Object.entries(g).map(([n,ws])=>`${n}/${ws.join(' — ')}`).join('. ')+'.';bc.hidden=false}else bc.hidden=true;
+  const cb=$('#cluebar');
+  if(ao&&ao.locked)cb.innerHTML=`<span class="dir">✓ travada</span><span class="ct">${esc(ao.clue)}: ${ao.w}</span><span class="len">sai quando uma palavra que a cruza for resolvida</span>`;
+  else if(ao)cb.innerHTML=`<span class="dir">${ao.dir==='a'?'→ horizontal':'↓ vertical'}</span><span class="ct">${esc(ao.clue)}</span><span class="pat" aria-label="${ao.w.length} letras">${ao.cells.map(([r,c])=>`<i class="${r===cur.r&&c===cur.c?'cu':''}">${grid[r][c].ent||''}</i>`).join('')}</span>`;
+  else cb.innerHTML=`<span class="ct" style="color:var(--mute)">Toque numa casa ou numa dica para começar.</span>`;
+  hud();
+}
+function fmt(s){s=Math.max(0,Math.ceil(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return [h,m,x].map(n=>String(n).padStart(2,'0')).join(':')}
+function hud(){
+  const t=$('#timer');t.textContent=fmt(timeLeft);t.classList.toggle('low',playing&&timeLeft<=10);
+  $('#sScore').textContent=score.toLocaleString('pt-BR');
+  $('#sCombo').textContent='×'+(playing&&performance.now()-lastSolve<R.win()?combo:1);
+  $('#cHint').textContent='−'+R.cost(LV.hint)+'s';$('#cSkip').textContent='−'+R.cost(LV.skip)+'s';$('#sStage').textContent=stage;$('#sClock').textContent='fase · ⏱×'+R.clock().toFixed(2).replace('.',',');
+  $('#sBest').textContent=(ranking[0]?.s||0).toLocaleString('pt-BR');
+  $('#tab').textContent=LV.name.toUpperCase()+' · Nº '+String(solved).padStart(3,'0');
+}
+
+/* ---------- tinta ---------- */
+let dpr=1, cw=1, chh=1;
+function resize(){
+  const r=gridBox.getBoundingClientRect(); dpr=window.devicePixelRatio||1;
+  canvas.width=Math.round(r.width*dpr); canvas.height=Math.round(r.height*dpr);
+  cw=r.width/COLS; chh=r.height/ROWS;
+  document.documentElement.style.setProperty('--cf',Math.max(7,Math.min(12.5,cw*.165))+'px');
+  document.documentElement.style.setProperty('--lf',(cw*.6)+'px');
+  drawInk();
+}
+function stroke(pts,color,w,alpha=1){
+  if(!pts.length)return;
+  ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=w;ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+  if(pts.length===1)ctx.lineTo(pts[0][0]+.1,pts[0][1]);
+  for(let i=1;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;ctx.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}
+  if(pts.length>1)ctx.lineTo(pts[pts.length-1][0],pts[pts.length-1][1]);
+  ctx.stroke();ctx.globalAlpha=1;
+}
+const INK='#1739d6', RED='#d9262c';
+function drawInk(){
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);
+  const lw=Math.max(2.2,cw*.075);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const g=grid[r][c];if(g&&g.t==='L'&&g.ink)for(const s of g.ink)stroke(s.map(p=>[(c+p.x)*cw,(r+p.y)*chh]),INK,lw)}
+  for(const s of pend.strokes)stroke(s.map(p=>[p.x*cw,p.y*chh]),INK,lw);
+  const now=performance.now();
+  marks=marks.filter(m=>!(m.t&&now-m.t>5200));
+  for(const m of marks){const a=m.t?Math.min(1,Math.max(0,1-(now-m.t-4000)/1200)):1;stroke(m.pts.map(p=>[p.x*cw,p.y*chh]),RED,lw*1.05,a)}
+}
+
+/* ---------- reconhecimento ($P point-cloud) ---------- */
+const NP=32;
+function arc(cx,cy,rx,ry,a0,a1,st=14){const o=[];for(let k=0;k<=st;k++){const a=(a0+(a1-a0)*k/st)*Math.PI/180;o.push([cx+rx*Math.cos(a),cy+ry*Math.sin(a)])}return o}
+const PB=[[0,0],[0,100]];
+const GLYPHS={
+A:[[[0,100],[40,0],[80,100]],[[18,60],[62,60]]],
+B:[PB,[[0,0],[40,0],...arc(40,24,22,24,-90,90),[0,48]],[[0,48],[45,48],...arc(45,74,25,26,-90,90),[0,100]]],
+C:[arc(50,50,45,50,-40,-320)],
+D:[PB,[[0,0],[25,0],...arc(25,50,45,50,-90,90),[0,100]]],
+E:[[[70,0],[0,0],[0,100],[70,100]],[[0,50],[55,50]]],
+F:[[[70,0],[0,0],[0,100]],[[0,50],[55,50]]],
+G:[[...arc(50,50,45,50,-40,-360),[55,50]]],
+H:[PB,[[70,0],[70,100]],[[0,50],[70,50]]],
+I:[[[0,0],[0,100]]],
+J:[[[60,0],[60,70],...arc(30,70,30,30,0,180)]],
+K:[PB,[[65,0],[0,58]],[[22,40],[65,100]]],
+L:[[[0,0],[0,100],[60,100]]],
+M:[[[0,100],[0,0],[40,60],[80,0],[80,100]]],
+N:[[[0,100],[0,0],[70,100],[70,0]]],
+O:[arc(40,50,40,50,0,360,22)],
+P:[PB,[[0,0],[35,0],...arc(35,25,25,25,-90,90),[0,50]]],
+Q:[arc(40,50,40,50,0,360,22),[[45,70],[88,106]]],
+R:[PB,[[0,0],[35,0],...arc(35,25,25,25,-90,90),[0,50]],[[25,50],[65,100]]],
+S:[[...arc(40,25,35,25,-15,-270),...arc(40,75,35,25,-90,165)]],
+T:[[[0,0],[70,0]],[[35,0],[35,100]]],
+U:[[[0,0],[0,65],...arc(35,65,35,35,180,0),[70,0]]],
+V:[[[0,0],[35,100],[70,0]]],
+W:[[[0,0],[20,100],[45,30],[70,100],[90,0]]],
+X:[[[0,0],[70,100]],[[70,0],[0,100]]],
+Y:[[[0,0],[35,50],[70,0]],[[35,50],[35,100]]],
+Z:[[[0,0],[70,0],[0,100],[70,100]]]
+};
+const EXTRA={I:[[[-20,0],[20,0]],[[0,0],[0,100]],[[-20,100],[20,100]]],M:[[[0,100],[10,0],[40,100],[70,0],[80,100]]],A:[[[0,100],[40,0],[80,100]],[[22,55],[58,55]]]};
+function pdist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function pathLen(p){let d=0;for(let i=1;i<p.length;i++)if(p[i].id===p[i-1].id)d+=pdist(p[i-1],p[i]);return d}
+function resample(points,n){
+  const pts=points.slice(),I=pathLen(pts)/(n-1);let D=0;const out=[pts[0]];
+  for(let i=1;i<pts.length;i++){
+    if(pts[i].id!==pts[i-1].id)continue;
+    const d=pdist(pts[i-1],pts[i]);
+    if(d>0&&D+d>=I){const t=(I-D)/d,q={x:pts[i-1].x+t*(pts[i].x-pts[i-1].x),y:pts[i-1].y+t*(pts[i].y-pts[i-1].y),id:pts[i].id};out.push(q);pts.splice(i,0,q);D=0}
+    else D+=d;
+  }
+  while(out.length<n)out.push(pts[pts.length-1]);
+  return out.slice(0,n);
+}
+function normalize(points){
+  if(pathLen(points)<1e-6)return null;
+  let p=resample(points,NP);
+  let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9;for(const q of p){mnx=Math.min(mnx,q.x);mny=Math.min(mny,q.y);mxx=Math.max(mxx,q.x);mxy=Math.max(mxy,q.y)}
+  const s=Math.max(mxx-mnx,mxy-mny)||1;p=p.map(q=>({x:(q.x-mnx)/s,y:(q.y-mny)/s,id:q.id}));
+  let cx=0,cy=0;for(const q of p){cx+=q.x;cy+=q.y}cx/=p.length;cy/=p.length;
+  return p.map(q=>({x:q.x-cx,y:q.y-cy,id:q.id}));
+}
+function cloudDist(a,b,start){
+  const n=a.length,m=new Array(n).fill(false);let sum=0,i=start;
+  do{let idx=-1,min=Infinity;for(let j=0;j<n;j++)if(!m[j]){const d=pdist(a[i],b[j]);if(d<min){min=d;idx=j}}m[idx]=true;sum+=(1-((i-start+n)%n)/n)*min;i=(i+1)%n}while(i!==start);
+  return sum;
+}
+function greedy(a,b){const step=Math.floor(Math.pow(NP,.5));let min=Infinity;for(let i=0;i<NP;i+=step)min=Math.min(min,cloudDist(a,b,i),cloudDist(b,a,i));return min}
+const toPts=(strokes,shear=0)=>{const o=[];strokes.forEach((s,id)=>s.forEach(([x,y])=>o.push({x:x+shear*(100-y),y,id})));return o};
+const TEMPL=[];
+for(const [ch,st] of Object.entries(GLYPHS)){for(const sh of [0,.2,-.12])TEMPL.push({ch,p:normalize(toPts(st,sh))})}
+for(const [ch,st] of Object.entries(EXTRA))TEMPL.push({ch,p:normalize(toPts(st))});
+function recognize(strokes){
+  const pts=[];strokes.forEach((s,id)=>s.forEach(q=>pts.push({x:q.x,y:q.y,id})));
+  const cand=normalize(pts);if(!cand)return [];
+  const best={};for(const t of TEMPL){const d=greedy(cand,t.p);if(!(t.ch in best)||d<best[t.ch])best[t.ch]=d}
+  return Object.entries(best).map(([ch,d])=>({ch,d})).sort((a,b)=>a.d-b.d);
+}
+
+/* ---------- caneta / marcador / borracha ---------- */
+const pend={key:null,r:0,c:0,strokes:[],timer:0};
+let drawing=null, raf=0;
+const toGrid=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*COLS,y:(e.clientY-r.top)/r.height*ROWS}};
+const redraw=()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;drawInk()})};
+function eraseAt(p){
+  if(!playing||paused||busy)return;
+  const r=Math.floor(p.y),c=Math.floor(p.x),g=cell(r,c);
+  if(g&&g.t==='L'&&g.ent){setEntry(r,c,'');render()}
+}
+function finalize(){
+  clearTimeout(pend.timer);
+  if(pend.key===null)return;
+  const {r,c}=pend,strokes=pend.strokes;
+  pend.key=null;pend.strokes=[];
+  const g=cell(r,c);
+  if(!playing||paused||busy||!g||g.t!=='L'){drawInk();return}
+  const ranked=recognize(strokes);
+  if(!ranked.length){drawInk();return}
+  // tolerância: se a letra esperada estiver entre as 3 mais próximas e perto da 1ª, ela vale
+  let ch=ranked[0].ch;
+  const ei=ranked.findIndex(x=>x.ch===g.sol);
+  if(ei>0&&ei<3&&ranked[ei].d<=ranked[0].d*1.3)ch=g.sol;
+  setEntry(r,c,ch,{ink:strokes.map(s=>s.map(p=>({x:p.x-c,y:p.y-r}))),read:ch});
+  cur={r,c};if(!g.w[dir])dir=other(dir);
+  render();check(r,c);
+}
+canvas.addEventListener('pointerdown',e=>{
+  if(mode==='key')return;
+  e.preventDefault();canvas.setPointerCapture(e.pointerId);
+  const p=toGrid(e);
+  if(mode==='erase'||(e.pointerType==='pen'&&(e.buttons&32))){drawing={erase:true};eraseAt(p);return}
+  if(mode==='mark'){drawing={mark:{pts:[p],t:0}};marks.push(drawing.mark);redraw();return}
+  const r=Math.floor(p.y),c=Math.floor(p.x),key=r*COLS+c;
+  if(pend.key!==null&&pend.key!==key)finalize();
+  clearTimeout(pend.timer);
+  if(pend.key===null){
+    pend.key=key;pend.r=r;pend.c=c;pend.strokes=[];
+    const g=cell(r,c);if(g&&g.t==='L'&&g.ent&&playing&&!busy){g.ent='';g.ink=null;g.read=null;g.hint=false;render()}
+  }
+  drawing={pen:[p]};pend.strokes.push(drawing.pen);redraw();
+});
+canvas.addEventListener('pointermove',e=>{
+  if(!drawing)return;
+  const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];
+  if(drawing.erase){eraseAt(toGrid(e));return}
+  const arr=drawing.pen||drawing.mark.pts;
+  for(const ev of evs)arr.push(toGrid(ev));
+  redraw();
+});
+function endStroke(){
+  if(!drawing)return;
+  if(drawing.mark){drawing.mark.t=performance.now();fadeLoop()}
+  if(drawing.pen){
+    const s=drawing.pen;let len=0;for(let i=1;i<s.length;i++)len+=Math.hypot(s[i].x-s[i-1].x,s[i].y-s[i-1].y);
+    if(pend.strokes.length===1&&len<.12){
+      const {r,c}=pend;pend.key=null;pend.strokes=[];
+      const cq=document.elementsFromPoint?null:null;
+      handleTap(r,c);if(mode==='pen')drawInk();
+    }else pend.timer=setTimeout(finalize,650);
+  }
+  drawing=null;
+}
+canvas.addEventListener('pointerup',endStroke);
+canvas.addEventListener('pointercancel',endStroke);
+let fading=false;
+function fadeLoop(){if(fading)return;fading=true;const step=()=>{drawInk();if(marks.some(m=>m.t)){requestAnimationFrame(step)}else fading=false};requestAnimationFrame(step)}
+
+/* ---------- modos e botões ---------- */
+function setMode(m){
+  mode=m;save(':mode',m);
+  document.querySelectorAll('#modes button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));
+  canvas.classList.toggle('live',m!=='key');
+  if(m!=='pen')finalize();
+}
+$('#modes').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.mode)});
+document.querySelector('.acts').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const a=b.dataset.act;
+  if(a==='hint')hint();else if(a==='skip')skip();else if(a==='pause')togglePause();
+});
+gridEl.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='pen'&&mode==='key'){setMode('pen');toast('Caneta detectada. Modo caneta ativo.')}
+});
+gridEl.addEventListener('click',e=>{
+  const q=e.target.closest('.cq'), el=e.target.closest('.cell');if(!el)return;
+  handleTap(+el.dataset.r,+el.dataset.c,q?+q.dataset.w:0);
+  if(mode==='key'&&playing)kbd.focus({preventScroll:true});
+});
+const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();
+document.addEventListener('keydown',e=>{
+  if(e.target.id==='ini')return;
+  if(e.key==='Escape'&&playing){togglePause();return}
+  if(!playing||paused||e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=norm(e.key);
+  if(/^[A-Z]$/.test(k)&&e.key.length===1){e.preventDefault();typeLetter(k)}
+  else if(e.key==='Backspace'||e.key==='Delete'){e.preventDefault();backspace()}
+  else if(e.key==='ArrowRight'){e.preventDefault();moveArrow(0,1)}
+  else if(e.key==='ArrowLeft'){e.preventDefault();moveArrow(0,-1)}
+  else if(e.key==='ArrowDown'){e.preventDefault();moveArrow(1,0)}
+  else if(e.key==='ArrowUp'){e.preventDefault();moveArrow(-1,0)}
+  else if(e.key==='Tab'){e.preventDefault();nextWord(e.shiftKey)}
+  else if(e.key===' '){e.preventDefault();const g=cell(cur.r,cur.c);if(g&&g.w[other(dir)]){dir=other(dir);render()}}
+});
+kbd.addEventListener('input',()=>{
+  const v=norm(kbd.value);kbd.value='';
+  for(const ch of v)if(/[A-Z]/.test(ch))typeLetter(ch);
+});
+function toast(t){const el=document.createElement('div');el.className='pop';el.style.cssText='font-size:15px;color:#fff;text-shadow:none;background:#000;padding:8px 12px;border-radius:6px;top:8%;white-space:normal;width:min(90%,420px);text-align:center;animation-duration:2.8s';el.textContent=t;$('#board').appendChild(el);setTimeout(()=>el.remove(),2800)}
+
+/* ---------- jogo ---------- */
+let startedAt=0;
+const ov=$('#ov');
+function rankTable(hi){
+  if(!ranking.length)return '<p>Nenhum recorde ainda.</p>';
+  return `<table class="rank">${ranking.map((x,i)=>`<tr class="${i===hi?'me':''}"><td>${i+1}º</td><td class="n">${esc(x.n)}</td><td>${x.f?'fase '+x.f+' · ':''}${x.w} pal.</td><td class="s">${x.s.toLocaleString('pt-BR')}</td></tr>`).join('')}</table>`;
+}
+function levelCards(){
+  return `<div class="lvls" role="radiogroup" aria-label="Dificuldade">${Object.entries(LEVELS).map(([k,v])=>{const best=(load(':rank-'+k)||[])[0];return `<button class="lv${k===level?' on':''}" role="radio" aria-checked="${k===level}" data-lv="${k}"><b>${v.name}</b><span>${v.desc}</span><em>${best?'Recorde '+best.s.toLocaleString('pt-BR'):'Sem recorde'}</em></button>`}).join('')}</div>`;
+}
+function showStart(){
+  ov.hidden=false;
+  ov.innerHTML=`<div class="panel" role="dialog" aria-label="Início">
+    <h1>Cruzada Sem Fim</h1>
+    <p>Cada palavra resolvida sai do tabuleiro e outra entra cruzando as que ficaram. As letras compartilhadas continuam escritas. Acertos dão tempo e, em sequência, combo até ×5.</p>
+    <h2>Dificuldade</h2>${levelCards()}
+    <h2>Recordes · <span id="rkname">${LV.name}</span></h2><div id="rk">${rankTable(-1)}</div>
+    <div class="row"><button class="btn" data-go="start">Começar</button></div>
+  </div>`;
+}
+function startGame(){
+  emptyBoard();recent=[];score=0;combo=1;bestCombo=1;lastSolve=-1e9;timeLeft=LV.time;solved=0;stage=1;DICT=dictFor();marks=[];
+  startedAt=performance.now()+1e9; fill(); startedAt=performance.now();
+  fixCursor();playing=true;paused=false;busy=false;ov.hidden=true;ov.innerHTML='';
+  $('#board').classList.remove('blur');render();
+  if(mode==='key')kbd.focus({preventScroll:true});
+}
+function togglePause(){
+  if(!playing)return;
+  paused=!paused;$('#board').classList.toggle('blur',paused);
+  document.querySelector('[data-act="pause"]').textContent=paused?'Continuar':'Pausar';
+  if(paused){ov.hidden=false;ov.innerHTML=`<div class="panel"><h1>Pausado</h1><p>O tabuleiro fica escondido enquanto o tempo está parado.</p><div class="row"><button class="btn" data-go="resume">Continuar</button></div></div>`}
+  else{ov.hidden=true;ov.innerHTML=''}
+}
+function gameOver(){
+  playing=false;finalize();
+  const qualifies=score>0&&(ranking.length<10||score>ranking[ranking.length-1].s);
+  ov.hidden=false;
+  ov.innerHTML=`<div class="panel" role="dialog" aria-label="Fim de jogo">
+    <h2>Tempo esgotado · ${LV.name}</h2>
+    <div class="big">${score.toLocaleString('pt-BR')}</div>
+    <p>Fase ${stage} · ${solved} palavra${solved===1?'':'s'} · combo máximo ×${bestCombo}</p>
+    ${qualifies?`<h2>Entrou no ranking. Suas iniciais:</h2><div class="row"><input id="ini" maxlength="3" value="${esc(load(':ini')||'')}" aria-label="Iniciais"><button class="btn" data-go="save">Salvar</button></div>`:''}
+    <h2>Recordes</h2><div id="rk">${rankTable(-1)}</div>
+    <div class="row"><button class="btn${qualifies?' ghost':''}" data-go="start">Jogar de novo</button><button class="btn ghost" data-go="menu">Trocar dificuldade</button></div>
+  </div>`;
+  if(qualifies)setTimeout(()=>{const i=$('#ini');i&&i.focus();i&&i.select()},50);
+  hud();
+}
+function saveScore(){
+  const i=$('#ini');if(!i)return;
+  const n=(norm(i.value).replace(/[^A-Z]/g,'')||'???').slice(0,3);save(':ini',n);
+  const entry={n,s:score,w:solved,f:stage,t:Date.now()};
+  ranking.push(entry);ranking.sort((a,b)=>b.s-a.s);ranking=ranking.slice(0,10);save(RK(),ranking);
+  i.parentElement.previousElementSibling.remove();i.parentElement.remove();
+  $('#rk').innerHTML=rankTable(ranking.indexOf(entry));
+  ov.querySelector('[data-go="start"]').classList.remove('ghost');hud();
+}
+ov.addEventListener('click',e=>{
+  const b=e.target.closest('[data-go],[data-lv]');if(!b)return;
+  const g=b.dataset.go;
+  if(b.dataset.lv){setLevel(b.dataset.lv);ov.querySelectorAll('.lv').forEach(x=>{const on=x.dataset.lv===level;x.classList.toggle('on',on);x.setAttribute('aria-checked',on)});$('#rkname').textContent=LV.name;$('#rk').innerHTML=rankTable(-1);hud();return}
+  if(g==='menu'){showStart();return}
+  if(g==='start')startGame();else if(g==='resume')togglePause();else if(g==='save')saveScore();
+});
+ov.addEventListener('keydown',e=>{if(e.target.id==='ini'&&e.key==='Enter')saveScore()});
+
+let lastT=performance.now();
+function tick(t){
+  const dt=Math.min(.25,(t-lastT)/1000);lastT=t;
+  if(playing&&!paused){timeLeft-=dt*R.clock();if(timeLeft<=0){timeLeft=0;gameOver()}}
+  hud();requestAnimationFrame(tick);
+}
+
+/* ---------- boot ---------- */
+emptyBoard();startedAt=performance.now()+1e9;fill();fixCursor();
+setMode(mode);
+new ResizeObserver(resize).observe(gridBox);
+render();resize();showStart();
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
