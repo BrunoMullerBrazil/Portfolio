@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import { Inter, Anton, Playfair_Display, Space_Mono } from "next/font/google";
+import { Inter, Anton, Playfair_Display, Space_Mono, Caveat } from "next/font/google";
 
 export const inter = Inter({
   subsets: ["latin"],
@@ -46,4 +46,13 @@ export const gcgrind = localFont({
   src: "../public/fonts/gcgrind.woff2",
   variable: "--font-gcgrind",
   display: "swap",
+});
+
+// Used only on /briefing — handwritten notes over the printed briefing.
+export const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["500", "700"],
+  variable: "--font-caveat",
+  display: "swap",
+  preload: false, // subpages only
 });
