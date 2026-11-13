@@ -318,6 +318,27 @@ html.cur .cursor{display:block}
  .map{position:relative;left:auto;top:auto;width:150%;margin-left:-25%;transform:translate(var(--tx),0) perspective(1200px) rotateX(32deg) rotateZ(-12deg) scale(var(--sc))!important;margin-top:-22%;margin-bottom:-32%}
  .cards{position:relative;left:auto;bottom:auto;width:auto;margin:0 20px}.legend{position:relative;right:auto;bottom:auto;margin:18px 20px 0}}
 @media(prefers-reduced-motion:reduce){.map,.gcard,.gcard .more{transition:none}.roadlink{animation:none}}
+
+.ct{background:#0d0a09;color:var(--cream);padding:150px 0 0;overflow:hidden}
+.ct .in{max-width:77.5rem;margin:0 auto;padding:0 max(24px,env(safe-area-inset-left,0px))}
+.ct .lab{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;margin:0 0 1.1rem;color:var(--amber)}
+.ct h2{margin:0;font-size:clamp(2.6rem,6vw,5.6rem);font-weight:500;letter-spacing:-.04em;line-height:1;max-width:12ch;text-wrap:balance}
+.ct h2 span{color:#6f6560}
+.ct-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:56px;align-items:end}
+.ct .sub{margin:1.6rem 0 2rem;font-size:1.1rem;color:rgba(246,239,233,.65);max-width:40ch}
+.ct .pill.red{padding:1rem 1.5rem;font-size:1rem}
+.ct .pill.red .arr{background:rgba(255,255,255,.2)}
+.ct-list{display:grid;border-top:1px solid rgba(255,255,255,.12);margin:0}
+.ct-list div{display:grid;grid-template-columns:8.5rem 1fr;gap:16px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+.ct-list dt{color:rgba(246,239,233,.5);font-size:.9rem}
+.ct-list dd{margin:0;font-size:1.05rem}
+.ct-list a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(217,58,38,.6)}
+.foot{max-width:77.5rem;margin:120px auto 0;padding:0 max(24px,env(safe-area-inset-left,0px));display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.85rem;color:rgba(246,239,233,.45);border-top:1px solid rgba(255,255,255,.08);padding-top:22px}
+.foot a{color:inherit;text-decoration:none}
+.bigmark{margin:24px 0 0;padding:0 max(14px,env(safe-area-inset-left,0px));font-weight:700;letter-spacing:-.07em;line-height:.74;font-size:min(29vw,27rem);color:var(--cream);user-select:none;overflow:hidden;white-space:nowrap}
+.bigmark i{font-style:normal;color:var(--red-btn);display:inline-block}
+.s{display:none}
+@media(max-width:900px){.l{display:none}.s{display:inline}.ct{padding-top:96px}.ct-grid{grid-template-columns:1fr;gap:36px}.ct-list div{grid-template-columns:6.5rem 1fr}.foot{margin-top:72px}.bigmark{font-size:41vw}}
 </style>
 <style id="overlays">
 /* Overlays com a identidade ISLA: o ponto vermelho do logo + texto limpo, sem pílula de vidro */
@@ -449,6 +470,112 @@ html.mo .hi.h-in{clip-path:inset(0 0 0 0 round 0)}
 /* reduced-motion: tudo pronto (a classe .mo nem é aplicada); garante a regra global */
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
+<style id="motion2">
+/* títulos: contato entra no mesmo gesto */
+html.mo .ct h2{clip-path:inset(-.3em -.15em 100% -.15em);translate:0 .35em;transition:clip-path var(--m-l) var(--e-out) 80ms,translate var(--m-l) var(--e-out) 80ms}
+html.mo .ct h2 > span{opacity:0;transition:opacity var(--m-l) var(--e-out) 360ms}
+html.mo .ct .lab{opacity:0;transition:opacity var(--m-s) var(--e-out)}
+html.mo .ct .t-in h2{clip-path:inset(-.3em -.15em -.3em -.15em);translate:0 0}
+html.mo .ct .t-in h2 > span,html.mo .ct .t-in .lab{opacity:1}
+
+/* menu: o ponto vermelho desliza até a seção ativa */
+html.mo .menu a.lk.on::after{display:none}
+.menu .tab .ind{display:none}
+html.mo .menu .tab .ind{display:block;position:absolute;left:0;bottom:7px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--red-btn);
+  translate:var(--ind-x,0px) 0;opacity:var(--ind-o,0);transition:translate var(--m-m) var(--e-out),opacity var(--m-s) var(--e-out);pointer-events:none}
+
+/* celular: a barra entra com mola; os blocos do painel em cascata */
+@keyframes mo-dock{from{translate:0 140%}to{translate:0 0}}
+html.mo .dock{animation:mo-dock 640ms var(--e-mola) 600ms both}
+html.mo .bar .lens{transition:transform .55s cubic-bezier(.3,1.5,.5,1),opacity var(--m-s) var(--e-out),background .45s,border-color .45s}
+html.mo .sheet .tile,html.mo .sheet .pill,html.mo .sheet .wa{opacity:0;translate:0 8px;transition:opacity var(--m-xs) var(--e-out),translate var(--m-xs) var(--e-out)}
+html.mo .dock.open + .sheet :is(.tile,.pill,.wa){opacity:1;translate:0 0;transition:opacity 260ms var(--e-out),translate 260ms var(--e-out)}
+html.mo .dock.open + .sheet .tile:nth-child(1){transition-delay:80ms}
+html.mo .dock.open + .sheet .tile:nth-child(2){transition-delay:120ms}
+html.mo .dock.open + .sheet .tile:nth-child(3){transition-delay:160ms}
+html.mo .dock.open + .sheet .tile:nth-child(4){transition-delay:200ms}
+html.mo .dock.open + .sheet .tile:nth-child(5){transition-delay:240ms}
+html.mo .dock.open + .sheet .tile:nth-child(6){transition-delay:280ms}
+html.mo .dock.open + .sheet .pill{transition-delay:320ms}
+html.mo .dock.open + .sheet .wa{transition-delay:360ms}
+
+/* toque: tudo que é botão afunda levemente ao pressionar */
+html.mo :is(.pill,.nav-b,.gcard,.plus,.tile){transition:scale var(--m-xs) var(--e-out),background .3s,color .3s,border-color .3s,transform .4s cubic-bezier(.2,.8,.2,1)}
+html.mo :is(.pill,.nav-b,.gcard,.plus,.tile):active{scale:.97}
+html.mo .pill .arr{transition:translate var(--m-s) var(--e-out)}
+html.mo .pill:hover .arr{translate:2px -2px}
+
+/* conformidade: pino e legenda se acendem juntos */
+html.mo .cf .frame .pin{transition:scale 380ms var(--e-mola),opacity var(--m-s) var(--e-out)}
+html.mo .cf .frame.hl-on .pin:not(.hl){opacity:.35}
+html.mo .cf .frame .pin.hl{scale:1.22}
+html.mo .cf .keys p{transition:opacity var(--m-s) var(--e-out),translate var(--m-m) var(--e-out)}
+html.mo .cf .keys.hl-on p:not(.hl){opacity:.4}
+html.mo .cf .keys p{cursor:default}
+
+/* health insiders: convidados entram por máscara; a grade marca o dia de hoje */
+html.mo .hi .guests .g{clip-path:inset(100% 0 0 0 round 22px);translate:0 var(--m-d2)}
+html.mo .hi .guests .g img{scale:1.08}
+html.mo .hi .guests .g .cap{opacity:0;translate:0 var(--m-d1)}
+html.mo .hi .guests.g-in .g{clip-path:inset(0 0 0 0 round 22px);translate:0 0;transition:clip-path var(--m-l) var(--e-io),translate var(--m-l) var(--e-io)}
+html.mo .hi .guests.g-in .g img{scale:1;transition:scale var(--m-xl) var(--e-out),transform .6s}
+html.mo .hi .guests.g-in .g .cap{opacity:1;translate:0 0;transition:opacity var(--m-m) var(--e-out) 380ms,translate var(--m-m) var(--e-out) 380ms}
+html.mo .hi .guests.g-in .g:nth-child(2){transition-delay:90ms}
+html.mo .hi .guests.g-in .g:nth-child(3){transition-delay:180ms}
+html.mo .hi .guests.g-in .g:nth-child(2) .cap{transition-delay:470ms}
+html.mo .hi .guests.g-in .g:nth-child(3) .cap{transition-delay:560ms}
+@media(min-width:901px){
+ html.mo .hi .tv{position:relative}
+ html.mo .hi .tv > div{position:relative;z-index:1;background:transparent!important;transition:color var(--m-m) var(--e-out)}
+ html.mo .hi .tv::before{content:"";position:absolute;top:0;bottom:0;left:0;width:20%;background:#1a0b06;translate:calc(var(--d,0) * 100%) 0;transition:translate var(--m-l) var(--e-io)}
+}
+
+/* trabalhos: os cases entram da direita (ensinam o arrasto) */
+html.mo .tr .case{opacity:0;translate:40px 0}
+html.mo .tr.c-in .case{opacity:1;translate:0 0;transition:opacity var(--m-m) var(--e-out),translate var(--m-l) var(--e-out)}
+html.mo .tr.c-in .case:nth-child(2){transition-delay:70ms}
+html.mo .tr.c-in .case:nth-child(3){transition-delay:140ms}
+html.mo .tr.c-in .case:nth-child(n+4){transition-delay:210ms}
+@media(max-width:900px){html.mo .tr .case{translate:30px 0}}
+@supports (animation-timeline: view()){
+ @media(min-width:901px){
+  html.mo .tr .case{view-timeline:--cs inline}
+  @keyframes mo-par{from{translate:-5% 0}to{translate:5% 0}}
+  html.mo .tr .case img{scale:1.12;animation:mo-par linear both;animation-timeline:--cs;animation-range:cover 0% cover 100%}
+ }
+}
+
+/* estúdios: a ilha se monta */
+html.mo .est .mapwrap{opacity:0;transition:opacity var(--m-l) var(--e-out)}
+html.mo .est .road{stroke-dasharray:1;stroke-dashoffset:1}
+html.mo .est .pinin{opacity:0;transform:translateY(-12px)}
+html.mo .est .gcard{opacity:0;translate:0 var(--m-d2)}
+html.mo .est.s-in .mapwrap{opacity:1}
+html.mo .est.s-in .road{stroke-dashoffset:0;transition:stroke-dashoffset 1400ms var(--e-io) 300ms}
+html.mo .est.s-in .pinin{opacity:1;transform:none;transition:opacity 420ms var(--e-out) 1200ms,transform 520ms var(--e-mola) 1200ms}
+html.mo .est.s-in .pinw[data-k="sap"] .pinin{transition-delay:1350ms}
+html.mo .est.s-in .gcard{opacity:1;translate:0 0;transition:opacity var(--m-m) var(--e-out) 200ms,translate var(--m-m) var(--e-out) 200ms,background .3s,transform .4s cubic-bezier(.2,.8,.2,1),scale var(--m-xs) var(--e-out)}
+html.mo .est.s-in .gcard:nth-child(2){transition-delay:270ms,270ms,0s,0s,0s}
+@keyframes mo-halo{0%{fill:rgba(210,58,28,0)}40%{fill:rgba(210,58,28,.3)}100%{fill:rgba(210,58,28,0)}}
+html.mo .est.s-in .pinw[data-k="med"]:not(.on) .halo{animation:mo-halo 1100ms var(--e-out) 1700ms 1}
+html.mo .est:not(.s-vis) .roadlink{animation-play-state:paused}
+.pinin{transform-box:fill-box;transform-origin:50% 100%}
+
+/* contato: o ISLA. volta do corte e o ponto acende por último */
+html.mo .ct .ct-list > div,html.mo .ct .pill.red,html.mo .ct .sub{opacity:0;translate:0 var(--m-d1)}
+html.mo .ct.k-in .ct-list > div,html.mo .ct.k-in .pill.red,html.mo .ct.k-in .sub{opacity:1;translate:0 0;transition:opacity var(--m-m) var(--e-out),translate var(--m-m) var(--e-out)}
+html.mo .ct.k-in .sub{transition-delay:200ms}
+html.mo .ct.k-in .pill.red{transition-delay:280ms}
+html.mo .ct.k-in .ct-list > div:nth-child(1){transition-delay:200ms}
+html.mo .ct.k-in .ct-list > div:nth-child(2){transition-delay:270ms}
+html.mo .ct.k-in .ct-list > div:nth-child(3){transition-delay:340ms}
+html.mo .ct.k-in .ct-list > div:nth-child(4){transition-delay:410ms}
+.bigmark .bm{display:inline-block}
+html.mo .bigmark .bm{translate:0 30%}
+html.mo .bigmark i{scale:0;transform-origin:50% 85%}
+html.mo .bigmark.b-in .bm{translate:0 0;transition:translate 1000ms var(--e-io)}
+html.mo .bigmark.b-in i{scale:1;transition:scale 460ms var(--e-mola) 900ms}
+</style>
 </head><body>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -462,8 +589,8 @@ html.mo .hi.h-in{clip-path:inset(0 0 0 0 round 0)}
 </svg>
 
 <!-- menu desktop -->
-<div class="menu dark"><div class="band"></div><nav class="tab" aria-label="Principal"><a class="logo" href="#topo">ISLA<i>.</i></a><a class="lk" href="#para-quem" data-s="para-quem">Para quem</a><a class="lk" href="#conformidade" data-s="conformidade">Conformidade</a><a class="lk" href="#health-insiders" data-s="health-insiders">Health Insiders</a><a class="lk" href="#trabalhos" data-s="trabalhos">Trabalhos</a><a class="lk" href="#estudios" data-s="estudios">Estúdios</a><a class="pill red" href="#contato">Agendar visita</a></nav></div>
-<div class="menu light" id="mlight" aria-hidden="true"><div class="band"></div><nav class="tab"><a class="logo" href="#topo" tabindex="-1">ISLA<i>.</i></a><a class="lk" href="#para-quem" data-s="para-quem" tabindex="-1">Para quem</a><a class="lk" href="#conformidade" data-s="conformidade" tabindex="-1">Conformidade</a><a class="lk" href="#health-insiders" data-s="health-insiders" tabindex="-1">Health Insiders</a><a class="lk" href="#trabalhos" data-s="trabalhos" tabindex="-1">Trabalhos</a><a class="lk" href="#estudios" data-s="estudios" tabindex="-1">Estúdios</a><a class="pill red" href="#contato" tabindex="-1">Agendar visita</a></nav></div>
+<div class="menu dark"><div class="band"></div><nav class="tab" aria-label="Principal"><i class="ind" aria-hidden="true"></i><a class="logo" href="#topo">ISLA<i>.</i></a><a class="lk" href="#para-quem" data-s="para-quem">Para quem</a><a class="lk" href="#conformidade" data-s="conformidade">Conformidade</a><a class="lk" href="#health-insiders" data-s="health-insiders">Health Insiders</a><a class="lk" href="#trabalhos" data-s="trabalhos">Trabalhos</a><a class="lk" href="#estudios" data-s="estudios">Estúdios</a><a class="pill red" href="#contato">Agendar visita</a></nav></div>
+<div class="menu light" id="mlight" aria-hidden="true"><div class="band"></div><nav class="tab"><i class="ind" aria-hidden="true"></i><a class="logo" href="#topo" tabindex="-1">ISLA<i>.</i></a><a class="lk" href="#para-quem" data-s="para-quem" tabindex="-1">Para quem</a><a class="lk" href="#conformidade" data-s="conformidade" tabindex="-1">Conformidade</a><a class="lk" href="#health-insiders" data-s="health-insiders" tabindex="-1">Health Insiders</a><a class="lk" href="#trabalhos" data-s="trabalhos" tabindex="-1">Trabalhos</a><a class="lk" href="#estudios" data-s="estudios" tabindex="-1">Estúdios</a><a class="pill red" href="#contato" tabindex="-1">Agendar visita</a></nav></div>
 
 <!-- menu celular -->
 <div class="dock" id="dock">
@@ -554,11 +681,11 @@ t.addEventListener('click',function(e){if(moved>6){e.preventDefault();e.stopProp
  <linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a2629"/><stop offset="1" stop-color="#0d1417"/></linearGradient>
 </defs>
 <rect x="-3000" y="-3000" width="7000" height="7307" fill="#0f1719"/>
-<path d="M83.7,1932.5 L89.2,1941.7 L120.6,1959.8 L120.7,1979.0 L111.9,1991.7 L114.0,2016.3 L131.1,2035.6 L133.7,2059.6 L156.5,2060.9 L180.5,2078.5 L176.8,2097.2 L159.3,2112.6 L149.0,2132.8 L153.5,2148.6 L174.4,2161.5 L184.9,2190.3 L155.3,2223.4 L154.3,2245.7 L142.6,2257.9 L130.5,2308.8 L137.3,2313.9 L151.6,2300.4 L167.7,2300.9 L181.7,2309.2 L182.6,2327.0 L251.3,2282.1 L260.9,2268.6 L272.2,2200.9 L281.0,2194.1 L294.5,2164.4 L287.4,2146.2 L301.0,2129.6 L295.9,2110.4 L340.2,2050.2 L374.4,2031.9 L411.8,2033.9 L424.0,2042.3 L417.6,2073.4 L431.6,2091.3 L453.0,2092.4 L461.5,2100.7 L482.6,2096.3 L497.4,2078.4 L512.8,2074.7 L519.0,2056.2 L527.2,2055.0 L531.6,2044.9 L507.7,2012.1 L519.0,1988.3 L534.7,1971.0 L550.6,1973.5 L556.8,1980.9 L565.1,1974.2 L554.8,1932.3 L521.3,1921.6 L509.8,1897.6 L473.0,1908.6 L452.8,1876.1 L463.4,1857.5 L450.1,1871.8 L434.6,1866.1 L425.9,1854.8 L419.6,1828.4 L420.2,1773.3 L441.4,1718.0 L441.4,1697.6 L484.1,1621.5 L537.4,1571.7 L562.9,1450.2 L614.2,1346.1 L680.9,1256.4 L691.5,1249.9 L697.4,1256.9 L706.1,1253.6 L702.3,1240.6 L707.4,1223.5 L733.4,1205.2 L732.5,1191.2 L754.9,1182.4 L766.4,1184.4 L763.4,1165.6 L756.1,1170.1 L748.5,1162.8 L748.6,1136.1 L772.0,1098.3 L782.7,1099.9 L778.1,1084.2 L790.2,1066.4 L806.0,1060.1 L821.6,1065.0 L828.8,1044.7 L820.4,1016.2 L855.0,971.9 L854.5,963.1 L845.1,955.8 L815.1,969.6 L809.8,959.2 L806.6,967.4 L799.2,967.4 L779.6,937.3 L775.9,880.5 L796.7,791.2 L845.8,684.8 L918.9,571.5 L973.3,509.5 L995.5,492.5 L1009.6,497.5 L1021.4,490.1 L1017.6,476.8 L1029.0,444.2 L1013.9,413.6 L1020.9,382.1 L1041.5,334.0 L1070.9,322.4 L1085.5,324.2 L1087.5,303.3 L1097.3,283.1 L1086.1,275.9 L1066.5,243.4 L1046.6,281.0 L1046.7,298.0 L1037.5,301.7 L991.2,290.3 L948.9,257.6 L904.6,190.0 L892.0,156.3 L897.2,133.2 L883.5,103.9 L873.1,107.6 L855.6,101.7 L844.1,42.5 L852.6,31.2 L859.6,-2.7 L836.5,-21.9 L821.6,-17.4 L815.0,19.3 L791.0,20.9 L761.5,9.8 L742.7,40.2 L776.1,86.7 L780.8,137.2 L773.4,159.4 L744.1,185.3 L669.4,212.4 L604.8,217.5 L575.2,212.3 L549.7,227.4 L543.0,244.3 L546.4,253.8 L537.1,265.7 L517.0,271.5 L440.2,262.7 L368.5,233.5 L359.5,274.6 L343.1,306.5 L277.4,328.4 L239.9,378.8 L257.2,376.2 L272.2,358.6 L269.3,350.9 L275.7,344.5 L316.1,351.4 L333.4,339.3 L352.9,349.1 L372.4,382.2 L365.0,400.2 L372.4,418.1 L336.3,406.9 L331.7,436.8 L318.8,447.1 L307.9,440.1 L301.3,468.7 L283.9,475.9 L281.1,514.6 L274.8,521.8 L282.9,532.0 L275.1,545.2 L282.4,538.9 L296.2,543.8 L302.0,539.9 L324.5,548.2 L345.6,566.5 L343.1,591.8 L348.2,614.1 L377.2,644.3 L385.1,663.4 L375.7,686.9 L356.0,690.9 L329.5,716.9 L343.0,740.2 L341.9,749.4 L334.0,768.1 L315.1,782.1 L314.5,790.6 L358.3,822.7 L385.6,819.1 L418.2,835.3 L371.3,900.3 L347.4,902.5 L356.7,920.3 L377.0,935.5 L381.4,948.8 L374.0,967.6 L338.4,967.9 L332.6,958.7 L323.6,963.0 L293.3,955.1 L284.2,946.6 L283.0,958.6 L255.7,980.8 L248.1,1014.4 L172.2,1046.7 L163.9,1060.2 L164.0,1068.5 L177.3,1080.4 L176.3,1093.3 L211.1,1112.3 L225.7,1127.6 L232.2,1139.6 L226.5,1150.1 L232.7,1151.1 L225.9,1155.8 L226.6,1166.6 L240.8,1169.6 L250.2,1187.1 L270.8,1161.6 L278.5,1166.1 L279.6,1158.5 L283.2,1169.2 L302.3,1172.0 L299.9,1175.7 L309.8,1185.2 L314.6,1182.1 L310.0,1187.6 L321.5,1194.5 L316.2,1198.3 L319.8,1212.9 L324.5,1212.9 L319.9,1220.1 L327.2,1228.0 L325.9,1236.9 L330.4,1236.2 L324.2,1252.1 L328.8,1251.8 L324.3,1253.3 L325.3,1273.2 L336.5,1303.0 L333.7,1336.0 L347.2,1341.0 L342.6,1358.1 L291.7,1347.9 L289.3,1338.9 L273.8,1339.0 L264.9,1328.4 L219.2,1351.3 L207.5,1347.3 L208.3,1356.4 L192.7,1372.7 L159.1,1456.5 L140.7,1473.6 L127.2,1474.7 L149.5,1508.4 L137.6,1517.1 L127.4,1541.9 L149.8,1560.9 L146.9,1570.6 L153.3,1584.4 L166.1,1592.1 L189.5,1584.9 L211.6,1599.4 L217.1,1616.5 L181.8,1659.4 L169.5,1696.7 L160.2,1707.3 L171.6,1808.2 L181.6,1813.7 L187.7,1831.0 L179.2,1877.6 L143.4,1904.2 L136.7,1916.6 L83.7,1932.5 Z" fill="url(#land)" filter="url(#relief)"/>
+<path d="M83.7,1932.5 L89.2,1941.7 L120.6,1959.8 L120.7,1979.0 L111.9,1991.7 L114.0,2016.3 L131.1,2035.6 L133.7,2059.6 L156.5,2060.9 L180.5,2078.5 L176.8,2097.2 L159.3,2112.6 L149.0,2132.8 L153.5,2148.6 L174.4,2161.5 L184.9,2190.3 L155.3,2223.4 L154.3,2245.7 L142.6,2257.9 L130.5,2308.8 L137.3,2313.9 L151.6,2300.4 L167.7,2300.9 L181.7,2309.2 L182.6,2327.0 L251.3,2282.1 L260.9,2268.6 L272.2,2200.9 L281.0,2194.1 L294.5,2164.4 L287.4,2146.2 L301.0,2129.6 L295.9,2110.4 L340.2,2050.2 L374.4,2031.9 L411.8,2033.9 L424.0,2042.3 L417.6,2073.4 L431.6,2091.3 L453.0,2092.4 L461.5,2100.7 L482.6,2096.3 L497.4,2078.4 L512.8,2074.7 L519.0,2056.2 L527.2,2055.0 L531.6,2044.9 L507.7,2012.1 L519.0,1988.3 L534.7,1971.0 L550.6,1973.5 L556.8,1980.9 L565.1,1974.2 L554.8,1932.3 L521.3,1921.6 L509.8,1897.6 L473.0,1908.6 L452.8,1876.1 L463.4,1857.5 L450.1,1871.8 L434.6,1866.1 L425.9,1854.8 L419.6,1828.4 L420.2,1773.3 L441.4,1718.0 L441.4,1697.6 L484.1,1621.5 L537.4,1571.7 L562.9,1450.2 L614.2,1346.1 L680.9,1256.4 L691.5,1249.9 L697.4,1256.9 L706.1,1253.6 L702.3,1240.6 L707.4,1223.5 L733.4,1205.2 L732.5,1191.2 L754.9,1182.4 L766.4,1184.4 L763.4,1165.6 L756.1,1170.1 L748.5,1162.8 L748.6,1136.1 L772.0,1098.3 L782.7,1099.9 L778.1,1084.2 L790.2,1066.4 L806.0,1060.1 L821.6,1065.0 L828.8,1044.7 L820.4,1016.2 L855.0,971.9 L854.5,963.1 L845.1,955.8 L815.1,969.6 L809.8,959.2 L806.6,967.4 L799.2,967.4 L779.6,937.3 L775.9,880.5 L796.7,791.2 L845.8,684.8 L918.9,571.5 L973.3,509.5 L995.5,492.5 L1009.6,497.5 L1021.4,490.1 L1017.6,476.8 L1029.0,444.2 L1013.9,413.6 L1020.9,382.1 L1041.5,334.0 L1070.9,322.4 L1085.5,324.2 L1087.5,303.3 L1097.3,283.1 L1086.1,275.9 L1066.5,243.4 L1046.6,281.0 L1046.7,298.0 L1037.5,301.7 L991.2,290.3 L948.9,257.6 L904.6,190.0 L892.0,156.3 L897.2,133.2 L883.5,103.9 L873.1,107.6 L855.6,101.7 L844.1,42.5 L852.6,31.2 L859.6,-2.7 L836.5,-21.9 L821.6,-17.4 L815.0,19.3 L791.0,20.9 L761.5,9.8 L742.7,40.2 L776.1,86.7 L780.8,137.2 L773.4,159.4 L744.1,185.3 L669.4,212.4 L604.8,217.5 L575.2,212.3 L549.7,227.4 L543.0,244.3 L546.4,253.8 L537.1,265.7 L517.0,271.5 L440.2,262.7 L368.5,233.5 L359.5,274.6 L343.1,306.5 L277.4,328.4 L239.9,378.8 L257.2,376.2 L272.2,358.6 L269.3,350.9 L275.7,344.5 L316.1,351.4 L333.4,339.3 L352.9,349.1 L372.4,382.2 L365.0,400.2 L372.4,418.1 L336.3,406.9 L331.7,436.8 L318.8,447.1 L307.9,440.1 L301.3,468.7 L283.9,475.9 L281.1,514.6 L274.8,521.8 L282.9,532.0 L275.1,545.2 L282.4,538.9 L296.2,543.8 L302.0,539.9 L324.5,548.2 L345.6,566.5 L343.1,591.8 L348.2,614.1 L377.2,644.3 L385.1,663.4 L375.7,686.9 L356.0,690.9 L329.5,716.9 L343.0,740.2 L341.9,749.4 L334.0,768.1 L315.1,782.1 L314.5,790.6 L358.3,822.7 L385.6,819.1 L418.2,835.3 L371.3,900.3 L347.4,902.5 L356.7,920.3 L377.0,935.5 L381.4,948.8 L374.0,967.6 L338.4,967.9 L332.6,958.7 L323.6,963.0 L293.3,955.1 L284.2,946.6 L283.0,958.6 L255.7,980.8 L248.1,1014.4 L172.2,1046.7 L163.9,1060.2 L164.0,1068.5 L177.3,1080.4 L176.3,1093.3 L211.1,1112.3 L225.7,1127.6 L232.2,1139.6 L226.5,1150.1 L232.7,1151.1 L225.9,1155.8 L226.6,1166.6 L240.8,1169.6 L250.2,1187.1 L270.8,1161.6 L278.5,1166.1 L279.6,1158.5 L283.2,1169.2 L302.3,1172.0 L299.9,1175.7 L309.8,1185.2 L314.6,1182.1 L310.0,1187.6 L321.5,1194.5 L316.2,1198.3 L319.8,1212.9 L324.5,1212.9 L319.9,1220.1 L327.2,1228.0 L325.9,1236.9 L330.4,1236.2 L324.2,1252.1 L328.8,1251.8 L324.3,1253.3 L325.3,1273.2 L336.5,1303.0 L333.7,1336.0 L347.2,1341.0 L342.6,1358.1 L291.7,1347.9 L289.3,1338.9 L273.8,1339.0 L264.9,1328.4 L219.2,1351.3 L207.5,1347.3 L208.3,1356.4 L192.7,1372.7 L159.1,1456.5 L140.7,1473.6 L127.2,1474.7 L149.5,1508.4 L137.6,1517.1 L127.4,1541.9 L149.8,1560.9 L146.9,1570.6 L153.3,1584.4 L166.1,1592.1 L189.5,1584.9 L211.6,1599.4 L217.1,1616.5 L181.8,1659.4 L169.5,1696.7 L160.2,1707.3 L171.6,1808.2 L181.6,1813.7 L187.7,1831.0 L179.2,1877.6 L143.4,1904.2 L136.7,1916.6 L83.7,1932.5 Z" fill="url(#land)"/><image href="img/ilha-relevo.jpg" x="60" y="-40" width="1060" height="1740" preserveAspectRatio="none"/>
 <path d="M83.7,1932.5 L89.2,1941.7 L120.6,1959.8 L120.7,1979.0 L111.9,1991.7 L114.0,2016.3 L131.1,2035.6 L133.7,2059.6 L156.5,2060.9 L180.5,2078.5 L176.8,2097.2 L159.3,2112.6 L149.0,2132.8 L153.5,2148.6 L174.4,2161.5 L184.9,2190.3 L155.3,2223.4 L154.3,2245.7 L142.6,2257.9 L130.5,2308.8 L137.3,2313.9 L151.6,2300.4 L167.7,2300.9 L181.7,2309.2 L182.6,2327.0 L251.3,2282.1 L260.9,2268.6 L272.2,2200.9 L281.0,2194.1 L294.5,2164.4 L287.4,2146.2 L301.0,2129.6 L295.9,2110.4 L340.2,2050.2 L374.4,2031.9 L411.8,2033.9 L424.0,2042.3 L417.6,2073.4 L431.6,2091.3 L453.0,2092.4 L461.5,2100.7 L482.6,2096.3 L497.4,2078.4 L512.8,2074.7 L519.0,2056.2 L527.2,2055.0 L531.6,2044.9 L507.7,2012.1 L519.0,1988.3 L534.7,1971.0 L550.6,1973.5 L556.8,1980.9 L565.1,1974.2 L554.8,1932.3 L521.3,1921.6 L509.8,1897.6 L473.0,1908.6 L452.8,1876.1 L463.4,1857.5 L450.1,1871.8 L434.6,1866.1 L425.9,1854.8 L419.6,1828.4 L420.2,1773.3 L441.4,1718.0 L441.4,1697.6 L484.1,1621.5 L537.4,1571.7 L562.9,1450.2 L614.2,1346.1 L680.9,1256.4 L691.5,1249.9 L697.4,1256.9 L706.1,1253.6 L702.3,1240.6 L707.4,1223.5 L733.4,1205.2 L732.5,1191.2 L754.9,1182.4 L766.4,1184.4 L763.4,1165.6 L756.1,1170.1 L748.5,1162.8 L748.6,1136.1 L772.0,1098.3 L782.7,1099.9 L778.1,1084.2 L790.2,1066.4 L806.0,1060.1 L821.6,1065.0 L828.8,1044.7 L820.4,1016.2 L855.0,971.9 L854.5,963.1 L845.1,955.8 L815.1,969.6 L809.8,959.2 L806.6,967.4 L799.2,967.4 L779.6,937.3 L775.9,880.5 L796.7,791.2 L845.8,684.8 L918.9,571.5 L973.3,509.5 L995.5,492.5 L1009.6,497.5 L1021.4,490.1 L1017.6,476.8 L1029.0,444.2 L1013.9,413.6 L1020.9,382.1 L1041.5,334.0 L1070.9,322.4 L1085.5,324.2 L1087.5,303.3 L1097.3,283.1 L1086.1,275.9 L1066.5,243.4 L1046.6,281.0 L1046.7,298.0 L1037.5,301.7 L991.2,290.3 L948.9,257.6 L904.6,190.0 L892.0,156.3 L897.2,133.2 L883.5,103.9 L873.1,107.6 L855.6,101.7 L844.1,42.5 L852.6,31.2 L859.6,-2.7 L836.5,-21.9 L821.6,-17.4 L815.0,19.3 L791.0,20.9 L761.5,9.8 L742.7,40.2 L776.1,86.7 L780.8,137.2 L773.4,159.4 L744.1,185.3 L669.4,212.4 L604.8,217.5 L575.2,212.3 L549.7,227.4 L543.0,244.3 L546.4,253.8 L537.1,265.7 L517.0,271.5 L440.2,262.7 L368.5,233.5 L359.5,274.6 L343.1,306.5 L277.4,328.4 L239.9,378.8 L257.2,376.2 L272.2,358.6 L269.3,350.9 L275.7,344.5 L316.1,351.4 L333.4,339.3 L352.9,349.1 L372.4,382.2 L365.0,400.2 L372.4,418.1 L336.3,406.9 L331.7,436.8 L318.8,447.1 L307.9,440.1 L301.3,468.7 L283.9,475.9 L281.1,514.6 L274.8,521.8 L282.9,532.0 L275.1,545.2 L282.4,538.9 L296.2,543.8 L302.0,539.9 L324.5,548.2 L345.6,566.5 L343.1,591.8 L348.2,614.1 L377.2,644.3 L385.1,663.4 L375.7,686.9 L356.0,690.9 L329.5,716.9 L343.0,740.2 L341.9,749.4 L334.0,768.1 L315.1,782.1 L314.5,790.6 L358.3,822.7 L385.6,819.1 L418.2,835.3 L371.3,900.3 L347.4,902.5 L356.7,920.3 L377.0,935.5 L381.4,948.8 L374.0,967.6 L338.4,967.9 L332.6,958.7 L323.6,963.0 L293.3,955.1 L284.2,946.6 L283.0,958.6 L255.7,980.8 L248.1,1014.4 L172.2,1046.7 L163.9,1060.2 L164.0,1068.5 L177.3,1080.4 L176.3,1093.3 L211.1,1112.3 L225.7,1127.6 L232.2,1139.6 L226.5,1150.1 L232.7,1151.1 L225.9,1155.8 L226.6,1166.6 L240.8,1169.6 L250.2,1187.1 L270.8,1161.6 L278.5,1166.1 L279.6,1158.5 L283.2,1169.2 L302.3,1172.0 L299.9,1175.7 L309.8,1185.2 L314.6,1182.1 L310.0,1187.6 L321.5,1194.5 L316.2,1198.3 L319.8,1212.9 L324.5,1212.9 L319.9,1220.1 L327.2,1228.0 L325.9,1236.9 L330.4,1236.2 L324.2,1252.1 L328.8,1251.8 L324.3,1253.3 L325.3,1273.2 L336.5,1303.0 L333.7,1336.0 L347.2,1341.0 L342.6,1358.1 L291.7,1347.9 L289.3,1338.9 L273.8,1339.0 L264.9,1328.4 L219.2,1351.3 L207.5,1347.3 L208.3,1356.4 L192.7,1372.7 L159.1,1456.5 L140.7,1473.6 L127.2,1474.7 L149.5,1508.4 L137.6,1517.1 L127.4,1541.9 L149.8,1560.9 L146.9,1570.6 L153.3,1584.4 L166.1,1592.1 L189.5,1584.9 L211.6,1599.4 L217.1,1616.5 L181.8,1659.4 L169.5,1696.7 L160.2,1707.3 L171.6,1808.2 L181.6,1813.7 L187.7,1831.0 L179.2,1877.6 L143.4,1904.2 L136.7,1916.6 L83.7,1932.5 Z" fill="none" stroke="rgba(226,236,222,.55)" stroke-width="1.4"/>
 <path d="M524.0,1162.8 L527.8,1184.9 L535.3,1189.9 L531.8,1196.3 L534.1,1202.8 L540.2,1203.8 L539.5,1193.6 L542.4,1190.6 L553.0,1187.5 L560.5,1189.8 L566.8,1207.4 L552.6,1216.4 L549.9,1223.3 L561.7,1236.0 L579.9,1243.1 L604.6,1233.0 L619.6,1200.8 L618.4,1180.0 L621.8,1173.4 L615.8,1155.5 L625.4,1137.6 L619.0,1129.0 L634.3,1138.5 L678.7,1146.9 L704.5,1148.9 L718.4,1145.5 L716.8,1127.8 L729.9,1117.4 L725.1,1108.5 L730.6,1097.9 L725.9,1092.6 L740.6,1068.9 L740.2,1061.5 L745.0,1054.4 L741.6,1047.0 L744.0,1041.0 L714.8,1021.8 L704.4,999.5 L688.9,983.3 L685.5,969.1 L699.8,976.5 L710.2,966.7 L712.9,953.6 L710.1,940.7 L726.7,921.2 L721.8,905.0 L728.9,899.8 L727.1,893.4 L720.1,890.4 L685.3,849.8 L676.2,817.9 L678.4,813.9 L668.9,800.7 L696.0,793.9 L702.7,786.8 L710.1,765.2 L727.6,759.9 L736.8,747.1 L754.8,752.0 L759.2,745.7 L759.7,736.5 L770.0,731.8 L775.7,724.2 L792.1,720.0 L792.2,714.3 L787.5,711.2 L792.4,702.0 L786.3,693.8 L799.8,680.2 L798.1,649.8 L790.9,650.8 L785.6,669.7 L773.8,678.8 L765.6,712.6 L756.9,723.2 L746.7,728.4 L739.5,740.7 L724.7,743.3 L724.5,725.1 L719.3,705.5 L720.7,688.3 L712.9,683.5 L692.5,707.4 L681.2,708.9 L678.1,722.3 L660.2,744.9 L655.3,758.0 L640.4,770.4 L633.4,792.9 L636.3,811.2 L628.9,826.5 L633.4,834.4 L631.8,850.6 L614.7,890.6 L618.6,901.1 L615.0,918.3 L637.4,939.8 L639.0,953.0 L645.6,965.2 L647.4,995.8 L651.0,999.7 L630.4,1030.8 L636.0,1052.1 L633.0,1064.1 L640.5,1079.4 L630.3,1080.0 L621.2,1089.0 L617.7,1103.7 L625.8,1126.9 L609.3,1128.8 L607.6,1138.4 L613.0,1143.1 L583.8,1148.6 L563.3,1160.4 L543.0,1166.4 L537.1,1162.7 L543.5,1161.5 L546.6,1156.2 L540.7,1145.7 L542.9,1137.8 L540.0,1137.1 L529.6,1159.1 L526.0,1157.9 L524.0,1162.8 Z" fill="#142023" stroke="rgba(214,226,210,.25)" stroke-width="1"/>
-<path class="road" d="M380.9,982.9 L389.1,976.7 L418.2,922.4 L445.5,879.4 L456.4,858.9 L444.1,818.4 L450.0,758.4 L471.8,671.3 L490.9,589.3 L509.1,527.8 L510.0,486.3 L581.8,447.9"/><path class="roadlink" d="M581.8,447.9 L636.4,384.3 L681.8,307.5 L725.0,234.2"/>
-<g class="pinw" data-k="med" transform="translate(415.9,925.0)" data-cursor="Ver estúdio"><circle class="halo" r="60"/><circle class="ring" r="46"/><circle class="pinbg" r="16"/><circle class="pdot" r="6"/><path class="arrowp" d="M-5.4,-7.1C-6.2,-7.7-7.3,-7-7.2,-6L-6,7.3c.1,1.1,1.5,1.5,2.2.6l2.8-3.7c.5-.7,1.3-1.1,2.2-1.1l5.4-.3c1.1,0,1.5-1.4.7-2.1z" transform="rotate(-20) scale(1.05)"/></g><g class="pinw" data-k="sap" transform="translate(725.0,234.2)" data-cursor="Ver estúdio"><circle class="halo" r="60"/><circle class="ring" r="46"/><circle class="pinbg" r="16"/><circle class="pdot" r="6"/><path class="arrowp" d="M-5.4,-7.1C-6.2,-7.7-7.3,-7-7.2,-6L-6,7.3c.1,1.1,1.5,1.5,2.2.6l2.8-3.7c.5-.7,1.3-1.1,2.2-1.1l5.4-.3c1.1,0,1.5-1.4.7-2.1z" transform="rotate(-20) scale(1.05)"/></g>
+<path class="road" pathLength="1" d="M380.9,982.9 L389.1,976.7 L418.2,922.4 L445.5,879.4 L456.4,858.9 L444.1,818.4 L450.0,758.4 L471.8,671.3 L490.9,589.3 L509.1,527.8 L510.0,486.3 L581.8,447.9"/><path class="roadlink" d="M581.8,447.9 L636.4,384.3 L681.8,307.5 L725.0,234.2"/>
+<g class="pinw" data-k="med" transform="translate(415.9,925.0)" data-cursor="Ver estúdio"><g class="pinin"><circle class="halo" r="60"/><circle class="ring" r="46"/><circle class="pinbg" r="16"/><circle class="pdot" r="6"/><path class="arrowp" d="M-5.4,-7.1C-6.2,-7.7-7.3,-7-7.2,-6L-6,7.3c.1,1.1,1.5,1.5,2.2.6l2.8-3.7c.5-.7,1.3-1.1,2.2-1.1l5.4-.3c1.1,0,1.5-1.4.7-2.1z" transform="rotate(-20) scale(1.05)"/></g></g><g class="pinw" data-k="sap" transform="translate(725.0,234.2)" data-cursor="Ver estúdio"><g class="pinin"><circle class="halo" r="60"/><circle class="ring" r="46"/><circle class="pinbg" r="16"/><circle class="pdot" r="6"/><path class="arrowp" d="M-5.4,-7.1C-6.2,-7.7-7.3,-7-7.2,-6L-6,7.3c.1,1.1,1.5,1.5,2.2.6l2.8-3.7c.5-.7,1.3-1.1,2.2-1.1l5.4-.3c1.1,0,1.5-1.4.7-2.1z" transform="rotate(-20) scale(1.05)"/></g></g>
 </svg></div></div><div class="cards">
 <div class="gcard" data-k="med" role="button" tabindex="0" data-cursor="Ver estúdio"><b>MED401<i>.</i></b><span class="go">→</span><small>Vertical Saúde · SC-401</small><div class="more"><div><p><span class="l">Dentro do centro médico. O médico grava entre um atendimento e outro.</span><span class="s">Dentro do centro médico.</span></p><a href="#contato">Agendar visita ↗</a></div></div></div>
 <div class="gcard" data-k="sap" role="button" tabindex="0" data-cursor="Ver estúdio"><b>Passeio Sapiens<i>.</i></b><span class="go">→</span><small>Vertical Negócios · Norte da ilha</small><div class="more"><div><p><span class="l">No polo de tecnologia. O executivo grava onde trabalha.</span><span class="s">No polo de tecnologia.</span></p><a href="#contato">Agendar visita ↗</a></div></div></div>
@@ -587,7 +714,14 @@ addEventListener('resize',function(){cam(cur)});
 cam(null);
 var q=new URLSearchParams(location.search);if(q.get('foco'))set(q.get('foco'));
 })();</script>
-<section data-tone="dark" class="demo" id="contato"><div><h2>Contato</h2><p>seção de exemplo</p></div></section>
+<section data-tone="dark" class="ct" id="contato"><div class="in"><div class="ct-grid"><div><p class="lab">Contato</p><h2>Agende uma visita <span>ao estúdio.</span></h2>
+<p class="sub"><span class="l">Trinta minutos no MED401 ou no Passeio Sapiens para conhecer o estúdio e conversar sobre o seu projeto.</span><span class="s">Trinta minutos para conhecer o estúdio.</span></p>
+<a class="pill red" href="https://wa.me/5548988417851?text=Quero%20agendar%20uma%20visita%20ao%20est%C3%BAdio" target="_blank" rel="noopener" data-cursor="Agendar ↗">Agendar pelo WhatsApp <span class="arr">↗</span></a></div>
+<dl class="ct-list"><div><dt>WhatsApp</dt><dd><a href="https://wa.me/5548988417851?text=Quero%20agendar%20uma%20visita%20ao%20est%C3%BAdio" target="_blank" rel="noopener">(48) 98841-7851</a></dd></div>
+<div><dt>Saúde</dt><dd>MED401 · SC-401</dd></div><div><dt>Negócios</dt><dd>Passeio Sapiens · Norte da ilha</dd></div>
+<div><dt>Canal</dt><dd>Health Insiders · seg a sex, 7h30</dd></div></dl></div></div>
+<div class="foot"><span>© 2026 ISLA Media House · Florianópolis, SC</span><a href="#topo">Voltar ao topo ↑</a></div>
+<p class="bigmark" aria-hidden="true"><span class="bm">ISLA<i>.</i></span></p></section>
 
 <script>
 (function(){
@@ -691,5 +825,40 @@ function stack(){ tick=false; var vh=innerHeight;
     var p=(vh-r.top)/Math.max(1,(vh-top)); p=Math.max(0,Math.min(1,p)); cards[i].style.setProperty('--rp',p.toFixed(3)); } }
 if(cards.length>1){ addEventListener('scroll',function(){ if(!tick){tick=true;requestAnimationFrame(stack);} },{passive:true}); addEventListener('resize',stack); stack(); }
 d.classList.add('mo-ready');
+})();</script>
+<script id="motion2-js">(function(){
+var d=document.documentElement; if(!d.classList.contains('mo')) return;
+function once(sel,cls,opt,tgt){ var els=document.querySelectorAll(sel); if(!els.length) return; var io=new IntersectionObserver(function(es){es.forEach(function(e){ if(e.isIntersecting){ (tgt?tgt(e.target):e.target).classList.add(cls); io.unobserve(e.target);} });},opt||{rootMargin:'0px 0px -12% 0px'}); [].forEach.call(els,function(x){io.observe(x)}); }
+once('.ct-grid > div:first-child','t-in');
+once('.ct-grid','k-in',{threshold:.2},function(x){return x.closest('.ct')});
+once('.bigmark','b-in',{threshold:.35});
+once('.hi .guests','g-in',{threshold:.2});
+once('#trk','c-in',{threshold:.2},function(x){return x.closest('.tr')});
+once('#stage','s-in',{threshold:.25},function(x){return x.closest('.est')});
+var est=document.querySelector('.est'); if(est){ new IntersectionObserver(function(es){ est.classList.toggle('s-vis',es[0].isIntersecting); }).observe(est); }
+
+// menu: ponto que desliza
+var tab=document.querySelector('.menu.dark .tab'), pos={};
+function measure(){ if(!tab) return; var t=tab.getBoundingClientRect(); [].forEach.call(tab.querySelectorAll('a.lk[data-s]'),function(a){ var r=a.getBoundingClientRect(); pos[a.dataset.s]=(r.left-t.left)+r.width/2; }); }
+var last=null, tk=false;
+function ind(){ tk=false; if(!tab) return; var a=tab.querySelector('a.lk.on'), k=a?a.dataset.s:null; if(k===last) return; last=k;
+  if(k&&pos[k]!=null){ d.style.setProperty('--ind-x',pos[k].toFixed(1)+'px'); d.style.setProperty('--ind-o','1'); } else d.style.setProperty('--ind-o','0'); }
+measure(); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(function(){measure();last=null;ind();});
+addEventListener('resize',function(){measure();last=null;ind();});
+addEventListener('scroll',function(){ if(!tk){tk=true;requestAnimationFrame(ind);} },{passive:true}); ind();
+
+// conformidade: pino <-> legenda
+var fr=document.querySelector('.cf .frame'), keys=document.querySelector('.cf .keys');
+if(fr&&keys){ var pins=[].slice.call(fr.querySelectorAll('.pin')), ks=[].slice.call(keys.querySelectorAll('p'));
+  function hl(i){ pins.forEach(function(p,j){p.classList.toggle('hl',j===i)}); ks.forEach(function(p,j){p.classList.toggle('hl',j===i)}); fr.classList.toggle('hl-on',i>=0); keys.classList.toggle('hl-on',i>=0); }
+  pins.concat(ks).forEach(function(el){ var i=pins.indexOf(el); if(i<0) i=ks.indexOf(el); el.addEventListener('mouseenter',function(){hl(i)}); el.addEventListener('mouseleave',function(){hl(-1)}); }); }
+
+// health insiders: hoje de verdade
+var tv=document.querySelector('.hi .tv');
+if(tv){ var days=[].slice.call(tv.children), wd=new Intl.DateTimeFormat('en-US',{timeZone:'America/Sao_Paulo',weekday:'short'}).format(new Date());
+  var map={Mon:0,Tue:1,Wed:2,Thu:3,Fri:4}, idx=map[wd], label='Hoje'; if(idx==null){ idx=0; label='Próximo'; }
+  days.forEach(function(el,i){ el.classList.toggle('today',i===idx); });
+  var dl=days[idx]&&days[idx].querySelector('.d'); if(dl) dl.textContent=label+' · 7h30';
+  var io=new IntersectionObserver(function(es){ if(es[0].isIntersecting){ tv.style.setProperty('--d',idx); if(innerWidth<=900 && days[idx]) tv.scrollLeft=Math.max(0,days[idx].offsetLeft-16); io.disconnect(); } },{threshold:.6}); io.observe(tv); }
 })();</script>
 </body></html>
