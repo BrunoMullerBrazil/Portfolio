@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel · Clínica Aurora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+<style>
+  /* Ajustes só desta tela */
+  /* Cartão de faturamento: anel (realizado × meta, com o marcador do esperado hoje).
+     Tamanhos fluidos pela largura do próprio cartão (cqi). */
+  .kpi-foco { --anel: clamp(68px, 28cqi, 108px); }
+  .kpi-foco__corpo { display: flex; align-items: center; gap: 18px; flex: 1; min-width: 0; }
+  .kpi-foco .anel { --tam: var(--anel); }
+  .kpi-foco__num { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .kpi-foco .kpi__valor { --disp: calc(100cqi - var(--anel) - 18px); }
+  .kpi-foco .kpi__nota b { color: #fff; font-weight: 600; }
+  .kpi-foco .anel-leg { color: var(--foco-texto-2); }
+  .kpi-foco .anel-leg b { color: var(--foco-texto); font-weight: 600; }
+  /* Cartão largo (foco na linha inteira): mostra também projeção e supermeta */
+  .kpi-foco__extra { display: none; }
+  @container (min-width: 520px) {
+    .kpi-foco__extra { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, max-content); gap: 0; margin: 0 0 0 auto; align-self: center; }
+    .kpi-foco__extra > div { padding: 2px 0 2px 22px; margin-left: 22px; border-left: 1px solid rgba(255,255,255,.12); display: flex; flex-direction: column; gap: 4px; }
+    .kpi-foco__extra dt { font-size: var(--t-xs); color: var(--foco-texto-2); white-space: nowrap; }
+    .kpi-foco__extra dd { margin: 0; font: 600 calc(20px + 4 * var(--k))/1.1 var(--f-titulo); letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; color: #fff; }
+    .kpi-foco__extra dd small { font-size: .6em; font-weight: 500; opacity: .75; margin: 0 .15em; }
+  }
+  @container (min-width: 520px) and (max-width: 700px) { .kpi-foco__extra > div:last-child { display: none; } }
+
+  /* Atenção hoje: avatar | nome + contexto / tipo + pendência | prazo | ação */
+  :root { --cols-at: 36px minmax(0, 1fr) 140px 78px; }
+  .at-l1 { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .at-l1 .linha__nome { flex: 0 1 auto; min-width: 0; }
+  .at-ctx { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+  .at-l2 { display: flex; align-items: baseline; gap: 8px; min-width: 0; margin-top: 3px; font-size: var(--t-sm); color: var(--texto-2); }
+  .at-txt { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tipo-rot { flex: none; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-2); background: var(--suave); border-radius: 6px; padding: 2px 6px; line-height: 1.3; }
+  .at-prazo { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  /* Ações da linha: WhatsApp (mensagem pronta), agenda (recall agendado) e ligar/registrar */
+  .at-acoes { display: flex; justify-content: flex-end; gap: 6px; }
+  .linha__acao { position: relative; }
+  .linha__acao[data-dica]::after { content: attr(data-dica); position: absolute; right: 0; bottom: calc(100% + 6px); background: var(--tinta); color: #fff; font-size: var(--t-xs); font-weight: 500; white-space: nowrap; padding: 5px 9px; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity .12s; z-index: 2; }
+  .linha__acao:hover::after, .linha__acao:focus-visible::after { opacity: 1; }
+  .cartao--lista { padding-bottom: 12px; }
+
+  /* Funil da safra de novembro */
+  .funil-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .funil-cab h2 { font-size: var(--t-lg); display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+
+  /* Linha do tempo = pacientes do dia. Os já atendidos viram uma linha de resumo. */
+  .tempo .tempo__item--feito { display: none; }
+  .tempo-resumo { display: flex; font-size: var(--t-xs); color: var(--texto-2); margin: -4px 0 10px; }
+  .lado .cartao__cab { margin-bottom: 12px; }
+  .tempo-mais { display: none; }
+  /* Calendário do painel: só a semana de hoje (o mês inteiro fica na Agenda) */
+  .cartao--cal .mcal__dia.fora-semana { display: none; }
+  .cartao--cal .mcal__cab { margin-bottom: 4px; }
+  /* Coluna direita abaixo do conteúdo (app < 1040px): semana em cima e agenda do dia embaixo, as duas na largura toda
+     (lado a lado, a semana curta deixava um vão de 700px ao lado da linha do tempo). */
+  @container app (max-width: 1039px) { .lado { display: flex; flex-direction: column; align-items: stretch; } }
+
+  @media (max-width: 720px) {
+    .grade { display: flex; flex-direction: column; align-items: stretch; }
+    .lado { order: -1; }
+    .lado .cartao--cal { display: none; }
+    .tempo .tempo__item--extra { display: none; }
+    .tempo .tempo__item:has(+ .tempo__item--extra)::before { display: none; }
+    .tempo-mais:not([hidden]) { display: flex; justify-content: center; width: 100%; margin-top: 4px; }
+    /* KPIs: a grade e os tamanhos vêm de proto.css (container queries) */
+    .kpi__ctx { display: none; }
+    .kpis .kpi:not(.cartao--foco) { padding: 14px; min-height: 0; }
+    .kpis .kpi .kpi__rot { font-size: var(--t-xs); }
+    .kpis .kpi .kpi__nota { font-size: var(--t-xs); }
+    /* Atenção: nome, prazo embaixo, pendência em 2 linhas; botão à direita */
+    :root { --cols-at: 36px minmax(0, 1fr) 40px; }
+    .at-linha { grid-template-areas: "av l1 bt" "av pz bt" "av l2 bt"; align-items: start; row-gap: 4px; }
+    .at-linha > .av { grid-area: av; }
+    .at-linha > .at-corpo { display: contents; }
+    .at-linha .at-l1 { grid-area: l1; }
+    .at-linha .at-l2 { grid-area: l2; margin-top: 0; }
+    .at-linha .at-prazo { grid-area: pz; }
+    .at-linha > .at-acoes { grid-area: bt; align-self: center; flex-direction: column; gap: 6px; }
+    .at-linha .linha__acao { display: inline-grid !important; }
+    .at-linha .at-prazo { flex-direction: row; flex-wrap: wrap; align-items: center; }
+    .at-linha .at-ctx { display: none; }
+    .at-txt { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .at-l2 { display: block; }
+    .at-l2 .tipo-rot { margin-right: 6px; vertical-align: 1px; }
+    .at-l2 .at-txt { display: inline; }
+    #abas-atencao { overflow-x: auto; flex-wrap: nowrap; width: 100%; gap: 2px; }
+    #abas-atencao .aba { padding: 0 7px; font-size: 12px; min-width: 0; gap: 4px; }
+    .legenda-med { display: none; }
+  }
+</style>
+</head>
+<body data-pagina="painel">
+
+<main class="app">
+  <!-- TOPO -->
+  <header class="topo">
+    <div class="topo__ola">
+      <h1>Bom dia, Dra. Lúcia</h1>
+      <p class="topo__data"><b>Sexta-feira, 13 de novembro</b> · 09:40 · <span id="resumo-dia"></span></p>
+    </div>
+    <div class="topo__acoes">
+      <div class="pilulas" role="group" aria-label="Filtrar por médico">
+        <button class="pilula" data-med="todos" aria-pressed="true">Todos <span class="pilula__n"></span></button>
+        <button class="pilula" data-med="g" aria-pressed="false"><span class="av av--g av--sm" aria-hidden="true">RS</span>Dr. Rafael <span class="pilula__n"></span></button>
+        <button class="pilula" data-med="d" aria-pressed="false"><span class="av av--d av--sm" aria-hidden="true">LS</span>Dra. Lúcia <span class="pilula__n"></span></button>
+      </div>
+      <div class="linha-flex" id="acoes-topo"></div>
+    </div>
+  </header>
+
+  <div class="grade">
+    <div class="coluna">
+
+      <!-- KPIs DE NOVEMBRO (mesmas definições da tela Metas) -->
+      <section class="kpis" aria-label="Indicadores de novembro">
+        <article class="cartao cartao--foco kpi kpi-foco recorte">
+          <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+          <a class="recorte__seta" href="metas.html" aria-label="Abrir metas do mês"><svg class="ico"><use href="#i-seta"/></svg></a>
+          <span class="kpi__rot">Faturamento · novembro</span>
+          <div class="kpi-foco__corpo">
+            <div class="anel" id="k-anel"></div>
+            <div class="kpi-foco__num">
+              <div class="kpi__valor kpi__valor--lg" id="k-fat"></div>
+              <div class="kpi__nota"><span class="nw">meta <b id="k-meta"></b></span></div>
+              <span class="anel-leg">esperado hoje <b id="k-esp"></b></span>
+            </div>
+            <dl class="kpi-foco__extra">
+              <div><dt>Projeção do mês</dt><dd id="k-proj"></dd></div>
+              <div><dt>Supermeta</dt><dd id="k-sup"></dd></div>
+            </dl>
+          </div>
+        </article>
+
+        <article class="cartao kpi recorte">
+          <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+          <a class="recorte__seta" href="funil.html" aria-label="Abrir funil de leads"><svg class="ico"><use href="#i-seta"/></svg></a>
+          <span class="kpi__rot">Leads novos</span>
+          <div class="kpi__valor"><span id="k-leads"></span><small>leads</small></div>
+          <div class="kpi__nota"><span id="k-agend"></span><span class="status status--neutro" id="k-agend-p"></span></div>
+          <div class="kpi__ctx">criados de 01 a 13/11</div>
+        </article>
+
+        <article class="cartao kpi recorte">
+          <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+          <a class="recorte__seta" href="metas.html" aria-label="Abrir metas de planos fechados"><svg class="ico"><use href="#i-seta"/></svg></a>
+          <span class="kpi__rot">Planos fechados</span>
+          <div class="kpi__valor"><span id="k-planos"></span><small>de</small><span id="k-planos-m"></span></div>
+          <div class="kpi__nota"><b style="color:var(--tinta);font-weight:600" id="k-planos-v"></b><span class="status" id="k-planos-s"></span></div>
+          <div class="kpi__ctx" id="k-planos-esp"></div>
+        </article>
+
+        <article class="cartao kpi recorte">
+          <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+          <a class="recorte__seta" href="funil.html" aria-label="Abrir comparecimento"><svg class="ico"><use href="#i-seta"/></svg></a>
+          <span class="kpi__rot">Comparecimento</span>
+          <div class="kpi__valor"><span id="k-comp"></span><small>%</small></div>
+          <div class="kpi__nota"><span id="k-comp-n"></span><span id="k-comp-s" class="linha-flex" style="flex-wrap:wrap;gap:4px"></span></div>
+          <div class="kpi__ctx">1ª consulta de leads</div>
+        </article>
+      </section>
+
+      <!-- AVISO: leads parados acima do prazo (abre o funil filtrado) -->
+      <a class="aviso" id="aviso-parados" href="funil.html#parados">
+        <span class="aviso__ico" aria-hidden="true"><svg class="ico"><use href="#i-relogio"/></svg></span>
+        <span class="aviso__txt"><b id="av-par-n"></b> acima do prazo <em>· <span id="av-par-v"></span> em risco</em></span>
+        <span class="aviso__ir"><span>Ver no funil</span><svg class="ico ico-sm" aria-hidden="true"><use href="#i-dir"/></svg></span>
+      </a>
+
+      <!-- ATENÇÃO HOJE -->
+      <section class="cartao cartao--lista" aria-labelledby="t-atencao">
+        <div class="cartao__cab">
+          <h2 id="t-atencao">Atenção hoje <span class="cartao__sub" id="atencao-n"></span></h2>
+          <div class="abas" role="tablist" aria-label="Tipo de pendência" id="abas-atencao">
+            <button class="aba" role="tab" aria-selected="true" data-tipo="todos">Todos</button>
+            <button class="aba" role="tab" aria-selected="false" data-tipo="recall">Recall <span class="pilula__n" data-n="recall"></span></button>
+            <button class="aba" role="tab" aria-selected="false" data-tipo="fu">Follow-up <span class="pilula__n" data-n="fu"></span></button>
+            <button class="aba" role="tab" aria-selected="false" data-tipo="plano">Planos <span class="pilula__n" data-n="plano"></span></button>
+            <button class="aba" role="tab" aria-selected="false" data-tipo="agenda">Agenda <span class="pilula__n" data-n="agenda"></span></button>
+          </div>
+        </div>
+        <div class="linha__cab" style="--cols:var(--cols-at)"><span></span><span>Paciente · pendência</span><span>Prazo</span><span style="text-align:right">Ações</span></div>
+        <ul class="lista" id="lista-atencao" style="--cols:var(--cols-at)"></ul>
+        <div class="rodape-cartao"><span class="legenda-med"><span><i class="g"></i>Dr. Rafael</span><span><i class="d"></i>Dra. Lúcia</span><span>cor do avatar = médico responsável</span></span><button class="bt-texto" id="atencao-todos"><span>Ver todos (<span id="atencao-tot"></span>)</span> <svg class="ico ico-sm"><use href="#i-dir"/></svg></button></div>
+      </section>
+
+      <!-- FUNIL DA SAFRA DE NOVEMBRO -->
+      <section class="cartao" aria-labelledby="t-funil">
+        <div class="funil-cab">
+          <h2 id="t-funil">Funil de novembro <span class="cartao__sub">leads criados de 01 a 13/11</span></h2>
+          <span class="cartao__sub" id="funil-obs"></span>
+        </div>
+        <div class="funil" id="funil"></div>
+      </section>
+    </div>
+
+    <!-- COLUNA DIREITA: agenda do dia -->
+    <aside class="lado" aria-label="Agenda do dia">
+      <section class="cartao cartao--cal">
+        <div class="mcal__cab">
+          <h2>9 a 13 de novembro</h2>
+          <div class="mcal__nav">
+            <button class="bt-ico bt-ico--sm bt-ico--plano" aria-label="Semana anterior"><svg class="ico ico-sm"><use href="#i-esq"/></svg></button>
+            <button class="bt-ico bt-ico--sm bt-ico--plano" aria-label="Próxima semana"><svg class="ico ico-sm"><use href="#i-dir"/></svg></button>
+          </div>
+        </div>
+        <div class="mcal" id="mcal"></div>
+        <div class="mcal__leg"><span><i class="pt"></i>dia com consultas</span><span><i class="hj"></i>hoje</span></div>
+      </section>
+
+      <section class="cartao">
+        <div class="cartao__cab">
+          <h2>Hoje <span class="cartao__sub" id="tempo-n"></span></h2>
+          <div class="datahora" aria-label="Data e hora atuais"><div><span>Data</span><b>13/11</b></div><div><span>Hora</span><b>09:40</b></div></div>
+        </div>
+        <p class="tempo-resumo" id="tempo-resumo"></p>
+        <ol class="tempo" id="tempo"></ol>
+        <button class="bt-texto tempo-mais" id="tempo-mais"></button>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script src="dados.js"></script>
+<script src="comum.js"></script>
+<script>
+/* Tudo vem de dados.js (window.VA). Nenhum número digitado aqui. */
+const { P, AGENDA, ATENCAO, TIPO_ROT, ST_AGENDA, FRAC, METAS, safraNov, comparecimento, fechNov, somaV, metaVal, ritmo, situacao } = VA;
+const { br, mil, rsMil, av, escala, real, linhaDoTempo, miniCal, pilulasMedico, poeAnel, btWa, btAgenda, regTent } = UI;
+const ACAO = { tel: ["i-tel", "Ligar"], msg: ["i-msg", "Mandar mensagem"], check: ["i-check", "Registrar"] };
+const SEV = { atrasado: "status--atrasado", atencao: "status--atencao", neutro: "status--neutro" };
+const $ = id => document.getElementById(id);
+const pacHoje = m => AGENDA.filter(a => !a.evento && (m === "todos" || P[a.id].med === m));
+
+function renderAtencao() {
+  $("lista-atencao").innerHTML = ATENCAO.map(a => {
+    const p = P[a.id];
+    const ctx = p.t ? `${escala(p.t)}<span class="chip">${p.origem}</span>` : p.carteira ? `<span class="chip">Carteira ${p.carteira}</span>` : "";
+    const prazo = a.prazo || `${a.dias} dias de atraso`;
+    // "Mandar mensagem" agora é o botão de WhatsApp; ligar/registrar continuam ao lado
+    const extra = a.acao && a.acao !== "msg" ? (() => { const [ic, rot] = ACAO[a.acao], dica = a.acaoRot || rot;
+      return `<button class="bt-ico bt-ico--sm bt-ico--plano linha__acao" data-dica="${dica}" aria-label="${dica}: ${p.nome}"><svg class="ico ico-sm"><use href="#${ic}"/></svg></button>`; })() : "";
+    return `<li class="linha at-linha" data-med="${p.med}" data-tipo="${a.tipo}">
+      ${av(p.med, p.nome)}
+      <div class="at-corpo" style="min-width:0">
+        <div class="at-l1"><span class="linha__nome">${p.nome}</span><span class="at-ctx">${ctx}</span></div>
+        <div class="at-l2"><span class="tipo-rot">${TIPO_ROT[a.tipo]}</span><span class="at-txt">${a.txt}</span></div>
+      </div>
+      <div class="at-prazo"><span class="status ${SEV[a.sev]}">${prazo}</span>${regTent(a.id)}</div>
+      <div class="at-acoes">${btWa(a.id, a.wa)}${a.agenda ? btAgenda(a.id) : ""}${extra}</div>
+    </li>`; }).join("");
+}
+
+function renderFunil(m) {
+  const s = safraNov(m), rot = ["Leads", "Agendaram", "Compareceram", "Receberam plano", "Fecharam"];
+  // Colunas proporcionais à base (leads da safra) e a taxa de passagem entre etapas
+  const n0 = s.n[0] || 1;
+  $("funil").innerHTML = s.n.map((n, i) => {
+    const taxa = i ? (s.n[i - 1] ? Math.round(n / s.n[i - 1] * 100) : 0) : 0;
+    const seta = i ? `<span class="funil__taxa" title="${taxa}% de “${rot[i - 1]}” chegaram a “${rot[i]}”"><svg class="ico" aria-hidden="true"><use href="#i-dir"/></svg>${taxa}%</span>` : "";
+    const pct = i === 0 ? "base da safra" : i === 4 ? `R$ ${mil(s.fv)} mil` : Math.round(n / n0 * 100) + "% da safra";
+    return `${seta}<div class="funil__etapa${i === 4 ? " funil__etapa--fim" : ""}" style="--h:${(n / n0).toFixed(3)}">
+      <span class="funil__rot">${rot[i]}</span><span class="funil__n">${n}</span>
+      <span class="funil__col" title="${rot[i]}: ${n} de ${n0} leads"><i></i></span><span class="funil__pct">${pct}</span></div>`;
+  }).join("");
+  $("funil-obs").textContent = `${s.futuras} consultas desta safra ainda vão acontecer`;
+  return s;
+}
+
+function aplicaKPI(m) {
+  // Faturamento (igual à tela Metas)
+  const [fv, fm, fs] = metaVal("fat", m), pf = Math.round(fv / fm * 100), sf = situacao(METAS[0], [fv, fm, fs]);
+  $("k-fat").innerHTML = rsMil(fv);
+  poeAnel($("k-anel"), { p: fv / fm * 100, marca: FRAC * 100, aria: `${pf}% da meta de faturamento; esperado hoje ${Math.round(FRAC * 100)}%` });
+  $("k-meta").textContent = `R$ ${mil(fm)} mil`;
+  $("k-esp").textContent = `R$ ${mil(fm * FRAC)} mil`;
+  $("k-proj").innerHTML = rsMil(sf.proj); $("k-sup").innerHTML = rsMil(fs);
+  // Leads novos (safra de novembro)
+  const s = renderFunil(m);
+  $("k-leads").textContent = s.n[0]; $("k-agend").textContent = `${s.n[1]} agendaram`; $("k-agend-p").textContent = Math.round(s.n[1] / s.n[0] * 100) + "%";
+  // Planos fechados no mês (mesma definição da tela Metas)
+  const [pv, pm] = metaVal("pl", m), r = ritmo(pv, pm);
+  $("k-planos").textContent = pv; $("k-planos-m").textContent = pm;
+  $("k-planos-v").textContent = `R$ ${mil(metaVal("fechv", m)[0])} mil`;
+  const st = $("k-planos-s"); st.className = "status " + r.cls; st.textContent = r.rot;
+  $("k-planos-esp").textContent = `Esperado hoje: ${br(r.esp)} planos`;
+  // Comparecimento na 1ª consulta
+  const c = comparecimento(m);
+  $("k-comp").textContent = c.pct; $("k-comp-n").textContent = `${c.foi} de ${c.reg}`;
+  // Dois selos curtos (não um longo): cabem lado a lado ou quebram entre eles
+  $("k-comp-s").innerHTML = [c.faltas ? `<span class="status status--atencao">${c.faltas} falta${c.faltas > 1 ? "s" : ""}</span>` : "",
+    c.sem ? `<span class="status status--atencao">${c.sem} sem registro</span>` : ""].join("");
+}
+
+const MAX_AT = 6;  // Atenção hoje: só os 6 mais urgentes (a lista já vem em ordem de urgência)
+let filtroMed = "todos", filtroTipo = "todos";
+function filtra() {
+  const okMed = el => filtroMed === "todos" || el.dataset.med === filtroMed;
+  const cont = { recall: 0, fu: 0, plano: 0, agenda: 0 }; let n = 0, atras = 0;
+  document.querySelectorAll("#lista-atencao .linha").forEach(el => {
+    const m = okMed(el); if (m) cont[el.dataset.tipo]++;
+    const v = m && (filtroTipo === "todos" || el.dataset.tipo === filtroTipo); if (v) n++; el.hidden = !v || n > MAX_AT;
+    if (m && el.querySelector(".status--atrasado")) atras++;
+  });
+  Object.entries(cont).forEach(([t, c]) => document.querySelector(`[data-n="${t}"]`).textContent = c);
+  $("atencao-n").textContent = n > MAX_AT ? `${MAX_AT} mais urgentes de ${n}` : n + (n === 1 ? " item" : " itens");
+  $("atencao-tot").textContent = n;
+  linhaDoTempo($("tempo"), filtroMed);
+  const hoje = pacHoje(filtroMed), feitos = hoje.filter(a => a.st === "feito").length;
+  $("tempo-n").textContent = `${hoje.length} pacientes`;
+  $("tempo-resumo").textContent = `${feitos} já atendida${feitos === 1 ? "" : "s"} antes das 09:40`;
+  const extra = document.querySelectorAll("#tempo .tempo__item--extra").length;
+  $("tempo-mais").hidden = !extra;
+  $("tempo-mais").innerHTML = `Ver os ${hoje.length} pacientes de hoje <svg class="ico ico-sm"><use href="#i-dir"/></svg>`;
+  $("resumo-dia").textContent = `${hoje.length} pacientes hoje · ${atras} pendências atrasadas`;
+  // Aviso de parados (mesma regra do Funil)
+  const par = VA.parados(filtroMed);
+  $("aviso-parados").hidden = !par.length;
+  $("av-par-n").textContent = `${par.length} ${par.length === 1 ? "lead parado" : "leads parados"}`;
+  $("av-par-v").textContent = `R$ ${mil(par.reduce((s, p) => s + VA.valorLead(p), 0))} mil`;
+  aplicaKPI(filtroMed);
+}
+pilulasMedico(m => pacHoje(m).length, m => { filtroMed = m; filtra(); });
+document.querySelectorAll("#abas-atencao .aba").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("#abas-atencao .aba").forEach(x => x.setAttribute("aria-selected", x === b));
+  filtroTipo = b.dataset.tipo; filtra();
+}));
+renderAtencao(); miniCal($("mcal"), { pontos: true });
+document.querySelectorAll("#mcal .mcal__dia").forEach((d, i) => { if (i < 7 || i > 13) d.classList.add("fora-semana"); });  // 8 a 14/11
+filtra();
+</script>
+<link rel="stylesheet" href="motion.css">
+<script src="motion.js"></script>
+</body>
+</html>

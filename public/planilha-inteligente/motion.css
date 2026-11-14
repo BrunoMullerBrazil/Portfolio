@@ -1,0 +1,158 @@
+/* =====================================================================
+   MOVIMENTO · camada separada do sistema visual (proto.css).
+   Incluído no fim do <body>, junto com motion.js. Não muda layout:
+   só transições, estados de hover e as telas de abertura/encerramento.
+   Regras: nada no fluxo normal passa de 400ms (exceto a abertura);
+   nada infinito; nada anima enquanto se digita; com
+   prefers-reduced-motion, só opacidade.
+   ===================================================================== */
+:root {
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-in: cubic-bezier(.4, 0, 1, 1);
+  --ease-cortina: cubic-bezier(.7, 0, .2, 1);
+  --d-1: 120ms;  /* micro: cor, opacidade de dica */
+  --d-2: 200ms;  /* hover, saída de gaveta, aviso */
+  --d-3: 320ms;  /* entrada de gaveta, FLIP, pílula do trilho */
+  --d-4: 600ms;  /* só abertura/encerramento */
+}
+
+/* ---------- 1. Navegação entre páginas (View Transitions) ------------- */
+/* @view-transition { navigation: auto } é injetado por motion.js só em http(s):
+   em file:// o navegador recusa a transição entre documentos e usa o fallback. */
+.trilho { view-transition-name: vam-trilho; }
+.vam-pilula { view-transition-name: vam-pilula; }
+::view-transition-group(root) { animation-duration: var(--d-2); }
+::view-transition-group(vam-pilula) { animation-duration: var(--d-3); animation-timing-function: var(--ease-out); }
+::view-transition-old(vam-trilho), ::view-transition-new(vam-trilho) { animation: none; }
+
+/* Pílula ativa do trilho como peça única que desliza entre itens.
+   O item atual perde o fundo próprio; a pílula (injetada) assume o desenho. */
+.trilho.vam-pil .trilho__item[aria-current="page"] { background: transparent; box-shadow: none; }
+.trilho.vam-pil .trilho__item[aria-current="page"]::before { opacity: 0; }
+.vam-pilula {
+  position: absolute; left: 0; top: 0; width: 60px; height: 52px; border-radius: 14px; pointer-events: none; z-index: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.08));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  will-change: transform;
+}
+.vam-pilula > i { position: absolute; left: -6px; top: 14px; bottom: 14px; width: 3px; border-radius: 3px; background: var(--salvia); }
+.trilho__item, .trilho__logo, .trilho__aba { z-index: 1; }
+.trilho__item { transition: background-color var(--d-1), color var(--d-1); }
+@media (max-width: 720px) {
+  .vam-pilula > i { left: 18px; right: 18px; top: auto; bottom: -6px; width: auto; height: 3px; }
+}
+
+/* ---------- 2. Hover em cartão --------------------------------------- */
+@media (hover: hover) and (pointer: fine) {
+  .cartao.recorte { transition: transform var(--d-2) var(--ease-out), box-shadow var(--d-2) var(--ease-out), opacity var(--d-2); }
+  .cartao.recorte:hover { transform: translateY(-2px); box-shadow: var(--sombra-2); }
+  .cartao--foco.recorte:hover { box-shadow: 0 14px 32px -14px rgba(23, 35, 27, .55); }
+  .recorte__seta .ico { transition: transform var(--d-2) var(--ease-out); }
+  .cartao.recorte:hover .recorte__seta .ico { transform: rotate(12deg) translate(1px, -1px); }
+  .recorte__seta { transition: background-color var(--d-2), box-shadow var(--d-2), border-color var(--d-2); }
+  .cartao.recorte:not(.cartao--foco):hover .recorte__seta { background-color: var(--suave-2); }
+  /* vidro realça: brilho mais forte no alto e borda mais clara */
+  .cartao--foco.recorte:hover .recorte__seta {
+    border-color: rgba(255,255,255,.46);
+    background: radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,.38) 0%, rgba(255,255,255,0) 58%), linear-gradient(180deg, rgba(54,91,72,.9), rgba(34,57,45,.95));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 10px 22px -10px rgba(23,35,27,.8);
+  }
+  .trilho__novo:hover { transform: scale(1.04); }
+}
+
+/* ---------- 3. Gavetas e popovers: entram da direita, saem mais rápido */
+.fn-gaveta, .gaveta, .vam-gaveta {
+  transition: transform var(--d-2) var(--ease-in), visibility 0s linear var(--d-2);
+  visibility: hidden;
+}
+.fn-gaveta.aberta, .gaveta.aberta, .vam-gaveta.aberta, .gaveta[open], .gaveta.is-open {
+  transition: transform 280ms var(--ease-out), visibility 0s;
+  visibility: visible;
+}
+[popover]:popover-open { animation: vam-pop-in 280ms var(--ease-out); }
+.popover.aberto, .popover.is-open, .pop.aberto { animation: vam-pop-in 280ms var(--ease-out); }
+@keyframes vam-pop-in { from { opacity: 0; transform: translateX(16px); } }
+
+/* ---------- 4. Tique + aviso que sobe pela base ---------------------- */
+.vam-tique-on > :not(.vam-tique) { opacity: 0; transition: opacity var(--d-1); }
+.vam-tique { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; color: var(--ok, var(--floresta)); }
+.vam-tique svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.vam-tique path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: vam-traco 280ms var(--ease-out) forwards; }
+@keyframes vam-traco { to { stroke-dashoffset: 0; } }
+
+.vam-avisos { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 90; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; width: max-content; max-width: calc(100vw - 32px); }
+.vam-aviso {
+  display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border-radius: var(--r-pill, 999px);
+  background: var(--tinta); color: #fff; font: 500 var(--t-sm, 14px)/1.3 var(--f-texto, Inter, sans-serif);
+  box-shadow: 0 10px 28px -12px rgba(23,35,27,.55); pointer-events: auto;
+}
+.vam-aviso__ok { width: 24px; height: 24px; border-radius: 50%; background: var(--floresta-2); display: grid; place-items: center; flex: none; }
+.vam-aviso__ok svg { width: 14px; height: 14px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.vam-aviso__ok path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: vam-traco 280ms var(--ease-out) 120ms forwards; }
+.vam-aviso b { font-weight: 600; }
+@media (max-width: 720px) { .vam-avisos { bottom: calc(var(--barra-cel, 68px) + 20px + env(safe-area-inset-bottom)); } }
+
+.vam-fantasma { position: fixed; margin: 0; z-index: 25; pointer-events: none; }
+
+/* ---------- 5. Abertura "Bom dia" e "Encerrar o dia" ----------------- */
+.vam-tela {
+  position: fixed; inset: 0; z-index: 100; background: var(--porcelana); color: var(--tinta);
+  display: grid; place-items: center; padding: 24px 16px; overflow: hidden; cursor: pointer;
+}
+.vam-tela::after { /* filete de luz na borda da cortina */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--linha);
+}
+.vam-tela__centro { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 22px; max-width: 720px; }
+.vam-mono { height: clamp(72px, 12vh, 104px); width: auto; aspect-ratio: 90 / 106; overflow: visible; color: var(--floresta-noite); }
+.vam-mono polygon { fill: currentColor; fill-opacity: 0; stroke: currentColor; stroke-width: .9; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.vam-tela__ola { font: 600 clamp(28px, 4.2vw, 48px)/1.1 var(--f-titulo, "Inter Tight", sans-serif); letter-spacing: -.025em; margin: 0; }
+.vam-tela__ola span { display: inline-block; white-space: pre; }
+.vam-tela__resumo { font: 500 clamp(14px, 1.4vw, 17px)/1.4 var(--f-texto, Inter, sans-serif); color: var(--texto-2); font-variant-numeric: tabular-nums; margin: 0; }
+.vam-tela__resumo b { color: var(--tinta); font-weight: 600; }
+.vam-tela__pular { position: absolute; right: 20px; bottom: 18px; font: 500 12px/1 var(--f-texto, Inter, sans-serif); color: var(--texto-2); opacity: .8; }
+.vam-demo { position: absolute; left: 20px; bottom: 14px; display: inline-flex; align-items: center; gap: 8px; font: 500 12px/1 var(--f-texto, Inter, sans-serif); color: var(--texto-2); cursor: default; }
+.vam-demo select { font: inherit; color: var(--tinta); background: transparent; border: 1px solid var(--linha-forte); border-radius: 8px; padding: 6px 8px; min-height: 32px; }
+@media (max-width: 720px) {
+  .vam-tela__pular { right: 16px; bottom: 16px; }
+  .vam-demo { left: 16px; bottom: 12px; }
+}
+
+/* Encerrar o dia */
+.vam-fim { cursor: default; }
+.vam-fim .vam-tela__centro { gap: 20px; }
+.vam-fim__nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 4px 0 0; width: min(620px, 100%); }
+.vam-fim__nums > div { padding: 4px 18px; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.vam-fim__nums > div + div { border-left: 1px solid var(--linha); }
+.vam-fim__nums dt { font-size: var(--t-xs, 12px); color: var(--texto-2); }
+.vam-fim__nums dd { margin: 0; font: 600 clamp(26px, 3.4vw, 36px)/1.05 var(--f-titulo, "Inter Tight", sans-serif); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.vam-fim__nums dd small { display: block; font: 500 var(--t-xs, 12px)/1.3 var(--f-texto, Inter, sans-serif); color: var(--texto-2); letter-spacing: 0; margin-top: 4px; }
+.vam-fim__ate { font: 500 clamp(16px, 1.6vw, 19px)/1.2 var(--f-titulo, "Inter Tight", sans-serif); color: var(--salvia-escura); margin: 0; }
+.vam-fim__fechar { margin-top: 6px; min-height: var(--alvo, 36px); padding: 0 18px; border-radius: var(--r-pill, 999px); border: 1px solid var(--linha-forte); background: var(--cartao); color: var(--tinta); font: 600 var(--t-sm, 14px)/1 var(--f-texto, Inter, sans-serif); cursor: pointer; }
+.vam-fim__fechar:hover { background: var(--suave); }
+@media (max-width: 520px) {
+  .vam-fim__nums > div { padding: 4px 8px; }
+}
+
+/* Botão "Encerrar o dia" no trilho (desktop) e no topo (celular) */
+.vam-encerrar .ico { width: 20px; height: 20px; }
+.vam-encerrar.vam-feito { color: var(--foco-texto-2); }
+.vam-encerrar-cel { display: none; }
+@media (max-width: 720px) {
+  .vam-encerrar-cel { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-top: 6px; min-height: var(--alvo); padding: 0 12px; border-radius: var(--r-pill, 999px); border: 1px solid var(--linha-forte); background: transparent; color: var(--texto-2); font: 500 var(--t-xs, 12px)/1 var(--f-texto, Inter, sans-serif); }
+  .vam-encerrar-cel .ico { width: 15px; height: 15px; }
+}
+
+/* Enquanto o usuário digita, nada se move */
+.vam-digitando main *, .vam-digitando main *::before, .vam-digitando main *::after { transition: none !important; animation: none !important; }
+
+/* ---------- 6. Movimento reduzido: só opacidade --------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .cartao.recorte:hover { transform: none; }
+  .cartao.recorte:hover .recorte__seta .ico, .trilho__novo:hover { transform: none; }
+  .fn-gaveta, .gaveta, .vam-gaveta { transition: opacity var(--d-2), visibility 0s linear var(--d-2); }
+  .fn-gaveta:not(.aberta), .gaveta:not(.aberta), .vam-gaveta:not(.aberta) { opacity: 0; }
+  .fn-gaveta.aberta, .gaveta.aberta, .vam-gaveta.aberta { transition: opacity 280ms, visibility 0s; opacity: 1; }
+  [popover]:popover-open, .popover.aberto, .popover.is-open, .pop.aberto { animation-name: vam-fade-in; }
+  @keyframes vam-fade-in { from { opacity: 0; } }
+  .vam-tique path, .vam-aviso__ok path { animation: none; stroke-dashoffset: 0; }
+}

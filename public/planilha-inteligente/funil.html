@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Funil · Clínica Aurora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+<style>
+  /* ===== Ajustes só da tela FUNIL (prefixo .fn-) =====
+     Tela larga: o quadro usa a largura toda. A agenda do dia (coluna direita das
+     outras telas) abre como gaveta pelo botão de agenda do topo. */
+  /* Tela larga: aceita um pouco mais de largura que as outras em monitores grandes */
+  .app { --max: 2080px; }
+
+  /* Linha de números: foco + alerta de parados + 3 números.
+     < 640px de área útil: empilha (foco, alerta, números) · 640–1239: foco | alerta, números embaixo · ≥ 1240: os três lado a lado */
+  .fn-resumo { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "foco" "alerta" "nums"; gap: var(--gap); margin-bottom: calc(var(--gap) + 4px); }
+  .fn-foco { grid-area: foco; } .fn-alerta { grid-area: alerta; } .fn-nums { grid-area: nums; }
+  @container app (min-width: 640px) { .fn-resumo { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "foco alerta" "nums nums"; } }
+  @container app (min-width: 1240px) { .fn-resumo { grid-template-columns: minmax(300px, 1fr) minmax(0, 1.5fr) minmax(360px, 1.3fr); grid-template-areas: "foco nums alerta"; } }
+  .fn-foco { --anel: clamp(64px, 24cqi, 92px); display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+  .fn-foco__corpo { display: flex; align-items: center; gap: 18px; min-width: 0; }
+  .fn-foco__corpo > div:last-child { min-width: 0; }
+  .fn-foco .anel { --tam: var(--anel); }
+  .fn-foco .kpi__valor { --disp: calc(100cqi - var(--anel) - 18px); --num-max: var(--t-num-lg); }
+  .fn-foco .kpi__valor + .kpi__nota { margin-top: 4px; }  /* respiro entre o número grande e a nota */
+  .fn-foco .kpi__nota b { color: #fff; font-weight: 600; }
+  .fn-foco > .kpi__nota:last-child { margin-top: auto; }
+  /* 3 números: 3 colunas com área útil ≥ 640px; mais estreito, 2 + 1 */
+  .fn-nums { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 8px 0; align-items: stretch; }
+  .fn-num { padding: 12px 16px; display: grid; align-content: center; grid-template-rows: auto auto minmax(calc(2 * 1.45em), auto); gap: 4px; min-width: 0; container-type: inline-size; }
+  .fn-num .kpi__nota { align-content: flex-start; }
+  .fn-num:nth-child(2) { border-left: 1px solid var(--linha); }
+  .fn-num:nth-child(3) { grid-column: 1 / -1; border-top: 1px solid var(--linha); }
+  @container app (min-width: 640px) {
+    .fn-nums { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 18px 8px; }
+    .fn-num { padding: 4px 18px; }
+    .fn-num + .fn-num { border-left: 1px solid var(--linha); }
+    .fn-num:nth-child(3) { grid-column: auto; border-top: 0; }
+  }
+  .fn-num .kpi__valor { margin-top: 4px; --num-max: calc(30px + 6 * var(--k)); }
+  .fn-num .kpi__rot { padding-right: 0; }
+
+  /* Cartão de alerta: leads parados acima do prazo (número vermelho, os 3 mais críticos, filtro) */
+  .fn-alerta__in { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "cab" "lista" "bt"; gap: 12px 20px; align-content: start; height: 100%; }
+  .fn-alerta { background: radial-gradient(120% 90% at 0 0, rgba(248,227,225,.85) 0%, rgba(248,227,225,0) 58%), var(--cartao); }
+  .fn-alerta__cab { grid-area: cab; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .fn-alerta__rot { display: flex; align-items: center; gap: 8px; font: 600 var(--t-sm)/1.3 var(--f-texto); color: var(--atrasado); }
+  .fn-alerta__rot::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--atrasado); box-shadow: 0 0 0 4px rgba(163,50,44,.12); flex: none; }
+  .fn-alerta__num { font: 600 var(--t-num-lg)/1 var(--f-titulo); letter-spacing: -.03em; color: var(--atrasado); font-variant-numeric: tabular-nums; margin-top: 6px; white-space: nowrap; }
+  .fn-alerta__num small { font-size: .42em; font-weight: 500; letter-spacing: 0; margin-left: .25em; opacity: .85; }
+  .fn-alerta__nota { font-size: var(--t-sm); color: var(--texto-2); margin-top: 6px; line-height: 1.45; }
+  .fn-alerta__nota b { color: var(--tinta); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .fn-alerta__nota .limite { color: var(--atencao); font-weight: 600; white-space: nowrap; }
+  .fn-alerta__lista { grid-area: lista; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; min-width: 0; }
+  .fn-alerta__lista li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 46px; padding: 6px 0; }
+  .fn-alerta__lista li + li { border-top: 1px solid var(--linha); }
+  .fn-alerta__lista b { display: block; font-weight: 600; font-size: var(--t-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fn-alerta__lista span.et { display: block; font-size: var(--t-xs); color: var(--texto-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @container (max-width: 420px) { .fn-alerta__lista span.et { white-space: normal; } }  /* celular: etapa e médico em 2 linhas, sem cortar o nome do médico */
+  .fn-alerta__lista .nw { white-space: nowrap; }
+  .fn-alerta__bt { grid-area: bt; justify-self: start; }
+  .fn-alerta__bt .ico { width: 15px; height: 15px; }
+  @container (min-width: 520px) {
+    .fn-alerta__in { grid-template-columns: minmax(150px, .8fr) minmax(0, 1.6fr); grid-template-areas: "cab lista" "bt lista"; }
+    .fn-alerta__bt { align-self: end; }
+  }
+
+  /* Barra de ferramentas da seção */
+  .fn-barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+  .fn-barra h2 { font-size: var(--t-h2); display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .fn-barra__dir { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .fn-vista { display: inline-flex; gap: 4px; padding: 4px; background: var(--cartao); border-radius: var(--r-pill); box-shadow: var(--sombra-1); }
+  .fn-vista .aba { height: var(--alvo); padding: 0 14px; }
+  .fn-vista .aba .ico { width: 16px; height: 16px; }
+
+  /* Etapas em pílulas (só no celular) */
+  .fn-etapas { display: none; }
+
+  /* Quadro: colunas por etapa. Sem espaço para as 6 colunas (≥196px), o quadro rola
+     na horizontal DENTRO da área dele (a página nunca rola de lado). */
+  .fn-quadro-wrap { overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
+  .fn-quadro { display: grid; grid-template-columns: repeat(6, minmax(196px, 1fr)); gap: 12px; align-items: start; }
+  .fn-col { scroll-snap-align: start; }
+  .fn-col { background: var(--suave); border-radius: 20px; padding: 8px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .fn-col__cab { position: relative; padding: 8px 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+  .fn-col__tit { display: flex; align-items: center; gap: 8px; font: 600 var(--t-md)/1.2 var(--f-titulo); }
+  .fn-passo { width: 24px; height: 24px; border-radius: 50%; flex: none; display: grid; place-items: center; font: 700 11.5px/1 var(--f-titulo); background: var(--cartao); color: var(--floresta); box-shadow: inset 0 0 0 1.5px var(--salvia); position: relative; z-index: 1; }
+  .fn-passo--fim { background: var(--floresta); color: #fff; box-shadow: none; }
+  .fn-passo--fim .ico { width: 13px; height: 13px; stroke-width: 2.4; }
+  .fn-col:not(:last-child) .fn-col__cab::after { content: ""; position: absolute; left: 32px; right: -24px; top: 19px; height: 2px; background: repeating-linear-gradient(90deg, var(--linha-forte) 0 4px, transparent 4px 8px); }
+  .fn-col:not(:last-child) .fn-col__tit > span:not(.fn-passo) { background: var(--suave); position: relative; z-index: 1; padding-right: 6px; }
+  .fn-col__tit > span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fn-col__nums { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 8px; }
+  .fn-col__n { font: 600 26px/1 var(--f-titulo); letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .fn-col__n small { font-size: .46em; font-weight: 500; opacity: .72; margin-left: .2em; letter-spacing: 0; }
+  .fn-col__valor { font: 600 15px/1.1 var(--f-titulo); letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .fn-col__valor small { font-size: .74em; font-weight: 500; opacity: .72; margin: 0 .15em; letter-spacing: 0; }
+  .fn-col__rot { font-size: var(--t-xs); color: var(--texto-2); font-variant-numeric: tabular-nums; line-height: 1.4; min-height: 2.8em; margin-top: 4px; }
+  .fn-col__mais { width: 100%; justify-content: center; }
+
+  /* Cartão de lead */
+  .fn-card.recorte { --rc: 46px; --rf: 12px; --seta: 38px; --fundo-recorte: var(--suave); padding: 12px; border-radius: 18px; display: flex; flex-direction: column; gap: 6px; }
+  .fn-card.recorte::before { border-bottom-left-radius: 18px; }
+  @media (max-width: 1023px) { .fn-card.recorte { --rc: 48px; --seta: 40px; } }
+  .fn-card .recorte__seta .ico { width: 16px; height: 16px; }
+  .fn-card[hidden] { display: none; }
+  .fn-card__top { display: flex; align-items: center; gap: 8px; min-height: 32px; padding-right: 40px; }
+  .fn-card__med { font-size: var(--t-xs); color: var(--texto-2); white-space: nowrap; }
+  .fn-card__nome { font-weight: 600; font-size: var(--t-md); line-height: 1.25; margin-top: 2px; }
+  .fn-card__proc { font-size: var(--t-sm); color: var(--texto-2); line-height: 1.3; }
+  .fn-card__pot { font-size: var(--t-xs); color: var(--texto-2); font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .fn-card__valor { font: 600 19px/1.1 var(--f-titulo); letter-spacing: -.015em; font-variant-numeric: tabular-nums; }
+  .fn-card__valor small { font-size: .56em; font-weight: 500; opacity: .72; margin-right: .2em; letter-spacing: 0; }
+  .fn-card__valor .fn-de { font: 500 var(--t-xs) var(--f-texto); color: var(--texto-2); margin-left: 4px; letter-spacing: 0; }
+  .fn-card__meta { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+  .fn-card .datahora > div { padding: 4px 10px; }
+  .fn-card .datahora b { font-size: var(--t-sm); }
+  .fn-card .datahora span { font-size: 9.5px; }
+  .fn-card__pe { border-top: 1px solid var(--linha); margin-top: 2px; padding-top: 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .fn-card__nota { font-size: var(--t-xs); color: var(--texto-2); line-height: 1.35; }
+  /* Parado acima do prazo: filete vermelho discreto à esquerda + selo vermelho forte. No limite: âmbar. */
+  .fn-card--parado::after, .fn-card--limite::after { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 0 3px 3px 0; background: var(--atrasado); }
+  .fn-card--limite::after { background: var(--atencao); opacity: .8; }
+  .fn-card--parado { box-shadow: var(--sombra-1), 0 0 0 1px rgba(163,50,44,.10); }
+  /* Ações de contato no pé do cartão */
+  .fn-card__acoes { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+  .fn-card__acoes .wa-reg { margin-left: auto; }
+  .fn-card__acoes:empty { display: none; }
+
+  /* Contador de parados no cabeçalho da coluna */
+  .fn-col__sel { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  /* Filtro "só os parados" */
+  .fn-filtro { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; margin: -2px 0 12px; padding: 6px 6px 6px 14px; border-radius: 16px; background: var(--cartao); box-shadow: var(--sombra-1), inset 3px 0 0 var(--atrasado); font-size: var(--t-sm); }
+  .fn-filtro[hidden] { display: none; }
+  .fn-filtro b { color: var(--atrasado); font-weight: 600; }
+  .fn-filtro .bt-texto { margin-left: auto; }
+  .fn-quadro.so-parados .fn-col:not(.tem-parado) { display: none; }
+  .fn-quadro.so-parados .fn-col__cab::after { display: none; }
+  .fn-quadro.so-parados { grid-template-columns: repeat(var(--ncol, 6), minmax(196px, 1fr)); }
+
+  /* Saíram do funil */
+  .fn-fora { margin-top: 16px; display: flex; align-items: center; gap: 12px 20px; flex-wrap: wrap; padding: 14px 20px; }
+  .fn-fora b { font: 600 var(--t-md) var(--f-titulo); }
+  .fn-fora__item { display: inline-flex; align-items: center; gap: 8px; font-size: var(--t-sm); color: var(--texto-2); }
+  .fn-fora__item strong { font: 600 var(--t-lg) var(--f-titulo); color: var(--tinta); font-variant-numeric: tabular-nums; }
+  .fn-fora .bt-texto { margin-left: auto; }
+
+  /* Lista: tabela densa (≥ 1100px de cartão). Mais estreito, cada linha vira um cartão. */
+  .fn-lista { padding: 8px 12px 12px; }
+  .fn-lista .tabela td:nth-child(2) { min-width: 130px; white-space: normal; }  /* procedimento e próximo passo quebram linha; a tabela cabe a partir de 1100px */
+  .fn-lista .tabela td { padding: 7px 8px; height: 52px; vertical-align: middle; }
+  .fn-lista .tabela th { padding-inline: 8px; }
+  .fn-lista .tabela th { white-space: nowrap; }
+  .fn-pac { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .fn-pac > div > b { display: block; font-size: var(--t-md); font-weight: 600; white-space: nowrap; }
+  .fn-pac > div > span { display: block; font-size: var(--t-xs); color: var(--texto-2); white-space: nowrap; }
+  .fn-etapa { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--tinta); font-weight: 500; }
+  .fn-etapa .fn-passo { width: 22px; height: 22px; font-size: 10.5px; }
+  .fn-lista .tabela tr.fn-grupo td { height: 34px; padding: 14px 10px 6px; background: transparent; border-bottom: 1px solid var(--linha-forte); font-size: var(--t-xs); font-weight: 600; color: var(--texto-2); text-transform: uppercase; letter-spacing: .05em; }
+  .fn-lista .tabela tr.fn-grupo:hover td { background: transparent; }
+  .fn-lista .tabela tr.fn-grupo td span.fn-tot { text-transform: none; letter-spacing: 0; font-weight: 500; margin-left: 8px; }
+  .fn-lista .tabela tr.fn-grupo td .fn-etapa { vertical-align: middle; margin-right: 6px; }
+  .fn-lista .tabela tr[hidden] { display: none; }
+  /* Lista: parados primeiro em cada etapa, com faixa sutil */
+  .fn-lista .tabela tr.fn-parado td { background: rgba(248,227,225,.42); }
+  .fn-lista .tabela tr.fn-parado td:first-child { box-shadow: inset 3px 0 0 var(--atrasado); }
+  .fn-lista .tabela tr.fn-parado:hover td { background: rgba(248,227,225,.7); }
+  .fn-quando { white-space: nowrap; }
+  .fn-quando small { display: block; font-size: var(--t-xs); color: var(--texto-2); white-space: normal; min-width: 190px; }
+  .fn-valor { font: 600 var(--t-md) var(--f-titulo); white-space: nowrap; }
+  .fn-valor small { font-size: .75em; font-weight: 500; opacity: .72; margin-right: .15em; }
+  .fn-valor--est { font-weight: 500; color: var(--texto-2); }
+  .fn-valor--est small { opacity: 1; }  /* estimado: mesmo formato, peso e cor mais leves */
+  .fn-rolagem { overflow-x: auto; max-width: 100%; }
+  @container (max-width: 1099px) {
+    .fn-lista .tabela, .fn-lista .tabela tbody { display: block; }
+    .fn-lista .tabela thead { display: none; }
+    .fn-lista .tabela tbody { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+    .fn-lista .tabela tr.fn-grupo { display: block; grid-column: 1 / -1; }
+    .fn-lista .tabela tr.fn-grupo td { display: block; height: auto; padding: 14px 4px 6px; }
+    .fn-lista .tabela tr:not(.fn-grupo) { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "pac pac valor acao" "proc proc proc proc" "quando quando quando quando" "orig temp st st"; gap: 6px 10px; align-items: center; padding: 12px; border-radius: 16px; background: var(--porcelana); }
+    .fn-lista .tabela tr:not(.fn-grupo):hover td { background: transparent; }
+    .fn-lista .tabela tr.fn-parado { background: linear-gradient(90deg, rgba(248,227,225,.95), rgba(248,227,225,.45)); box-shadow: inset 3px 0 0 var(--atrasado); }
+    .fn-lista .tabela tr.fn-parado td, .fn-lista .tabela tr.fn-parado:hover td { background: transparent; box-shadow: none !important; }
+    .fn-lista .tabela tr:not(.fn-grupo) > td { display: block; height: auto; padding: 0; border: 0; min-width: 0; }
+    .fn-lista .tabela tr:not(.fn-grupo) > td:nth-child(1) { grid-area: pac; }
+    .fn-lista .tabela tr:not(.fn-grupo) > td:nth-child(2) { grid-area: proc; font-weight: 500; }
+    .fn-lista .tabela tr:not(.fn-grupo) > td:nth-child(3) { grid-area: orig; }
+    .fn-lista .tabela tr:not(.fn-grupo) > td:nth-child(4) { grid-area: temp; }
+    .fn-lista .tabela tr:not(.fn-grupo) > td:nth-child(5) { grid-area: quando; white-space: normal; color: var(--texto-2); }
+    .fn-lista .tabela tr:not(.fn-grupo) > td:nth-child(6) { grid-area: st; justify-self: end; }
+    .fn-lista .tabela tr:not(.fn-grupo) > td:nth-child(7) { grid-area: valor; }
+    .fn-lista .tabela tr:not(.fn-grupo) > td:nth-child(8) { grid-area: acao; width: auto !important; }
+    .fn-lista .fn-pac > div { min-width: 0; }
+    .fn-lista .fn-pac > div > b, .fn-lista .fn-pac > div > span { overflow: hidden; text-overflow: ellipsis; }
+    .fn-lista .fn-quando { color: var(--tinta); }
+  }
+  /* Cartão da Lista muito estreito (celular de 360px): o selo de status desce para uma linha própria,
+     em vez de invadir "Muito quente" */
+  @container (max-width: 320px) {  /* área útil do cartão .fn-lista: 360px de tela = 304px; 390px = 334px fica como estava */
+    .fn-lista .tabela tr:not(.fn-grupo) { grid-template-areas: "pac pac valor acao" "proc proc proc proc" "quando quando quando quando" "orig temp temp temp" "st st st st"; }
+    .fn-lista .tabela tr:not(.fn-grupo) > td:nth-child(6) { justify-self: start; }
+  }
+
+  /* Gaveta: agenda de hoje */
+  .fn-gaveta { position: fixed; top: 0; right: 0; bottom: 0; width: 360px; z-index: 30; background: var(--porcelana); box-shadow: -12px 0 40px -16px rgba(23,35,27,.28); padding: 20px; overflow-y: auto; transform: translateX(105%); transition: transform .2s; }
+  .fn-gaveta.aberta { transform: none; }
+  .fn-gaveta .cartao__cab { margin-bottom: 12px; }
+  #bt-agenda[aria-expanded="true"] { background: var(--suave-2); box-shadow: inset 0 0 0 1px var(--linha-forte); }
+
+  @media (max-width: 720px) {
+    .fn-barra { gap: 10px; }
+    .fn-barra__dir { width: 100%; justify-content: space-between; }
+    /* Quadro no celular: abas por etapa + uma lista vertical de cartões */
+    .fn-etapas { display: flex; gap: 6px; overflow-x: auto; margin: 0 -16px 12px; padding: 2px 16px 4px; scrollbar-width: none; }
+    .fn-etapas .pilula { flex: none; background: var(--cartao); box-shadow: var(--sombra-1); padding: 0 12px; }
+    .fn-etapas .pilula[aria-pressed="true"] { background: var(--suave-2); }
+    .fn-quadro-wrap { overflow: visible; margin: 0; padding: 0; }
+    .fn-quadro { display: block; }
+    .fn-col { display: none; }
+    .fn-col.ativa { display: flex; }
+    /* Filtro de parados no celular: sem abas, todas as etapas com parados empilhadas */
+    .fn-etapas.so-parados { display: none; }
+    .fn-quadro.so-parados .fn-col.tem-parado { display: flex; margin-bottom: 10px; }
+    .fn-col__cab::after { display: none; }
+    .fn-gaveta { width: 100%; }
+    .fn-fora .bt-texto { margin-left: 0; }
+    .fn-fora > b { width: 100%; }
+  }
+</style>
+</head>
+<body data-pagina="funil">
+
+<main class="app">
+  <!-- TOPO -->
+  <header class="topo">
+    <div class="topo__ola">
+      <h1>Bom dia, Dra. Lúcia</h1>
+      <p class="topo__data"><b>Sexta-feira, 13 de novembro</b> · 09:40 · <span id="resumo-dia"></span></p>
+    </div>
+    <div class="topo__acoes">
+      <div class="pilulas" role="group" aria-label="Filtrar por médico">
+        <button class="pilula" data-med="todos" aria-pressed="true">Todos <span class="pilula__n"></span></button>
+        <button class="pilula" data-med="g" aria-pressed="false"><span class="av av--g av--sm" aria-hidden="true">RS</span>Dr. Rafael <span class="pilula__n"></span></button>
+        <button class="pilula" data-med="d" aria-pressed="false"><span class="av av--d av--sm" aria-hidden="true">LS</span>Dra. Lúcia <span class="pilula__n"></span></button>
+      </div>
+      <div class="linha-flex" id="acoes-topo"></div>
+    </div>
+  </header>
+
+  <!-- LINHA DE NÚMEROS -->
+  <section class="fn-resumo" aria-label="Resumo do funil de 2026">
+    <article class="cartao cartao--foco recorte fn-foco">
+      <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+      <button class="recorte__seta" aria-label="Abrir planos fechados"><svg class="ico"><use href="#i-seta"/></svg></button>
+      <span class="kpi__rot">Fechado em 2026 · jan a 13/nov</span>
+      <div class="fn-foco__corpo">
+        <div class="anel" id="r-anel"></div>
+        <div>
+          <div class="kpi__valor" id="r-fech-v"></div>
+          <div class="kpi__nota"><span><b id="r-fech-n"></b> leads fecharam plano</span></div>
+        </div>
+      </div>
+      <div class="kpi__nota" id="r-ticket"></div>
+    </article>
+
+    <article class="cartao fn-nums">
+      <div class="fn-num">
+        <span class="kpi__rot">Leads no ano</span>
+        <div class="kpi__valor"><span id="r-leads"></span><small>leads</small></div>
+        <span class="kpi__nota"><span id="r-ativos"></span></span>
+      </div>
+      <div class="fn-num">
+        <span class="kpi__rot">Planos em aberto</span>
+        <div class="kpi__valor" id="r-aberto"></div>
+        <span class="kpi__nota"><span id="r-aberto-n"></span></span>
+      </div>
+      <div class="fn-num">
+        <span class="kpi__rot">Perdidos</span>
+        <div class="kpi__valor"><span id="r-perd"></span><small>leads</small></div>
+        <span class="kpi__nota"><span id="r-fora"></span></span>
+      </div>
+    </article>
+
+    <!-- ALERTA: leads parados acima do prazo -->
+    <article class="cartao fn-alerta" aria-labelledby="t-parados"><div class="fn-alerta__in">
+      <div class="fn-alerta__cab">
+        <h2 class="fn-alerta__rot" id="t-parados">Parados acima do prazo</h2>
+        <div class="fn-alerta__num"><span id="r-parados"></span><small>leads</small></div>
+        <p class="fn-alerta__nota"><b id="r-risco"></b> em risco · <span class="limite" id="r-perto"></span></p>
+      </div>
+      <ol class="fn-alerta__lista" id="r-criticos" aria-label="Os 3 mais parados"></ol>
+      <button type="button" class="bt-sec fn-alerta__bt" id="bt-parados" aria-pressed="false" aria-controls="v-quadro v-lista"></button>
+    </div></article>
+  </section>
+
+  <!-- BARRA DA SEÇÃO -->
+  <div class="fn-barra">
+    <h2>Jornada do lead <span class="cartao__sub">leads de 2026 · da primeira conversa ao fechamento</span></h2>
+    <div class="fn-barra__dir">
+      <span class="legenda-med"><span><i class="g"></i>Dr. Rafael</span><span><i class="d"></i>Dra. Lúcia</span></span>
+      <div class="fn-vista" role="tablist" aria-label="Modo de visualização">
+        <button class="aba" role="tab" aria-selected="true" aria-controls="v-quadro" data-vista="quadro"><svg class="ico"><use href="#i-quadro"/></svg>Quadro</button>
+        <button class="aba" role="tab" aria-selected="false" aria-controls="v-lista" data-vista="lista"><svg class="ico"><use href="#i-lista"/></svg>Lista</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTRO ATIVO: só os parados -->
+  <div class="fn-filtro" id="filtro-parados" role="status" hidden>
+    <span>Mostrando só os <b id="filtro-n"></b> acima do prazo, do mais parado ao menos parado</span>
+    <button type="button" class="bt-texto" id="limpa-parados">Mostrar todos os leads <svg class="ico ico-sm" aria-hidden="true"><use href="#i-fechar"/></svg></button>
+  </div>
+
+  <!-- VISTA QUADRO -->
+  <section id="v-quadro" role="tabpanel" aria-label="Quadro do funil">
+    <div class="fn-etapas" id="etapas" role="group" aria-label="Etapa do funil"></div>
+    <div class="fn-quadro-wrap"><div class="fn-quadro" id="quadro"></div></div>
+    <div class="cartao fn-fora" id="fora"></div>
+  </section>
+
+  <!-- VISTA LISTA -->
+  <section id="v-lista" role="tabpanel" aria-label="Lista do funil" hidden>
+    <div class="cartao fn-lista">
+      <div class="fn-rolagem">
+        <table class="tabela">
+          <thead><tr>
+            <th>Paciente</th><th>Procedimento de interesse</th><th>Origem</th><th>Temperatura</th><th>Consulta / próximo passo</th><th>Na etapa</th><th class="dir">Valor</th><th><span class="sr">Ação</span></th>
+          </tr></thead>
+          <tbody id="tabela"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="cartao fn-fora" id="fora-lista"></div>
+  </section>
+</main>
+
+<!-- GAVETA: agenda do dia (abre pelo botão de agenda do topo) -->
+<aside class="fn-gaveta" id="gaveta" aria-label="Agenda de hoje" aria-hidden="true">
+  <section class="cartao">
+    <div class="cartao__cab">
+      <h2>Hoje <span class="cartao__sub" id="gaveta-n"></span></h2>
+      <button class="bt-ico bt-ico--sm bt-ico--plano" id="gaveta-fechar" aria-label="Fechar agenda"><svg class="ico ico-sm"><use href="#i-fechar"/></svg></button>
+    </div>
+    <ol class="tempo" id="tempo"></ol>
+  </section>
+</aside>
+
+<script src="dados.js"></script>
+<script src="comum.js"></script>
+<script>
+/* Tudo vem de dados.js (window.VA). Nenhum número digitado aqui. */
+const { P, ETAPAS, FECHOU_ANO, FORA, AGENDA, ativosEtapa, fechMes } = VA;
+const { mil, real, rsMil, av, escala, nomeMed, linhaDoTempo, pilulasMedico, btWa, btAgenda, regTent } = UI;
+const LEADS = Object.values(P).filter(p => p.etapa);
+const SEV = { atrasado: "status--atrasado", atencao: "status--atencao", ok: "status--ok", neutro: "status--neutro" };
+const $ = id => document.getElementById(id);
+const diasTxt = l => {
+  if (l.etapa === "fechou") return `há ${l.d} ${l.d === 1 ? "dia" : "dias"}`;
+  const base = l.d === 1 ? "1 dia" : `${l.d} dias`;
+  return l.sev === "atrasado" || l.sev === "atencao" ? `${base} parado` : `${base} na etapa`;
+};
+const passo = i => i === 5 ? `<span class="fn-passo fn-passo--fim"><svg class="ico"><use href="#i-check"/></svg></span>` : `<span class="fn-passo">${i + 1}</span>`;
+const valorTit = v => `R$ ${real(v)}`;
+// Fechamentos mais recentes primeiro (dd/mm do mesmo ano)
+const ordemData = s => s.split("/").reverse().join("");
+const recentes = ls => ls.slice().sort((a, b) => ordemData(b.dt).localeCompare(ordemData(a.dt)));
+
+let filtroMed = "todos", etapaCel = "contato", soParados = location.hash === "#parados";
+const parado = l => l.etapa !== "fechou" && l.sev === "atrasado";
+const limite = l => l.etapa !== "fechou" && l.sev === "atencao";
+// Modelo de WhatsApp pela situação do lead (sem modelo: nada a mandar, ex. consulta sem registro)
+const modeloWa = l => l.etapa === "contato" ? "followup" : l.falta ? "falta" : (l.etapa === "agendado" || l.etapa === "confirmado") ? (VA.consulta(l.id) ? "confirmacao" : null) : l.etapa === "plano" ? "plano" : null;
+const okMed = m => filtroMed === "todos" || m === filtroMed;
+const soma = o => filtroMed === "todos" ? o.g + o.d : o[filtroMed];
+const fechAno = () => filtroMed === "todos" ? { n: FECHOU_ANO.g.n + FECHOU_ANO.d.n, v: FECHOU_ANO.g.v + FECHOU_ANO.d.v } : FECHOU_ANO[filtroMed];
+const ATIVAS = ETAPAS.filter(e => e.k !== "fechou").map(e => e.k);
+const nAtivos = m => ATIVAS.reduce((a, k) => a + ativosEtapa(k, m).n, 0);
+const totalLeads = m => {  // em andamento + fechados no ano + saíram
+  const f = k => (m === "todos" ? ["g", "d"] : [m]).reduce((a, x) => a + k(x), 0);
+  return nAtivos(m) + f(x => FECHOU_ANO[x].n) + f(x => Object.values(FORA).reduce((a, o) => a + o[x], 0));
+};
+
+function cartao(l) {
+  const temData = l.dh && l.etapa !== "compareceu" && l.etapa !== "plano" && l.etapa !== "fechou";
+  const valor = l.etapa === "plano" ? `<div class="fn-card__valor" title="${valorTit(l.v)}"><small>R$</small>${real(l.v)}</div>`
+    : l.etapa === "fechou" ? `<div class="fn-card__valor"><small>R$</small>${real(l.v)}${l.total !== l.v ? `<span class="fn-de">de ${real(l.total)}</span>` : ""}</div>` : "";
+  const pot = l.pot ? `<div class="fn-card__pot">ticket estimado ≈ R$ ${mil(l.pot)} mil</div>` : "";
+  const dh = temData ? `<div class="datahora" aria-label="${l.falta ? "Faltou em" : "Consulta"} ${l.dh[0]} às ${l.dh[1]}"><div><span>${l.falta ? "Faltou" : "Data"}</span><b>${l.dh[0]}</b></div><div><span>Hora</span><b>${l.dh[1]}</b></div></div>` : "";
+  const st = l.etapa === "fechou" ? `<span class="status status--ok">Fechou ${l.dt}</span>` : `<span class="status ${parado(l) ? "status--forte" : SEV[l.sev]}">${diasTxt(l)}</span>`;
+  const wa = btWa(l.id, modeloWa(l)), ag = l.etapa === "agendado" || l.etapa === "confirmado" ? btAgenda(l.id) : "";
+  const acoes = wa || ag ? `<div class="fn-card__acoes">${wa}${ag}${regTent(l.id)}</div>` : "";
+  const marca = parado(l) ? " fn-card--parado" : limite(l) ? " fn-card--limite" : "";
+  return `<article class="cartao recorte fn-card${marca}" data-med="${l.med}">
+    <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+    <button class="recorte__seta" aria-label="Abrir ficha de ${l.nome}"><svg class="ico"><use href="#i-seta"/></svg></button>
+    <div class="fn-card__top">${av(l.med, l.nome, true)}<span class="fn-card__med">${nomeMed(l.med)}</span></div>
+    <div><div class="fn-card__nome">${l.nome}</div><div class="fn-card__proc">${l.proc}</div>${pot}</div>
+    ${valor}${dh}
+    <div class="fn-card__meta"><span class="chip">${l.origem}</span>${l.t ? escala(l.t) : ""}</div>
+    <div class="fn-card__pe">${st}<span class="fn-card__nota">${l.nota}</span></div>
+    ${acoes}
+  </article>`;
+}
+
+function render() {
+  const vis = LEADS.filter(l => okMed(l.med)), fech = fechAno(), fNov = fechMes(filtroMed);
+  // Parados primeiro (do mais parado ao menos); com o filtro ligado, só eles
+  const porEtapa = k => vis.filter(l => l.etapa === k && (!soParados || parado(l))).sort((a, b) => (parado(b) - parado(a)) || (parado(a) ? b.d - a.d : 0));
+  const nEtapa = k => k === "fechou" ? fech.n : ativosEtapa(k, filtroMed).n;
+  // Quadro
+  $("quadro").innerHTML = ETAPAS.map((et, i) => {
+    let ls = porEtapa(et.k), n, valor, rot, tit;
+    if (et.k === "fechou") {
+      ls = recentes(ls); n = fech.n; valor = rsMil(fech.v); tit = valorTit(fech.v);
+      rot = "fechados no ano · os mais recentes abaixo";
+    } else if (et.k === "plano") {
+      const a = ativosEtapa(et.k, filtroMed); n = a.n; valor = rsMil(a.v); tit = valorTit(a.v); rot = "em aberto · " + et.prazo;
+    } else {
+      const a = ativosEtapa(et.k, filtroMed); n = a.n; valor = `<small>≈ R$</small>${mil(a.v)}<small>mil</small>`; tit = `soma dos tickets estimados: ${valorTit(a.v)}`; rot = "potencial · " + et.prazo;
+    }
+    const parados = ls.filter(parado).length;
+    const mostra = et.k === "fechou" ? ls.slice(0, 4) : ls;
+    const sel = et.k === "fechou" ? `<span class="status status--ok">${fNov.n} em novembro · R$ ${mil(fNov.v)} mil</span>`
+      : parados ? `<span class="status status--forte">${parados} parado${parados > 1 ? "s" : ""} acima do prazo</span>` : `<span class="status status--neutro">nada parado</span>`;
+    const mais = soParados ? "" : et.k === "fechou" ? `<button class="bt-texto fn-col__mais">Ver os ${fech.n} fechamentos do ano <svg class="ico ico-sm"><use href="#i-dir"/></svg></button>`
+      : n > mostra.length ? `<button class="bt-texto fn-col__mais">Ver os ${n} leads <svg class="ico ico-sm"><use href="#i-dir"/></svg></button>` : "";
+    return `<section class="fn-col${et.k === etapaCel ? " ativa" : ""}${parados ? " tem-parado" : ""}" data-etapa="${et.k}" aria-label="${et.nome}: ${n}${parados ? `, ${parados} parados acima do prazo` : ""}">
+      <header class="fn-col__cab">
+        <div class="fn-col__tit">${passo(i)}<span>${et.nome}</span></div>
+        <div class="fn-col__nums"><span class="fn-col__n">${n}<small>${n === 1 ? "lead" : "leads"}</small></span><span class="fn-col__valor" title="${tit}">${valor}</span></div>
+        <div class="fn-col__rot">${rot}</div>
+        <div class="fn-col__sel">${sel}</div>
+      </header>
+      ${mostra.map(cartao).join("") || `<div class="vazio">Ninguém nesta etapa</div>`}
+      ${mais}
+    </section>`;
+  }).join("");
+
+  // Filtro "só os parados"
+  const nPar = vis.filter(parado).length;
+  $("quadro").classList.toggle("so-parados", soParados); $("etapas").classList.toggle("so-parados", soParados);
+  $("quadro").style.setProperty("--ncol", Math.max(1, $("quadro").querySelectorAll(".fn-col.tem-parado").length));
+  $("filtro-parados").hidden = !soParados; $("filtro-n").textContent = `${nPar} ${nPar === 1 ? "lead parado" : "leads parados"}`;
+  const bp = $("bt-parados"); bp.setAttribute("aria-pressed", soParados);
+  bp.innerHTML = soParados ? `Mostrar todos os leads <svg class="ico" aria-hidden="true"><use href="#i-fechar"/></svg>` : `Ver os ${nPar} parados <svg class="ico" aria-hidden="true"><use href="#i-dir"/></svg>`;
+  bp.hidden = !nPar && !soParados;
+
+  // Pílulas de etapa (celular)
+  $("etapas").innerHTML = ETAPAS.map((et, i) => {
+    const n = nEtapa(et.k);
+    return `<button class="pilula" data-etapa="${et.k}" aria-pressed="${et.k === etapaCel}">${i + 1}. ${et.curto} <span class="pilula__n">${n}</span></button>`;
+  }).join("");
+  $("etapas").querySelectorAll(".pilula").forEach(b => b.addEventListener("click", () => { etapaCel = b.dataset.etapa; render(); }));
+
+  // Lista (tabela)
+  $("tabela").innerHTML = ETAPAS.map((et, i) => {
+    let ls = porEtapa(et.k); if (!ls.length) return "";
+    if (et.k === "fechou") ls = recentes(ls);
+    const nt = nEtapa(et.k);
+    const np = ls.filter(parado).length;
+    const tot = soParados ? `${np} ${np > 1 ? "parados" : "parado"} acima do prazo` : et.k === "fechou" ? `${fNov.n} em novembro · ${fech.n} no ano · os ${ls.length} mais recentes` : `${nt} ${nt > 1 ? "leads" : "lead"}${nt > ls.length ? ` · mostrando ${ls.length} com próximo passo` : ""}`;
+    return `<tr class="fn-grupo"><td colspan="8"><span class="fn-etapa">${passo(i)}</span>${et.nome}<span class="fn-tot">${tot}</span></td></tr>` + ls.map(l => {
+      const quando = l.etapa === "fechou" ? `Fechou ${l.dt}<small>${l.nota}</small>`
+        : l.dh ? `${l.falta ? "Faltou" : "Consulta"} ${l.dh[0]} · ${l.dh[1]}<small>${l.nota}</small>`
+        : `${l.prox}<small>${l.nota}</small>`;
+      const st = l.etapa === "fechou" ? `<span class="status status--ok">${diasTxt(l)}</span>` : `<span class="status ${parado(l) ? "status--forte" : SEV[l.sev]}">${diasTxt(l)}</span>`;
+      const v = l.v ? `<span class="fn-valor"><small>R$</small>${real(l.v)}</span>` : `<span class="fn-valor fn-valor--est" title="ticket estimado"><small>≈ R$</small>${real(l.pot)}</span>`;
+      return `<tr data-med="${l.med}"${parado(l) ? ' class="fn-parado"' : ""}>
+        <td><div class="fn-pac">${av(l.med, l.nome, true)}<div><b>${l.nome}</b><span>${nomeMed(l.med)}</span></div></div></td>
+        <td style="color:var(--tinta)">${l.proc}</td>
+        <td><span class="chip">${l.origem}</span></td>
+        <td>${l.t ? escala(l.t) : `<span class="muted">—</span>`}</td>
+        <td class="fn-quando">${quando}</td>
+        <td>${st}</td>
+        <td class="dir">${v}</td>
+        <td style="width:52px"><button class="bt-ico bt-ico--sm bt-ico--plano" aria-label="Abrir ficha de ${l.nome}"><svg class="ico ico-sm"><use href="#i-seta"/></svg></button></td>
+      </tr>`; }).join("");
+  }).join("");
+
+  // Saíram do funil
+  const fora = `<b>Saíram do funil em 2026</b>` + Object.values(FORA).map(f => `<span class="fn-fora__item"><strong>${soma(f)}</strong>${f.rot}</span>`).join("") +
+    `<button class="bt-texto">Ver motivos <svg class="ico ico-sm"><use href="#i-dir"/></svg></button>`;
+  $("fora").innerHTML = fora; $("fora-lista").innerHTML = fora;
+
+  // Linha de números
+  const ativos = vis.filter(l => l.etapa !== "fechou"), leads = totalLeads(filtroMed), nAt = nAtivos(filtroMed);
+  const abertos = ativosEtapa("plano", filtroMed), vAberto = abertos.v;
+  const parTodos = VA.parados(filtroMed), vermelho = parTodos.length, ambar = VA.noLimite(filtroMed).length;
+  const outros = soma(FORA.recusou) + soma(FORA.faltou) + soma(FORA.esfriou), p = Math.round(fech.n / leads * 100);
+  UI.poeAnel($("r-anel"), { p, aria: `${p}% dos leads de 2026 fecharam plano` });
+  $("r-fech-v").innerHTML = rsMil(fech.v); $("r-fech-v").title = valorTit(fech.v); $("r-fech-n").textContent = `${fech.n} de ${leads}`;
+  $("r-ticket").textContent = `ticket médio fechado R$ ${mil(fech.v / fech.n)} mil · anel = % dos leads que fechou`;
+  $("r-leads").textContent = leads; $("r-ativos").textContent = `${nAt} em andamento`;
+  $("r-aberto").innerHTML = rsMil(vAberto); $("r-aberto").title = valorTit(vAberto);
+  $("r-aberto-n").textContent = `${abertos.n} ${abertos.n === 1 ? "plano apresentado" : "planos apresentados"}`;
+  $("r-perd").textContent = soma(FORA.perdido); $("r-fora").textContent = `+ ${outros} saíram por outro motivo`;
+  $("r-parados").textContent = vermelho; $("r-perto").textContent = `+ ${ambar} em atenção`;
+  $("r-risco").textContent = `R$ ${mil(parTodos.reduce((a, l) => a + VA.valorLead(l), 0))} mil`;
+  const nomeEt = k => ETAPAS.find(e => e.k === k).nome;
+  $("r-criticos").innerHTML = parTodos.slice(0, 3).map(l => `<li>${av(l.med, l.nome, true)}<div><b>${l.nome}</b><span class="et">${nomeEt(l.etapa)} <span class="nw">· ${nomeMed(l.med)}</span></span></div><span class="status status--forte">${l.d} dias parado</span></li>`).join("")
+    || `<li class="vazio">Nenhum lead parado acima do prazo</li>`;
+  $("resumo-dia").textContent = `Funil comercial · ${nAt} leads em andamento, ${vermelho} parados demais`;
+  linhaDoTempo($("tempo"), filtroMed);
+  $("gaveta-n").textContent = `${AGENDA.filter(a => !a.evento && okMed(P[a.id].med)).length} pacientes`;
+}
+
+pilulasMedico(m => totalLeads(m), m => { filtroMed = m; render(); });
+// Filtro de parados: botão do cartão de alerta, "Mostrar todos" e o endereço funil.html#parados
+function filtraParados(ligar, rolar) {
+  soParados = ligar;
+  history.replaceState(null, "", ligar ? "#parados" : location.pathname + location.search);
+  render();
+  if (ligar && rolar) document.querySelector(".fn-barra").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+}
+$("bt-parados").addEventListener("click", () => filtraParados(!soParados, true));
+$("limpa-parados").addEventListener("click", () => { filtraParados(false); $("bt-parados").focus(); });
+addEventListener("hashchange", () => { if ((location.hash === "#parados") !== soParados) filtraParados(location.hash === "#parados"); });
+document.querySelectorAll(".fn-vista .aba").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".fn-vista .aba").forEach(x => x.setAttribute("aria-selected", x === b));
+  $("v-quadro").hidden = b.dataset.vista !== "quadro"; $("v-lista").hidden = b.dataset.vista !== "lista";
+}));
+// Gaveta da agenda
+const gav = $("gaveta"), btAg = $("bt-agenda");
+btAg.setAttribute("aria-expanded", "false"); btAg.setAttribute("aria-controls", "gaveta");
+const gaveta = abrir => { gav.classList.toggle("aberta", abrir); gav.setAttribute("aria-hidden", !abrir); btAg.setAttribute("aria-expanded", abrir); };
+btAg.addEventListener("click", () => gaveta(!gav.classList.contains("aberta")));
+$("gaveta-fechar").addEventListener("click", () => gaveta(false));
+render();
+</script>
+<link rel="stylesheet" href="motion.css">
+<script src="motion.js"></script>
+</body>
+</html>
