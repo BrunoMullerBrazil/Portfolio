@@ -862,6 +862,862 @@ const LEVELS={
   med:{name:'Médio',time:60,bonus:3,hint:8,skip:15,win:20000,mult:1.5,gift:false,desc:'60 s · dicas diretas · pontos ×1,5'},
   hard:{name:'Difícil',time:45,bonus:1,hint:12,skip:20,win:15000,mult:2.5,gift:false,desc:'45 s · dicas de charada · pontos ×2,5'}
 };
+const RAW_MORE=`NILO|Rio mais longo da África|1
+AMAZONAS|Maior estado brasileiro|1
+EVEREST|Monte mais alto do mundo|1
+ANDES|Cordilheira da América do Sul|1
+ASIA|Continente mais populoso|1
+AFRICA|Continente do Egito e do Quênia|1
+LISBOA|Capital de Portugal|1
+MADRI|Capital da Espanha|1
+PERU|País de Lima e Cusco|1
+EGITO|País das pirâmides de Gizé|1
+ATENAS|Capital da Grécia|1
+CAIRO|Capital do Egito|1
+MANAUS|Capital do Amazonas|1
+BAHIA|Estado de Salvador|1
+TIETE|Rio que corta a capital paulista|1
+IGUACU|Rio das famosas cataratas do PR|1
+SAARA|Maior deserto quente do mundo|1
+EQUADOR|Linha que divide os hemisférios N e S|1
+RUSSIA|Maior país do mundo em área|1
+CANADA|Maior país das Américas em área|1
+ZEUS|Rei dos deuses gregos (Mit.)|1
+THOR|Deus nórdico do trovão|1
+APOLO|Deus grego da música e da luz|1
+HERA|Esposa de Zeus (Mit.)|1
+ATENA|Deusa grega da sabedoria|1
+AQUILES|Herói de calcanhar vulnerável (Mit.)|1
+MEDUSA|Górgona de cabelos de serpente|1
+IARA|A mãe-d'água (Folc.)|1
+CURUPIRA|Ser de pés virados para trás (Folc.)|1
+CABRAL|Navegador que chegou ao Brasil em 1500|1
+ISABEL|Princesa que assinou a Lei Áurea|1
+ZUMBI|Líder do Quilombo dos Palmares|1
+NAPOLEAO|Imperador derrotado em Waterloo|1
+NOE|Construtor da arca bíblica|1
+EVA|Primeira mulher, segundo a Bíblia|1
+EDEN|Jardim do paraíso bíblico|1
+MECA|Cidade mais sagrada do islã|1
+VATICANO|Menor país do mundo|1
+OXIGENIO|Gás essencial à respiração|1
+CORACAO|Órgão que bombeia o sangue|1
+RIM|Órgão que filtra o sangue|1
+IRIS|Parte colorida do olho|1
+GENE|Unidade da hereditariedade|1
+JUPITER|Maior planeta do Sistema Solar|1
+ORBITA|Trajetória de um planeta (Astr.)|1
+LUZ|Ano-(?), medida de distância (Astr.)|1
+DARWIN|Autor de "A Origem das Espécies"|1
+EINSTEIN|Criador da Teoria da Relatividade|1
+PICASSO|Pintor de "Guernica"|1
+TARSILA|Pintora de "Abaporu"|1
+VINCI|Leonardo da (?), da "Mona Lisa"|1
+CAMOES|Autor de "Os Lusíadas"|1
+MACHADO|(?) de Assis, de "Dom Casmurro"|1
+QUIXOTE|Dom (?), cavaleiro de Cervantes|1
+MOZART|Compositor de "A Flauta Mágica"|1
+SOPRANO|Voz feminina mais aguda|1
+JUDO|Arte marcial olímpica do quimono|1
+MARATONA|Corrida olímpica de 42,195 km|1
+PRIMO|Número divisível só por 1 e por si|1
+MIL|M em romanos|1
+IX|Nove em romanos|1
+HEXAGONO|Polígono de seis lados|1
+VENUS|Planeta mais quente do Sistema Solar|2
+URANO|Sétimo planeta a partir do Sol|2
+NETUNO|Oitavo planeta a partir do Sol|2
+NEBULOSA|Nuvem de gás e poeira no espaço|2
+METEORO|A "estrela cadente" (Astr.)|2
+ORION|Constelação das Três Marias|2
+SIRIUS|Estrela mais brilhante do céu noturno|2
+FIGADO|Maior glândula do corpo humano|2
+FEMUR|Osso mais longo do corpo humano|2
+AORTA|Maior artéria do corpo humano|2
+RETINA|Camada do olho sensível à luz|2
+INSULINA|Hormônio que reduz a glicose no sangue|2
+RNA|Ácido ribonucleico (sigla)|2
+NEUTRON|Partícula sem carga do núcleo atômico|2
+ION|Átomo com carga elétrica|2
+SODIO|Elemento de símbolo Na (Quím.)|2
+ACIDO|Substância de pH menor que 7|2
+CU|Cobre (símbolo)|2
+HG|Mercúrio (símbolo)|2
+CL|Cloro (símbolo)|2
+JOULE|Unidade de energia (SI)|2
+PASTEUR|Criador da vacina antirrábica|2
+ODIN|Pai dos deuses nórdicos|2
+LOKI|Deus nórdico da trapaça|2
+ASGARD|Morada dos deuses nórdicos|2
+JUNO|Esposa de Júpiter (Mit.)|2
+GAIA|A Terra personificada (Mit.)|2
+CRONOS|Titã pai de Zeus (Mit.)|2
+ESPARTA|Cidade-estado grega de Leônidas|2
+TUPA|Deus do trovão (Mit. tupi)|2
+INCA|Povo do império de Cusco|2
+ASTECA|Povo da antiga Tenochtitlán|2
+CANUDOS|Guerra de (?), no sertão baiano|2
+FARRAPOS|Guerra dos (?), no Rio Grande do Sul|2
+TORA|O Pentateuco, no judaísmo|3
+ACRE|Estado de Rio Branco|2
+AMAPA|Estado de Macapá|2
+RORAIMA|Estado de Boa Vista|2
+PALMAS|Capital do Tocantins|2
+ARACAJU|Capital de Sergipe|2
+OSLO|Capital da Noruega|2
+BERNA|Capital da Suíça|2
+VIENA|Capital da Áustria|2
+CANBERRA|Capital da Austrália|2
+SEUL|Capital da Coreia do Sul|2
+MAPUTO|Capital de Moçambique|2
+SENA|Rio que banha Paris|2
+TEJO|Rio que banha Lisboa|2
+XINGU|Rio de parque indígena em MT|2
+GOBI|Deserto da Mongólia e da China|2
+URAL|Montes entre a Europa e a Ásia|2
+ETNA|Vulcão ativo da Sicília|2
+CRETA|Ilha grega do Minotauro|2
+NEPAL|País de Katmandu|2
+MONET|Pintor de "Impressão, Nascer do Sol"|2
+DALI|Surrealista dos relógios derretidos|2
+CAPITU|Personagem de "Dom Casmurro"|2
+ALENCAR|José de (?), de "O Guarani"|2
+IRACEMA|A "virgem dos lábios de mel" (Lit.)|3
+BANDEIRA|Manuel (?), poeta de "Pasárgada"|2
+ORWELL|Autor de "1984"|2
+HAICAI|Poema japonês de três versos|2
+VERDI|Compositor de "La Traviata"|2
+ADAGIO|Andamento lento (Mús.)|2
+BARITONO|Voz masculina entre tenor e baixo|2
+FAGOTE|Sopro de madeira de som grave|3
+HANDEBOL|Esporte de quadra com 7 por time|2
+ARGOLAS|Aparelho de ginástica de Zanetti|2
+CATETO|Lado que forma o ângulo reto|2
+EUCLIDES|O "pai da geometria"|2
+XC|Noventa em romanos|2
+DC|Seiscentos em romanos|2
+JACI|A Lua (Mit. tupi)|3
+GUARACI|O Sol (Mit. tupi)|3
+IO|Lua vulcânica de Júpiter|3
+FOBOS|Maior lua de Marte|3
+SN|Estanho (símbolo)|3
+NI|Níquel (símbolo)|3
+LI|Lítio (símbolo)|3
+MOL|Unidade de quantidade de matéria (SI)|3
+REGENCIA|Período (?), de 1831 a 1840 (Hist.)|3
+MAUA|Barão de (?), pioneiro industrial|3
+NAIROBI|Capital do Quênia|3
+ANCARA|Capital da Turquia|3
+HANOI|Capital do Vietnã|3
+VARSOVIA|Capital da Polônia|3
+RIGA|Capital da Letônia|3
+SOFIA|Capital da Bulgária|3
+DOHA|Capital do Catar|3
+ACRA|Capital de Gana|3
+DILI|Capital do Timor-Leste|3
+BISSAU|Capital da Guiné-Bissau|3
+VOLGA|Rio mais longo da Europa|3
+RENO|Rio que banha Colônia e Basileia|3
+CAUCASO|Montes entre os mares Negro e Cáspio|3
+CHIPRE|Ilha-nação de Nicósia|3
+MALTA|Ilha-nação de Valeta|3
+LAOS|País asiático de Vientiane|3
+CHADE|País africano de N'Djamena|3
+MALI|País africano de Bamako|3
+GOYA|Pintor de "Três de Maio de 1808"|3
+TICIANO|Mestre veneziano do Renascimento|3
+ANITA|(?) Malfatti, pintora modernista|3
+CECILIA|(?) Meireles, poetisa carioca|3
+LISZT|Compositor das Rapsódias Húngaras|3
+WAGNER|Compositor de "O Anel do Nibelungo"|3
+FUGA|Forma musical contrapontística|3
+TALES|Grego do teorema das paralelas|3
+OLIMPIA|Santuário grego dos Jogos antigos|3
+HOME|Casa, lar, em inglês|1
+LIKE|Curtida nas redes, em inglês|1
+LIVE|Transmissão ao vivo, em inglês|1
+FAKE|(?) news: notícia falsa, em inglês|1
+EMAIL|Correio eletrônico, em inglês|1
+LINK|Atalho clicável na web, em inglês|1
+LOGIN|Acesso com usuário e senha (ingl.)|1
+POST|Publicação nas redes, em inglês|1
+SELFIE|Autorretrato com celular, em inglês|1
+HASHTAG|Termo marcado com #, em inglês|1
+SPOILER|Revelação do final do filme (ingl.)|1
+SOFTWARE|Programa de computador, em inglês|1
+HACKER|Invasor de sistemas, em inglês|2
+DOWNLOAD|Ato de baixar arquivo, em inglês|2
+UPLOAD|Envio de arquivo à rede, em inglês|2
+ZOOM|Ampliação da imagem, em inglês|2
+PRINT|Captura de tela (anglicismo usual)|2
+RUGBY|Esporte da bola oval, em inglês|2
+RANKING|Classificação geral, em inglês|2
+SPRINT|Arrancada final da prova (ingl.)|2
+COACH|Treinador, em inglês|2
+DOPING|Uso ilícito de estimulante (ingl.)|2
+JEANS|Calça (?): de brim azul, em inglês|1
+BLAZER|Paletó esportivo, em inglês|2
+FASHION|Moda, em inglês|2
+OUTLET|Loja de ponta de estoque (ingl.)|2
+VINTAGE|Estilo retrô de época, em inglês|3
+CHEDDAR|Queijo inglês alaranjado|2
+MUFFIN|Bolinho assado em forminha (ingl.)|2
+BROWNIE|Bolinho denso de chocolate (ingl.)|1
+BRUNCH|Café da manhã com almoço (ingl.)|2
+EGG|Ovo, em inglês|1
+TEA|Chá, em inglês|1
+BRAND|Marca, em inglês|2
+TARGET|Alvo, em inglês|2
+BRANDING|Gestão de marca, em inglês|3
+FEEDBACK|Retorno sobre desempenho (ingl.)|1
+BRIEFING|Resumo de instruções, em inglês|3
+STARTUP|Empresa nascente de tecnologia (ingl.)|1
+DEADLINE|Prazo final, em inglês|2
+SALE|Liquidação, em inglês|2
+OFF|Desconto: 50% (?), em inglês|1
+DELIVERY|Entrega em domicílio, em inglês|1
+CHECKIN|Registro de entrada no hotel (ingl.)|2
+PODCAST|Programa de áudio na web (ingl.)|1
+CRUSH|Paixão platônica, em inglês|2
+HATER|Quem critica por ódio na web (ingl.)|2
+WATER|Água, em inglês|1
+STAR|Estrela, em inglês|1
+QUEEN|Rainha, em inglês|1
+MIND|Mente, em inglês|2
+DREAM|Sonho, em inglês|1
+THE|Artigo definido, em inglês|1
+UP|Para cima, em inglês|2
+ON|Ligado, em inglês|1
+HI|Oi, em inglês|1
+HOLA|Olá, em espanhol|1
+GRACIAS|Obrigado, em espanhol|1
+NINO|Menino, em espanhol|2
+SENOR|Senhor, em espanhol|2
+SIESTA|Soneca após o almoço, em espanhol|2
+HOY|Hoje, em espanhol|2
+YO|Eu, em espanhol|2
+MANANA|Amanhã, em espanhol|2
+MERCI|Obrigado, em francês|1
+BONJOUR|Bom dia, em francês|1
+CHEF|Cozinheiro-chefe, em francês|1
+DEJA|(?) vu: sensação de já visto (fr.)|2
+BLASE|Indiferente, enfastiado (fr.)|3
+MAISON|Casa, em francês|3
+OUI|Sim, em francês|1
+ROUGE|Vermelho, em francês|2
+SOIREE|Festa noturna, em francês|3
+PETIT|Pequeno, em francês|2
+VOILA|"Eis aí!", em francês|2
+CIAO|Tchau, em italiano|1
+GRAZIE|Obrigado, em italiano|1
+BELLA|Bonita, em italiano|2
+NONNA|Avó, em italiano|2
+AMORE|Amor, em italiano|1
+DOLCE|Doce, em italiano|2
+GELATO|Sorvete, em italiano|2
+STATUS|Posição social, em latim|2
+HABEAS|(?) corpus, em latim|3
+VERSUS|Contra, em latim|2
+ALTER|(?) ego: o outro eu, em latim|3
+CARPE|(?) diem: aproveite o dia (lat.)|2
+VIDE|Veja, em latim|3
+QUORUM|Número mínimo para votar (lat.)|3
+URBI|(?) et orbi: bênção papal (lat.)|3
+AQUA|Água, em latim|2
+LUX|Luz, em latim|2
+PAX|Paz, em latim|2
+REX|Rei, em latim|3
+MEA|(?) culpa: minha culpa (lat.)|2
+VERITAS|Verdade, em latim|3
+HOMO|(?) sapiens, em latim|1
+ERGO|Logo, portanto, em latim|3
+GESTALT|Psicologia da forma, em alemão|3
+TRAUMA|Choque psíquico duradouro|1
+FOBIA|Medo irracional e persistente|1
+MANIA|Hábito fixo e exagerado; cisma|2
+ANSIA|Aflição; desejo ansioso|2
+TEDIO|Enfado, aborrecimento|1
+EMPATIA|Sentir o que o outro sente|1
+LUTO|Processo de dor após uma perda|1
+AFETO|Carinho, ternura|1
+SUPEREGO|Instância moral, para Freud|2
+ID|Instância dos impulsos, em Freud|2
+EDIPO|Complexo de (?), de Freud|2
+ELECTRA|Complexo de (?), de Jung|3
+JUNG|Criador da psicologia analítica|2
+FREUD|Pai da psicanálise|1
+PIAGET|Suíço que estudou a mente infantil|3
+PAVLOV|Russo do cão e da campainha|2
+SKINNER|Behaviorista americano da "caixa"|3
+ADLER|Criador da psicologia individual|3
+LACAN|Psicanalista francês do espelho|3
+MASLOW|Autor da pirâmide de necessidades|3
+SINAPSE|Junção entre neurônios|2
+NEURONIO|Célula nervosa|1
+DOPAMINA|Neurotransmissor da recompensa|2
+CORTISOL|Hormônio do estresse|2
+ESTRESSE|Tensão física e mental|1
+EUFORIA|Alegria intensa e exaltada|1
+CIUME|Medo de perder quem se ama|1
+CULPA|Peso por erro cometido|1
+VERGONHA|Embaraço que deixa a face rubra|1
+SAUDADE|Falta sentida de alguém ausente|1
+PANICO|Síndrome do (?): crises de medo|2
+ANGUSTIA|Aperto no peito, aflição|2
+APATIA|Falta de emoção e interesse|2
+TIQUE|Movimento involuntário repetido|2
+HIPNOSE|Transe induzido por sugestão|2
+DIVA|Sofá do analista freudiano|2
+CATARSE|Liberação de emoções reprimidas|3
+RECALQUE|Repressão inconsciente (Freud)|3
+NEUROSE|Conflito psíquico ansioso (Freud)|3
+LAPSO|Ato falho, deslize|2
+PESADELO|Sonho ruim e angustiante|1
+AMNESIA|Perda de memória|1
+HUMOR|Senso de (?): graça|1
+GATILHO|Estímulo que dispara reação (Psic.)|2
+VIES|Distorção do julgamento (Psic.)|3
+TDAH|Sigla do déficit de atenção|2
+TOC|Sigla do transtorno obsessivo|2
+PERSONA|Máscara social, em Jung|3
+ANIMA|Lado feminino da psique, em Jung|3
+INSIGHT|Compreensão súbita, em inglês|2
+BURNOUT|Esgotamento profissional (ingl.)|2
+MINDSET|Modo de pensar, em inglês|3
+FLOW|Estado de imersão total (ingl.)|3
+BULLYING|Intimidação sistemática (ingl.)|1
+TIMIDEZ|Retraimento diante de outros|1
+CARENCIA|Falta de afeto|2
+APEGO|Vínculo afetivo forte|2
+IMPULSO|Ímpeto súbito|2
+INSTINTO|Comportamento inato|2
+INTUICAO|Saber sem raciocinar|2
+DELIRIO|Crença fora da realidade (Psic.)|2
+PSIQUE|A mente, a alma (Psic.)|2
+AMIGDALA|Centro cerebral do medo|3
+PLACEBO|Pílula sem princípio ativo|2
+ATO|(?) falho, de Freud|2
+PULSAO|Impulso, força psíquica (Freud)|3
+TRANSE|Estado alterado de consciência|2
+LUCIDO|Sonho (?): ciente de que sonha|3
+REM|Fase do sono com sonhos (sigla)|2
+MAGOA|Ressentimento por ofensa|2
+RANCOR|Ódio guardado por muito tempo|2
+VAIDADE|Desejo de ser admirado|2
+LIBIDO|Energia do desejo, para Freud|2
+PAU|Em casa de ferreiro, espeto de (?)|1
+DURA|Água mole em pedra (?) tanto bate até que fura|1
+MAO|Mais vale um pássaro na (?) que dois voando|1
+PAPO|De grão em grão a galinha enche o (?)|1
+MORDE|Cão que ladra não (?)|1
+MADRUGA|Deus ajuda quem cedo (?)|1
+ALCANCA|Quem espera sempre (?)|2
+NUNCA|Antes tarde do que (?)|1
+GALHO|Cada macaco no seu (?)|1
+PEIXINHO|Filho de peixe, (?) é|1
+CORACAO|Quem vê cara não vê (?)|1
+CURTA|A mentira tem perna (?)|1
+MOSCA|Em boca fechada não entra (?)|1
+FRIA|Gato escaldado tem medo de água (?)|1
+FERIDO|Quem com ferro fere, com ferro será (?)|2
+PERDAO|Ladrão que rouba ladrão tem cem anos de (?)|2
+DENTES|A cavalo dado não se olham os (?)|2
+BONANCA|Depois da tempestade vem a (?)|2
+MELHOR|Quem ri por último ri (?)|1
+CUMBUCA|Macaco velho não mete a mão em (?)|2
+MONGE|O hábito não faz o (?)|2
+MILAGRE|Santo de casa não faz (?)|1
+REMEDIAR|Mais vale prevenir do que (?)|2
+POSTO|Rei morto, rei (?)|2
+LONGE|Devagar se vai ao (?)|1
+VELHO|O seguro morreu de (?)|1
+PASSA|Os cães ladram e a caravana (?)|2
+LADRAO|A ocasião faz o (?)|2
+BEM|Há males que vêm para o (?)|1
+REFRESCO|Pimenta nos olhos dos outros é (?)|2
+TODOS|Cada um por si e Deus por (?)|1
+DISCUTE|Gosto não se (?)|1
+HUMANO|Errar é (?)|1
+MOINHO|Águas passadas não movem (?)|2
+MORRE|A esperança é a última que (?)|1
+PETISCA|Quem não arrisca não (?)|2
+CRU|O apressado come (?)|1
+RECEBE|É dando que se (?)|2
+FORCA|A união faz a (?)|1
+LINGUICA|Cachorro mordido de cobra tem medo de (?)|3
+DINHEIRO|Tempo é (?)|1
+DEUS|Quem dá aos pobres empresta a (?)|2
+DURE|Não há mal que sempre (?)|2
+COME|O que é do homem o bicho não (?)|3
+POUCO|De médico e louco todo mundo tem um (?)|2
+VER|Pior cego é o que não quer (?)|1
+CONSOLO|Mal de muitos, (?) é|3
+ESPANTA|Quem canta seus males (?)|2
+NEGOCIOS|Amigos, amigos; (?) à parte|2
+LAMBUZA|Quem nunca comeu melado, quando come se (?)|3
+TORTAS|Deus escreve certo por linhas (?)|1
+SENTENCA|Cada cabeça, uma (?)|3
+QUER|Quem fala o que quer ouve o que não (?)|2
+LEBRE|Vender gato por (?): enganar|1
+CAJADADA|Matar dois coelhos com uma só (?)|2
+VAQUINHA|Fazer uma (?): juntar dinheiro em grupo|2
+NAVIOS|Ficar a ver (?): ficar sem nada|2
+MOLHADO|Chover no (?): repetir o óbvio|2
+CHUVA|Tire o cavalinho da (?)|1
+BOTAS|Bater as (?): morrer|2
+PALETO|Abotoar o (?): morrer|3
+BARRIGA|Ter o rei na (?): ser arrogante|3
+DIABO|Comer o pão que o (?) amassou|1
+MANGAS|Arregaçar as (?): pôr-se a trabalhar|2
+BREJO|Ir para o (?): dar tudo errado|2
+ESQUERDO|Entrar com o pé (?): começar mal|1
+COTOVELO|Dor de (?): ciúme, inveja|2
+PESCOCO|Estar com a corda no (?)|2
+TORCER|Dar o braço a (?): ceder|2
+CONTO|Cair no (?) do vigário|2
+TRIPAS|Fazer das (?) coração|3
+AQUILES|Calcanhar de (?): ponto fraco|2
+PANDORA|Caixa de (?): fonte de todos os males|2
+GREGO|Presente de (?): oferta traiçoeira|2
+COLOMBO|Ovo de (?): solução óbvia depois de vista|3
+ARIADNE|Fio de (?): guia para sair do labirinto|3
+TROIANOS|Agradar a gregos e (?)|2
+BRANCA|Mosca (?): pessoa ou coisa rara|2
+ONCA|Amigo da (?): falso amigo|1
+PALHEIRO|Procurar agulha no (?)|1
+PENEIRA|Tapar o sol com a (?)|1
+NUVENS|Viver com a cabeça nas (?)|1
+BEIRA|Sem eira nem (?)|3
+CAIXA|A toque de (?): às pressas|3
+ABANANDO|Chegar de mãos (?): sem levar nada|2
+PERNA|Passar a (?): enganar alguém|1
+CANO|Dar o (?) no credor: não pagar|2
+PRATOS|Pôr em (?) limpos: esclarecer|2
+CABECAS|Bicho de sete (?): algo complicado|2
+COLHER|Meter a (?): intrometer-se|2
+PAPAS|Não ter (?) na língua: ser franco|3
+PILULA|Dourar a (?): amenizar algo ruim|3
+CARA|Custar os olhos da (?)|1
+TROMBONE|Botar a boca no (?): denunciar|2
+DOBRADO|Cortar um (?): passar aperto|3
+MAIONESE|Viajar na (?): devanear|2
+FIO|Estar por um (?): quase acabar|2
+OVOS|Pisar em (?): agir com cautela|1
+TRAPOS|Juntar os (?): ir morar junto|2
+SEDA|Rasgar (?): elogiar demais|2
+BEICOS|Lamber os (?): achar delicioso|3
+GIRASSOL|Flor composta de "girar" + "sol"|1
+PONTAPE|Chute, de "ponta" + "pé"|1
+PERNALTA|Ave de pernas longas, como a garça|3
+PLANALTO|Terreno alto e plano|2
+VINAGRE|Tempero; vem de "vinho acre"|2
+FIDALGO|Nobre; de "filho de algo"|3
+AGUARRAS|Solvente de tinta a óleo|3
+CORRIMAO|Apoio de mão na escada|2
+EMBORA|Vem de "em boa hora"|3
+VOCE|Pronome que veio de "Vossa Mercê"|2
+TALVEZ|Advérbio de dúvida; "tal" + "vez"|1
+BENDITO|Abençoado; de "bem" + "dito"|2
+ALCATEIA|Coletivo de lobos|2
+CARDUME|Coletivo de peixes|1
+ENXAME|Coletivo de abelhas|1
+MATILHA|Coletivo de cães|2
+CAFILA|Coletivo de camelos|3
+VARA|Coletivo de porcos|3
+RESTEA|Coletivo de alhos ou cebolas|3
+MOLHO|Coletivo de chaves|2
+RESMA|Conjunto de 500 folhas de papel|3
+CLERO|Coletivo de sacerdotes|2
+FROTA|Coletivo de ônibus de uma empresa|2
+FAUNA|Conjunto dos animais de uma região|1
+MANADA|Coletivo de elefantes|2
+ATRIZ|Feminino de "ator"|1
+SULTANA|Feminino de "sultão"|3
+CONSULES|Plural de "cônsul"|3
+FOSSEIS|Plural de "fóssil"|3
+REPTEIS|Plural de "réptil"|3
+ALCOOIS|Plural de "álcool"|3
+ZE|Apelido carinhoso de José|1
+CHICO|Apelido de Francisco|1
+NODULO|Diminutivo erudito de "nó"|3
+GOTICULA|Diminutivo erudito de "gota"|3
+COPAZIO|Aumentativo de "copo"|3
+FOGAREU|Aumentativo de "fogo"|3
+SINONIMO|Antônimo de "antônimo"|2
+ESTREITO|Contrário de "largo"; canal marítimo|2
+ATCHIM|Onomatopeia do espirro|1
+TOCTOC|Som de batida na porta|1
+COCORICO|Canto do galo|1
+MU|Onomatopeia da vaca|1
+TCHIBUM|Som de mergulho na água|2
+ZUMZUM|Zumbido de abelha; boato|2
+UFA|Interjeição de alívio|1
+PSIU|Interjeição que pede silêncio|1
+XO|Interjeição para espantar galinha|2
+TIMTIM|Saudação ao brindar|1
+TOMARA|Interjeição de desejo: oxalá!|2
+OXALA|Tomara!, palavra de origem árabe|3
+QUEIRA|Imperativo de "querer" (você)|3
+ESTEJA|Imperativo de "estar" (você)|3
+VENHA|Imperativo de "vir" (você)|1
+COUBE|Pretérito de "caber" (eu, ele)|3
+VINDO|Particípio de "vir"|3
+AGUDO|Acento como o de "café"|1
+CEDILHA|Sinal gráfico sob o "c"|1
+TIL|Sinal sobre o "a" de "maçã"|1
+GRAVE|Acento que marca a crase|2
+ADJETIVO|Palavra que qualifica o substantivo|1
+METAFORA|Comparação sem o "como"|2
+ANAGRAMA|"Amor" para "Roma", por exemplo|2
+ACRONIMO|Sigla lida como palavra, como "Detran"|3
+TOPONIMO|Nome próprio de lugar|3
+RADICAL|Parte da palavra com o sentido básico|3
+VIRGULA|Ponto e (?): o sinal ";"|1
+SOTAQUE|Pronúncia típica de uma região|1
+DIALETO|Variante regional de uma língua|2
+RIFAO|Provérbio popular, adágio|3
+SACI|Moleque de uma perna só do folclore|1
+CUCA|Bruxa-jacaré do Sítio do Picapau|1
+IARA|Sereia dos rios no folclore|1
+CURUPIRA|Ente com os pés virados para trás|1
+BOITATA|Cobra de fogo do folclore|2
+CAIPORA|Protetora das matas, no folclore|2
+EMILIA|Boneca de pano de Monteiro Lobato|1
+PEDRINHO|Neto de Dona Benta, no Sítio|1
+VISCONDE|(?) de Sabugosa, sábio de sabugo|2
+RABICO|Leitão do Sítio do Picapau|3
+QUINDIM|Rinoceronte do Sítio do Picapau|3
+LOBATO|Monteiro (?), criador do Sítio|1
+ASSIS|Machado de (?), escritor|1
+SANGALO|Ivete (?), cantora baiana|1
+MONICA|Dona do coelho Sansão|1
+CASCAO|Amigo da Mônica que odeia água|1
+ZICO|Galinho de Quintino, ídolo do Fla|1
+SENNA|Ayrton (?), tricampeão da F1|1
+GUGA|Apelido do tenista Kuerten|1
+KUERTEN|Gustavo (?), tenista catarinense|2
+RIVELINO|Craque da patada atômica, de 70|3
+MARADONA|Craque argentino da "mão de Deus"|1
+EUSEBIO|Pantera Negra do Benfica|3
+CRUYFF|Holandês do carrossel de 74|3
+ADAO|Primeiro homem, segundo a Bíblia|1
+EVA|Primeira mulher, segundo a Bíblia|1
+NOE|Construtor da arca bíblica|1
+MOISES|Recebeu as Tábuas da Lei|1
+GOLIAS|Gigante filisteu vencido por Davi|1
+DALILA|Traiu Sansão, na Bíblia|2
+CAIM|Matou o irmão Abel, na Bíblia|1
+JONAS|Profeta engolido por grande peixe|1
+PAULO|Apóstolo dos gentios|2
+ABRAAO|Patriarca bíblico casado com Sara|2
+ESAU|Irmão gêmeo de Jacó|3
+RUTE|Moabita nora de Noemi|3
+LAZARO|Ressuscitado por Jesus em Betânia|2
+HERODES|Rei da matança dos inocentes|2
+ELIAS|Profeta levado num carro de fogo|3
+DANIEL|Profeta da cova dos leões|2
+UR|Cidade natal de Abraão|3
+ZEUS|Rei dos deuses gregos|1
+HERCULES|Herói dos doze trabalhos|1
+THOR|Deus nórdico do trovão|1
+HERMES|Mensageiro dos deuses gregos|2
+ATENA|Deusa grega da sabedoria|2
+AFRODITE|Deusa grega do amor|1
+IO|Lua de Júpiter, amada de Zeus|3
+ICARO|Voou perto do Sol com asas de cera|2
+AQUILES|Herói grego de calcanhar vulnerável|2
+ULISSES|Herói da "Odisseia"|2
+HOMERO|Poeta grego da "Ilíada"|2
+MEDUSA|Górgona de cabelos de serpentes|2
+EINSTEIN|Criador da Teoria da Relatividade|1
+DARWIN|Autor da teoria da evolução|1
+GALILEU|Astrônomo julgado pela Inquisição|2
+EDISON|Thomas (?), inventor americano|2
+TESLA|Nikola (?), inventor sérvio-americano|2
+CURIE|Marie (?), Nobel de Física e Química|2
+PASTEUR|Louis (?), da vacina antirrábica|2
+DUMONT|Santos (?), pai da aviação|1
+CRUZ|Oswaldo (?), sanitarista|2
+MARCONI|Guglielmo (?), pioneiro do rádio|3
+NOBEL|Alfred (?), inventor da dinamite|2
+FREUD|Pai da psicanálise|2
+SOCRATES|Filósofo grego mestre de Platão|1
+TARSILA|(?) do Amaral, de "Abaporu"|1
+NIEMEYER|Oscar (?), arquiteto de Brasília|1
+VINICIUS|(?) de Moraes, o poetinha|1
+JOBIM|Tom (?), de "Garota de Ipanema"|1
+GILBERTO|João (?), pai da bossa nova|2
+ELIS|(?) Regina, a Pimentinha|1
+CAZUZA|Cantor de "Exagerado"|1
+RAUL|(?) Seixas, o Maluco Beleza|1
+GONZAGA|Luiz (?), o Rei do Baião|1
+NOEL|(?) Rosa, o Poeta da Vila|2
+CARTOLA|Sambista fundador da Mangueira|2
+CAYMMI|Dorival (?), cantor do mar baiano|2
+CARMEN|(?) Miranda, a Pequena Notável|1
+OSCARITO|Comediante das chanchadas|3
+GOMES|Carlos (?), da ópera "O Guarani"|3
+DRUMMOND|Carlos (?) de Andrade, poeta|2
+BANDEIRA|Manuel (?), poeta de "Pasárgada"|2
+CECILIA|(?) Meireles, poetisa|2
+CLARICE|(?) Lispector, escritora|1
+AMADO|Jorge (?), autor de "Gabriela"|1
+ALENCAR|José de (?), autor de "Iracema"|2
+IRACEMA|A virgem dos lábios de mel|2
+PERI|Herói indígena de "O Guarani"|3
+CAPITU|Moça dos olhos de ressaca|2
+EUCLIDES|(?) da Cunha, de "Os Sertões"|3
+ANCHIETA|José de (?), jesuíta|3
+ZUMBI|Líder do Quilombo dos Palmares|1
+DANDARA|Guerreira de Palmares|3
+CABRAL|Pedro Álvares (?), navegador|1
+NAPOLEAO|Imperador derrotado em Waterloo|1
+RAMSES|Faraó egípcio, o Grande|3
+CAMOES|Autor de "Os Lusíadas"|1
+SARAMAGO|José (?), Nobel português|2
+DANTE|Autor de "A Divina Comédia"|2
+TOLSTOI|Autor de "Guerra e Paz"|3
+KAFKA|Autor de "A Metamorfose"|2
+ORWELL|George (?), autor de "1984"|2
+VERNE|Júlio (?), de "Vinte Mil Léguas"|2
+HUGO|Victor (?), de "Os Miseráveis"|2
+POE|Edgar Allan (?), de "O Corvo"|2
+POIROT|Detetive belga de Agatha Christie|2
+SHERLOCK|(?) Holmes, detetive|1
+WATSON|Parceiro de Sherlock Holmes|2
+DRACULA|Conde vampiro de Bram Stoker|1
+JULIETA|Amada de Romeu|1
+HAMLET|Príncipe da Dinamarca de Shakespeare|2
+QUIXOTE|Dom (?), cavaleiro da triste figura|2
+GANDALF|Mago de "O Senhor dos Anéis"|2
+PICASSO|Pintor de "Guernica"|1
+MONET|Pintor impressionista das ninfeias|2
+MIRO|Joan (?), pintor catalão|3
+GOYA|Francisco de (?), pintor espanhol|3
+RAFAEL|Pintor de "Escola de Atenas"|3
+DAVINCI|Leonardo (?), da "Mona Lisa"|1
+MOZART|Compositor de "A Flauta Mágica"|1
+BACH|Johann Sebastian (?), compositor|2
+VERDI|Compositor de "La Traviata"|2
+CHAPLIN|Criador do vagabundo Carlitos|1
+PINOQUIO|Boneco cujo nariz cresce|1
+GEPETO|Carpinteiro pai de Pinóquio|2
+ALADIM|Dono da lâmpada maravilhosa|1
+RAPUNZEL|Princesa das tranças compridas|1
+OZ|O Mágico de (?)|1
+SININHO|Fada de Peter Pan|2
+PATINHAS|Tio rico do Pato Donald|1
+WOODY|Caubói de "Toy Story"|2
+POPEYE|Marinheiro que come espinafre|1
+GARFIELD|Gato laranja que ama lasanha|1
+TINTIM|Repórter de Hergé, dono do Milu|2
+ASTERIX|Gaulês de Goscinny e Uderzo|2
+OBELIX|Gaulês amigo de Asterix|2
+MAFALDA|Menina de Quino que odeia sopa|2
+TARZAN|Rei das selvas criado por macacos|1
+CHAVES|Menino do barril, de Bolaños|1
+ODETE|(?) Roitman, vilã de "Vale Tudo"|2
+RUI|(?) Barbosa, a Águia de Haia|2
+OLINDA|Cidade histórica vizinha a Recife|2
+SALVADOR|Capital baiana|1
+MACEIO|Capital de Alagoas|2
+ARACAJU|Capital de Sergipe|3
+TERESINA|Capital do Piauí|3
+VITORIA|Capital do Espírito Santo|2
+CARACAS|Capital da Venezuela|2
+SANTIAGO|Capital do Chile|2
+VENEZA|Cidade italiana das gôndolas|1
+FLORENCA|Cidade natal de Dante|3
+NAPOLES|Cidade italiana aos pés do Vesúvio|3
+IPANEMA|Praia da "Garota" de Jobim|1
+LEBLON|Bairro carioca vizinho de Ipanema|2
+URCA|Bairro carioca do Pão de Açúcar|2
+ITAPUA|Praia de Salvador cantada por Vinicius|3
+PARATY|Cidade colonial fluminense da Flip|3
+BUZIOS|Balneário fluminense de Brigitte Bardot|3
+GRAMADO|Cidade gaúcha do festival de cinema|2
+AMAZONAS|Maior rio do Brasil|1
+NILO|Rio do Egito|1
+TIETE|Rio que corta a cidade de São Paulo|1
+PARANA|Rio da usina de Itaipu|2
+XINGU|Rio de famoso parque indígena|3
+ARAGUAIA|Rio da Ilha do Bananal|3
+NEGRO|Rio (?), afluente escuro do Amazonas|2
+SOLIMOES|Encontra o rio Negro perto de Manaus|3
+TAMISA|Rio de Londres|2
+DANUBIO|Rio azul da valsa de Strauss|2
+TEJO|Rio de Lisboa|3
+GANGES|Rio sagrado da Índia|2
+CUICA|Instrumento de atrito do samba|2
+AGOGO|Sino duplo de ferro do samba|2
+ZABUMBA|Tambor grave do forró|2
+PANDEIRO|Instrumento de couro com platinelas|1
+TAMBORIM|Pequeno tambor do samba, de baqueta|2
+BERIMBAU|Arco musical da capoeira|1
+FORRO|Ritmo do arrasta-pé nordestino|1
+FREVO|Dança pernambucana com sombrinha|1
+AXE|Música baiana de carnaval|1
+CHORO|Gênero instrumental de Pixinguinha|2
+BOSSA|(?) nova, gênero de Tom Jobim|1
+XOTE|Dança nordestina de passo arrastado|3
+BAIAO|Ritmo consagrado por Luiz Gonzaga|2
+MARACATU|Cortejo pernambucano com alfaias|2
+MODA|(?) de viola, canção caipira|2
+SANFONA|Acordeão, no Nordeste|2
+GANZA|Chocalho cilíndrico de metal|3
+ATABAQUE|Tambor alto de terreiro e capoeira|2
+REPENTE|Desafio improvisado de violeiros|2
+CORDEL|Literatura popular em folhetos|2
+MPB|Sigla da Música Popular Brasileira|1
+LUNDU|Dança afro-brasileira do séc. XVIII|3
+JONGO|Dança afro do Sudeste, avô do samba|3
+BREGA|Música romântica popular, cafona|2
+GOLEIRO|Guarda a meta no futebol|1
+PENALTI|Cobrança da marca da cal|1
+DRIBLE|Finta que engana o marcador|1
+FRANGO|Gol bobo sofrido pelo goleiro (gíria)|1
+CRAQUE|Jogador de grande talento|1
+GRENAL|Clássico de Porto Alegre|2
+FLAFLU|Clássico carioca de 1912|2
+VARZEA|Futebol amador de terrão|2
+PELADA|Jogo de futebol informal|1
+GANDULA|Quem repõe a bola fora de campo|2
+OLE|Grito da torcida a cada toque|2
+ZICO|O Galinho de Quintino|2
+TETRA|Título mundial do Brasil em 1994|2
+MARACANA|Estádio carioca da Copa de 1950|1
+QUENTAO|Bebida quente de festa junina|1
+PACOCA|Doce de amendoim pilado|1
+CARIMBO|Dança paraense de saia rodada|3
+ARRAIAL|Local enfeitado da festa junina|2
+TRIO|(?) elétrico, caminhão do axé|1
+ABADA|Camiseta de bloco baiano|3
+CONFETE|Rodelinhas de papel do carnaval|1
+PASSISTA|Sambista que desfila no pé|2
+CANJICA|Doce junino de milho branco|2
+CURAU|Creme doce de milho verde|3
+MUNGUNZA|Canjica, no Nordeste|3
+ACARAJE|Bolinho de feijão frito no dendê|1
+TAPIOCA|Massa de goma do Nordeste|1
+PAMONHA|Iguaria de milho cozida na palha|1
+CUSCUZ|Prato de flocão de milho no vapor|1
+VATAPA|Creme baiano de pão e camarão|2
+CARURU|Prato baiano de quiabo|3
+FEIJOADA|Prato de feijão-preto e carnes|1
+FAROFA|Farinha torrada com temperos|1
+COXINHA|Salgado de frango em forma de gota|1
+PICANHA|Corte nobre do churrasco|1
+CUPIM|Corte da corcova do boi|2
+ACAI|Fruta roxa da Amazônia, na tigela|1
+CUPUACU|Fruta amazônica parente do cacau|3
+PEQUI|Fruto do cerrado de caroço espinhoso|3
+GUARANA|Fruta amazônica do refrigerante|1
+CACHACA|Destilado de cana-de-açúcar|1
+MATE|Erva do chimarrão|2
+TERERE|Mate gelado do Mato Grosso do Sul|3
+BUCHADA|Prato de vísceras de bode, no Nordeste|3
+ANGU|Papa de fubá|2
+DENDE|Azeite da culinária baiana|1
+UMBU|Fruto ácido da caatinga|3
+CAJA|Fruta amarela da cajazeira|3
+SIRI|Crustáceo da casquinha|2
+SURURU|Molusco típico de Alagoas|3
+SACI|Moleque de uma perna só|1
+CUCA|Bruxa-jacaré do Sítio do Picapau|1
+BOTO|Golfinho que vira rapaz na lenda|2
+IARA|Sereia dos rios amazônicos|1
+CURUPIRA|Guardião da mata de pés virados|1
+BOITATA|Cobra de fogo do folclore|2
+CAIPORA|Ente da mata que protege a caça|2
+BUMBA|(?) meu boi, folguedo|1
+GARCOM|Atende as mesas do bar|1
+DIARISTA|Faxineira paga por dia|2
+MOTOBOY|Entregador de moto|1
+VAQUEIRO|Lida com o gado no sertão, de gibão|2
+ALFAIATE|Costura terno sob medida|2
+CHINELO|Sandália de borracha, de dedo|1
+PILAO|Recipiente de socar grãos|2
+MORINGA|Jarro de barro para água fresca|3
+PREGADOR|Prende a roupa no varal|1
+JATOBA|Árvore de fruto com polpa farinhenta|3
+ARAPONGA|Ave de canto metálico, a ferreira|3
+SABIA|Ave da "Canção do Exílio"|1
+CAPIVARA|Maior roedor do mundo|1
+ONCA|(?)-pintada, maior felino das Américas|1
+JACARE|Parente do crocodilo, no Pantanal|1
+SUCURI|Cobra gigante da Amazônia|1
+JIBOIA|Serpente que dá nome a planta de vaso|2
+PIRARUCU|Peixe gigante da Amazônia|2
+TAMBAQUI|Peixe redondo amazônico|3
+QUATI|Bicho de focinho longo e cauda anelada|2
+TAMANDUA|Come formigas com a língua|1
+SAGUI|Macaquinho de tufos nas orelhas|2
+BUGIO|Macaco que ruge, no Sul|3
+SERIEMA|Ave do cerrado de topete|3
+CARCARA|Gavião do sertão|3
+UIRAPURU|Pássaro amazônico de canto lendário|3
+CERRADO|Savana do Brasil central|1
+CAATINGA|Mata seca do sertão|2
+PAMPA|Campo do Rio Grande do Sul|2
+BURITI|Palmeira das veredas|3
+BABACU|Palmeira de coco oleoso do Maranhão|3
+PINHAO|Semente da araucária|2
+GRALHA|(?)-azul, ave do Paraná|3
+QUERO|(?)-quero, ave dos pampas|3
+PIRACEMA|Subida dos peixes para desovar|3
+POROROCA|Encontro do rio com o mar no Amazonas|2
+CABRA|Sujeito, no Nordeste ("(?) da peste")|2
+BAGULHO|Coisa, objeto qualquer (gíria)|2
+MASSA|Legal, bacana, no Nordeste (gíria)|2
+MANEIRO|Legal, no Rio (gíria)|2
+BAITA|Grande, enorme, no Sul|2
+PILCHA|Traje típico gaúcho|3
+BOMBACHA|Calça larga do gaúcho|2
+TRI|Muito, no Sul ("(?) legal")|2
+CUSCO|Cachorro pequeno, no Sul|3
+GURIA|Menina, no Sul|1
+CAUSO|História contada, no interior|2
+VIXE|(?) Maria!, espanto no Nordeste|1
+FIRMEZA|Tudo certo, em São Paulo (gíria)|2
+XODO|Pessoa querida, chamego|1
+CAFUNE|Carinho na cabeça|1
+SAUDADE|Falta que se sente de alguém|1
+JEITINHO|Modo brasileiro de driblar regras|2
+MALANDRO|Esperto da Lapa de chapéu-panamá|2
+BOTECO|Bar simples de esquina|1
+QUITANDA|Venda de frutas e verduras|2
+MEME|Piada que viraliza na rede|1
+LIVE|Transmissão ao vivo na rede|1
+HASHTAG|Palavra-chave precedida de #|2
+CRACHA|Identificação presa no peito|1
+HOLERITE|Contracheque, em São Paulo|3
+FGTS|Fundo de garantia (sigla)|2
+CLT|Consolidação das Leis do Trabalho|2
+CNPJ|Cadastro de empresas (sigla)|2
+MEI|Microempreendedor individual (sigla)|2
+ZAP|WhatsApp, popularmente|1
+EMOJI|Carinha digital|1
+DOMINO|Jogo de pedras com pintas|1
+TRUCO|Jogo de cartas em que se grita "seis!"|1
+PETECA|Brinquedo de penas, rebatido na mão|1
+CAPOEIRA|Luta-dança da ginga|1
+BOCHA|Jogo de bolas lançadas rumo ao bolim|2
+BOLITA|Bolinha de gude, no Sul|3
+GUDE|Bolinha de (?)|1
+PIAO|Brinquedo que gira na ponta|1
+QUEIMADA|Jogo em que se 'queima' o adversário|2
+JUDO|Arte marcial do quimono e faixas|1
+SURFE|Esporte nas ondas|1
+XADREZ|Jogo do xeque-mate|1
+BARALHO|Conjunto de cartas de jogar|1
+CEROL|Mistura cortante na linha da pipa|2
+PEBOLIM|Totó, futebol de mesa|3
+ORIXA|Divindade do candomblé|2
+UMBANDA|Religião que cultua orixás e caboclos|2
+CANGACO|Banditismo de Lampião|2
+LAMPIAO|O Rei do Cangaço|1
+ORELHAO|Telefone público de cúpula|2
+FAROL|Semáforo, em São Paulo|2`;
 const RAW_FILL=`AA|Alcoólicos Anônimos (sigla)|1
 MJ|Michael Jackson (iniciais)|1
 SP|São Paulo (sigla)|1
@@ -1043,10 +1899,13 @@ const FILLS=RAW_FILL.split("\n").map(l=>{const [w,clue,lv]=l.split("|");return {
 const RARE=new Set(FILLS.filter(f=>f.lv===3).map(f=>f.w));
 for(const [w] of HARDC)if(!BASE.has(w))RARE.add(w);
 const fillFor=max=>FILLS.filter(f=>f.lv<=max).map(({w,clue})=>({w,clue}));
+// a mesma palavra pode ter várias dicas: o jogo sorteia uma cada vez que ela entra
+const MORE=(()=>{const m=new Map();for(const l of RAW_MORE.split("\n")){const a=l.split("|");if(a.length<3)continue;const w=a[0].trim();if(!/^[A-Z]{2,8}$/.test(w))continue;const lv=+a[2];if(!m.has(w))m.set(w,{w,clue:[],lv});const e=m.get(w);e.clue.push(a[1].trim());e.lv=Math.min(e.lv,lv)}return [...m.values()]})();
+const moreFor=(lo,hi)=>MORE.filter(f=>f.lv>=lo&&f.lv<=hi).map(({w,clue})=>({w,clue}));
 const POOLS={
-  easy:[...BASE].filter(([w])=>w.length<=6).map(([w,clue])=>({w,clue})).concat(fillFor(1)),
-  med:[...BASE].map(([w,clue])=>({w,clue})).concat(fillFor(2)),
-  hard:[...HARDC].map(([w,clue])=>({w,clue})).concat(fillFor(3))
+  easy:[...BASE].filter(([w])=>w.length<=6).map(([w,clue])=>({w,clue})).concat(fillFor(1),moreFor(1,1)),
+  med:[...BASE].map(([w,clue])=>({w,clue})).concat(fillFor(2),moreFor(1,2)),
+  hard:[...HARDC].map(([w,clue])=>({w,clue})).concat(fillFor(3),moreFor(2,3))
 };
 for(const k in POOLS){const seen=new Set();POOLS[k]=POOLS[k].filter(e=>!seen.has(e.w)&&seen.add(e.w))}
 let level='med', LV=LEVELS.med, DICT=POOLS.med;
@@ -1130,7 +1989,7 @@ function place(entry,r0,c0,d){
   const cr=r0-dr,cc=c0-dc;
   if(!grid[cr][cc])grid[cr][cc]={t:'C',a:null,d:null};
   grid[cr][cc][d]=id;
-  words.set(id,{id,w:entry.w,clue:entry.clue,dir:d,cells,clueAt:[cr,cc],born:performance.now()});
+  words.set(id,{id,w:entry.w,clue:Array.isArray(entry.clue)?entry.clue[Math.random()*entry.clue.length|0]:entry.clue,dir:d,cells,clueAt:[cr,cc],born:performance.now()});
   recent.push(entry.w); if(recent.length>70)recent.shift();
   return id;
 }
@@ -1140,6 +1999,22 @@ function removeWord(id){
   const [cr,cc]=o.clueAt, cg=grid[cr][cc]; cg[o.dir]=null; if(!cg.a&&!cg.d)grid[cr][cc]=null;
   words.delete(id);
 }
+/* memória entre partidas: palavra vista há pouco perde prioridade, palavra nunca vista ganha */
+let seenIdx=0, seenMap={};
+try{const sv=JSON.parse(localStorage.getItem('cruzada-sem-fim-v1:seen')||'null');if(sv){seenIdx=sv.i||0;seenMap=sv.m||{}}}catch(e){}
+const SEEN_SPAN=500;
+function seenPen(w){const t=seenMap[w];if(t===undefined)return -1.5;const age=seenIdx-t;return age>=SEEN_SPAN?0:12*(1-age/SEEN_SPAN)}
+let seenDirty=0;
+function markSeen(ids){
+  for(const id of ids){const o=words.get(id);if(o){seenIdx++;seenMap[o.w]=seenIdx}}
+  if(++seenDirty>=4)flushSeen();
+}
+function flushSeen(){
+  seenDirty=0;
+  for(const k in seenMap)if(seenIdx-seenMap[k]>SEEN_SPAN*2)delete seenMap[k];
+  try{localStorage.setItem('cruzada-sem-fim-v1:seen',JSON.stringify({i:seenIdx,m:seenMap}))}catch(e){}
+}
+addEventListener('pagehide',flushSeen);
 function fillOnce(){
   let guard=0, added=[];
   while(words.size<MAXW&&guard++<40){
@@ -1151,7 +2026,7 @@ function fillOnce(){
       if(e.w.length===2&&twoCount>=5)continue;
       const res=canPlace(e.w,r,c,d); if(!res||res.nw<Math.min(2,e.w.length-1))continue;
       // cruzar é o objetivo; palavra solta só entra se nada cruzar
-      const s=res.x*5+res.nw*.7+Math.random()*3-(res.x?0:9)-(empty?(Math.abs(r-1)+Math.abs(c-1))*2:0);
+      const s=res.x*5+res.nw*.7+Math.random()*3-seenPen(e.w)-(res.x?0:9)-(empty?(Math.abs(r-1)+Math.abs(c-1))*2:0);
       if(!best||s>best.s)best={s,e,r,c,d};
     }
     if(!best)break;
@@ -1175,7 +2050,7 @@ function fillRaw(tries){
     if(!best||v>best.v)best={v,state:snap(),added};
   }
   restore(best.state);
-  const now=performance.now(); best.added.forEach(id=>{const o=words.get(id);if(o)o.born=now});
+  const now=performance.now(); best.added.forEach(id=>{const o=words.get(id);if(o)o.born=now});markSeen(best.added);
   if(best.added.length)setTimeout(render,2700);
   return best.added;
 }
@@ -1193,7 +2068,7 @@ function bestFor(slot){
     const n=e.w.length;
     if(n>slot.len||onBoard.has(e.w)||recent.includes(e.w)||(n===2&&two>=5))continue;
     const res=canPlace(e.w,slot.r,slot.c,slot.dir); if(!res||res.nw<Math.min(2,n-1))continue;
-    const sc=(n===slot.len?8:0)+n+res.x*3+Math.random()*4;
+    const sc=(n===slot.len?8:0)+n+res.x*3+Math.random()*4-seenPen(e.w);
     if(!best||sc>best.sc)best={sc,e};
   }
   return best&&best.e;
@@ -1214,6 +2089,7 @@ function replaceWords(ids,lockKept){
     else drop.add(failed);                             // travada antiga: a vez dela chegou, sai sem substituta
   }
   if(!out){restore(cloneOf(base));out={added:[],kept:[...ids]}}
+  markSeen(out.added);
   if(lockKept)out.kept.forEach(id=>{const o=words.get(id);if(o)o.locked=true});
   releaseStuck();
   return out;
@@ -1762,6 +2638,7 @@ function showHelp(){
   </div>`;
 }
 function gameOver(){
+  flushSeen();
   playing=false;finalize();SFX.over();buzz([60,40,120]);
   const qualifies=score>0&&(ranking.length<10||score>ranking[ranking.length-1].s);
   ov.hidden=false;
