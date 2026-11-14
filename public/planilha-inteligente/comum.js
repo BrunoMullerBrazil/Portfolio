@@ -52,7 +52,8 @@
     { k: "metas",   rot: "Metas",      ico: "i-metas",   href: "metas.html",  cel: "o5" },
     { k: "rel",     rot: "Relatórios", ico: "i-rel",     href: "#" },
   ];
-  const item = i => `<a class="trilho__item ${i.cel || "trilho__item--desk"}" href="${i.href}"${i.k === pagina ? ' aria-current="page"' : ""}>
+  // data-rotulo: no computador (>= 1024px) a peça mostra só ícones e o rótulo vira tooltip
+  const item = i => `<a class="trilho__item ${i.cel || "trilho__item--desk"}" href="${i.href}" data-rotulo="${i.rot}"${i.k === pagina ? ' aria-current="page"' : ""}>
       <svg class="ico" aria-hidden="true"><use href="#${i.ico}"/></svg><span class="trilho__rot">${i.rot}</span></a>`;
   // Monograma da clínica: cópia fiel de brand/va_monograma.svg, inline, fill = currentColor
   // (sem círculo e sem fundo; a cor vem do CSS: porcelana no trilho, floresta-noite no topo do celular)
@@ -61,10 +62,14 @@
   const logo = `<a class="trilho__logo" href="painel.html" aria-label="Clínica Aurora · Painel">${monograma("")}</a>`;
   const nav = `<nav class="trilho" aria-label="Navegação principal">${logo}
     <div class="trilho__aba"><i></i><button class="trilho__novo" data-rotulo="Novo lead" aria-label="Novo lead"><svg class="ico"><use href="#i-mais"/></svg></button><i></i></div>
+    <div class="trilho__peca">
     ${ITENS.map(item).join("")}
     <span class="trilho__sep"></span>
     ${item({ k: "ajustes", rot: "Ajustes", ico: "i-ajustes", href: "#" })}
+    </div>
   </nav>`;
+  // .trilho__peca: no computador é a peça escura flutuante (só a altura dos itens);
+  // no tablet e no celular é display: contents (os itens seguem filhos diretos do trilho).
   document.querySelector("main").insertAdjacentHTML("beforebegin", nav);
   const ola = document.querySelector(".topo__ola");
   if (ola) ola.insertAdjacentHTML("afterbegin", monograma("marca-cel"));

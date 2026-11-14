@@ -2,18 +2,20 @@
    MOVIMENTO · camada separada do sistema visual (proto.css).
    Incluído no fim do <body>, junto com motion.js. Não muda layout:
    só transições, estados de hover e as telas de abertura/encerramento.
-   Regras: nada no fluxo normal passa de 400ms (exceto a abertura);
-   nada infinito; nada anima enquanto se digita; com
-   prefers-reduced-motion, só opacidade.
+   Regras (revisão "suave"): curvas macias, uso diário entre 280 e 520ms
+   (abertura e encerramento à parte); nada infinito; nada anima enquanto
+   se digita; com prefers-reduced-motion, só opacidade e curto.
    ===================================================================== */
 :root {
-  --ease-out: cubic-bezier(.2, .8, .2, 1);
-  --ease-in: cubic-bezier(.4, 0, 1, 1);
-  --ease-cortina: cubic-bezier(.7, 0, .2, 1);
-  --d-1: 120ms;  /* micro: cor, opacidade de dica */
-  --d-2: 200ms;  /* hover, saída de gaveta, aviso */
-  --d-3: 320ms;  /* entrada de gaveta, FLIP, pílula do trilho */
-  --d-4: 600ms;  /* só abertura/encerramento */
+  --ease-out: cubic-bezier(.22, 1, .36, 1);     /* entradas: desacelera longo e macio */
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);  /* cortina, trocas de lugar */
+  --ease-in: cubic-bezier(.55, 0, .75, .3);      /* saídas: começa devagar, sem tranco */
+  --ease-cortina: var(--ease-in-out);
+  --d-1: 200ms;  /* micro: cor, opacidade de dica */
+  --d-2: 280ms;  /* saída de gaveta/popover (260), aviso */
+  --d-3: 380ms;  /* entrada de gaveta/popover, FLIP, pílula do trilho */
+  --d-4: 520ms;  /* cartões entrando */
+  --d-hover: 320ms;
 }
 
 /* ---------- 1. Navegação entre páginas (View Transitions) ------------- */
@@ -21,8 +23,13 @@
    em file:// o navegador recusa a transição entre documentos e usa o fallback. */
 .trilho { view-transition-name: vam-trilho; }
 .vam-pilula { view-transition-name: vam-pilula; }
-::view-transition-group(root) { animation-duration: var(--d-2); }
-::view-transition-group(vam-pilula) { animation-duration: var(--d-3); animation-timing-function: var(--ease-out); }
+/* Troca de página: crossfade de 400ms com curva macia (o velho some um pouco antes do novo firmar) */
+::view-transition-group(root) { animation-duration: 400ms; animation-timing-function: var(--ease-in-out); }
+::view-transition-old(root) { animation: vam-vt-sai 400ms var(--ease-in-out) both; }
+::view-transition-new(root) { animation: vam-vt-entra 400ms var(--ease-out) both; }
+@keyframes vam-vt-sai { to { opacity: 0; } }
+@keyframes vam-vt-entra { from { opacity: 0; } }
+::view-transition-group(vam-pilula) { animation-duration: 440ms; animation-timing-function: var(--ease-out); }
 ::view-transition-old(vam-trilho), ::view-transition-new(vam-trilho) { animation: none; }
 
 /* Pílula ativa do trilho como peça única que desliza entre itens.
@@ -37,19 +44,31 @@
 }
 .vam-pilula > i { position: absolute; left: -6px; top: 14px; bottom: 14px; width: 3px; border-radius: 3px; background: var(--salvia); }
 .trilho__item, .trilho__logo, .trilho__aba { z-index: 1; }
-.trilho__item { transition: background-color var(--d-1), color var(--d-1); }
+.trilho__item { transition: background-color var(--d-1) var(--ease-out), color var(--d-1) var(--ease-out); }
 @media (max-width: 720px) {
   .vam-pilula > i { left: 18px; right: 18px; top: auto; bottom: -6px; width: auto; height: 3px; }
+}
+/* Computador (>= 1024px): a peça flutuante tem pílula CLARA com ícone escuro.
+   A peça (.trilho__peca) é posicionada, então a pílula e os itens sobem de camada. */
+@media (min-width: 1024px) {
+  .vam-pilula {
+    z-index: 1; border-radius: var(--r-pill, 999px);
+    background: linear-gradient(180deg, #FBFCFA, #E9EEE9);
+    box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 4px 12px -6px rgba(0,0,0,.45);
+  }
+  .vam-pilula > i { display: none; }
+  .trilho .trilho__item { z-index: 2; }
+  .trilho.vam-pil .trilho__item[aria-current="page"] { color: var(--floresta-noite); }
 }
 
 /* ---------- 2. Hover em cartão --------------------------------------- */
 @media (hover: hover) and (pointer: fine) {
-  .cartao.recorte { transition: transform var(--d-2) var(--ease-out), box-shadow var(--d-2) var(--ease-out), opacity var(--d-2); }
+  .cartao.recorte { transition: transform var(--d-hover) var(--ease-out), box-shadow var(--d-hover) var(--ease-out), opacity var(--d-hover); }
   .cartao.recorte:hover { transform: translateY(-2px); box-shadow: var(--sombra-2); }
   .cartao--foco.recorte:hover { box-shadow: 0 14px 32px -14px rgba(23, 35, 27, .55); }
-  .recorte__seta .ico { transition: transform var(--d-2) var(--ease-out); }
+  .recorte__seta .ico { transition: transform var(--d-hover) var(--ease-out); }
   .cartao.recorte:hover .recorte__seta .ico { transform: rotate(12deg) translate(1px, -1px); }
-  .recorte__seta { transition: background-color var(--d-2), box-shadow var(--d-2), border-color var(--d-2); }
+  .recorte__seta { transition: background-color var(--d-hover) var(--ease-out), box-shadow var(--d-hover) var(--ease-out), border-color var(--d-hover) var(--ease-out); }
   .cartao.recorte:not(.cartao--foco):hover .recorte__seta { background-color: var(--suave-2); }
   /* vidro realça: brilho mais forte no alto e borda mais clara */
   .cartao--foco.recorte:hover .recorte__seta {
@@ -57,27 +76,28 @@
     background: radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,.38) 0%, rgba(255,255,255,0) 58%), linear-gradient(180deg, rgba(54,91,72,.9), rgba(34,57,45,.95));
     box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 10px 22px -10px rgba(23,35,27,.8);
   }
+  .trilho__novo { transition: background var(--d-hover) var(--ease-out), transform var(--d-hover) var(--ease-out); }
   .trilho__novo:hover { transform: scale(1.04); }
 }
 
-/* ---------- 3. Gavetas e popovers: entram da direita, saem mais rápido */
+/* ---------- 3. Gavetas e popovers: entram em 380ms, saem em 260ms ---- */
 .fn-gaveta, .gaveta, .vam-gaveta {
-  transition: transform var(--d-2) var(--ease-in), visibility 0s linear var(--d-2);
+  transition: transform 260ms var(--ease-in), visibility 0s linear 260ms;
   visibility: hidden;
 }
 .fn-gaveta.aberta, .gaveta.aberta, .vam-gaveta.aberta, .gaveta[open], .gaveta.is-open {
-  transition: transform 280ms var(--ease-out), visibility 0s;
+  transition: transform 380ms var(--ease-out), visibility 0s;
   visibility: visible;
 }
-[popover]:popover-open { animation: vam-pop-in 280ms var(--ease-out); }
-.popover.aberto, .popover.is-open, .pop.aberto { animation: vam-pop-in 280ms var(--ease-out); }
-@keyframes vam-pop-in { from { opacity: 0; transform: translateX(16px); } }
+[popover]:popover-open { animation: vam-pop-in 380ms var(--ease-out); }
+.popover.aberto, .popover.is-open, .pop.aberto { animation: vam-pop-in 380ms var(--ease-out); }
+@keyframes vam-pop-in { from { opacity: 0; transform: translateX(10px); } }
 
 /* ---------- 4. Tique + aviso que sobe pela base ---------------------- */
-.vam-tique-on > :not(.vam-tique) { opacity: 0; transition: opacity var(--d-1); }
+.vam-tique-on > :not(.vam-tique) { opacity: 0; transition: opacity var(--d-1) var(--ease-out); }
 .vam-tique { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; color: var(--ok, var(--floresta)); }
 .vam-tique svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-.vam-tique path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: vam-traco 280ms var(--ease-out) forwards; }
+.vam-tique path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: vam-traco 420ms var(--ease-out) forwards; }
 @keyframes vam-traco { to { stroke-dashoffset: 0; } }
 
 .vam-avisos { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 90; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; width: max-content; max-width: calc(100vw - 32px); }
@@ -88,7 +108,7 @@
 }
 .vam-aviso__ok { width: 24px; height: 24px; border-radius: 50%; background: var(--floresta-2); display: grid; place-items: center; flex: none; }
 .vam-aviso__ok svg { width: 14px; height: 14px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
-.vam-aviso__ok path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: vam-traco 280ms var(--ease-out) 120ms forwards; }
+.vam-aviso__ok path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: vam-traco 420ms var(--ease-out) 160ms forwards; }
 .vam-aviso b { font-weight: 600; }
 @media (max-width: 720px) { .vam-avisos { bottom: calc(var(--barra-cel, 68px) + 20px + env(safe-area-inset-bottom)); } }
 
@@ -128,6 +148,7 @@
 .vam-fim__nums dd small { display: block; font: 500 var(--t-xs, 12px)/1.3 var(--f-texto, Inter, sans-serif); color: var(--texto-2); letter-spacing: 0; margin-top: 4px; }
 .vam-fim__ate { font: 500 clamp(16px, 1.6vw, 19px)/1.2 var(--f-titulo, "Inter Tight", sans-serif); color: var(--salvia-escura); margin: 0; }
 .vam-fim__fechar { margin-top: 6px; min-height: var(--alvo, 36px); padding: 0 18px; border-radius: var(--r-pill, 999px); border: 1px solid var(--linha-forte); background: var(--cartao); color: var(--tinta); font: 600 var(--t-sm, 14px)/1 var(--f-texto, Inter, sans-serif); cursor: pointer; }
+.vam-fim__fechar { transition: background-color var(--d-1) var(--ease-out); }
 .vam-fim__fechar:hover { background: var(--suave); }
 @media (max-width: 520px) {
   .vam-fim__nums > div { padding: 4px 8px; }
@@ -149,10 +170,13 @@
 @media (prefers-reduced-motion: reduce) {
   .cartao.recorte:hover { transform: none; }
   .cartao.recorte:hover .recorte__seta .ico, .trilho__novo:hover { transform: none; }
-  .fn-gaveta, .gaveta, .vam-gaveta { transition: opacity var(--d-2), visibility 0s linear var(--d-2); }
+  .fn-gaveta, .gaveta, .vam-gaveta { transition: opacity 160ms linear, visibility 0s linear 160ms; }
   .fn-gaveta:not(.aberta), .gaveta:not(.aberta), .vam-gaveta:not(.aberta) { opacity: 0; }
-  .fn-gaveta.aberta, .gaveta.aberta, .vam-gaveta.aberta { transition: opacity 280ms, visibility 0s; opacity: 1; }
+  .fn-gaveta.aberta, .gaveta.aberta, .vam-gaveta.aberta { transition: opacity 200ms linear, visibility 0s; opacity: 1; }
+  .cartao.recorte, .recorte__seta, .trilho__novo { transition-property: opacity, background-color, box-shadow, border-color; }
+  ::view-transition-group(root), ::view-transition-old(root), ::view-transition-new(root), ::view-transition-group(vam-pilula) { animation-duration: 200ms; }
   [popover]:popover-open, .popover.aberto, .popover.is-open, .pop.aberto { animation-name: vam-fade-in; }
+  [popover]:popover-open, .popover.aberto, .popover.is-open, .pop.aberto { animation-duration: 200ms; }
   @keyframes vam-fade-in { from { opacity: 0; } }
   .vam-tique path, .vam-aviso__ok path { animation: none; stroke-dashoffset: 0; }
 }
