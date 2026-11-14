@@ -14,7 +14,9 @@
   const q = new URLSearchParams(location.search);
   const mm = s => window.matchMedia && window.matchMedia(s).matches;
   const REDUZ = mm("(prefers-reduced-motion: reduce)");
-  const EASE = "cubic-bezier(.2,.8,.2,1)", EASE_IN = "cubic-bezier(.4,0,1,1)", CORTINA = "cubic-bezier(.7,0,.2,1)";
+  // Curvas macias (revisão "suave"): entradas desaceleram longo; saídas começam devagar
+  const EASE = "cubic-bezier(.22,1,.36,1)", EASE_IN = "cubic-bezier(.55,0,.75,.3)", EASE_IO = "cubic-bezier(.65,0,.35,1)";
+  const CORTINA = EASE_IO, CONTA = "cubic-bezier(.16,1,.3,1)";  // contagem: desaceleração forte no fim
   const pagina = body.dataset.pagina || "";
   const VA = window.VA || {};
 
@@ -75,7 +77,8 @@
   /* =====================================================================
      3. ENTRADA DAS TELAS
      ===================================================================== */
-  const PASSO = 40, DUR_CARTAO = 200, MAX_ATRASO = 160;  // último começa em 160ms: total 360ms
+  // Cartões: 520ms cada, escalonamento sobreposto de 55ms (o último começa em até 495ms)
+  const PASSO = 55, DUR_CARTAO = 520, MAX_ATRASO = 495;
 
   function entradaCartoes(base = 0) {
     const els = [...doc.querySelectorAll("main .cartao")].filter(el => !el.closest(".fn-gaveta, .vam-tela") && visivel(el));
@@ -84,13 +87,14 @@
     // cartões aninhados (ex.: cartões do funil dentro de colunas) seguem a ordem visual
     vis.forEach((x, i) => {
       const atraso = base + Math.min(i * PASSO, MAX_ATRASO);
-      animaE(x.el, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }],
-        { duration: DUR_CARTAO, delay: atraso, easing: EASE, fill: "backwards" });
+      animaE(x.el, REDUZ ? [{ opacity: 0 }, { opacity: 1 }]
+        : [{ opacity: 0, transform: "translateY(5px)", filter: "blur(4px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }],
+        { duration: REDUZ ? 200 : DUR_CARTAO, delay: REDUZ ? base : atraso, easing: EASE, fill: "backwards" });
     });
-    return base + MAX_ATRASO + DUR_CARTAO;
+    return base + (REDUZ ? 200 : Math.min(vis.length * PASSO, MAX_ATRASO) + DUR_CARTAO);
   }
 
-  /* Números contam até o valor (500ms, ease-out). A largura fica travada
+  /* Números contam até o valor (900ms, desaceleração forte no fim). A largura fica travada
      no valor final (o texto real não muda; o número que corre é desenhado
      por cima), então o tamanho calculado por UI.medeNumeros não pula. */
   const RX_NUM = /^\d{1,3}(?:\.\d{3})+(?:,\d+)?$|^\d+(?:,\d+)?$/;
@@ -126,7 +130,7 @@
       box.append(fant, vivo); it.t.replaceWith(box); Object.assign(it, { box, vivo, orig: fant.textContent });
     });
     // O relógio é uma animação neutra (opacidade 1→1): pode ser adiantada ou posicionada como as outras
-    const relogio = animaE(itens[0].box, [{ opacity: 1 }, { opacity: 1 }], { duration: 500, delay: atraso, easing: EASE });
+    const relogio = animaE(itens[0].box, [{ opacity: 1 }, { opacity: 1 }], { duration: 900, delay: atraso, easing: CONTA });
     const fim = () => itens.forEach(it => { if (it.box.isConnected) it.box.replaceWith(doc.createTextNode(it.orig)); });
     if (!relogio) return fim();
     const passo = () => {
@@ -141,18 +145,18 @@
 
   /* Anéis se desenham e barras crescem logo depois dos números */
   function graficos(atraso = 0) {
-    const d = atraso + 120, DUR = 380;
+    const d = atraso + 80, DUR = 900;  // anéis e barras se desenham em 900ms, ease-out
     doc.querySelectorAll("main .anel__arco").forEach(c => {
       if (c.closest(".fn-gaveta") || !naTela(c.getBoundingClientRect())) return;
       const final = c.getAttribute("stroke-dasharray") || "100 0";
-      animaE(c, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ strokeDasharray: "0 100" }, { strokeDasharray: final }], { duration: DUR, delay: d, easing: EASE, fill: "backwards" });
+      animaE(c, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ strokeDasharray: "0 100" }, { strokeDasharray: final }], { duration: REDUZ ? 200 : DUR, delay: d, easing: EASE, fill: "backwards" });
     });
     doc.querySelectorAll("main .anel__marca, main .anel__halo, main .bm__ponta, main .bm__rot").forEach(el => {
-      animaE(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 160, delay: d + DUR - 80, fill: "backwards" });
+      animaE(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 360, delay: d + DUR - 360, easing: EASE, fill: "backwards" });
     });
     const cresce = (el, eixo, origem) => {
       if (el.closest(".fn-gaveta") || !naTela(el.getBoundingClientRect())) return;
-      if (REDUZ) return animaE(el, [{ opacity: 0 }, { opacity: 1 }], { duration: DUR, delay: d, fill: "backwards" });
+      if (REDUZ) return animaE(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: d, fill: "backwards" });
       const base = getComputedStyle(el).transform, pre = base && base !== "none" ? base + " " : "";
       el.style.transformOrigin = el.style.transformOrigin || origem;
       animaE(el, [{ transform: `${pre}scale${eixo}(0)` }, { transform: `${pre}scale${eixo}(1)` }], { duration: DUR, delay: d, easing: EASE, fill: "backwards" });
@@ -167,22 +171,25 @@
     return d + DUR;
   }
 
-  /* O alerta de parados pulsa UMA vez (anel vermelho que se expande e some) */
+  /* O alerta de parados pulsa UMA vez, devagar (halo vermelho que cresce e se dissolve em 1,6s) */
   function pulsoAlerta(atraso) {
     doc.querySelectorAll("main #aviso-parados, main .fn-alerta, main [data-alerta]").forEach(el => {
       if (el.hidden || !visivel(el) || !naTela(el.getBoundingClientRect())) return;
-      if (REDUZ) { animaE(el, [{ opacity: 1 }, { opacity: .6 }, { opacity: 1 }], { duration: 400, delay: atraso }); return; }
-      animaE(el, [{ boxShadow: "0 1px 2px rgba(23,35,27,.05), 0 0 0 0 rgba(163,50,44,.40)" }, { boxShadow: "0 1px 2px rgba(23,35,27,.05), 0 0 0 12px rgba(163,50,44,0)" }],
-        { duration: 400, delay: atraso, easing: EASE });
+      if (REDUZ) { animaE(el, [{ opacity: 1 }, { opacity: .75 }, { opacity: 1 }], { duration: 300, delay: atraso }); return; }
+      animaE(el, [
+        { boxShadow: "0 1px 2px rgba(23,35,27,.05), 0 0 0 0 rgba(163,50,44,0)" },
+        { boxShadow: "0 1px 2px rgba(23,35,27,.05), 0 0 0 3px rgba(163,50,44,.22)", offset: .25 },
+        { boxShadow: "0 1px 2px rgba(23,35,27,.05), 0 0 0 16px rgba(163,50,44,0)" }],
+        { duration: 1600, delay: atraso, easing: "cubic-bezier(.33,0,.2,1)" });
     });
   }
 
   function entrada(base = 0) {
     const fimCartoes = entradaCartoes(base);
-    const dNum = base + 120;
+    const dNum = base + 160;
     contarNumeros(dNum);
-    const fimGraf = graficos(dNum + 140);
-    pulsoAlerta(Math.max(fimCartoes, fimGraf) - 120);
+    const fimGraf = graficos(dNum + 60);
+    pulsoAlerta(Math.max(fimCartoes, fimGraf) - 200);
   }
 
   /* =====================================================================
@@ -207,6 +214,9 @@
     const coloca = () => { const p = posDe(atual); Object.assign(pil.style, { width: p.w + "px", height: p.h + "px", transform: `translate(${p.x}px, ${p.y}px)` }); return p; };
     const fim = coloca();
     addEventListener("resize", coloca);
+    // a peça do computador é centralizada: se a altura dela mudar, a pílula acompanha
+    const peca = trilho.querySelector(".trilho__peca");
+    if (peca && window.ResizeObserver) new ResizeObserver(() => { if (!pil.getAnimations().length) coloca(); }).observe(peca);
     // fallback sem View Transitions: a pílula sai da posição do item clicado na página anterior
     let vt = false;
     addEventListener("pagereveal", e => { if (e.viewTransition) vt = true; });
@@ -216,7 +226,7 @@
       let ini; try { ini = JSON.parse(salvo); } catch (e) { return; }
       if (!ini || ini.cel !== fim.cel || (ini.x === fim.x && ini.y === fim.y)) return;
       if (REDUZ) { anima(pil, [{ opacity: 0 }, { opacity: 1 }], { duration: 200 }); return; }
-      anima(pil, [{ transform: `translate(${ini.x}px, ${ini.y}px)` }, { transform: `translate(${fim.x}px, ${fim.y}px)` }], { duration: 320, easing: EASE });
+      anima(pil, [{ transform: `translate(${ini.x}px, ${ini.y}px)` }, { transform: `translate(${fim.x}px, ${fim.y}px)` }], { duration: 440, easing: EASE });
     });
     trilho.addEventListener("click", e => {
       const a = e.target.closest("a.trilho__item, a.trilho__logo");
@@ -225,7 +235,7 @@
       ss.set("vam:pilula", JSON.stringify(posDe(atual)));
       if (!REDUZ && !doc.startViewTransition) {
         const alvo = a.classList.contains("trilho__item") ? a : trilho.querySelector('.trilho__item[href="painel.html"]');
-        if (alvo) { const p = posDe(alvo); anima(pil, [{ transform: pil.style.transform }, { transform: `translate(${p.x}px, ${p.y}px)` }], { duration: 160, easing: EASE, fill: "forwards" }); }
+        if (alvo) { const p = posDe(alvo); anima(pil, [{ transform: pil.style.transform }, { transform: `translate(${p.x}px, ${p.y}px)` }], { duration: 280, easing: EASE_IO, fill: "forwards" }); }
       }
     });
   }
@@ -270,11 +280,11 @@
       c.classList.add("vam-fantasma"); c.setAttribute("aria-hidden", "true"); c.setAttribute("inert", "");
       Object.assign(c.style, { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px", display: el.tagName === "TR" ? "table" : "" });
       body.appendChild(c);
-      const a = anima(c, REDUZ ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(.97)" }], { duration: 200, easing: EASE_IN, fill: "forwards" });
+      const a = anima(c, REDUZ ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 1, transform: "none", filter: "blur(0)" }, { opacity: 0, transform: "scale(.98)", filter: "blur(3px)" }], { duration: REDUZ ? 160 : 260, easing: EASE_IN, fill: "forwards" });
       if (a) a.finished.then(() => c.remove(), () => c.remove()); else c.remove();
     });
-    if (!REDUZ) ficam.forEach(([el, r, a]) => anima(el, [{ transform: `translate(${r.left - a.left}px, ${r.top - a.top}px)` }, { transform: "none" }], { duration: 280, easing: EASE }));
-    entram.forEach(el => anima(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 80, easing: EASE, fill: "backwards" }));
+    if (!REDUZ) ficam.forEach(([el, r, a]) => anima(el, [{ transform: `translate(${r.left - a.left}px, ${r.top - a.top}px)` }, { transform: "none" }], { duration: 440, easing: EASE }));
+    entram.forEach(el => anima(el, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, filter: "blur(3px)" }, { opacity: 1, filter: "blur(0)" }], { duration: REDUZ ? 160 : 380, delay: REDUZ ? 0 : 120, easing: EASE, fill: "backwards" }));
   }
   doc.addEventListener("click", e => { if (e.target.closest("main")) fotografa(); }, true);
   doc.addEventListener("click", () => { if (foto) requestAnimationFrame(flip); });
@@ -290,9 +300,9 @@
     a.innerHTML = `<span class="vam-aviso__ok">${TIQUE}</span><span>${html}</span>`;
     avisos.appendChild(a);
     while (avisos.children.length > 2) avisos.firstElementChild.remove();
-    anima(a, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(16px)" }, { opacity: 1, transform: "none" }], { duration: 280, easing: EASE });
+    anima(a, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(12px)", filter: "blur(3px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: REDUZ ? 200 : 460, easing: EASE });
     setTimeout(() => {
-      const s = anima(a, REDUZ ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(8px)" }], { duration: 200, easing: EASE_IN, fill: "forwards" });
+      const s = anima(a, REDUZ ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(6px)" }], { duration: REDUZ ? 160 : 300, easing: EASE_IN, fill: "forwards" });
       if (s) s.finished.then(() => a.remove(), () => a.remove()); else a.remove();
     }, 2600);
   }
@@ -324,16 +334,16 @@
 
   /* =====================================================================
      4d. CAMADAS FLUTUANTES de comum.js (pré-visualização do WhatsApp,
-     menu "adicionar à agenda"): entram da direita em 280ms e saem em
-     200ms. No celular a do WhatsApp é gaveta inferior: entra de baixo.
+     menu "adicionar à agenda"): entram da direita em 380ms e saem em
+     260ms. No celular a do WhatsApp é gaveta inferior: entra de baixo.
      ===================================================================== */
   const SEL_CAMADA = ".wa-pop, .ag-menu";
   const deBaixo = el => el.classList.contains("wa-pop") && mm("(max-width: 720px)");
   function entraCamada(el) {
     const kf = REDUZ ? [{ opacity: 0 }, { opacity: 1 }]
-      : deBaixo(el) ? [{ opacity: 0, transform: "translateY(24px)" }, { opacity: 1, transform: "none" }]
-      : [{ opacity: 0, transform: "translateX(16px)" }, { opacity: 1, transform: "none" }];
-    anima(el, kf, { duration: 280, easing: EASE });
+      : deBaixo(el) ? [{ opacity: 0, transform: "translateY(32px)" }, { opacity: 1, transform: "none" }]
+      : [{ opacity: 0, transform: "translateX(10px) scale(.985)" }, { opacity: 1, transform: "none" }];
+    anima(el, kf, { duration: REDUZ ? 200 : 380, easing: EASE });
   }
   function saiCamada(el, r) {
     if (!r || !r.width) return;
@@ -344,9 +354,9 @@
     Object.assign(c.style, { left: r.left + "px", top: r.top + "px", right: "auto", bottom: "auto", width: r.width + "px", height: r.height + "px", zIndex: 41 });
     body.appendChild(c);
     const kf = REDUZ ? [{ opacity: 1 }, { opacity: 0 }]
-      : deBaixo(el) ? [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(24px)" }]
-      : [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(16px)" }];
-    const a = anima(c, kf, { duration: 200, easing: EASE_IN, fill: "forwards" });
+      : deBaixo(el) ? [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(32px)" }]
+      : [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateX(8px) scale(.985)" }];
+    const a = anima(c, kf, { duration: REDUZ ? 160 : 260, easing: EASE_IN, fill: "forwards" });
     if (a) a.finished.then(() => c.remove(), () => c.remove()); else c.remove();
   }
   const ultimaPos = new WeakMap();
@@ -357,10 +367,10 @@
       if (!el.hidden) { requestAnimationFrame(() => ultimaPos.set(el, el.getBoundingClientRect())); entraCamada(el); }
       else saiCamada(el, ultimaPos.get(el));
     } else if (el.id === "camada-veu" && !el.hidden) {
-      anima(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
+      anima(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: EASE });
     } else if (el.matches(".wa-reg") && !el.hidden && m.oldValue !== null) {
       // tentativa registrada: o selo se desenha da esquerda para a direita
-      anima(el, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }], { duration: 280, easing: EASE });
+      anima(el, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }], { duration: 480, easing: EASE });
     }
   })).observe(body, { attributes: true, attributeFilter: ["hidden"], attributeOldValue: true, subtree: true });
   // posição atualizada ao rolar/redimensionar (comum.js reposiciona a camada)
@@ -424,25 +434,35 @@
     const resumo = tela.querySelector(".vam-tela__resumo");
     const extras = tela.querySelectorAll(".vam-demo, .vam-tela__pular");
 
-    // 0–0,6s: monograma traço por traço (contorno se desenha, depois enche)
+    /* Linha do tempo (~4,5s; com movimento reduzido, metade e só opacidade):
+       0,0–1,4s  monograma: três traços sobrepostos se desenham com calma e enchem
+       1,1–2,3s  saudação palavra por palavra (600ms cada, desfoque saindo, subida pequena)
+       2,2–2,9s  resumo do dia
+       2,9–3,5s  pausa de leitura
+       3,5–4,4s  a cortina sobe (900ms, curva macia) e o painel entra em seguida */
+    const T = REDUZ ? .5 : 1, t = ms => Math.round(ms * T);
+    const sobe = (y, blur) => REDUZ ? [{ opacity: 0 }, { opacity: 1 }]
+      : [{ opacity: 0, transform: `translateY(${y}px)`, filter: `blur(${blur}px)` }, { opacity: 1, transform: "none", filter: "blur(0)" }];
     polys.forEach((p, i) => {
-      const d = i * 150;
+      const d = t(120 + i * 260);
       if (REDUZ) { A(p, [{ fillOpacity: 0, strokeDashoffset: 0, opacity: 0 }, { fillOpacity: 1, strokeDashoffset: 0, opacity: 1 }], { duration: 300, delay: d }); return; }
-      A(p, [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 300, delay: d, easing: "cubic-bezier(.45,0,.25,1)" });
-      A(p, [{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: 160, delay: d + 260, easing: "linear" });
+      A(p, [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 680, delay: d, easing: "cubic-bezier(.45,0,.2,1)" });
+      A(p, [{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: 440, delay: d + 500, easing: EASE_IO });
     });
-    // 0,6–1,3s: saudação palavra por palavra
-    const passoW = ws.length > 1 ? Math.min(140, 460 / (ws.length - 1)) : 0;
-    ws.forEach((w, i) => A(w, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }],
-      { duration: 240, delay: 600 + i * passoW, easing: EASE }));
-    // 1,3–1,8s: resumo do dia
-    A(resumo, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 380, delay: 1300, easing: EASE });
-    extras.forEach(x => A(x, [{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 500 }));
-    // 1,8–2,2s: a tela sobe como cortina
-    const cortina = A(tela, REDUZ ? [{ opacity: 1 }, { opacity: 0 }] : [{ transform: "translateY(0)" }, { transform: "translateY(-100%)" }], { duration: 400, delay: 1800, easing: CORTINA });
-    // o painel entra enquanto a cortina sobe
-    const inicio = performance.now();
-    entrada(1820);
+    const T_OLA = t(1100);
+    const passoW = ws.length > 1 ? Math.max(110, Math.min(200, 800 / (ws.length - 1))) : 0;
+    ws.forEach((w, i) => A(w, sobe(8, 6), { duration: t(600), delay: T_OLA + t(i * passoW), easing: EASE }));
+    const fimOla = T_OLA + t(Math.max(0, ws.length - 1) * passoW + 600);
+    const T_RESUMO = Math.max(t(2200), fimOla - t(150));
+    A(resumo, sobe(6, 3), { duration: t(700), delay: T_RESUMO, easing: EASE });
+    extras.forEach(x => A(x, [{ opacity: 0 }, { opacity: 1 }], { duration: t(600), delay: t(700), easing: EASE }));
+    // pausa de leitura e a cortina sobe; o conteúdo dela sobe um pouco mais devagar (profundidade)
+    const T_CORTINA = T_RESUMO + t(700) + t(600), DUR_CORTINA = t(900);
+    const cortina = A(tela, REDUZ ? [{ opacity: 1 }, { opacity: 0 }] : [{ transform: "translateY(0)" }, { transform: "translateY(-100%)" }], { duration: DUR_CORTINA, delay: T_CORTINA, easing: CORTINA });
+    if (!REDUZ) A(tela.querySelector(".vam-tela__centro"), [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(48px)" }], { duration: t(700), delay: T_CORTINA, easing: EASE_IO });
+    // o painel entra logo atrás da cortina
+    const inicio = performance.now(), T_ENTRADA = T_CORTINA + t(320);
+    entrada(T_ENTRADA);
 
     let acabou = false;
     const termina = () => {
@@ -451,15 +471,16 @@
       ls.set(chaveDia(), new Date().toISOString());
     };
     if (cortina) cortina.finished.then(termina, termina); else termina();
-    // segurança: nada fica travado mesmo se uma animação não terminar
-    setTimeout(termina, 4000);
+    // segurança: nada fica travado mesmo se uma animação não terminar (folga sobre os ~4,5s)
+    setTimeout(termina, T_CORTINA + DUR_CORTINA + 2000);
 
     const pular = () => {
       if (acabou) return;
       anims.forEach(a => { try { a.cancel(); } catch (e) { /* ok */ } });
       // a entrada do painel não espera a cortina: adianta para começar agora
-      adiantaEntrada(Math.max(0, 1820 - (performance.now() - inicio)));
-      const s = anima(tela, [{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: EASE_IN, fill: "forwards" });
+      adiantaEntrada(Math.max(0, T_ENTRADA - (performance.now() - inicio)));
+      // pular continua imediato (sem esperar a linha do tempo): só um esmaecer curto
+      const s = anima(tela, [{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: EASE, fill: "forwards" });
       if (s) s.finished.then(termina, termina); else termina();
       doc.removeEventListener("keydown", tecla, true);
     };
@@ -475,7 +496,7 @@
       const u = new URL(location.href); u.searchParams.delete("nome"); u.searchParams.set("intro", "1");
       location.replace(u.href);
     });
-    VAM.intro = { tela, anims, pular, duracao: 2200 };
+    VAM.intro = { tela, anims, pular, duracao: T_CORTINA + DUR_CORTINA, cortina: T_CORTINA, entrada: T_ENTRADA };
     return tela;
   }
   const chaveDia = () => `vam:abertura:${NOME}:${hojeISO}`;
@@ -499,7 +520,8 @@
     const b = doc.createElement("button");
     b.type = "button"; b.className = "trilho__item trilho__item--desk vam-encerrar" + (feito ? " vam-feito" : "");
     b.setAttribute("aria-label", "Encerrar o dia");
-    b.title = feito ? "Dia encerrado · rever o resumo" : "Encerrar o dia";
+    // no computador o rótulo vira tooltip (data-rotulo), como os outros itens da peça
+    b.dataset.rotulo = feito ? "Dia encerrado · rever o resumo" : "Encerrar o dia";
     b.innerHTML = `${ICO_LUA}<span class="trilho__rot">${feito ? "Encerrado" : "Encerrar"}</span>`;
     const sep = trilho.querySelector(".trilho__sep");
     if (sep) sep.after(b); else trilho.appendChild(b);
@@ -534,29 +556,39 @@
     inerte(true);
     ls.set(chaveFim(), new Date().toISOString());
 
+    /* Linha do tempo (~3,6s até "Até amanhã" firmar; reduzido: metade, só opacidade):
+       0,0–0,6s  a tela clareia
+       0,3–1,5s  "Boa noite" palavra por palavra (600ms cada, 200ms entre elas)
+       1,3–2,2s  os três números do dia
+       2,1–3,4s  o monograma se desfaz devagar, do último traço ao primeiro
+       2,9–3,6s  "Até amanhã." e o botão Fechar */
+    const T = REDUZ ? .5 : 1, t = ms => Math.round(ms * T);
     const A = (el, kf, o) => anima(el, kf, Object.assign({ fill: "both" }, o));
-    const fade = (el, d, dur = 280, y = 8) => A(el, REDUZ ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: `translateY(${y}px)` }, { opacity: 1, transform: "none" }], { duration: dur, delay: d, easing: EASE });
-    A(tela, [{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: EASE });
+    const fade = (el, d, dur, y = 8, blur = 0) => A(el, REDUZ ? [{ opacity: 0 }, { opacity: 1 }]
+      : [{ opacity: 0, transform: `translateY(${y}px)`, filter: `blur(${blur}px)` }, { opacity: 1, transform: "none", filter: "blur(0)" }],
+      { duration: t(dur), delay: t(d), easing: EASE });
+    A(tela, [{ opacity: 0 }, { opacity: 1 }], { duration: t(600), easing: EASE });
     const polys = tela.querySelectorAll(".vam-mono polygon");
     polys.forEach(p => { p.style.fillOpacity = 1; p.style.strokeDashoffset = 0; });
-    tela.querySelectorAll(".vam-tela__ola span").forEach((w, i) => fade(w, 200 + i * 110, 240, 10));
-    tela.querySelectorAll(".vam-fim__nums > div").forEach((n, i) => fade(n, 650 + i * 80, 320));
-    // o monograma se desfaz (enche → contorno → some, do último traço ao primeiro) e entra "Até amanhã"
+    fade(tela.querySelector(".vam-mono"), 0, 700, 4, 4);
+    tela.querySelectorAll(".vam-tela__ola span").forEach((w, i) => fade(w, 300 + i * 200, 600, 8, 6));
+    tela.querySelectorAll(".vam-fim__nums > div").forEach((n, i) => fade(n, 1300 + i * 150, 600, 6, 3));
+    // o monograma se desfaz (enche → contorno → some, do último traço ao primeiro); fica um vestígio
     [...polys].reverse().forEach((p, i) => {
-      const d = 1300 + i * 150;
+      const d = t(2100 + i * 200);
       if (REDUZ) { A(p, [{ opacity: 1 }, { opacity: .1 }], { duration: 300, delay: d }); return; }
-      A(p, [{ fillOpacity: 1 }, { fillOpacity: .1 }], { duration: 160, delay: d, easing: "linear" });  // fica um vestígio
-      A(p, [{ strokeDashoffset: 0 }, { strokeDashoffset: -1 }], { duration: 300, delay: d + 120, easing: "cubic-bezier(.55,0,.75,.2)" });
+      A(p, [{ fillOpacity: 1 }, { fillOpacity: .1 }], { duration: 420, delay: d, easing: EASE_IO });
+      A(p, [{ strokeDashoffset: 0 }, { strokeDashoffset: -1 }], { duration: 700, delay: d + 260, easing: EASE_IO });
     });
-    fade(tela.querySelector(".vam-fim__ate"), 1800, 400, 6);
-    fade(tela.querySelector(".vam-fim__fechar"), 2000, 280, 0);
+    fade(tela.querySelector(".vam-fim__ate"), 2900, 700, 6, 4);
+    fade(tela.querySelector(".vam-fim__fechar"), 3200, 500, 0);
 
     const fechar = () => {
       doc.removeEventListener("keydown", tecla, true);
-      const s = anima(tela, [{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: EASE_IN, fill: "forwards" });
+      const s = anima(tela, [{ opacity: 1 }, { opacity: 0 }], { duration: REDUZ ? 160 : 360, easing: EASE_IO, fill: "forwards" });
       const fim = () => {
         tela.remove(); inerte(false);
-        if (VAM.botaoEncerrar) { VAM.botaoEncerrar.classList.add("vam-feito"); VAM.botaoEncerrar.querySelector(".trilho__rot").textContent = "Encerrado"; VAM.botaoEncerrar.title = "Dia encerrado · rever o resumo"; }
+        if (VAM.botaoEncerrar) { VAM.botaoEncerrar.classList.add("vam-feito"); VAM.botaoEncerrar.querySelector(".trilho__rot").textContent = "Encerrado"; VAM.botaoEncerrar.dataset.rotulo = "Dia encerrado · rever o resumo"; }
         if (quem && quem.focus) quem.focus();
       };
       if (s) s.finished.then(fim, fim); else fim();
@@ -573,8 +605,8 @@
      ===================================================================== */
   const VAM = window.VAM = { aviso, tique, entrada, encerrar, abertura, nome: NOME, hora: HORA };
   ajustaSaudacao();
+  botaoEncerrar();          // antes da pílula: o botão muda a altura (e a posição) da peça
   if (trilho) poePilula();
-  botaoEncerrar();
 
   const forca = q.get("intro") === "1";
   const jaViu = !!ls.get(chaveDia());

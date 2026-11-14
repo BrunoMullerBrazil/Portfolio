@@ -166,6 +166,77 @@ a { color: inherit; }
     linear-gradient(180deg, rgba(148,168,156,.58), rgba(94,116,102,.42));
 }
 
+/* ---------- 4b. MENU DO COMPUTADOR (>= 1024px): PEÇA FLUTUANTE -------- */
+/* O trilho de altura total vira uma peça escura discreta: 64px de largura, só a
+   altura dos itens, presa à borda esquerda por curvas côncavas em cima e embaixo
+   (filetes com radial-gradient, a mesma técnica do recorte dos cartões). Só ícones;
+   o rótulo aparece num tooltip escuro ao passar o mouse ou focar. O "+" (Novo lead)
+   é um círculo separado logo abaixo, numa aba presa à borda pela mesma curva.
+   A logo fica no topo da página, fora da peça. Tablet e celular não mudam. */
+.trilho__peca { display: contents; }
+@media (min-width: 1024px) {
+  :root { --trilho: 64px; --peca-topo: #233A2E; --peca-base: #192C22; --peca-r: 20px; }
+  .app { padding-left: clamp(20px, 2vw, 44px); }
+  .trilho {
+    inset: 0 auto 0 0; width: var(--trilho); padding: 0 0 2vh; gap: 0;
+    background: none; box-shadow: none; justify-content: center; pointer-events: none;
+  }
+  .trilho > *, .trilho__peca > * { pointer-events: auto; }
+  /* logo: monograma discreto no topo da página, alinhado à saudação */
+  .trilho__logo {
+    position: absolute; left: 0; top: calc(22px + 8 * var(--k)); width: var(--trilho); height: 36px; margin: 0;
+    color: var(--floresta-noite); opacity: .9; border-radius: 10px;
+  }
+  .trilho__logo svg { height: 28px; }
+  .trilho__logo:hover { opacity: 1; }
+  /* a peça */
+  .trilho__peca {
+    order: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    width: var(--trilho); padding: 10px 0; flex: none;
+    border-radius: 0 30px 30px 0;
+    background: linear-gradient(180deg, var(--peca-topo), var(--floresta-noite) 45%, var(--peca-base));
+    box-shadow: inset -1px 0 0 rgba(255,255,255,.07), 14px 18px 32px -22px rgba(23,35,27,.55);
+  }
+  /* curvas côncavas onde a peça encontra a borda da tela */
+  .trilho__peca::before, .trilho__peca::after {
+    content: ""; position: absolute; left: 0; width: var(--peca-r); height: var(--peca-r); pointer-events: none;
+  }
+  .trilho__peca::before { top: calc(-1 * var(--peca-r)); background: radial-gradient(circle at 100% 0, transparent calc(var(--peca-r) - .5px), var(--peca-topo) var(--peca-r)); }
+  .trilho__peca::after { bottom: calc(-1 * var(--peca-r)); background: radial-gradient(circle at 100% 100%, transparent calc(var(--peca-r) - .5px), var(--peca-base) var(--peca-r)); }
+  /* itens: só ícone, 48 × 44 */
+  .trilho__item { width: 48px; height: 44px; border-radius: var(--r-pill); gap: 0; color: var(--salvia); }
+  .trilho__item .ico { width: 20px; height: 20px; }
+  .trilho__rot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .trilho__item:hover { background: rgba(255,255,255,.08); color: #fff; }
+  /* ativo: pílula clara com ícone escuro */
+  .trilho__item[aria-current="page"] {
+    background: linear-gradient(180deg, #FBFCFA, #E9EEE9); color: var(--floresta-noite);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 4px 12px -6px rgba(0,0,0,.45);
+  }
+  .trilho__item[aria-current="page"]::before { display: none; }
+  .trilho__sep { flex: none; width: 22px; height: 1px; margin: 5px 0; background: rgba(255,255,255,.12); }
+  /* tooltip escuro arredondado (mouse e foco) */
+  .trilho__item[data-rotulo]::after, .trilho__novo[data-rotulo]::after {
+    content: attr(data-rotulo); position: absolute; left: calc(100% + 18px); top: 50%; z-index: 5;
+    transform: translate(-4px, -50%); background: var(--tinta); color: #fff;
+    font: 500 13px/1 var(--f-texto); letter-spacing: .005em; white-space: nowrap;
+    padding: 9px 12px; border-radius: 10px; box-shadow: 0 10px 24px -12px rgba(23,35,27,.6);
+    opacity: 0; pointer-events: none;
+    transition: opacity 200ms cubic-bezier(.22,1,.36,1), transform 320ms cubic-bezier(.22,1,.36,1);
+  }
+  .trilho__item:hover::after, .trilho__item:focus-visible::after,
+  .trilho__novo:hover::after, .trilho__novo:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
+  .trilho__item:focus-visible { outline-color: var(--salvia); }
+  /* "+" Novo lead: círculo de vidro numa aba própria, logo abaixo da peça */
+  .trilho__aba { order: 2; width: var(--trilho); height: 64px; margin: calc(2 * var(--peca-r) + 10px) 0 0; }
+  .trilho__aba::before { width: var(--trilho); height: 64px; border-radius: 0 32px 32px 0; background: linear-gradient(180deg, var(--peca-topo), var(--peca-base)); }
+  .trilho__aba > i { left: 0; width: 16px; height: 16px; }
+  .trilho__aba > i:first-child { background: radial-gradient(circle at 100% 0, transparent 15.5px, var(--peca-topo) 16px); }
+  .trilho__aba > i:last-of-type { background: radial-gradient(circle at 100% 100%, transparent 15.5px, var(--peca-base) 16px); }
+  .trilho__novo { left: 8px; top: 8px; }
+  .trilho__novo[data-rotulo]::after { left: calc(100% + 26px); }
+}
+
 /* ---------- 5. TOPO -------------------------------------------------- */
 .topo { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; flex-wrap: wrap; }
 .topo__ola { display: flex; flex-direction: column; gap: 4px; }
