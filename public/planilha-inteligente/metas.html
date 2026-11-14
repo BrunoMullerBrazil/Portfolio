@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metas · Clínica Aurora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+<style>
+  /* Ajustes só desta tela (prefixo metas-) */
+  /* Colunas da lista de metas pela largura do PRÓPRIO cartão (container query) */
+  #lista-metas, .metas-cab { --cols-metas: 36px minmax(176px, 1fr) minmax(0, 1.3fr) 104px 140px 36px; }
+  @container (max-width: 979px) { #lista-metas, .metas-cab { --cols-metas: 36px minmax(150px, 1fr) minmax(0, 1.3fr) 96px 136px; } .metas-linha .linha__acao, .metas-cab-acao { display: none; } }
+  #lista-metas .linha, .metas-cab { column-gap: 24px; }
+
+  /* Seletor de mês no topo */
+  .metas-mes { display: inline-flex; align-items: center; gap: 2px; padding: 4px; background: var(--cartao); border-radius: var(--r-pill); box-shadow: var(--sombra-1); }
+  .metas-mes__rot { min-width: 128px; text-align: center; font: 600 var(--t-md)/1 var(--f-titulo); }
+  .metas-mes__rot span { color: var(--texto-2); font-weight: 500; }
+  .metas-mes .bt-ico:disabled { opacity: .4; cursor: default; }
+
+  /* Anéis */
+  .metas-kpis .kpi { min-height: calc(168px + 16 * var(--k)); }
+  .metas-kcorpo { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-width: 0; }
+  .metas-kesp { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .metas-kesp .anel { --tam: calc(46px + 6 * var(--k)); }
+  .metas-kesp .anel__v { font-size: calc(var(--tam) * .26); }
+  .metas-kcorpo > div:last-child { min-width: 0; }
+  /* Ritmo necessário */
+  .metas-ritmo { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+  .metas-ritmo__l { display: grid; grid-template-columns: 52px minmax(0, 1fr) 54px; align-items: center; gap: 8px; font-size: var(--t-xs); color: var(--texto-2); font-variant-numeric: tabular-nums; }
+  .metas-ritmo__l i { display: block; height: 8px; border-radius: 8px; background: var(--suave); position: relative; overflow: hidden; }
+  .metas-ritmo__l i b { position: absolute; inset: 0 auto 0 0; border-radius: 8px; background: linear-gradient(90deg, #7A9283, var(--floresta)); }
+  .metas-ritmo__l:first-child i b { background: linear-gradient(90deg, #B5C4BA, var(--salvia)); }
+  .metas-ritmo__l span:last-child { text-align: right; color: var(--tinta); font-weight: 600; }
+  .metas-kcorpo .kpi__valor small:first-child { margin-left: 0; }
+  .metas-kmeta { font-size: var(--t-xs); color: var(--texto-2); margin-top: 2px; }
+  /* Cartão em foco: anel + número + meta/supermeta; barra com a faixa embaixo.
+     Largo (≥ 560px, foco na linha inteira): a barra vai para a direita. */
+  .metas-foco { --anel: clamp(64px, 24cqi, 92px); }
+  .metas-foco__lay { display: flex; flex-direction: column; gap: 14px; flex: 1; min-width: 0; }
+  .metas-foco__corpo { display: flex; align-items: center; gap: 16px; min-width: 0; }
+  .metas-foco__corpo .anel { --tam: var(--anel); }
+  .metas-foco .metas-foco__corpo > div:last-child { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .metas-foco__corpo .kpi__valor { --disp: calc(100cqi - var(--anel) - 16px); --num-max: calc(var(--t-num) + 4px); }
+  .metas-foco .kpi__nota { flex-direction: column; align-items: flex-start; gap: 0; }
+  .metas-foco .kpi__nota b { color: #fff; font-weight: 600; }
+  .metas-foco__barra { margin-top: auto; min-width: 0; }
+  .metas-foco .barra-meta__leg { flex-direction: column; gap: 2px; }
+  @container (min-width: 560px) {
+    .metas-foco__lay { flex-direction: row; align-items: center; gap: 32px; }
+    .metas-foco__corpo .kpi__valor { --disp: 220px; }
+    .metas-foco__barra { flex: 1; margin-top: 0; }
+    .metas-foco .barra-meta__leg { flex-direction: row; }
+  }
+
+  /* Legenda das barras */
+  .metas-chave { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: var(--t-xs); color: var(--texto-2); padding: 0 8px 12px; }
+  .metas-chave span { display: inline-flex; align-items: center; gap: 7px; }
+  .metas-nomecel .linha__sub { display: block; }
+
+  /* Linhas de meta */
+  .metas-linha { min-height: 64px; }
+  .metas-barra { min-width: 0; padding-right: 6px; }
+  .metas-barra .barra-meta__leg { margin-top: 7px; gap: 8px; }
+  .metas-barra .barra-meta__leg span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .metas-num { font: 600 var(--t-lg)/1.2 var(--f-titulo); font-variant-numeric: tabular-nums; letter-spacing: -.01em; white-space: nowrap; }
+  .metas-num .u { font-size: 11.5px; }
+  .metas-num__de { display: block; font: 400 var(--t-xs)/1.3 var(--f-texto); color: var(--texto-2); }
+  .metas-proj { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+  .metas-proj > span:last-child { font-size: var(--t-xs); color: var(--texto-2); padding-left: 9px; white-space: nowrap; }
+  .metas-ico { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--suave); color: var(--floresta); }
+  .metas-rodape b { color: var(--tinta); font-weight: 600; }
+
+  /* Por médico */
+  .metas-med { transition: opacity .15s; }
+  .metas-med.is-fora { opacity: .45; }
+  .metas-med__cab { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-right: 52px; }
+  .metas-med__cab .av { width: 44px; height: 44px; font-size: 14px; }
+  .metas-med__cab b { display: block; font: 600 var(--t-h3)/1.2 var(--f-titulo); }
+  .metas-med__cab div span { font-size: var(--t-sm); color: var(--texto-2); }
+  .metas-mini { display: grid; grid-template-columns: 96px minmax(0, 1fr) 88px; gap: 4px 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--linha); }
+  .metas-mini__rot { font-size: var(--t-sm); font-weight: 500; }
+  .metas-mini__v { text-align: right; font: 600 var(--t-md)/1.2 var(--f-titulo); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .metas-mini__v .u { font-size: 11px; }
+  .metas-mini__v small { display: block; font: 400 var(--t-xs)/1.3 var(--f-texto); color: var(--texto-2); }
+  .metas-mini .bm { align-self: center; }
+
+  /* Quadro anual */
+  .metas-ano { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 2px; align-items: end; height: calc(140px + 40 * var(--k)); padding-top: 18px; }
+  .metas-ano__mes { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; border-radius: 8px; padding: 0 0 4px; border: 0; background: transparent; font: inherit; color: inherit; }
+  .metas-ano__mes:hover { background: var(--porcelana); }
+  .metas-ano__area { position: relative; width: 100%; flex: 1; }
+  /* Barras com cantos arredondados no topo e gradiente sutil; meta = traço tracejado fino */
+  .metas-ano__barra { position: absolute; left: 50%; bottom: 0; width: clamp(8px, 52%, 18px); transform: translateX(-50%); border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, #4A6E5A, var(--floresta)); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
+  .metas-ano__meta { position: absolute; left: 50%; width: clamp(14px, 78%, 28px); transform: translateX(-50%); height: 0; border-top: 1.5px dashed var(--tinta); }
+  .metas-ano__mes--sem .metas-ano__barra { background: linear-gradient(180deg, #D6DDD7, var(--linha-forte)); box-shadow: none; }
+  .metas-ano__mes--abaixo .metas-ano__barra { background: linear-gradient(180deg, #B3C3B8, var(--salvia)); }
+  .metas-ano__mes--futuro .metas-ano__meta { border-top-color: var(--salvia-escura); }
+  .metas-ano__mes--atual { background: linear-gradient(180deg, rgba(225,234,227,0), var(--suave-2)); }
+  .metas-ano__mes--atual .metas-ano__barra { background: linear-gradient(180deg, #2E4D3D, var(--floresta-noite)); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 4px 10px -4px rgba(30,51,40,.6); }
+  .metas-ano__mes--atual .metas-ano__val { opacity: 1; }
+  .metas-ano__mes[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px var(--floresta); }
+  .metas-ano__val { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(100% + 4px); font: 600 10.5px/1.1 var(--f-titulo); color: var(--tinta); white-space: nowrap; background: var(--cartao); padding: 2px 4px; border-radius: 4px; box-shadow: var(--sombra-1); opacity: 0; pointer-events: none; z-index: 2; }
+  .metas-ano__mes:hover .metas-ano__val, .metas-ano__mes:focus-visible .metas-ano__val { opacity: 1; }
+  .metas-ano__fixo { display: flex; justify-content: flex-end; font-size: var(--t-xs); color: var(--texto-2); margin: 2px 0 6px; }
+  .metas-ano__fixo b { color: var(--tinta); font-weight: 600; margin-right: 4px; }
+  .metas-ano__leg .t-atual { width: 10px; height: 12px; border-radius: 3px; background: var(--suave-2); box-shadow: inset 0 0 0 1.5px var(--floresta); }
+  .metas-ano__rot { font-size: 11px; color: var(--texto-3); font-weight: 600; margin-top: 6px; text-transform: uppercase; letter-spacing: .02em; }
+  .metas-ano__mes--atual .metas-ano__rot { color: var(--tinta); }
+  .metas-ano__leg { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: var(--t-xs); color: var(--texto-2); margin: 12px 0 4px; }
+  .metas-ano__leg span { display: inline-flex; align-items: center; gap: 6px; }
+  .metas-ano__leg i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+  .metas-ano__leg .t-meta { width: 14px; height: 0; border-top: 1.5px dashed var(--tinta); border-radius: 0; }
+  .metas-acum { margin-top: 12px; padding: 12px 14px; border-radius: var(--r-sm); background: var(--porcelana); }
+  .metas-acum__n { font: 600 26px/1.1 var(--f-titulo); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .metas-acum__n .u { font-size: 12px; }
+  .metas-acum__n .status { letter-spacing: 0; font-family: var(--f-texto); }
+  .metas-acum p { font-size: var(--t-sm); color: var(--texto-2); }
+  .metas-tab { width: 100%; border-collapse: collapse; font-size: var(--t-sm); font-variant-numeric: tabular-nums; margin-top: 10px; }
+  .metas-tab td { padding: 7px 0; border-top: 1px solid var(--linha); }
+  .metas-tab td:nth-child(2), .metas-tab td:nth-child(3) { text-align: right; color: var(--texto-2); }
+  .metas-tab td { white-space: nowrap; }
+  .metas-tab td:nth-child(3) { font-size: var(--t-xs); padding-left: 8px; }
+  .metas-tab td:last-child { text-align: right; width: 1%; padding-left: 8px; }
+  .metas-nota { font-size: var(--t-xs); color: var(--texto-2); line-height: 1.5; margin-top: 12px; display: flex; gap: 8px; }
+  .metas-nota .ico { color: var(--salvia-escura); margin-top: 1px; }
+
+  /* Dias úteis */
+  .metas-cal .mcal__dia { cursor: default; }
+  .metas-cal .mcal__dia--conta { background: var(--suave-2); font-weight: 600; }
+  .metas-uteis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
+  .metas-uteis > div { background: var(--porcelana); border-radius: var(--r-sm); padding: 8px 10px; }
+  .metas-uteis b { display: block; font: 600 20px/1.1 var(--f-titulo); font-variant-numeric: tabular-nums; }
+  .metas-uteis span { font-size: var(--t-xs); color: var(--texto-2); }
+  .metas-cal__leg { display: flex; gap: 12px; flex-wrap: wrap; font-size: var(--t-xs); color: var(--texto-2); margin-top: 8px; }
+  .metas-cal__leg span { display: inline-flex; align-items: center; gap: 6px; }
+  .metas-cal__leg i { width: 12px; height: 12px; border-radius: 50%; background: var(--suave-2); display: inline-block; }
+
+  /* Lista de metas em cartão estreito (< 680px): nome e número, barra, projeção */
+  @container (max-width: 679px) {
+    #lista-metas, .metas-cab { --cols-metas: minmax(0, 1fr) auto; }
+    .metas-cab { display: none !important; }
+    .metas-chave { padding: 0 0 10px; }
+    .metas-linha { grid-template-areas: "nome num" "barra barra" "proj proj"; row-gap: 8px; padding: 12px 4px; border-radius: 0; }
+    .metas-linha > .metas-ico, .metas-linha > .linha__acao { display: none; }
+    .metas-linha > .metas-nomecel { grid-area: nome; }
+    .metas-linha > .metas-barra { grid-area: barra; padding-right: 0; }
+    .metas-linha > .metas-numcel { grid-area: num; text-align: right; }
+    .metas-linha > .metas-proj { grid-area: proj; flex-direction: row; align-items: center; gap: 8px; }
+    .metas-linha > .metas-proj > span:last-child { padding-left: 0; }
+    .metas-rodape { flex-direction: column; align-items: flex-start; gap: 6px; }
+  }
+  @container (max-width: 380px) { .metas-mini { grid-template-columns: 84px minmax(0, 1fr) 80px; gap: 4px 10px; } }
+  /* KPIs pequenos (2 por linha no celular): anel some, número e esperado ficam */
+  @container col (max-width: 599px) {
+    .metas-kpis .kpi:not(.cartao--foco) { min-height: 0; padding: 14px; }
+    .metas-kpis .kpi:not(.cartao--foco) .kpi__rot { font-size: var(--t-xs); }
+    .metas-kesp .anel { display: none; }
+    .metas-kpis > .kpi:last-child .metas-ritmo { max-width: 420px; }
+  }
+  @media (max-width: 720px) {
+    .metas-mes { width: 100%; justify-content: space-between; }
+  }
+</style>
+</head>
+<body data-pagina="metas">
+
+<main class="app">
+  <!-- TOPO -->
+  <header class="topo">
+    <div class="topo__ola">
+      <h1>Bom dia, Dra. Lúcia</h1>
+      <p class="topo__data"><b>Sexta-feira, 13 de novembro</b> · 09:40 · Metas do mês: <span id="resumo-dia"></span></p>
+    </div>
+    <div class="topo__acoes">
+      <div class="metas-mes" role="group" aria-label="Mês das metas">
+        <button class="bt-ico bt-ico--sm bt-ico--plano" id="mes-ant" aria-label="Mês anterior"><svg class="ico ico-sm"><use href="#i-esq"/></svg></button>
+        <span class="metas-mes__rot" id="mes-rot" aria-live="polite">Novembro <span>2026</span></span>
+        <button class="bt-ico bt-ico--sm bt-ico--plano" id="mes-prox" aria-label="Próximo mês"><svg class="ico ico-sm"><use href="#i-dir"/></svg></button>
+      </div>
+      <div class="pilulas" role="group" aria-label="Filtrar por médico">
+        <button class="pilula" data-med="todos" aria-pressed="true" title="% da meta de faturamento">Todos <span class="pilula__n"></span></button>
+        <button class="pilula" data-med="g" aria-pressed="false" title="% da meta de faturamento"><span class="av av--g av--sm" aria-hidden="true">RS</span>Dr. Rafael <span class="pilula__n"></span></button>
+        <button class="pilula" data-med="d" aria-pressed="false" title="% da meta de faturamento"><span class="av av--d av--sm" aria-hidden="true">LS</span>Dra. Lúcia <span class="pilula__n"></span></button>
+      </div>
+      <div class="linha-flex" id="acoes-topo"></div>
+    </div>
+  </header>
+
+  <div class="grade">
+    <div class="coluna">
+
+      <!-- ANÉIS: as 4 metas principais -->
+      <section class="kpis metas-kpis" aria-label="Metas principais de novembro">
+        <article class="cartao cartao--foco kpi metas-foco recorte">
+          <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+          <button class="recorte__seta" aria-label="Abrir detalhe do faturamento"><svg class="ico"><use href="#i-seta"/></svg></button>
+          <span class="kpi__rot">Faturamento · novembro</span>
+          <div class="metas-foco__lay">
+            <div class="metas-foco__corpo">
+              <div class="anel" id="a-fat"></div>
+              <div>
+                <div class="kpi__valor"><small>R$</small><span id="f-val"></span><small>mil</small></div>
+                <div class="kpi__nota"><span class="nw">meta <b id="f-meta"></b></span><span class="nw">supermeta <span id="f-sup"></span></span></div>
+              </div>
+            </div>
+            <div class="metas-foco__barra">
+              <div id="f-barra"></div>
+              <div class="barra-meta__leg"><span id="f-ritmo"></span><span id="f-proj"></span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="cartao kpi recorte">
+          <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+          <button class="recorte__seta" aria-label="Abrir planos fechados"><svg class="ico"><use href="#i-seta"/></svg></button>
+          <span class="kpi__rot">Planos fechados</span>
+          <div class="metas-kcorpo"><div class="kpi__valor"><span id="v-pl">5</span><small>de</small><span id="m-pl">15</span></div><div class="metas-kesp"><div class="anel" id="a-pl"></div><div class="metas-kmeta" id="n-pl"></div></div></div>
+          <div class="kpi__nota" id="s-pl"></div>
+        </article>
+
+        <article class="cartao kpi recorte">
+          <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+          <button class="recorte__seta" aria-label="Abrir consultas"><svg class="ico"><use href="#i-seta"/></svg></button>
+          <span class="kpi__rot">Consultas</span>
+          <div class="metas-kcorpo"><div class="kpi__valor"><span id="v-co">39</span><small>de</small><span id="m-co">90</span></div><div class="metas-kesp"><div class="anel" id="a-co"></div><div class="metas-kmeta" id="n-co"></div></div></div>
+          <div class="kpi__nota" id="s-co"></div>
+        </article>
+
+        <article class="cartao kpi recorte">
+          <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+          <button class="recorte__seta" aria-label="Abrir ritmo do faturamento"><svg class="ico"><use href="#i-seta"/></svg></button>
+          <span class="kpi__rot">Ritmo necessário</span>
+          <div class="kpi__valor" id="v-rit"></div>
+          <div class="metas-ritmo" id="rit-barras"></div>
+          <div class="kpi__nota" id="s-rit"></div>
+        </article>
+      </section>
+
+      <!-- LISTA DE METAS -->
+      <section class="cartao cartao--lista" aria-labelledby="t-metas" style="padding-bottom:12px">
+        <div class="cartao__cab">
+          <h2 id="t-metas">Metas de novembro <span class="cartao__sub" id="metas-n">9 metas</span></h2>
+          <div class="abas" role="tablist" aria-label="Grupo de metas" id="abas-metas">
+            <button class="aba" role="tab" aria-selected="true" data-grupo="todos">Todas</button>
+            <button class="aba" role="tab" aria-selected="false" data-grupo="com">Comercial <span class="pilula__n">3</span></button>
+            <button class="aba" role="tab" aria-selected="false" data-grupo="ag">Agenda <span class="pilula__n">3</span></button>
+            <button class="aba" role="tab" aria-selected="false" data-grupo="rec">Recall <span class="pilula__n">3</span></button>
+          </div>
+        </div>
+        <div class="metas-chave" aria-hidden="true">
+          <span><i class="k-valor"></i>Realizado</span>
+          <span><i class="k-ponta"></i>Ponta na cor da situação</span>
+          <span><i class="k-faixa"></i>Faixa da meta (da meta à supermeta)</span>
+          <span><i class="k-ritmo"></i>Esperado hoje (8 de 19 dias úteis)</span><span>Projeção = realizado ÷ 8 × 19</span>
+        </div>
+        <div class="linha__cab metas-cab" style="--cols:var(--cols-metas)"><span style="width:36px"></span><span>Meta</span><span>Realizado × faixa</span><span>Realizado</span><span>Projeção do mês</span><span class="metas-cab-acao" style="width:36px"></span></div>
+        <ul class="lista" id="lista-metas" style="--cols:var(--cols-metas)"></ul>
+        <div class="rodape-cartao metas-rodape"><span id="metas-resumo"></span><button class="bt-texto">Editar metas do mês <svg class="ico ico-sm"><use href="#i-dir"/></svg></button></div>
+      </section>
+
+      <!-- POR MÉDICO -->
+      <section class="duas" aria-label="Metas por médico" id="por-medico"></section>
+    </div>
+
+    <!-- COLUNA DIREITA: ano e dias úteis -->
+    <aside class="lado" aria-label="Contexto das metas">
+      <section class="cartao" aria-labelledby="t-ano">
+        <div class="cartao__cab" style="margin-bottom:6px">
+          <h2 id="t-ano">Ano de 2026 <span class="cartao__sub">faturamento</span></h2>
+          <span class="cartao__sub">clínica toda</span>
+        </div>
+        <div class="metas-ano__fixo" id="ano-fixo"></div>
+        <div class="metas-ano" id="ano" role="group" aria-label="Faturamento por mês em 2026"></div>
+        <div class="metas-ano__leg">
+          <span><i style="background:var(--floresta-2)"></i>Bateu a meta</span>
+          <span><i style="background:var(--salvia)"></i>Abaixo da meta</span>
+          <span><i style="background:var(--linha-forte)"></i>Sem meta</span>
+          <span><i class="t-meta"></i>Meta</span>
+          <span><i class="t-atual"></i>Mês atual</span>
+        </div>
+        <div class="metas-acum">
+          <span class="cartao__sub">Acumulado jul–out</span>
+          <div class="metas-acum__n" id="acum-n"></div>
+          <p id="acum-p"></p>
+        </div>
+        <table class="metas-tab" aria-label="Meses com meta">
+          <tbody id="ano-tab"></tbody>
+        </table>
+        <p class="metas-nota"><svg class="ico ico-sm"><use href="#i-info"/></svg><span>O acumulado compara só os meses que têm meta. Jan a jun não tinham meta cadastrada e ficam em cinza, fora da conta. Novembro entra quando o mês fechar.</span></p>
+      </section>
+
+      <section class="cartao metas-cal" aria-labelledby="t-uteis">
+        <div class="mcal__cab">
+          <h2 id="t-uteis">Dias úteis de novembro</h2>
+        </div>
+        <div class="mcal" id="mcal"></div>
+        <div class="metas-cal__leg"><span><i></i>Já conta no ritmo</span><span><i style="background:var(--floresta)"></i>Hoje</span><span><s>20</s> feriado</span></div>
+        <div class="metas-uteis">
+          <div><b>19</b><span>dias úteis</span></div>
+          <div><b>8</b><span>concluídos</span></div>
+          <div><b>11</b><span>restam (c/ hoje)</span></div>
+        </div>
+        <p class="metas-nota"><svg class="ico ico-sm"><use href="#i-info"/></svg><span>Esperado hoje = meta × dias úteis concluídos ÷ dias úteis do mês (8 ÷ 19 = 42%). Projeção = realizado ÷ 8 × 19.</span></p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script src="dados.js"></script>
+<script src="comum.js"></script>
+<script>
+/* Tudo vem de dados.js (window.VA): metas, situação, ritmo. Nenhum número digitado aqui. */
+const { METAS, ANO, DU, FEITOS, FRAC, situacao, ritmo, metaVal, medKey } = VA;
+const { br, mil, rsMil, miniCal, pilulasMedico, poeAnel, estadoDe } = UI;
+const MED = {
+  g: { nome: "Dr. Rafael Sena", ini: "RS", sub: "Meta própria · 50% do faturamento" },
+  d: { nome: "Dra. Lúcia Sena",  ini: "LS", sub: "Meta própria · 50% do faturamento" },
+};
+const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const $ = id => document.getElementById(id);
+const fmt = (m, v) => m.rs ? `<span class="u" style="margin-left:0">R$</span>${mil(v)}<span class="u">mil</span>`
+  : m.taxa ? `${br(v)}<span class="u">%</span>` : `${br(v, 0)}<span class="u">${m.u}</span>`;
+const txt = (m, v) => m.rs ? `R$ ${mil(v)} mil` : m.taxa ? `${br(v)}%` : br(v, 1);
+function barra(m, x, aria, alt) {
+  const [v, meta, sup] = x, max = m.taxa ? 100 : sup * 1.15, pc = y => Math.min(100, y / max * 100);
+  const esp = m.taxa ? meta : meta * FRAC;
+  return UI.barra({ v: pc(v), m1: pc(meta), m2: pc(sup), r: pc(esp), estado: estadoDe(situacao(m, x).cls), aria, alt });
+}
+let med = "todos", grupo = "todos";
+const val = m => m[medKey(med)];
+
+function renderLista() {
+  $("lista-metas").innerHTML = METAS.map(m => {
+    const x = val(m), [v, meta, sup] = x, s = situacao(m, x), esp = m.taxa ? meta : meta * FRAC;
+    const espTxt = m.taxa ? `meta ≥ ${br(meta)}%` : `esperado ${m.rs ? txt(m, esp) : br(esp, 1)}`;
+    const faixaTxt = m.taxa ? `faixa ${br(meta)}–${br(sup)}%` : m.rs ? `faixa ${mil(meta)}–${mil(sup)} mil` : `faixa ${br(meta, 0)}–${br(sup, 0)}`;
+    const projTxt = m.taxa ? `hoje ${br(v)}% · vazia ${br(100 - v)}%` : m.rs ? `proj. ${txt(m, s.proj)}` : `proj. ${br(s.proj, 0)} ${m.u}`;
+    const aria = `${m.nome}: ${txt(m, v)} de meta ${txt(m, meta)}; ${espTxt}; ${s.rot}`;
+    return `<li class="linha metas-linha" data-grupo="${m.grupo}">
+      <span class="metas-ico" aria-hidden="true"><svg class="ico ico-sm"><use href="#${m.ico}"/></svg></span>
+      <div class="metas-nomecel" style="min-width:0"><span class="linha__nome" title="${m.nome}">${m.nome}</span><span class="linha__sub" title="${m.sub}">${m.sub}</span></div>
+      <div class="metas-barra">${barra(m, x, aria)}<div class="barra-meta__leg"><span>${espTxt}</span><span>${faixaTxt}</span></div></div>
+      <div class="metas-numcel"><span class="metas-num">${fmt(m, v)}</span><span class="metas-num__de">de ${m.taxa ? br(meta) + "%" : m.rs ? "R$ " + mil(meta) + " mil" : br(meta, 0)}</span></div>
+      <div class="metas-proj"><span class="status ${s.cls}">${s.rot}</span><span>${projTxt}</span></div>
+      <button class="bt-ico bt-ico--sm bt-ico--plano linha__acao" aria-label="Abrir detalhe: ${m.nome}"><svg class="ico ico-sm"><use href="#i-seta"/></svg></button>
+    </li>`;
+  }).join("");
+  let n = 0;
+  document.querySelectorAll("#lista-metas .linha").forEach(el => { const ok = grupo === "todos" || el.dataset.grupo === grupo; el.hidden = !ok; if (ok) n++; });
+  $("metas-n").textContent = `${n} metas · ${med === "todos" ? "clínica toda" : med === "g" ? "Dr. Rafael" : "Dra. Lúcia"}`;
+  const sits = METAS.map(m => situacao(m, val(m)).cls), c = k => sits.filter(x => x === k).length;
+  $("metas-resumo").innerHTML = `Pela projeção: <b>${c("status--ok")} na faixa ou acima</b> · ${c("status--atencao")} pouco abaixo · ${c("status--atrasado")} abaixo da faixa`;
+}
+
+function anel(id, v, meta, esp) { const p = v / meta * 100; poeAnel($(id), { p, marca: FRAC * 100, esp, aria: `${Math.round(p)}% da meta; esperado hoje ${Math.round(FRAC * 100)}%` }); }
+function notaRitmo(el, v, meta) { const r = ritmo(v, meta); $(el).innerHTML = `<span class="status ${r.cls}">${r.rot}</span>`; return r; }
+function renderAneis() {
+  const M = id => METAS.find(m => m.id === id);
+  const [fv, fm, fs] = metaVal("fat", med), pl = metaVal("pl", med), co = metaVal("co", med);
+  anel("a-fat", fv, fm);
+  $("f-val").textContent = mil(fv); $("f-meta").textContent = `R$ ${mil(fm)} mil`; $("f-sup").textContent = `R$ ${mil(fs)} mil`;
+  const max = fs * 1.15, pc = x => x / max * 100;
+  const sf = situacao(M("fat"), [fv, fm, fs]);
+  $("f-barra").innerHTML = UI.barra({ v: pc(fv), m1: pc(fm), m2: pc(fs), r: pc(fm * FRAC), estado: estadoDe(sf.cls), rotulo: "esperado hoje",
+    aria: `Faturamento R$ ${mil(fv)} mil; faixa da meta de R$ ${mil(fm)} a ${mil(fs)} mil; esperado hoje R$ ${mil(fm * FRAC)} mil; ${sf.rot}` });
+  $("f-ritmo").innerHTML = `Esperado hoje: <b>R$ ${mil(fm * FRAC)} mil</b>`;
+  $("f-proj").innerHTML = `Projeção do mês: <b>R$ ${mil(sf.proj)} mil</b>`;
+  anel("a-pl", pl[0], pl[1], 13); $("v-pl").textContent = pl[0]; $("m-pl").textContent = pl[1];
+  const rp = notaRitmo("s-pl", pl[0], pl[1]); $("n-pl").textContent = `esperado hoje ${br(rp.esp)}`;
+  anel("a-co", co[0], co[1], 13); $("v-co").textContent = co[0]; $("m-co").textContent = co[1];
+  const rc = notaRitmo("s-co", co[0], co[1]); $("n-co").textContent = `esperado hoje ${br(rc.esp)}`;
+  // Ritmo necessário: quanto falta por dia útil para bater a meta, contra o ritmo atual
+  const resta = DU - FEITOS, nec = (fm - fv) / resta, atual = fv / FEITOS, maxR = Math.max(nec, atual);
+  $("v-rit").innerHTML = `${rsMil(nec)}<small>/dia</small>`;
+  $("rit-barras").innerHTML = `<div class="metas-ritmo__l"><span>até hoje</span><i><b style="width:${atual / maxR * 100}%"></b></i><span>${mil(atual)} mil</span></div>
+    <div class="metas-ritmo__l"><span>preciso</span><i><b style="width:${nec / maxR * 100}%"></b></i><span>${mil(nec)} mil</span></div>`;
+  $("s-rit").innerHTML = `<span class="status ${sf.cls}">${sf.rot.toLowerCase()}</span><span>${resta} dias úteis restam</span>`;
+  $("resumo-dia").textContent = `${FEITOS} de ${DU} dias úteis concluídos`;
+}
+
+function renderMedicos() {
+  const ids = ["fat", "pl", "co", "oc"], rot = { fat: "Faturamento", pl: "Planos", co: "Consultas", oc: "Ocupação" };
+  $("por-medico").innerHTML = ["g", "d"].map(k => {
+    const s = situacao(METAS[0], METAS[0][k]);
+    const linhas = ids.map(id => {
+      const m = METAS.find(x => x.id === id), x = m[k], [v, meta] = x;
+      const de = m.taxa ? `meta ${br(meta)}%` : m.rs ? `de ${mil(meta)} mil` : `de ${br(meta, 0)}`;
+      return `<div class="metas-mini"><span class="metas-mini__rot">${rot[id]}</span>${barra(m, x, `${rot[id]}: ${txt(m, v)}, ${de}`, "sm")}
+        <span class="metas-mini__v">${m.rs ? `<span class="u" style="margin-left:0">R$</span>${mil(v)}<span class="u">mil</span>` : m.taxa ? `${br(v)}<span class="u">%</span>` : br(v, 0)}<small>${de}</small></span></div>`;
+    }).join("");
+    return `<article class="cartao recorte metas-med${med !== "todos" && med !== k ? " is-fora" : ""}" data-med="${k}">
+      <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
+      <button class="recorte__seta" aria-label="Abrir metas de ${MED[k].nome}"><svg class="ico"><use href="#i-seta"/></svg></button>
+      <div class="metas-med__cab"><span class="av av--${k}" title="${MED[k].nome}">${MED[k].ini}</span><div><b>${MED[k].nome}</b><span>${MED[k].sub}</span></div></div>
+      ${linhas}
+      <div class="rodape-cartao"><span>Projeção do faturamento: <b style="color:var(--tinta);white-space:nowrap">R$ ${mil(s.proj)} mil</b></span><span class="status ${s.cls}">${s.rot}</span></div>
+    </article>`;
+  }).join("");
+}
+
+let mesSel = 10;
+function renderAno() {
+  const MAX = 210000;
+  $("ano").innerHTML = ANO.map((a, i) => {
+    const sem = !a.meta, abaixo = a.meta && !a.atual && !a.futuro && a.v < a.meta;
+    const c = ["metas-ano__mes", sem ? "metas-ano__mes--sem" : "", abaixo ? "metas-ano__mes--abaixo" : "", a.atual ? "metas-ano__mes--atual" : "", a.futuro ? "metas-ano__mes--futuro" : ""].join(" ");
+    const label = `${MESES[i]}: ${a.futuro ? "ainda não começou" : "R$ " + mil(a.v) + " mil"}${a.meta ? ", meta R$ " + mil(a.meta) + " mil" : ", sem meta"}`;
+    const h = (a.v / MAX * 100).toFixed(1);
+    return `<button class="${c}" data-i="${i}" aria-pressed="${i === mesSel}" aria-label="${label}" title="${label}">
+      <span class="metas-ano__area">${a.v ? `<span class="metas-ano__barra" style="height:${h}%"><span class="metas-ano__val">${mil(a.v)} mil</span></span>` : ""}${a.meta ? `<span class="metas-ano__meta" style="bottom:${(a.meta / MAX * 100).toFixed(1)}%"></span>` : ""}</span>
+      <span class="metas-ano__rot" aria-hidden="true">${a.m[0]}</span></button>`;
+  }).join("");
+  const nov = ANO.find(a => a.atual);
+  $("ano-fixo").innerHTML = `<span>${nov.m}: <b>R$ ${mil(nov.v)} mil</b>em curso</span>`;
+  const fechados = ANO.filter(a => a.meta && !a.atual && !a.futuro);
+  const sv = fechados.reduce((x, a) => x + a.v, 0), sm = fechados.reduce((x, a) => x + a.meta, 0), bat = fechados.filter(a => a.v >= a.meta).length;
+  $("acum-n").innerHTML = `<span class="u" style="margin-left:0">R$</span>${mil(sv)}<span class="u">mil</span> <span class="status ${sv >= sm ? "status--ok" : "status--atencao"}" style="vertical-align:middle">${Math.round(sv / sm * 100)}% da meta</span>`;
+  $("acum-p").textContent = `meta somada R$ ${mil(sm)} mil · ${bat} de ${fechados.length} meses batidos`;
+  $("ano-tab").innerHTML = ANO.filter(a => a.meta && !a.futuro).map(a => {
+    const p = Math.round(a.v / a.meta * 100);
+    const st = a.atual ? `<span class="status status--neutro">em curso</span>` : p >= 100 ? `<span class="status status--ok">${p}%</span>` : `<span class="status status--atencao">${p}%</span>`;
+    return `<tr><td>${a.m}</td><td>R$ ${mil(a.v)} mil</td><td>meta ${mil(a.meta)}</td><td>${st}</td></tr>`;
+  }).join("");
+  document.querySelectorAll(".metas-ano__mes").forEach(b => b.addEventListener("click", () => { mesSel = +b.dataset.i; mudaMes(); }));
+}
+function mudaMes() {
+  $("mes-rot").innerHTML = `${MESES[mesSel]} <span>2026</span>`;
+  document.querySelectorAll(".metas-ano__mes").forEach(b => b.setAttribute("aria-pressed", +b.dataset.i === mesSel));
+  $("mes-ant").disabled = mesSel === 0; $("mes-prox").disabled = mesSel === 11;
+}
+$("mes-ant").addEventListener("click", () => { if (mesSel > 0) { mesSel--; mudaMes(); } });
+$("mes-prox").addEventListener("click", () => { if (mesSel < 11) { mesSel++; mudaMes(); } });
+
+function tudo() { renderAneis(); renderLista(); renderMedicos(); }
+pilulasMedico(m => { const [v, meta] = metaVal("fat", m); return Math.round(v / meta * 100) + "%"; }, m => { med = m; tudo(); });
+document.querySelectorAll("#abas-metas .aba").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("#abas-metas .aba").forEach(x => x.setAttribute("aria-selected", x === b));
+  grupo = b.dataset.grupo; renderLista();
+}));
+miniCal($("mcal"), { conta: true, estatico: true }); renderAno(); mudaMes(); tudo();
+</script>
+<link rel="stylesheet" href="motion.css">
+<script src="motion.js"></script>
+</body>
+</html>
