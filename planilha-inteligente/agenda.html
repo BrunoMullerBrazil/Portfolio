@@ -27,6 +27,7 @@
   .ag-foco .kpi__nota b { color: #fff; font-weight: 600; }
   .ag-agora { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.12); font-size: var(--t-sm); color: var(--foco-texto-2); min-width: 0; }
   .ag-agora b { color: #fff; font-weight: 600; }
+  .kpi__ctx .nw { white-space: nowrap; }
   .ag-agora .av { box-shadow: 0 0 0 2px rgba(255,255,255,.2); }
   .ag-agora span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -63,8 +64,10 @@
   .ag-ev__t { font-size: 11px; color: var(--texto-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .ag-ev--curto { flex-direction: row; align-items: center; gap: 6px; padding-top: 2px; padding-bottom: 2px; }
   .ag-ev--curto .ag-ev__t, .ag-ev--medio .ag-ev__t { display: none; }
-  .ag-ev--feito { opacity: .6; }
-  .ag-ev--feito:hover { opacity: 1; }
+  /* Já atendido: fundo neutro em vez de opacidade (texto mantém contraste ≥ 4,5:1) */
+  .ag-ev--feito { background: var(--porcelana); }
+  .ag-ev--feito b { color: var(--texto-2); font-weight: 500; }
+  .ag-ev--feito .ag-ev__h .ico { width: 11px; height: 11px; color: var(--ok); flex: none; }
   .ag-ev--agora { background: var(--pena); color: #fff; box-shadow: inset 3px 0 0 #fff3, 0 8px 18px -10px rgba(70,87,200,.7); }
   .ag-ev--agora .ag-ev__h, .ag-ev--agora .ag-ev__t { color: #DDE1F7; }
   .ag-ev--falta { background: var(--atrasado-fundo); box-shadow: inset 3px 0 0 var(--atrasado); }
@@ -74,7 +77,8 @@
   .ag-ev--evento:hover { transform: none; box-shadow: inset 0 0 0 1px var(--linha-forte); }
   .ag-agora-linha { position: absolute; left: -1px; right: 0; height: 0; border-top: 2px solid var(--atrasado); z-index: 5; pointer-events: none; }
   .ag-agora-linha::before { content: ""; position: absolute; left: -5px; top: -6px; width: 10px; height: 10px; border-radius: 50%; background: var(--atrasado); }
-  .ag-agora-linha span { position: absolute; right: 4px; top: -20px; font: 600 10.5px/1 var(--f-titulo); color: #fff; background: var(--atrasado); padding: 3px 6px; border-radius: 999px; }
+  /* A hora de agora fica na coluna de horas, sem cobrir os horários do dia */
+  .ag-horas .ag-agora-h { right: 4px; z-index: 6; font: 600 10.5px/1 var(--f-titulo); color: #fff; background: var(--atrasado); padding: 3px 6px; border-radius: 999px; }
 
   /* Lista do dia (telas estreitas) */
   .ag-lista-wrap { display: none; }
@@ -94,18 +98,29 @@
     .ag-grade, .ag-cab .legenda-med { display: none; }
     .ag-lista-wrap { display: block; }
   }
+  /* Celular: a linha tem 3 colunas; status + WhatsApp + agenda descem para a 2ª linha, sob o nome.
+     (:root dentro de @container não vale, por isso as colunas vão direto na linha) */
   @container (max-width: 460px) {
-    :root { --cols-ag: 50px 28px minmax(0, 1fr); }
-    .ag-l .ag-st { display: none; }
-    .ag-l .ag-acoes { grid-column: 3; justify-content: flex-start; }
+    .ag-l { grid-template-columns: 50px 28px minmax(0, 1fr) !important; row-gap: 6px; }
+    .ag-l .ag-acoes { grid-column: 3; justify-content: flex-start; flex-wrap: wrap; }
+    .ag-l .ag-acoes:empty { display: none; }
+    .ag-l .hora { min-width: 50px; padding: 0 6px; }
     .ag-l .av { width: 28px; height: 28px; font-size: 11px; }
   }
 
-  /* Para confirmar */
+  /* A confirmar (lista) */
   :root { --cols-cf: 64px 36px minmax(0, 1fr) auto; }
   .cf-acoes { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
   .cf-st { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-  @container (max-width: 480px) { .cf-l { grid-template-columns: 56px minmax(0, 1fr) auto !important; } .cf-l > .av, .cf-l .status { display: none; } }
+  .cf-l .hora { white-space: nowrap; }
+  .rodape-cartao .legenda-med span { white-space: nowrap; }
+  @container (max-width: 480px) {
+    .cf-l { grid-template-columns: 56px 28px minmax(0, 1fr) auto !important; }
+    .cf-l .hora { min-width: 56px; padding: 0 6px; font-size: var(--t-xs); }
+    .cf-l > .av { width: 28px; height: 28px; font-size: 11px; }
+    .cf-l .status, .cf-l .cf-med { display: none; }   /* a cor do avatar já diz o médico */
+    .rodape-cartao { flex-wrap: wrap; gap: 6px 12px; }
+  }
   .cartao--cal .mcal__dia.sel-semana:not(.mcal__dia--hoje) { background: var(--suave-2); }
   .cartao--cal .mcal__dia.sel-dia:not(.mcal__dia--hoje) { box-shadow: inset 0 0 0 1.5px var(--pena); }
   .ag-resumo { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
@@ -157,7 +172,7 @@
         <div class="ag-agora" id="k-agora"></div>
       </article>
       <article class="cartao kpi">
-        <span class="kpi__rot">Atendimentos na semana</span>
+        <span class="kpi__rot">Horários na semana</span>
         <div class="kpi__valor"><span id="k-sem"></span><small>horários</small></div>
         <div class="kpi__nota" id="k-sem-n"></div>
         <div class="kpi__ctx" id="k-sem-c"></div>
@@ -190,7 +205,7 @@
 
     <div class="duas">
       <section class="cartao cartao--lista" aria-labelledby="t-conf" style="padding-bottom:12px">
-        <div class="cartao__cab"><h2 id="t-conf">Para confirmar <span class="cartao__sub" id="conf-sub"></span></h2></div>
+        <div class="cartao__cab"><h2 id="t-conf">A confirmar <span class="cartao__sub" id="conf-sub"></span></h2></div>
         <ul class="lista" id="conf-lista" style="--cols:var(--cols-cf)"></ul>
         <div class="rodape-cartao"><span class="legenda-med"><span><i class="g"></i>Dr. Rafael</span><span><i class="d"></i>Dra. Lúcia</span></span><span class="cartao__sub">mensagem sem procedimento nem valores</span></div>
       </section>
@@ -226,6 +241,9 @@ if (q.get("semana")) sem = Math.max(MIN_S, Math.min(MAX_S, +q.get("semana") || 0
 if (q.get("dia")) { const d = +q.get("dia"); if (d >= 1 && d <= 30) { sem = Math.max(MIN_S, Math.min(MAX_S, Math.floor((d - 2) / 7) - 1)); diaSel = Math.min(4, Math.max(0, (new Date(2026, 10, d).getDay() + 6) % 7)); } }
 if (q.get("ficha")) for (let n = MIN_S; n <= MAX_S; n++) { const i = semana(n).slice(0, 5).findIndex(dd => dd.itens.some(x => x.id === q.get("ficha"))); if (i >= 0) { sem = n; diaSel = i; if (n === 0) break; } }
 
+// Próximo dia útil com agenda (sexta → segunda), como no Painel da Recepção
+const PROX_DIA = (() => { for (let i = 1; i < 6; i++) { const d = new Date(VA2.HOJE_D); d.setDate(d.getDate() + i); const dd = VA2.dia(d); if (dd.itens.length) return dd; } return null; })();
+const PROX_ROT = PROX_DIA ? `${DIAS_L[PROX_DIA.d.getDay()]}, ${PROX_DIA.data}` : "";
 const okMed = it => it.evento || filtroMed === "todos" || it.med === filtroMed;
 const pac = it => !it.evento;
 const H0 = 8, H1 = 18;
@@ -235,14 +253,16 @@ const stTxt = it => ST[it.st] ? ST[it.st][1] : "";
 const lane = it => it.evento || filtroMed !== "todos" ? "left:3px;right:3px" : it.med === "g" ? "left:3px;width:calc(50% - 5px)" : "left:calc(50% + 2px);width:calc(50% - 5px)";
 
 function evento(it) {
-  const top = `calc(${pos(it.h)} * var(--h) + 2px)`, alt = `calc(${(min(it.fim) - min(it.h)) / 60} * var(--h) - 4px)`;
-  const curto = min(it.fim) - min(it.h) <= 30;
+  // em atendimento: o bloco vai até pelo menos 10 min depois de agora, para não acabar antes da linha do agora
+  const fimM = it.st === "atend" ? Math.max(min(it.fim), min(AGORA) + 10) : min(it.fim);
+  const top = `calc(${pos(it.h)} * var(--h) + 2px)`, alt = `calc(${(fimM - min(it.h)) / 60} * var(--h) - 4px)`;
+  const curto = fimM - min(it.h) <= 30;
   if (it.evento) return `<div class="ag-ev ag-ev--evento${curto ? " ag-ev--curto" : ""}" style="top:${top};height:${alt};${lane(it)}" role="note" aria-label="${it.h}, ${it.nome}, ${it.det}"><span class="ag-ev__h">${it.h}</span><b>${it.nome}</b><span class="ag-ev__t">${it.det}</span></div>`;
   const p = P[it.id];
-  const cls = [`ag-ev--${it.med}`, curto ? "ag-ev--curto" : min(it.fim) - min(it.h) <= 45 ? "ag-ev--medio" : "", it.st === "feito" ? "ag-ev--feito" : "", it.st === "atend" ? "ag-ev--agora" : "", it.st === "falta" ? "ag-ev--falta" : ""].join(" ");
+  const cls = [`ag-ev--${it.med}`, curto ? "ag-ev--curto" : fimM - min(it.h) <= 45 ? "ag-ev--medio" : "", it.st === "feito" ? "ag-ev--feito" : "", it.st === "atend" ? "ag-ev--agora" : "", it.st === "falta" ? "ag-ev--falta" : ""].join(" ");
   const pt = it.st === "aconf" || it.st === "semresp" || it.st === "semreg" ? `<i class="ag-ev__pt" aria-hidden="true"></i>` : "";
   return `<button type="button" class="ag-ev ${cls}" data-ficha="${it.id}" style="top:${top};height:${alt};${lane(it)}" aria-label="${it.h} a ${it.fim}: ${p.nome}, ${it.tipo}, ${nomeMed(it.med)}. ${stTxt(it)}" title="${it.h}–${it.fim} · ${p.nome} · ${it.tipo} · ${stTxt(it)}">
-    <span class="ag-ev__h">${it.h}${pt}${it.st === "falta" ? " · faltou" : it.st === "atend" ? " · agora" : ""}</span><b>${p.nome}</b><span class="ag-ev__t">${it.tipo} · ${p.proc}</span></button>`;
+    <span class="ag-ev__h">${it.st === "feito" ? `<svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>` : ""}${it.h}${pt}${it.st === "falta" ? " · faltou" : it.st === "atend" ? " · agora" : ""}</span><b>${p.nome}</b><span class="ag-ev__t">${it.tipo} · ${p.proc}</span></button>`;
 }
 
 function render() {
@@ -253,11 +273,12 @@ function render() {
   const vis = todos.filter(okMed);
   $("t-semana-sub").textContent = `${rotSemana(ds)} · ${vis.length} horários`;
   // Grade
-  let g = `<div></div>` + ds.map(d => `<div class="ag-dcab${d.hoje ? " ag-dcab--hoje" : ""}"><span>${DIAS[d.d.getDay()]}</span><b>${d.d.getDate()}</b><small>${d.feriado ? "feriado" : `${d.itens.filter(x => pac(x) && okMed(x)).length} pac.`}</small></div>`).join("");
-  g += `<div class="ag-horas" aria-hidden="true">${Array.from({ length: H1 - H0 }, (_, i) => i ? `<span style="top:calc(${i} * var(--h))">${String(H0 + i).padStart(2, "0")}:00</span>` : "").join("")}</div>`;
+  let g = `<div></div>` + ds.map(d => `<div class="ag-dcab${d.hoje ? " ag-dcab--hoje" : ""}"><span>${DIAS[d.d.getDay()]}</span><b>${d.d.getDate()}</b><small>${d.feriado ? "feriado" : (n => `${n} ${n === 1 ? "horário" : "horários"}`)(d.itens.filter(x => pac(x) && okMed(x)).length)}</small></div>`).join("");
+  const agoraH = ds.some(d => d.hoje) ? `<span class="ag-agora-h" style="top:calc(${pos(AGORA)} * var(--h))">${AGORA}</span>` : "";
+  g += `<div class="ag-horas" aria-hidden="true">${Array.from({ length: H1 - H0 }, (_, i) => i && Math.abs(pos(AGORA) - i) > .3 || i && !agoraH ? `<span style="top:calc(${i} * var(--h))">${String(H0 + i).padStart(2, "0")}:00</span>` : "").join("")}${agoraH}</div>`;
   g += ds.map(d => {
     if (d.feriado) return `<div class="ag-dia ag-dia--folga"><span class="ag-folga">Feriado<br>${FERIADO_NOME[d.data] || ""}</span></div>`;
-    const agora = d.hoje ? `<div class="ag-agora-linha" style="top:calc(${pos(AGORA)} * var(--h))" aria-hidden="true"><span>${AGORA}</span></div>` : "";
+    const agora = d.hoje ? `<div class="ag-agora-linha" style="top:calc(${pos(AGORA)} * var(--h))" aria-hidden="true"></div>` : "";
     return `<div class="ag-dia${d.hoje ? " ag-dia--hoje" : ""}" role="group" aria-label="${DIAS_L[d.d.getDay()]}, ${d.data}${d.hoje ? " (hoje)" : ""}">${d.itens.filter(okMed).map(evento).join("")}${agora}</div>`;
   }).join("");
   $("ag-grade").innerHTML = g;
@@ -285,20 +306,24 @@ function render() {
   const prim = vis.filter(x => x.tipo === "1ª consulta").length;
   $("k-sem").textContent = vis.length; $("k-sem-n").innerHTML = `<span>${prim} primeiras consultas</span><span class="status status--neutro">${vis.filter(x => x.tipo === "Recall").length} recall</span>`;
   const porMed = m => vis.filter(x => x.med === m).length;
-  $("k-sem-c").textContent = filtroMed === "todos" ? `Dr. Rafael ${porMed("g")} · Dra. Lúcia ${porMed("d")}` : rotSemana(ds);
-  const aConf = vis.filter(x => (x.st === "aconf" || x.st === "semresp") && (!x.hoje || x.h > AGORA));
-  $("k-conf").textContent = aConf.length;
-  $("k-conf-n").innerHTML = aConf.length ? `<span class="status status--atencao">${aConf.filter(x => x.hoje).length} hoje</span><span>${aConf.filter(x => x.st === "semresp").length} sem resposta</span>` : `<span class="status status--ok">tudo confirmado</span>`;
+  $("k-sem-c").innerHTML = filtroMed === "todos" ? `<span class="nw">Dr. Rafael ${porMed("g")}</span> · <span class="nw">Dra. Lúcia ${porMed("d")}</span>` : rotSemana(ds);
+  // A confirmar: mesma regra do Painel da Recepção (hoje, depois de agora, + véspera do próximo dia útil)
+  const confHoje = hoje.filter(x => (x.st === "aconf" || x.st === "semresp") && x.h > AGORA);
+  const confProx = PROX_DIA ? PROX_DIA.itens.filter(x => pac(x) && okMed(x) && x.st === "aconf") : [];
+  const nConf = confHoje.length + confProx.length, semResp = confHoje.filter(x => x.st === "semresp").length;
+  $("k-conf").textContent = nConf;
+  $("k-conf-n").innerHTML = nConf ? `<span class="nw"><b>${confHoje.length}</b> ainda hoje</span><span class="nw"><b>${confProx.length}</b> para ${PROX_ROT}</span>${semResp ? `<span class="status status--atrasado">${semResp} sem resposta</span>` : ""}` : `<span class="status status--ok">tudo confirmado</span>`;
   const faltas = vis.filter(x => x.st === "falta"), semreg = vis.filter(x => x.st === "semreg");
   $("k-falta").textContent = faltas.length + semreg.length;
   $("k-falta-n").innerHTML = (faltas.length ? `<span class="status status--atrasado">${faltas.length} falta${faltas.length > 1 ? "s" : ""}</span>` : "") + (semreg.length ? `<span class="status status--atencao">${semreg.length} sem registro</span>` : "") || `<span class="status status--ok">nenhuma</span>`;
-  // Para confirmar: desta semana em diante, com botão de WhatsApp quando há consulta marcada
-  const conf = [0, 1].flatMap(n => semana(n).slice(0, 5).flatMap(d => d.itens.filter(x => pac(x) && okMed(x) && (x.st === "aconf" || x.st === "semresp") && d.d >= VA2.HOJE_D && (!d.hoje || x.h > AGORA)).map(x => Object.assign({ data: d.data, dia: d.d, hoje: d.hoje }, x)))).slice(0, 7);
-  $("conf-sub").textContent = `${conf.length} próximas`;
+  // A confirmar (lista): desta semana em diante, com botão de WhatsApp quando há consulta marcada
+  const conf = [0, 1].flatMap(n => semana(n).slice(0, 5).flatMap(d => d.itens.filter(x => pac(x) && okMed(x) && (x.st === "aconf" || x.st === "semresp") && d.d >= VA2.HOJE_D && (!d.hoje || x.h > AGORA)).map(x => Object.assign({ data: d.data, dia: d.d, hoje: d.hoje }, x))));
+  const nLista = conf.length; conf.splice(7);
+  $("conf-sub").textContent = nLista > conf.length ? `${conf.length} mais próximas de ${nLista}` : `${nLista} nos próximos dias`;
   $("conf-lista").innerHTML = conf.map(x => {
     const p = P[x.id], c = VA.consulta(x.id), bate = c && c.data === x.data && c.hora === x.h;
     return `<li class="linha cf-l" data-id="${x.id}" data-med="${x.med}"><span class="hora">${x.hoje ? "hoje" : DIAS[x.dia.getDay()] + " " + x.dia.getDate()}</span>${av(x.med, p.nome)}
-      <div style="min-width:0"><span class="linha__nome">${p.nome}</span><span class="linha__sub">${x.h} · ${x.tipo} · ${nomeMed(x.med)}</span></div>
+      <div style="min-width:0"><span class="linha__nome">${p.nome}</span><span class="linha__sub">${x.h} · ${x.tipo}<span class="cf-med"> · ${nomeMed(x.med)}</span></span></div>
       <div class="cf-acoes"><span class="cf-st"><span class="status ${ST[x.st][0]}">${ST[x.st][1]}</span>${regTent(x.id)}</span>${bate ? btWa(x.id, "confirmacao") + btAgenda(x.id) : ""}</div></li>`;
   }).join("") || `<li class="vazio">Nada para confirmar.</li>`;
   // Mês: semana selecionada destacada
@@ -310,7 +335,7 @@ function render() {
   const ocup = Math.round(vis.reduce((s, x) => s + (min(x.fim) - min(x.h)), 0) / (ds.filter(d => !d.feriado).length * (filtroMed === "todos" ? 2 : 1) * 8.5 * 60) * 100);
   $("ag-resumo").innerHTML = `<div><b>${ocup}%</b><span>ocupação da semana</span></div><div><b>${vis.filter(x => x.tipo === "Procedimento").length}</b><span>procedimentos</span></div><div><b>${vis.filter(x => x.tipo === "Retorno").length}</b><span>retornos</span></div>`;
   document.querySelectorAll(".pilula[data-med]").forEach(b => { const m = b.dataset.med; b.querySelector(".pilula__n").textContent = todos.filter(x => m === "todos" || x.med === m).length; });
-  $("resumo-dia").textContent = `Agenda · ${hoje.length} pacientes hoje, ${aConf.length} a confirmar na semana`;
+  $("resumo-dia").textContent = `Agenda · ${hoje.length} pacientes hoje, ${nConf} a confirmar até ${PROX_DIA ? DIAS_L[PROX_DIA.d.getDay()] : "amanhã"}`;
 }
 
 pilulasMedico(m => semana(sem).slice(0, 5).flatMap(d => d.itens.filter(x => pac(x) && (m === "todos" || x.med === m))).length, m => { filtroMed = m; render(); });
@@ -318,10 +343,12 @@ $("sem-ant").addEventListener("click", () => { sem--; diaSel = 0; render(); });
 $("sem-prox").addEventListener("click", () => { sem++; diaSel = 0; render(); });
 $("sem-hoje").addEventListener("click", () => { sem = 0; diaSel = 4; render(); $("sem-prox").focus(); });
 miniCal($("mcal"), { pontos: true });
+// Sábado e domingo: a clínica não abre e a grade só vai de segunda a sexta, então não são clicáveis
+document.querySelectorAll("#mcal button.mcal__dia--fds").forEach(b => { const s = document.createElement("span"); s.className = b.className; s.textContent = b.textContent; s.setAttribute("aria-label", b.getAttribute("aria-label") + ", fim de semana"); b.replaceWith(s); });
 document.querySelectorAll("#mcal button.mcal__dia").forEach(b => b.addEventListener("click", () => {
   const d = +b.textContent, n = Math.floor((d - 2) / 7) - 1;
   sem = Math.max(MIN_S, Math.min(MAX_S, n)); const dw = new Date(2026, 10, d).getDay();
-  diaSel = dw === 0 && n < MIN_S ? 0 : Math.min(4, Math.max(0, (dw + 6) % 7)); render();
+  diaSel = Math.min(4, Math.max(0, (dw + 6) % 7)); render();
   document.querySelector(".ag-cartao").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
 }));
 render();

@@ -25,19 +25,31 @@
 
   /* ---------- Quem está usando (mesma regra de motion.js) --------------- */
   // nome: ?nome= ou o salvo na entrada; perfil: ?perfil= ou o salvo (gestao | medico | sdr | recepcao | closer)
-  const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  // (o perfil também pode estar só na sessão: perfis.js grava nos dois e lê localStorage, depois sessionStorage)
+  const lsGet = k => { try { return localStorage.getItem(k) || (k === "munin:perfil" ? sessionStorage.getItem(k) : null); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* sem armazenamento */ } };
   const quem = (() => {
-    const n = (q.get("nome") || lsGet("munin:nome") || lsGet("vam:nome") || "Dra. Lúcia").trim().slice(0, 40);
-    const conta = (VA2.CONTAS || []).find(c => c.nome === n) || (n === "Dr. Rafael" ? { completo: "Dr. Rafael Sena", email: "rafael@clinica-aurora.com.br", perfil: "medico", ini: "RS", cor: "g" } : null)
-      || { completo: n, email: "", perfil: "gestao", ini: UI.ini(n.replace(/^Dra?\. /, "") + " x"), cor: "r" };
-    const pk = q.get("perfil") || lsGet("munin:perfil") || conta.perfil;
-    const perf = (VA2.PERFIS || {})[pk] || { rot: pk };
+    const CONTAS = VA2.CONTAS || [], PERFS = VA2.PERFIS || {};
+    const valido = k => !!k && Object.prototype.hasOwnProperty.call(PERFS, k);
+    const contaDe = n => CONTAS.find(c => c.nome === n) || (n === "Dr. Rafael" ? { nome: n, completo: "Dr. Rafael Sena", email: "rafael@clinica-aurora.com.br", perfil: "medico", ini: "RS", cor: "g" } : null);
+    const qn = (q.get("nome") || "").trim().slice(0, 40), qp = (q.get("perfil") || "").toLowerCase();
+    const salvo = (lsGet("munin:nome") || lsGet("vam:nome") || "").trim().slice(0, 40);
+    // perfil: o do endereço, o salvo, o da pessoa nomeada; sem nada, Gestão (a mesma regra de perfis.js)
+    const pk = valido(qp) ? qp : valido(lsGet("munin:perfil")) ? lsGet("munin:perfil")
+      : ((contaDe(qn) || contaDe(salvo) || {}).perfil || "gestao");
+    // nome: o do endereço; senão o salvo, se combinar com o perfil; senão a conta daquele perfil
+    let n = qn;
+    if (!n) { const cs = contaDe(salvo); n = salvo && (!cs || cs.perfil === pk) ? salvo : ((CONTAS.find(c => c.perfil === pk) || {}).nome || "Dra. Lúcia"); }
+    // quem entrou pelo endereço fica lembrado nas outras telas (como a tela de entrada faz)
+    if (qn || valido(qp)) { lsSet("munin:nome", n); lsSet("munin:perfil", pk); }
+    const conta = contaDe(n) || { completo: n, email: "", perfil: pk, ini: UI.ini(n.replace(/^Dra?\. /, "") + " x"), cor: "r" };
+    const perf = PERFS[pk] || { rot: pk };
     return Object.assign({ nome: n }, conta, { perfilK: pk, perfil: perf.rot });
   })();
 
-  // motion.js só lembra (localStorage) os nomes da sua lista; para a saudação seguir a pessoa que entrou
-  // em todas as telas, o nome salvo na entrada volta para o endereço antes de motion.js ler (?nome=).
-  if (!q.get("nome") && lsGet("munin:nome")) {
+  // motion.js e perfis.js leem ?nome=; para a saudação seguir a mesma pessoa em todas as telas,
+  // o nome resolvido acima volta para o endereço antes deles.
+  if (q.get("nome") !== quem.nome) {
     const u = new URL(location.href); u.searchParams.set("nome", quem.nome); history.replaceState(history.state, "", u.pathname + u.search + u.hash);
   }
 
@@ -137,7 +149,7 @@
 
   /* ---------- + Novo lead ---------------------------------------------- */
   const ORIGENS = ["Instagram", "Google", "Indicação", "Site", "Campanha", "Parceria", "Outro"];
-  const INTERESSES = ["Toxina botulínica", "Bioestimulador", "Preenchimento labial", "Laser · rejuvenescimento", "Skinbooster", "Peeling químico", "Ultrassom microfocado", "Protocolo Natural Lift", "Liftera papada", "Acne adulta", "Mapeamento de pintas", "Consulta dermatológica"];
+  const INTERESSES = ["Toxina botulínica", "Bioestimulador", "Preenchimento labial", "Laser · rejuvenescimento", "Skinbooster", "Peeling químico", "Ultrassom microfocado", "Protocolo Natural Lift", "Liftera papada", "Tratamento de pele", "Consulta de pele", "Consulta dermatológica"];
   const POT = { toxina: 2400, bioestim: 4200, preench: 3200, laser: 3600, skin: 2200, peeling: 1200, ultrassom: 6500, protocolo: 6500, liftera: 4200, acne: 1800, mapeamento: 900, consulta: 600 };
   const mascara = v => { const d = v.replace(/\D/g, "").slice(0, 11); if (d.length <= 2) return d ? `(${d}` : ""; if (d.length <= 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`; return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`; };
   function formNovoLead(bt) {
@@ -215,27 +227,29 @@
     const c = VA.consulta(id), r = recallDe(id), d = destino(p), hoje = VA.AGENDA.find(a => a.id === id);
     const fone = VA.fone(id), foneTxt = `(${fone.slice(0, 2)}) ${fone.slice(2, 7)}-${fone.slice(7)}`;
     let wa = modeloWa(p); if (wa === "confirmacao" && !c) wa = p.ult ? "recall" : "followup";
+    // §4e: SDR e Recepção não abrem o plano nem veem valores de plano (matriz de Ajustes, via perfis.js)
+    const pf = window.MUNIN_PERFIL || quem.perfilK;
+    const verValor = window.MUNIN_VISAO ? window.MUNIN_VISAO.plano !== false : (pf !== "sdr" && pf !== "recepcao");
     const linhas = [
       ["Médico", UI.nomeMed(p.med)],
       ["WhatsApp", `<span class="num">${foneTxt}</span>`],
       ["Origem", `<span class="chip">${esc(p.origem)}</span>${p.carteira ? ` <span class="chip chip--borda">Carteira ${p.carteira}</span>` : ""}`],
       [p.etapa ? "Interesse" : "Procedimento", esc(p.proc)],
-      p.etapa ? ["Etapa", `${ETAPA(p.etapa)}${p.sev && p.etapa !== "fechou" ? ` <span class="status ${p.sev === "atrasado" ? "status--atrasado" : p.sev === "atencao" ? "status--atencao" : p.sev === "ok" ? "status--ok" : "status--neutro"}">${p.d === 0 ? "hoje" : p.d + (p.d === 1 ? " dia" : " dias")}</span>` : ""}`] : null,
-      p.v ? ["Valor do plano", `R$ ${UI.real(p.v)}${p.total && p.total !== p.v ? ` <span class="muted">de R$ ${UI.real(p.total)}</span>` : ""}`] : p.pot ? ["Ticket estimado", `≈ R$ ${UI.real(p.pot)}`] : null,
+      p.etapa ? ["Etapa", `${ETAPA(p.etapa)}${p.sev && p.etapa !== "fechou" ? ` <span class="status ${p.sev === "atrasado" ? "status--atrasado" : p.sev === "atencao" ? "status--atencao" : p.sev === "ok" ? "status--ok" : "status--neutro"}">${p.sev === "atrasado" && p.venc ? `${p.venc} ${p.venc === 1 ? "dia" : "dias"} de atraso` : p.d === 0 ? "hoje" : p.d + (p.d === 1 ? " dia" : " dias")}</span>` : ""}`] : null,
+      !verValor ? null : p.v ? ["Valor do plano", `R$ ${UI.real(p.v)}${p.total && p.total !== p.v ? ` <span class="muted">de R$ ${UI.real(p.total)}</span>` : ""}`] : p.pot ? ["Ticket estimado", `≈ R$ ${UI.real(p.pot)}`] : null,
       hoje ? ["Hoje", `${hoje.h} · ${hoje.tipo} <span class="status ${VA.ST_AGENDA[hoje.st][0]}">${VA.ST_AGENDA[hoje.st][1]}</span>`] : c ? ["Próxima consulta", `${c.data} às ${c.hora} · ${c.tipo}`] : null,
       p.ult ? ["Última sessão", `${p.ult.slice(0, 5)}${r ? ` · ${r.dias < 0 ? `recall venceu há ${-r.dias} ${r.dias === -1 ? "dia" : "dias"}` : `recall vence ${r.venc}`}` : ""}`] : null,
     ].filter(Boolean);
     const hist = [];
     if (p.lead) hist.push([`Lead criado`, `${p.lead.slice(0, 5)} · ${p.origem}`]);
     if (p.dh) hist.push([p.falta ? "Faltou à 1ª consulta" : p.semReg ? "1ª consulta sem registro" : "1ª consulta", `${p.dh[0]} às ${p.dh[1]}`]);
-    if (p.etapa === "plano" || p.etapa === "fechou") hist.push([p.etapa === "fechou" ? `Fechou plano` : "Plano apresentado", p.etapa === "fechou" ? `${p.dt} · R$ ${UI.real(p.v)}` : `R$ ${UI.real(p.v)}`]);
+    if (p.etapa === "plano" || p.etapa === "fechou") hist.push([p.etapa === "fechou" ? `Fechou plano` : "Plano apresentado", p.etapa === "fechou" ? (verValor ? `${p.dt} · R$ ${UI.real(p.v)}` : p.dt) : (verValor ? `R$ ${UI.real(p.v)}` : UI.nomeMed(p.med))]);
     if (p.ult) hist.push(["Última sessão", p.ult]);
     if (p.nota) hist.push([p.nota, p.prox || "Próximo passo", true]);
     // revisão pacotes: selo do plano fechado nesta sessão (a etapa em VA.P não muda)
     try { if (sessionStorage.getItem("munin:fechado:" + id)) hist.push(["Plano fechado nesta sessão", "pela tela do plano", true]); } catch (e) { /* sem armazenamento */ }
-    // §4e: SDR e Recepção não abrem o plano (itens, regiões e R$ por linha)
-    const pf = window.MUNIN_PERFIL || (() => { try { return new URLSearchParams(location.search).get("perfil") || localStorage.getItem("munin:perfil"); } catch (e) { return null; } })();
-    const podePlano = pf !== "sdr" && pf !== "recepcao";
+    // plano só depois da 1ª consulta (como o cartão do quadro) ou para paciente fora do funil (recall, agenda)
+    const podePlano = pf !== "sdr" && pf !== "recepcao" && (!p.etapa || ["compareceu", "plano", "fechou"].includes(p.etapa));
     const links = [["plano", "Montar plano", `plano.html?p=${id}`, podePlano], ["funil", "Ver no funil", `funil.html?ficha=${id}`, !!p.etapa], ["agenda", "Ver na agenda", `agenda.html?ficha=${id}`, !!(c || hoje)], ["recall", "Ver no recall", `recall.html?ficha=${id}`, !!r]]
       .filter(l => l[3] && l[0] !== pagina).map(l => `<a class="bt-sec" href="${l[2]}">${l[0] === "plano" ? ico("i-plano", "ico ico-sm") : ""}${l[1]} ${ico("i-dir", "ico ico-sm")}</a>`).join("");
     gav.innerHTML = cabGaveta(esc(p.nome), `${d.rot}`, UI.av(p.med, p.nome)) + `<div class="tl-gaveta__corpo">
@@ -365,7 +379,7 @@
       </nav>`;
   }
   function sair() {
-    try { sessionStorage.removeItem("munin:sessao"); ["vam:nome", "munin:nome", "munin:perfil"].forEach(k => localStorage.removeItem(k)); } catch (e) { /* ok */ }
+    try { sessionStorage.removeItem("munin:sessao"); sessionStorage.removeItem("munin:perfil"); ["vam:nome", "munin:nome", "munin:perfil"].forEach(k => localStorage.removeItem(k)); } catch (e) { /* ok */ }
     location.href = "entrar.html?saiu=1";
   }
   doc.addEventListener("click", e => { if (e.target.closest("[data-tl-sair]")) { e.preventDefault(); sair(); } });
@@ -405,9 +419,10 @@
     if (bt.dataset.ficha) { e.preventDefault(); abreFicha(bt.dataset.ficha, bt); return; }
     if ((m = rot.match(/^Abrir ficha de (.+)$/)) && bt.tagName === "BUTTON") { const id = idPorNome(m[1]); if (id) { e.preventDefault(); abreFicha(id, bt); } return; }
     if (pagina === "funil") {
-      if (bt.matches(".fn-foco .recorte__seta")) return vai("relatorios.html#procedimentos")();
+      // "Fechado em 2026" e "Ver os N fechamentos do ano": o mesmo número está no topo de Relatórios
+      if (bt.matches(".fn-foco .recorte__seta")) return vai("relatorios.html")();
       if (bt.matches(".fn-col__mais")) {
-        if (/fechamentos/.test(rot)) return vai("relatorios.html#origem")();
+        if (/fechamentos/.test(rot)) return vai("relatorios.html")();
         const et = bt.closest(".fn-col") && bt.closest(".fn-col").dataset.etapa, aba = $('.fn-vista .aba[data-vista="lista"]');
         if (aba) { aba.click(); const nome = (VA.ETAPAS.find(x => x.k === et) || {}).nome; const g = [...doc.querySelectorAll("#tabela .fn-grupo")].find(tr => nome && tr.textContent.includes(nome)); setTimeout(() => rola(g), 60); }
         return;
@@ -430,6 +445,8 @@
       if ((m = rot.match(/^Abrir detalhe: (.+)$/))) { const d = DETALHE_META.find(([r]) => r.test(m[1])); if (d) vai(d[1])(); return; }
     }
   });
+
+  if (pagina === "funil") { const st = $(".fn-foco .recorte__seta"); if (st) st.setAttribute("aria-label", "Ver relatório de fechamentos"); }
 
   /* ---------- Destaque e ficha vindos da busca (?ficha=id) ------------- */
   function destaca(id) {

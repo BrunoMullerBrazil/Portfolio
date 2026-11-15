@@ -309,11 +309,11 @@
     kpis: [
       { id: "aceitacao",      rot: "Aceitação do plano",   desc: "R$ aceito ÷ R$ apresentado, por plano" },
       { id: "aExecutar",      rot: "Receita a executar",   desc: "R$ aceito ainda não realizado" },
-      { id: "fasesAprovadas", rot: "Fases aprovadas",      desc: "planos com Fase 1, 2 e 3 aprovadas (contagem)" },
+      { id: "fasesAprovadas", rot: "Fases aceitas",        desc: "planos com Fase 1, 2 e 3 aceitas (contagem)" },
       { id: "manutencao",     rot: "Manutenção em dia",    desc: "pacientes com manutenção trimestral ou semestral no prazo (contagem)" },
       { id: "porRegiao",      rot: "Por região",           desc: "arcada e quadrante → propostos, aceitos, R$ (contagens, sem %)" },
     ],
-    subStatus: { plano: ["Fase 1 apresentada", "Aguardando decisão"], fechou: ["Fase 1 aprovada", "Fase 2 aprovada", "Em execução", "Plano concluído"] },
+    subStatus: { plano: ["Fase 1 apresentada", "Aguardando decisão"], fechou: ["Fase 1 aceita", "Fase 2 aceita", "Em execução", "Plano concluído"] },
     motivosPendencia: ["Preço", "Vai pensar", "Vai comparar", "Decide com outra pessoa", "Sem tempo agora"],
     interessesSDR: ["Sorriso", "Implante", "Ortodontia", "Clínico"],
     mapaSoPlanoAtual: true,   // itens de planos antigos não são desenhados (vão para "Planos anteriores · R$")

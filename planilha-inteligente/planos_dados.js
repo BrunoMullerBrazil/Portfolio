@@ -5,7 +5,7 @@
    houver nada salvo.
    - cristina, patricia e gabriela já existem em dados.js (VA.P): os
      números de Painel, Funil e Metas NÃO mudam por causa destes planos.
-   - mariana-alves e lucas-ferraz são pacientes de demonstração do pacote
+   - mariana-alves e rafael-nogueira são pacientes de demonstração do pacote
      odonto e ficam SÓ aqui (PLD.pacientes), fora do registro VA.P.
    - Os itens guardam só o comercial: alvo, procedimento do catálogo, qtd,
      grupo, status, motivo fechado, datas. Nada clínico, nenhum texto livre.
@@ -20,7 +20,7 @@
   // Pacientes de demonstração (fora de VA.P)
   const pacientes = {
     "mariana-alves": { id: "mariana-alves", nome: "Mariana Alves", med: "o", origem: "Instagram", proc: "Plano odontológico", demo: true },
-    "lucas-ferraz":  { id: "lucas-ferraz",  nome: "Lucas Ferraz",  med: "o", origem: "Indicação", proc: "Plano odontológico", demo: true },
+    "rafael-nogueira": { id: "rafael-nogueira", nome: "Rafael Nogueira", med: "o", origem: "Indicação", proc: "Plano odontológico", demo: true },
   };
 
   const PLANOS = {
@@ -101,7 +101,7 @@
        350 + 240 + 1.400 + 2.400 + 5.800 + 12.000 (6 lentes) + 1.200 (clareamento) = 23.390 · 12× */
     "mariana-alves": {
       id: "pl-mariana-alves-1", paciente: "mariana-alves", pacote: "odonto", variante: "A",
-      med: "o", closer: "tatiana", criado: "06/11/2026", atualizado: "13/11/2026 09:10", subStatus: "Fase 1 aprovada",
+      med: "o", closer: "tatiana", criado: "06/11/2026", atualizado: "13/11/2026 09:10", subStatus: "Fase 1 aceita",
       titulos: { "fase-1": "Prioridade", "fase-2": "Reabilitação", "fase-3": "Estética" },
       itens: [
         { uid: "m1", alvo: "boca", proc: "limpeza", qtd: 1, unidade: "sessao", grupo: "fase-1", status: "realizado", origem: "medico", data: "06/11/2026" },
@@ -119,10 +119,10 @@
       resumo: { token: "m3a7", expira: "20/11/2026" },
     },
 
-    /* Lucas Ferraz · odonto · Fase 1 aceita; Fase 2 alinhadores em aberto (recorrente mensal) e um item a definir.
+    /* Rafael Nogueira · odonto · Fase 1 aceita; Fase 2 alinhadores em aberto (recorrente mensal) e um item a definir.
        350 + 650 + 650 + 180 + 300 + 11.700 + 900 = 14.730 − 5% (737) = 13.993 · 12× */
-    "lucas-ferraz": {
-      id: "pl-lucas-ferraz-1", paciente: "lucas-ferraz", pacote: "odonto", variante: "A",
+    "rafael-nogueira": {
+      id: "pl-rafael-nogueira-1", paciente: "rafael-nogueira", pacote: "odonto", variante: "A",
       med: "o", closer: "tatiana", criado: "30/10/2026", atualizado: "12/11/2026 17:45", subStatus: "Em execução",
       titulos: { "fase-1": "Prioridade", "fase-2": "Estética" },
       itens: [

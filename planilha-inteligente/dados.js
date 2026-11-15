@@ -23,9 +23,9 @@
   add("ingrid",   { nome: "Ingrid Matos",     med: "g", origem: "Campanha",  proc: "Laser · 3 sessões" });
   add("mariana",  { nome: "Mariana Siqueira", med: "d", origem: "Site",      proc: "Bioestimulador · 2 sessões", carteira: "Diamante" });
   add("debora",   { nome: "Débora Brandão",   med: "g", origem: "Instagram", proc: "Toxina botulínica" });
-  add("aline",    { nome: "Aline Freitas",    med: "g", origem: "Indicação", proc: "Mapeamento de pintas" });
+  add("aline",    { nome: "Aline Freitas",    med: "g", origem: "Indicação", proc: "Preenchimento labial" });
   add("joana",    { nome: "Joana Bastos",     med: "d", origem: "Indicação", proc: "Skinbooster · 3 sessões" });
-  add("kelly",    { nome: "Kelly Araújo",     med: "d", origem: "Google",    proc: "Acne adulta" });
+  add("kelly",    { nome: "Kelly Araújo",     med: "d", origem: "Google",    proc: "Peeling de diamante" });
   add("luana",    { nome: "Luana Queiroz",    med: "d", origem: "Instagram", proc: "Peeling químico" });
   // Recall
   add("cristina", { nome: "Cristina Valadares", med: "d", origem: "Indicação", proc: "Toxina botulínica", carteira: "Bronze", ult: "01/07/2026" });
@@ -39,22 +39,22 @@
   // ---- Funil: 1 · Lead em contato
   add("livia",    { nome: "Lívia Carvalho",   med: "g", origem: "Parceria", proc: "Protocolo Natural Lift", t: 3, pot: 6500, lead: "01/11/2026", etapa: "contato", d: 12, sev: "atrasado", venc: 4, tent: 1, nota: "Pediu valor no WhatsApp · 1 tentativa", prox: "Retorno venceu 09/11" });
   add("priscila", { nome: "Patrícia Andrade", med: "d", origem: "Indicação", proc: "Liftera papada",         t: 4, pot: 4200, lead: "02/11/2026", etapa: "contato", d: 11, sev: "atrasado", venc: 2, tent: 3, nota: "Indecisão · 3 tentativas sem resposta", prox: "Retorno venceu 11/11" });
-  add("sofia",    { nome: "Sofia Brandt",     med: "d", origem: "Outro",     proc: "Acne adulta",            t: 4, pot: 1800, lead: "09/11/2026", etapa: "contato", d: 4,  sev: "atencao",  nota: "Ligar hoje · prefere manhã", prox: "Ligar hoje" });
-  add("lucas",    { nome: "Lucas Ferraz",     med: "g", origem: "Campanha",  proc: "Mapeamento de pintas",   t: 3, pot: 900,  lead: "12/11/2026", etapa: "contato", d: 1,  sev: "neutro",   nota: "Sem próximo contato definido", prox: "Sem data" });
-  add("cecilia",  { nome: "Cecília Furtado",  med: "g", origem: "Indicação", proc: "Clareamento de melasma", t: 3, pot: 2600, lead: "12/11/2026", etapa: "contato", d: 1,  sev: "ok",       nota: "Aguardando data · volta a falar 25/11", prox: "Retorno 25/11" });
+  add("sofia",    { nome: "Sofia Brandt",     med: "d", origem: "Outro",     proc: "Microagulhamento",       t: 4, pot: 1800, lead: "09/11/2026", etapa: "contato", d: 4,  sev: "atencao",  nota: "Prefere ser chamada de manhã", prox: "Ligar hoje" });
+  add("lucas",    { nome: "Lucas Ferraz",     med: "g", origem: "Campanha",  proc: "Avaliação · harmonização facial", t: 3, pot: 900,  lead: "12/11/2026", etapa: "contato", d: 1,  sev: "neutro",   nota: "Chegou ontem pela campanha · ainda sem conversa", prox: "Definir próximo contato" });
+  add("cecilia",  { nome: "Cecília Furtado",  med: "g", origem: "Indicação", proc: "Clareamento facial a laser", t: 3, pot: 2600, lead: "12/11/2026", etapa: "contato", d: 1,  sev: "ok",       nota: "Aguardando data · volta a falar 25/11", prox: "Retorno 25/11" });
   // ---- 2 · Agendado
   add("raquel",   { nome: "Raquel Monteiro",  med: "d", origem: "Instagram", proc: "Protocolo Natural Lift", t: 2, pot: 6500, lead: "06/11/2026", etapa: "agendado", d: 7, sev: "atrasado", dh: ["13/11", "11:30"], nota: "Confirmação sem resposta" });
   add("thais",    { nome: "Thaís Cunha",      med: "g", origem: "Google",    proc: "Protocolo Natural Lift", t: 3, pot: 6500, lead: "07/11/2026", etapa: "agendado", d: 6, sev: "atencao",  dh: ["13/11", "15:30"], nota: "Consulta hoje · confirmar agora" });
   add("renata",   { nome: "Renata Okamoto",   med: "d", origem: "Outro",     proc: "Liftera papada",         t: 2, pot: 4200, lead: "28/10/2026", etapa: "agendado", d: 2, sev: "atrasado", dh: ["11/11", "13:00"], falta: true, venc: 2, nota: "Faltou · remarcar" });
   add("vera",     { nome: "Vera Lúcia Santos", med: "g", origem: "Indicação", proc: "Botox testa e glabela", t: 4, pot: 2400, lead: "10/11/2026", etapa: "agendado", d: 3, sev: "ok",       dh: ["16/11", "09:30"], nota: "Taxa de consulta paga" });
-  add("roberto",  { nome: "Roberto Alves",    med: "d", origem: "Google",    proc: "Mapeamento de pintas",   t: 3, pot: 900,  lead: "11/11/2026", etapa: "agendado", d: 2, sev: "neutro",   dh: ["18/11", "16:00"], nota: "Confirmar em 17/11" });
+  add("roberto",  { nome: "Roberto Alves",    med: "d", origem: "Google",    proc: "Avaliação · harmonização facial", t: 3, pot: 900,  lead: "11/11/2026", etapa: "agendado", d: 2, sev: "neutro",   dh: ["18/11", "16:00"], nota: "Confirmar em 17/11" });
   // ---- 3 · Confirmado
   add("bianca",   { nome: "Bianca Lourenço",  med: "g", origem: "Google",    proc: "Protocolo Natural Lift", t: 3, pot: 6500, lead: "02/11/2026", etapa: "confirmado", d: 3, sev: "atrasado", dh: ["10/11", "10:00"], semReg: true, venc: 3, nota: "Consulta passou sem registro de comparecimento" });
-  add("paula",    { nome: "Paula Rezende",    med: "d", origem: "Google",    proc: "Biópsia · retirada de sinal", t: 4, pot: 1200, lead: "04/11/2026", etapa: "confirmado", d: 1, sev: "ok", dh: ["13/11", "10:00"], nota: "Hoje, próxima da agenda" });
+  add("paula",    { nome: "Paula Rezende",    med: "d", origem: "Google",    proc: "Avaliação facial", t: 4, pot: 1200, lead: "04/11/2026", etapa: "confirmado", d: 1, sev: "ok", dh: ["13/11", "10:00"], nota: "Hoje, próxima da agenda" });
   add("simone",   { nome: "Simone Castro",    med: "g", origem: "Parceria", proc: "Ultrassom microfocado",  t: 4, pot: 7800, lead: "05/11/2026", etapa: "confirmado", d: 1, sev: "ok",       dh: ["13/11", "14:00"], nota: "Hoje à tarde" });
   // ---- 4 · Compareceu
   add("otavio",   { nome: "Otávio Lins",      med: "g", origem: "Google",    proc: "Ultrassom microfocado",  t: 4, pot: 5200, lead: "06/11/2026", etapa: "compareceu", d: 1, sev: "ok", dh: ["12/11", "16:00"], nota: "Consultou 12/11 · plano sai em 16/11", prox: "Plano 16/11" });
-  add("yasmin",   { nome: "Yasmin Coutinho",  med: "d", origem: "Outro",     proc: "Rosácea · tratamento",   t: 3, pot: 1500, lead: "05/11/2026", etapa: "compareceu", d: 2, sev: "atencao", dh: ["11/11", "15:00"], venc: 2, nota: "Consultou e ainda sem plano registrado" });
+  add("yasmin",   { nome: "Yasmin Coutinho",  med: "d", origem: "Outro",     proc: "Limpeza de pele profunda", t: 3, pot: 1500, lead: "05/11/2026", etapa: "compareceu", d: 2, sev: "atencao", dh: ["11/11", "15:00"], venc: 2, nota: "Consultou e ainda sem plano registrado" });
   // ---- 5 · Plano apresentado
   add("camila",   { nome: "Camila Peixoto",   med: "d", origem: "Indicação", proc: "Botox + skinbooster",    t: 4, v: 10084, lead: "12/06/2026", etapa: "plano", d: 144, sev: "atrasado", venc: 8, nota: "Em negociação · retorno venceu 05/11", prox: "Retorno 05/11" });
   add("flavia",   { nome: "Flávia Assis",     med: "d", origem: "Campanha",  proc: "Laser · 3 sessões",      t: 4, v: 7986,  lead: "13/08/2026", etapa: "plano", d: 83,  sev: "atencao",  nota: "Vai pensar · retorno marcado 20/11", prox: "Retorno 20/11" });
@@ -70,7 +70,7 @@
 
   /* ---------- Volumes agregados (o registro acima traz só os pacientes que
      aparecem por nome nas telas; os totais vêm daqui) ----------------------
-     Novembro, clínica de dermatologia de alto padrão, metade do mês. */
+     Novembro, clínica de estética de alto padrão, metade do mês. */
   // Safra de novembro (leads criados de 01 a 13/11): [leads, agendaram, compareceram, receberam plano, fecharam]
   const SAFRA_NOV = {
     g: { n: [17, 13, 9, 6, 3], fv: 19400, futuras: 3 },   // futuras: Thaís, Simone (hoje), Vera (16/11)

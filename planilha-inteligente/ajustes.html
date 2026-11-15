@@ -49,7 +49,8 @@
   .aj-convite__tit { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
   .aj-convite .tl-erro { grid-column: 1 / -1; }
   @container (max-width: 760px) {
-    :root { --cols-us: 36px minmax(0, 1fr) auto; }
+    /* (polimento) container query não muda :root: a grade da linha é trocada direto */
+    #usuarios .aj-us { grid-template-columns: 36px minmax(0, 1fr) auto; }
     .aj-us { grid-template-areas: "av nm ac" "av pf pf" "av st st"; row-gap: 6px; align-items: start; }
     .aj-us > .av { grid-area: av; } .aj-us > .aj-q { grid-area: nm; } .aj-us > .aj-pf { grid-area: pf; } .aj-us > .aj-st { grid-area: st; } .aj-us > .aj-acoes { grid-area: ac; }
     .aj-convite { grid-template-columns: minmax(0, 1fr); }
@@ -69,6 +70,23 @@
   .sw[aria-checked="true"] { background: var(--pena); }
   .sw[aria-checked="true"]::after { transform: translateX(18px); }
   .sw:disabled { opacity: .55; cursor: not-allowed; }
+  .sw { cursor: pointer; }
+  /* alvo de toque de 44px sem mudar o desenho do interruptor */
+  .sw::before { content: ""; position: absolute; inset: -9px -2px; }
+  @container (max-width: 560px) {
+    /* matriz vira um bloco por perfil: nome do perfil e uma linha por item */
+    #matriz thead { display: none; }
+    #matriz, #matriz tbody { display: block; }
+    #matriz tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--linha); }
+    #matriz td { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0; border: 0; text-align: left; }
+    #matriz td:first-child { min-height: 0; padding-bottom: 2px; }
+    #matriz td:first-child small { display: none; }
+    #matriz td[data-rot]::before { content: attr(data-rot); font-size: var(--t-sm); color: var(--tinta); }
+  }
+  @media (max-width: 720px) {
+    .aj-sel, .pl-num, .pl-ck { min-height: 44px; height: 44px; }
+    .pl-ck { width: 44px; }
+  }
   .aj-nota { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: var(--t-xs); color: var(--texto-2); line-height: 1.5; }
   .aj-nota .ico { flex: none; margin-top: 1px; }
   /* Metas */
@@ -79,6 +97,9 @@
   .aj-pre { position: relative; }
   .aj-pre span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: var(--t-sm); color: var(--texto-2); pointer-events: none; }
   .aj-pre .tl-input { padding-left: 38px; font-variant-numeric: tabular-nums; }
+  .aj-pre--suf span { left: auto; right: 12px; }
+  .aj-pre--suf .tl-input { padding-left: 12px; padding-right: 34px; }
+  .aj-metas__g { grid-column: 1 / -1; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--linha); font-size: var(--t-xs); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--pena); }
   .aj-rod { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--linha); }
   @container (max-width: 560px) { .aj-metas { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .aj-metas > .nm { grid-column: 1 / -1; margin-top: 6px; } .aj-metas > span.c0 { display: none; } }
   /* Modelos */
@@ -90,7 +111,7 @@
   .aj-bolha p.r { font-size: var(--t-xs); color: var(--texto-2); margin-bottom: 8px; font-weight: 600; }
   .aj-bolha div { align-self: flex-end; max-width: 92%; background: #fff; border-radius: 14px 14px 4px 14px; padding: 10px 12px; font-size: var(--t-sm); line-height: 1.5; white-space: pre-wrap; box-shadow: var(--sombra-1); }
   .aj-bolha small { display: block; text-align: right; color: var(--texto-2); font-size: 10.5px; margin-top: 4px; }
-  @container (max-width: 820px) { .aj-mod { grid-template-columns: minmax(0, 1fr); } .aj-mod__lista { flex-direction: row; overflow-x: auto; } .aj-mod__lista .aba { white-space: nowrap; } .aj-mod__ed { grid-template-columns: minmax(0, 1fr); } }
+  @container (max-width: 820px) { .aj-mod { grid-template-columns: minmax(0, 1fr); } .aj-mod__lista { flex-direction: row; flex-wrap: wrap; } .aj-mod__lista .aba { white-space: normal; } .aj-mod__ed { grid-template-columns: minmax(0, 1fr); } }
   /* Avisos */
   .aj-av { list-style: none; margin: 0; padding: 0; }
   .aj-av li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; }
@@ -121,7 +142,13 @@
   .pl-ck:hover { background: var(--suave); }
   .pl-ck input { width: 18px; height: 18px; margin: 0; accent-color: var(--pena); cursor: pointer; }
   .pl-uso .aj-sel { width: auto; min-width: 150px; }
-  .pl-demo-chip { font-size: 10.5px; font-weight: 600; color: var(--texto-2); box-shadow: inset 0 0 0 1px var(--linha-forte); padding: 1px 6px; border-radius: 6px; margin-left: 6px; vertical-align: 1px; }
+  /* Sobre e créditos */
+  .aj-sobre { font-size: var(--t-sm); color: var(--texto-2); line-height: 1.55; }
+  .aj-sobre p + p, .aj-sobre ul + p { margin-top: 8px; }
+  .aj-sobre ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+  .aj-sobre b { color: var(--tinta); font-weight: 600; }
+  .aj-sobre a { color: var(--pena); }
+  .aj-sobre .pl-sub { margin-top: 0; color: var(--tinta); }
   .pl-link { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; margin-top: 16px; max-width: 560px; }
   .pl-aviso { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--r-sm); background: var(--suave-2); color: var(--tinta); font-size: var(--t-sm); line-height: 1.45; margin-bottom: 14px; }
   .pl-aviso .ico { flex: none; color: var(--pena); margin-top: 1px; }
@@ -169,7 +196,7 @@
     .pl-por { display: inline !important; }
     .pl-tab td:nth-child(1) { grid-area: nome; } .pl-tab td:nth-child(2) { display: none; }
     .pl-tab td:nth-child(3) { grid-area: preco; } .pl-tab td:nth-child(4) { grid-area: qtd; }
-    .pl-tab td:nth-child(5) { grid-area: rec; } .pl-tab td:nth-child(6) { grid-area: sw; justify-content: flex-end; }
+    .pl-tab td:nth-child(5) { grid-area: rec; } .pl-tab td:nth-child(6) { grid-area: sw; justify-content: flex-end; gap: 8px; }
     .pl-tab td[data-rot]::before { content: attr(data-rot); font-size: 10.5px; font-weight: 600; letter-spacing: .02em; color: var(--texto-2); white-space: nowrap; }
     .pl-tab tr.pl-tr--faces td:nth-child(4) { display: none; }
     .pl-tab .pl-rs > span:first-child { display: none; }
@@ -230,10 +257,10 @@
 
       <!-- METAS DO MÊS -->
       <section class="cartao" id="metas" aria-labelledby="t-metas">
-        <div class="aj-cab"><div><h2 id="t-metas">Metas de novembro</h2><p>Meta é o alvo do mês; supermeta é a faixa de excelência. O “esperado hoje” das telas sai daqui (meta × dias úteis concluídos ÷ 19).</p></div><a class="bt-texto" href="metas.html">Ver metas <svg class="ico ico-sm"><use href="#i-dir"/></svg></a></div>
+        <div class="aj-cab"><div><h2 id="t-metas">Metas do mês</h2><p>Novembro. Meta é o alvo do mês; supermeta é a faixa de excelência. O “esperado hoje” das telas acompanha os dias úteis que já passaram.</p></div><a class="bt-texto" href="metas.html">Ver metas <svg class="ico ico-sm"><use href="#i-dir"/></svg></a></div>
         <form id="f-metas" novalidate>
           <div class="aj-metas" id="metas-campos"></div>
-          <div class="aj-rod"><span class="tl-erro" id="m-erro" role="alert"></span><span class="tl-dica" id="m-dica">Valores da clínica inteira; a divisão por médico segue a do mês anterior.</span><button type="submit" class="tl-bt">Atualizar metas</button></div>
+          <div class="aj-rod"><span class="tl-erro" id="m-erro" role="alert"></span><span class="tl-dica" id="m-dica">Valores da clínica inteira; a divisão por médico segue a do mês anterior.</span><button type="submit" class="tl-bt tl-bt--sec" data-sem-aviso>Salvar metas</button></div>
         </form>
       </section>
 
@@ -247,7 +274,7 @@
             <div class="aj-bolha" aria-live="polite"><p class="r">Prévia no WhatsApp</p><div id="mod-prev"></div><small>09:41 ✓✓</small></div>
           </div>
         </div>
-        <div class="aj-rod"><span class="tl-dica" id="mod-dica"></span><button type="button" class="tl-bt" id="bt-mod">Atualizar modelo</button></div>
+        <div class="aj-rod"><span class="tl-dica" id="mod-dica"></span><button type="button" class="tl-bt tl-bt--sec" id="bt-mod" data-sem-aviso>Salvar modelo</button></div>
       </section>
 
       <!-- AVISOS -->
@@ -256,23 +283,22 @@
         <ul class="aj-av" id="av-lista"></ul>
       </section>
 
-      <!-- ESPECIALIDADES E PACOTES (revisão pacotes) -->
+      <!-- ESPECIALIDADES (revisão pacotes; na interface o módulo se chama "especialidade") -->
       <section class="cartao" id="especialidades" aria-labelledby="t-esp">
-        <div class="aj-cab"><div><h2 id="t-esp">Especialidades e pacotes</h2><p>A clínica liga os pacotes que usa e cada profissional trabalha com um ou mais. O pacote traz os desenhos, o catálogo e o recall; as telas continuam as mesmas.</p></div></div>
+        <div class="aj-cab"><div><h2 id="t-esp">Especialidades</h2><p>A clínica liga as especialidades que usa e cada profissional trabalha com uma ou mais. A especialidade traz os desenhos, o catálogo e o recall; as telas continuam as mesmas.</p></div></div>
         <div class="pl-pacs" id="pl-pacs" role="list"></div>
-        <h3 class="pl-sub" id="t-uso">Quem usa o quê <span>marque os pacotes de cada pessoa e o que abre primeiro num plano</span></h3>
+        <h3 class="pl-sub" id="t-uso">Quem usa o quê <span>Marque as especialidades de cada pessoa e qual abre primeiro num plano.</span></h3>
         <div class="aj-rolagem"><table class="aj-matriz pl-uso" id="pl-uso" aria-labelledby="t-uso"></table></div>
         <div class="tl-campo pl-link"><label for="pl-pront">Link do prontuário externo <span>· o botão “Abrir no prontuário” usa este endereço; {id} vira o código da paciente</span></label><input class="tl-input" id="pl-pront" type="url" inputmode="url" spellcheck="false" autocomplete="off"></div>
-        <p class="aj-nota"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-info"/></svg><span>Cada pacote traz um catálogo com nomes neutros, revisado para não registrar dado clínico. Diagnóstico, exames e fotos ficam no prontuário da clínica.</span></p>
+        <p class="aj-nota"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-info"/></svg><span>Cada especialidade traz um catálogo com nomes neutros, revisado para não registrar dado clínico. Diagnóstico, exames e fotos ficam no prontuário da clínica.</span></p>
         <p class="aj-nota" style="display:flex;flex-wrap:wrap;gap:4px;margin-left:-12px"><a class="bt-texto" href="plano.html?demo=dermato">Ver o mapa de exemplo · Estética ›</a><a class="bt-texto" href="plano.html?demo=odonto">Ver o mapa de exemplo · Odontologia ›</a></p>
-        <p class="aj-nota"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-info"/></svg><span>Créditos dos desenhos da Estética: rosto baseado em “Realistic female head study”, de CoryRichards (Sketchfab), CC BY 4.0; corpo baseado em “Male &amp; Female Base Mesh Pack”, de FormForge3D (Sketchfab), CC BY 4.0. Alterações: convertido em silhueta 2D vetorial, simetrizado e simplificado, com linhas e regiões adicionadas.</span></p>
       </section>
 
       <!-- TABELA DE PREÇOS (revisão pacotes) -->
       <section class="cartao" id="tabela" aria-labelledby="t-tab">
-        <div class="aj-cab"><div><h2 id="t-tab">Tabela de preços</h2><p>Preço, quantidade padrão e recall de cada procedimento, por pacote ativo. O nome vem do catálogo revisado: dá para trocar só por um sinônimo aprovado.</p></div></div>
+        <div class="aj-cab"><div><h2 id="t-tab">Tabela de preços</h2><p>Preço, quantidade padrão e recall de cada procedimento, por especialidade ativa. O nome vem do catálogo revisado: dá para trocar só por um sinônimo aprovado.</p></div></div>
         <p class="pl-aviso" role="note"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-info"/></svg><span><b>Valores de demonstração.</b> Substitua pelos da clínica. O Munin não sugere preço: estes números são só o ponto de partida.</span></p>
-        <div class="abas pl-abas" role="tablist" aria-label="Pacote" id="pl-abas"></div>
+        <div class="abas pl-abas" role="tablist" aria-label="Especialidade" id="pl-abas"></div>
         <div id="pl-painel" role="tabpanel" aria-labelledby="pl-aba-dermato"></div>
       </section>
 
@@ -281,8 +307,22 @@
         <div class="aj-cab"><div><h2 id="t-clin">Dados da clínica</h2><p>Aparecem na assinatura das mensagens, nos convites de agenda (.ics) e no topo das telas.</p></div></div>
         <form id="f-clin" novalidate>
           <div class="aj-clin" id="clin-campos"></div>
-          <div class="aj-rod"><span class="tl-dica">Fuso horário fixo: America/Sao_Paulo (UTC−3).</span><button type="submit" class="tl-bt">Atualizar dados</button></div>
+          <div class="aj-rod"><span class="tl-dica">Fuso horário fixo: America/Sao_Paulo (UTC−3).</span><button type="submit" class="tl-bt tl-bt--sec" data-sem-aviso>Salvar dados</button></div>
         </form>
+      </section>
+
+      <!-- SOBRE E CRÉDITOS (atribuição CC BY 4.0 dos desenhos; fora das telas de plano) -->
+      <section class="cartao" id="sobre" aria-labelledby="t-sobre">
+        <div class="aj-cab"><div><h2 id="t-sobre">Sobre e créditos</h2><p>Munin, a planilha inteligente da clínica. Versão de demonstração, novembro de 2026.</p></div></div>
+        <div class="aj-sobre">
+          <h3 class="pl-sub">Desenhos da Estética</h3>
+          <p>Os contornos do rosto e do corpo partem de malhas 3D publicadas com licença <a href="https://creativecommons.org/licenses/by/4.0/deed.pt-br" target="_blank" rel="license noopener">Creative Commons Atribuição 4.0 (CC BY 4.0)</a>:</p>
+          <ul>
+            <li><b>Rosto:</b> “<a href="https://sketchfab.com/models/14597fdaf88f4636b3c79420d8422652" target="_blank" rel="noopener">Realistic female head study</a>”, de CoryRichards (Sketchfab), CC BY 4.0.</li>
+            <li><b>Corpo:</b> “<a href="https://sketchfab.com/models/ec3041da6a214c1c995f3d47dc7d04c1" target="_blank" rel="noopener">Male &amp; Female Base Mesh Pack</a>”, de FormForge3D (Sketchfab), CC BY 4.0.</li>
+          </ul>
+          <p>Alterações: convertidos em silhueta 2D vetorial, simetrizados e simplificados, com linhas e regiões adicionadas.</p>
+        </div>
       </section>
     </div>
 
@@ -300,12 +340,13 @@
         <div class="aj-indice" id="indice">
           <a href="#acessos"><svg class="ico" aria-hidden="true"><use href="#i-leads"/></svg>Usuários e acessos<span id="ix-us"></span></a>
           <a href="#perfis"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg>O que cada perfil vê<span>5 perfis</span></a>
-          <a href="#metas"><svg class="ico" aria-hidden="true"><use href="#i-metas"/></svg>Metas do mês</a>
+          <a href="#metas"><svg class="ico" aria-hidden="true"><use href="#i-metas"/></svg>Metas do mês<span id="ix-metas"></span></a>
           <a href="#modelos"><svg class="ico" aria-hidden="true"><use href="#i-whats"/></svg>Modelos de mensagem<span id="ix-mod"></span></a>
           <a href="#avisos"><svg class="ico" aria-hidden="true"><use href="#i-sino"/></svg>Avisos</a>
-          <a href="#especialidades"><svg class="ico" aria-hidden="true"><use href="#i-quadro"/></svg>Especialidades e pacotes<span id="ix-pac"></span></a>
+          <a href="#especialidades"><svg class="ico" aria-hidden="true"><use href="#i-quadro"/></svg>Especialidades<span id="ix-pac"></span></a>
           <a href="#tabela"><svg class="ico" aria-hidden="true"><use href="#i-moeda"/></svg>Tabela de preços</a>
           <a href="#clinica"><svg class="ico" aria-hidden="true"><use href="#i-plano"/></svg>Dados da clínica</a>
+          <a href="#sobre"><svg class="ico" aria-hidden="true"><use href="#i-assina"/></svg>Sobre e créditos</a>
         </div>
       </nav>
     </aside>
@@ -325,14 +366,19 @@ const { ini, MODELOS, mensagem } = UI;
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const aviso = h => { if (window.TL) TL.aviso(h); };
-const salvo = aviso;   // botões "Atualizar…" (os "Salvar…" ganham o aviso genérico de motion.js)
+const salvo = aviso;   // botões "Salvar…" desta tela dão o próprio aviso (data-sem-aviso tira o genérico de motion.js)
 const ORDEM = ["gestao", "medico", "sdr", "recepcao", "closer"];
 const optsPerfil = sel => ORDEM.map(k => `<option value="${k}"${k === sel ? " selected" : ""}>${PERFIS[k].rot}</option>`).join("");
-const avCor = p => /^Dr\. /.test(p.nome) ? "g" : /^Dra\. /.test(p.nome) ? "d" : "r";
+// a cor do avatar indica o médico responsável: só Dr. Rafael (pena) e Dra. Lúcia (ardósia) têm cor própria
+const avCor = p => /Rafael/.test(p.nome) ? "g" : /Lúcia|Lucia/.test(p.nome) ? "d" : "r";
 const linkConvite = u => { const q = new URLSearchParams({ nome: u.nome, email: u.email, perfil: u.perfil, por: "Marina Albuquerque" }); return new URL("convite.html?" + q, location.href).href; };
 
 /* ---------- Usuários ---------- */
 const equipe = EQUIPE.map(u => Object.assign({}, u));
+// O dentista dos planos de Odontologia (planos_dados.js) também entra com o próprio Google
+if (window.PLD && PLD.profissionais.o && !equipe.some(u => /Caio/.test(u.nome))) {
+  equipe.splice(equipe.findIndex(u => /Rafael/.test(u.nome)) + 1, 0, { nome: PLD.profissionais.o.nome, email: "caio@clinica-aurora.com.br", perfil: "medico", st: "ativo", visto: "ontem, 17:40" });
+}
 function renderUs() {
   $("usuarios").innerHTML = equipe.map((u, i) => `<li class="linha aj-us" data-i="${i}">
     <span class="av av--${avCor(u)}" aria-hidden="true">${ini(u.nome.replace(/^Dra?\. /, "") + (u.nome.split(" ").length > 1 ? "" : " x"))}</span>
@@ -391,7 +437,7 @@ try { const salvo = JSON.parse(localStorage.getItem("munin:visao") || "null"); i
 const gravaVisao = () => { try { localStorage.setItem("munin:visao", JSON.stringify(visao)); } catch (e) { /* sem armazenamento: vale só nesta tela */ } };
 function renderMatriz() {
   $("matriz").innerHTML = `<thead><tr><th scope="col">Perfil</th>${COLS.map(c => `<th scope="col">${c[1]}</th>`).join("")}</tr></thead><tbody>` +
-    ORDEM.map(k => `<tr><td><b>${PERFIS[k].rot}</b><small>${PERFIS[k].desc}</small></td>${COLS.map(([c, rot]) => `<td><button type="button" class="sw" role="switch" aria-checked="${visao[k][c]}" data-k="${k}" data-c="${c}" aria-label="${PERFIS[k].rot} vê ${rot.toLowerCase()}"${k === "gestao" ? " disabled" : ""}></button></td>`).join("")}</tr>`).join("") + `</tbody>`;
+    ORDEM.map(k => `<tr><td><b>${PERFIS[k].rot}</b><small>${PERFIS[k].desc}</small></td>${COLS.map(([c, rot]) => `<td data-rot="${rot}"><button type="button" class="sw" role="switch" aria-checked="${visao[k][c]}" data-k="${k}" data-c="${c}" aria-label="${PERFIS[k].rot} vê ${rot.toLowerCase()}"${k === "gestao" ? " disabled" : ""}></button></td>`).join("")}</tr>`).join("") + `</tbody>`;
 }
 $("matriz").addEventListener("click", e => {
   const s = e.target.closest(".sw"); if (!s || s.disabled) return;
@@ -400,44 +446,50 @@ $("matriz").addEventListener("click", e => {
 });
 
 /* ---------- Metas ---------- */
-const MT = [["fat", "Faturamento", "recebido no mês", true], ["pl", "Planos fechados", "todas as origens"], ["co", "Consultas", "1ª consulta e retorno"], ["rc", "Recall · contatos", "pacientes contatados"], ["ra", "Recall · agendamentos", "voltaram para a agenda"]];
-$("metas-campos").innerHTML = `<span class="c c0"></span><span class="c">Meta</span><span class="c">Supermeta</span>` + MT.map(([id, nome, sub, rs]) => {
-  const [, m, s] = VA.metaVal(id, "todos");
-  const campo = (t, v) => `<div class="aj-pre"><span aria-hidden="true">${rs ? "R$" : "nº"}</span><input class="tl-input" id="m-${id}-${t}" inputmode="numeric" value="${v.toLocaleString("pt-BR")}" aria-label="${t === "m" ? "Meta" : "Supermeta"} de ${nome.toLowerCase()}"></div>`;
-  return `<div class="nm"><b>${nome}</b><small>${sub}</small></div>${campo("m", m)}${campo("s", s)}`;
-}).join("");
+// As mesmas 9 metas da tela Metas (VA.METAS), nos mesmos grupos das abas de lá
+const GRUPOS = [["com", "Comercial"], ["ag", "Agenda"], ["rec", "Recall"]];
+const MT = VA.METAS;
+$("metas-campos").innerHTML = `<span class="c c0"></span><span class="c">Meta</span><span class="c">Supermeta</span>` + GRUPOS.map(([g, rotG]) => `<span class="aj-metas__g">${rotG}</span>` + MT.filter(m => m.grupo === g).map(mt => {
+  const [, m, s] = VA.metaVal(mt.id, "todos");
+  const campo = (t, v) => `<div class="aj-pre${mt.taxa ? " aj-pre--suf" : ""}"><span aria-hidden="true">${mt.rs ? "R$" : mt.taxa ? "%" : "nº"}</span><input class="tl-input" id="m-${mt.id}-${t}" inputmode="numeric" value="${v.toLocaleString("pt-BR")}" aria-label="${t === "m" ? "Meta" : "Supermeta"} de ${mt.nome.toLowerCase()}${mt.taxa ? ", em %" : mt.rs ? ", em reais" : ""}"></div>`;
+  return `<div class="nm"><b>${mt.nome}</b><small>${mt.sub}</small></div>${campo("m", m)}${campo("s", s)}`;
+}).join("")).join("");
+$("ix-metas").textContent = `${MT.length} metas`;
 document.querySelectorAll("#metas-campos input").forEach(i => i.addEventListener("input", () => { const d = i.value.replace(/\D/g, ""); i.value = d ? (+d).toLocaleString("pt-BR") : ""; }));
 $("f-metas").addEventListener("submit", e => {
   e.preventDefault();
   const num = id => +($(id).value.replace(/\D/g, "")) || 0;
-  const ruim = MT.find(([id]) => num(`m-${id}-s`) < num(`m-${id}-m`) || !num(`m-${id}-m`));
-  $("m-erro").textContent = ruim ? `${ruim[1]}: a supermeta precisa ser maior ou igual à meta.` : "";
-  $("m-dica").hidden = !!ruim;
-  if (ruim) { $(`m-${ruim[0]}-s`).focus(); return; }
-  salvo("Metas de novembro salvas");
+  const pct = MT.find(m => m.taxa && (num(`m-${m.id}-m`) > 100 || num(`m-${m.id}-s`) > 100));
+  const ruim = pct ? null : MT.find(m => num(`m-${m.id}-s`) < num(`m-${m.id}-m`) || !num(`m-${m.id}-m`));
+  $("m-erro").textContent = pct ? `${pct.nome}: use um número de 0 a 100.` : ruim ? `${ruim.nome}: a supermeta precisa ser maior ou igual à meta.` : "";
+  $("m-dica").hidden = !!(pct || ruim);
+  if (pct || ruim) { $(`m-${(pct || ruim).id}-s`).focus(); return; }
+  salvo("Metas do mês salvas");
 });
 
 /* ---------- Modelos ---------- */
 const EXEMPLO = { confirmacao: "raquel", followup: "livia", plano: "camila", recall: "cristina", falta: "renata" };
 let modSel = "confirmacao";
-$("mod-lista").innerHTML = Object.entries(MODELOS).map(([k, m]) => `<button class="aba" role="tab" aria-selected="${k === modSel}" data-m="${k}">${m.rot}</button>`).join("");
+// Mesmas palavras em todas as telas: "Retorno" no lugar de "Follow-up" (como no painel)
+const rotMod = k => MODELOS[k].rot.replace(/^Follow-up/, "Retorno");
+$("mod-lista").innerHTML = Object.keys(MODELOS).map(k => `<button class="aba" role="tab" aria-selected="${k === modSel}" data-m="${k}">${rotMod(k)}</button>`).join("");
 $("ix-mod").textContent = `${Object.keys(MODELOS).length} modelos`;
 const textos = {};
 function renderMod() {
   const t = textos[modSel] || mensagem(EXEMPLO[modSel], modSel);
   $("mod-txt").value = t; $("mod-prev").textContent = t;
-  $("mod-dica").textContent = `Exemplo com ${VA.P[EXEMPLO[modSel]].nome.split(" ")[0]} · ${MODELOS[modSel].rot}`;
+  $("mod-dica").textContent = `Exemplo com ${VA.P[EXEMPLO[modSel]].nome.split(" ")[0]} · ${rotMod(modSel)}`;
 }
 $("mod-lista").addEventListener("click", e => { const b = e.target.closest("[data-m]"); if (!b) return; modSel = b.dataset.m; document.querySelectorAll("#mod-lista .aba").forEach(x => x.setAttribute("aria-selected", x === b)); renderMod(); });
 $("mod-txt").addEventListener("input", () => { $("mod-prev").textContent = $("mod-txt").value; });
 $("bt-mod").addEventListener("click", () => {
   const t = $("mod-txt").value;
   if (/R\$\s*\d|\d+[.,]\d{3}/.test(t)) { $("mod-dica").textContent = "Tire o valor da mensagem: ela pode ser lida por outra pessoa."; $("mod-txt").focus(); return; }
-  textos[modSel] = t; salvo(`Modelo salvo · <b>${MODELOS[modSel].rot}</b>`);
+  textos[modSel] = t; salvo(`Modelo salvo · <b>${rotMod(modSel)}</b>`);
 });
 
 /* ---------- Avisos ---------- */
-const AV = [["Lead parado acima do prazo", "Quando um lead passa do prazo da etapa", true], ["Recall vencido", "Todo dia às 08:00, com os vencidos do dia", true], ["Resumo da meta", "Às 18:00: faturamento × esperado do dia", true], ["Consulta sem confirmação na véspera", "Às 16:00, com quem ainda não confirmou", false]];
+const AV = [["Lead parado acima do prazo", "Quando um lead passa do prazo da etapa", true], ["Recall vencido", "Todo dia às 08:00, com os vencidos do dia", true], ["Resumo da meta", "Às 18:00: faturamento do dia comparado ao esperado", true], ["Consulta sem confirmação na véspera", "Às 16:00, com quem ainda não confirmou", false]];
 $("av-lista").innerHTML = AV.map(([t, s, on], i) => `<li><div><b id="av-t-${i}">${t}</b><span>${s}</span></div><button type="button" class="sw" role="switch" aria-checked="${on}" aria-labelledby="av-t-${i}" data-av="${i}"></button></li>`).join("");
 $("av-lista").addEventListener("click", e => { const s = e.target.closest(".sw"); if (!s) return; const v = s.getAttribute("aria-checked") !== "true"; s.setAttribute("aria-checked", v); aviso(`${AV[+s.dataset.av][0]} · ${v ? "ligado" : "desligado"}`); });
 
@@ -446,7 +498,7 @@ const CL = [["nome", "Nome da clínica"], ["razao", "Razão social"], ["cnpj", "
 $("clin-campos").innerHTML = CL.map(([k, rot, larga]) => `<div class="tl-campo${larga ? " larga" : ""}"><label for="cl-${k}">${rot}</label><input class="tl-input" id="cl-${k}" value="${esc(CLINICA_DADOS[k])}"></div>`).join("");
 $("f-clin").addEventListener("submit", e => { e.preventDefault(); salvo("Dados da clínica salvos"); });
 
-/* ---------- Especialidades e pacotes (revisão pacotes · munin:pacotes) ---------- */
+/* ---------- Especialidades (revisão pacotes · munin:pacotes; no código o módulo ainda se chama "pacote") ---------- */
 const GLIFO = {
   rosto:   `<path d="M17 4c-5.6 0-9 4.3-9 10.2C8 20.6 12 26 17 26s9-5.4 9-11.8C26 8.3 22.6 4 17 4z"/><path d="M13 26.6V31M21 26.6V31M13.2 13.6h2.4M18.4 13.6h2.4M17 15.5v3.2l-1 .6M15.2 21.6c1.2.7 2.4.7 3.6 0"/>`,
   dente:   `<path d="M10.5 5.5c-3.2 0-5 2.6-5 6.2 0 3 1.6 5.1 2.4 8.1.9 3.4 1.3 9.7 3.6 9.7 2.1 0 2.2-6.4 5.5-6.4s3.4 6.4 5.5 6.4c2.3 0 2.7-6.3 3.6-9.7.8-3 2.4-5.1 2.4-8.1 0-3.6-1.8-6.2-5-6.2-2.7 0-4 1.6-6.5 1.6s-3.8-1.6-6.5-1.6z"/>`,
@@ -459,25 +511,26 @@ const glifo = k => `<svg viewBox="0 0 34 34" aria-hidden="true">${GLIFO[k] || GL
 let cfg = PAC.config();
 const ativosIds = () => cfg.ativos.slice();
 const nomePac = id => PAC.get(id).rot;
-const vistasTxt = p => p.estado === "ativo" ? (p.abas || p.vistas).map(v => v.rot).join(" · ") : p.vistasPrevistas.join(" · ");
+const vistasTxt = p => (p.abas || p.vistas).map(v => v.rot).join(" · ");
 const gravaCfg = () => { if (!PAC.salvaConfig(cfg)) aviso("Sem armazenamento neste navegador: a mudança vale só nesta tela"); };
+// Só as especialidades que existem (Estética e Odontologia); as futuras ficam em pacotes.js, fora da tela
 function renderPacs() {
-  $("pl-pacs").innerHTML = PAC.lista().map(p => {
-    const breve = p.estado !== "ativo", on = cfg.ativos.includes(p.id);
-    return `<div class="pl-pac${breve ? " pl-pac--breve" : ""}" role="listitem" data-on="${on}">
+  $("pl-pacs").innerHTML = PAC.lista().filter(p => p.estado === "ativo").map(p => {
+    const on = cfg.ativos.includes(p.id);
+    return `<div class="pl-pac" role="listitem" data-on="${on}">
       <span class="pl-pac__ico">${glifo(p.ico)}</span>
-      <div style="min-width:0"><b id="pl-n-${p.id}">${esc(p.rot)}</b><small>${breve ? "Previsto: " : "Vistas: "}${esc(vistasTxt(p))}</small></div>
-      ${breve ? `<span class="pl-breve">Em breve</span>` : `<button type="button" class="sw" role="switch" aria-checked="${on}" data-pac="${p.id}" aria-labelledby="pl-n-${p.id}" title="${on ? "Ativo" : "Desligado"}"></button>`}
+      <div style="min-width:0"><b id="pl-n-${p.id}">${esc(p.rot)}</b><small>Desenhos: ${esc(vistasTxt(p))}</small></div>
+      <button type="button" class="sw" role="switch" aria-checked="${on}" data-pac="${p.id}" aria-labelledby="pl-n-${p.id}" title="${on ? "Ativa" : "Desligada"}"></button>
     </div>`;
   }).join("");
-  $("ix-pac").textContent = `${cfg.ativos.length} ativos`;
+  $("ix-pac").textContent = `${cfg.ativos.length} ${cfg.ativos.length === 1 ? "ativa" : "ativas"}`;
 }
-// profissionais: médicos da equipe + profissional de demonstração do odonto + closer
-const medKey = u => /Lúcia|Lucia/.test(u.nome) ? "d" : /Rafael/.test(u.nome) ? "g" : u.email;
+// profissionais: médicos e dentista da equipe (Usuários e acessos) + closer
+const medKey = u => /Lúcia|Lucia/.test(u.nome) ? "d" : /Rafael/.test(u.nome) ? "g" : /Caio/.test(u.nome) ? "o" : u.email;
+const ESP_SUB = { d: "Estética", g: "Estética", o: "Odontologia" };
 const PROFS = [
-  ...EQUIPE.filter(u => u.perfil === "medico").map(u => ({ k: medKey(u), nome: u.nome, sub: "Médico · estética", cor: avCor(u) })),
-  ...Object.entries(PLD.profissionais).map(([k, p]) => ({ k, nome: p.nome, sub: "Dentista", demo: true, cor: "g" })),
-  ...EQUIPE.filter(u => u.perfil === "closer").map(u => ({ k: "closer", nome: u.nome, sub: "Closer · monta e fecha os planos", cor: "r" })),
+  ...equipe.filter(u => u.perfil === "medico").map(u => ({ k: medKey(u), nome: u.nome, sub: ESP_SUB[medKey(u)] || "Médico", cor: avCor(u) })),
+  ...equipe.filter(u => u.perfil === "closer").map(u => ({ k: "closer", nome: u.nome, sub: "Closer · monta e fecha os planos", cor: "r" })),
 ];
 function renderUso() {
   const at = ativosIds();
@@ -486,19 +539,19 @@ function renderUso() {
       const uso = (cfg.uso[p.k] || []).filter(id => at.includes(id));
       const op = uso.length ? uso : at;
       const pad = op.includes(cfg.padrao[p.k]) ? cfg.padrao[p.k] : op[0];
-      return `<tr><td><b>${esc(p.nome)}${p.demo ? `<span class="pl-demo-chip" title="Profissional de demonstração">demo</span>` : ""}</b><small>${esc(p.sub)}</small></td>` +
+      return `<tr><td><b>${esc(p.nome)}</b><small>${esc(p.sub)}</small></td>` +
         at.map(id => `<td data-rot="${esc(nomePac(id))}"><label class="pl-ck"><input type="checkbox" data-uso="${p.k}" data-pac="${id}"${uso.includes(id) ? " checked" : ""} aria-label="${esc(p.nome)} usa ${esc(nomePac(id))}"></label></td>`).join("") +
-        `<td data-rot="Abre primeiro"><label class="sr" for="pl-pad-${p.k}">Pacote ao abrir um plano · ${esc(p.nome)}</label><select class="tl-select aj-sel" id="pl-pad-${p.k}" data-pad="${p.k}">${op.map(id => `<option value="${id}"${id === pad ? " selected" : ""}>${esc(nomePac(id))}</option>`).join("")}</select></td></tr>`;
+        `<td data-rot="Abre primeiro"><label class="sr" for="pl-pad-${p.k}">Especialidade ao abrir um plano · ${esc(p.nome)}</label><select class="tl-select aj-sel" id="pl-pad-${p.k}" data-pad="${p.k}">${op.map(id => `<option value="${id}"${id === pad ? " selected" : ""}>${esc(nomePac(id))}</option>`).join("")}</select></td></tr>`;
     }).join("") + `</tbody>`;
 }
 $("pl-pacs").addEventListener("click", e => {
   const s = e.target.closest(".sw[data-pac]"); if (!s) return;
   const id = s.dataset.pac, on = cfg.ativos.includes(id);
-  if (on && cfg.ativos.length === 1) { aviso("Deixe ao menos um pacote ativo"); return; }
+  if (on && cfg.ativos.length === 1) { aviso("Deixe ao menos uma especialidade ativa"); return; }
   cfg.ativos = on ? cfg.ativos.filter(x => x !== id) : PAC.ORDEM.filter(x => x === id || cfg.ativos.includes(x));
   gravaCfg(); renderPacs(); renderUso(); renderAbas();
   const f = document.querySelector(`#pl-pacs .sw[data-pac="${id}"]`); if (f) f.focus();
-  aviso(`<b>${esc(nomePac(id))}</b> ${on ? "desligado · some do seletor de pacote nos planos" : "ativo · aparece no seletor de pacote nos planos"}`);
+  aviso(`<b>${esc(nomePac(id))}</b> ${on ? "desligada · sai da escolha de especialidade nos planos" : "ativa · entra na escolha de especialidade nos planos"}`);
 });
 $("pl-uso").addEventListener("change", e => {
   const c = e.target.closest("[data-uso]"), s = e.target.closest("[data-pad]");
@@ -551,7 +604,7 @@ function linhaProc(P, b, t) {
     <td data-rot="Preço (R$)">${preco}</td>
     <td data-rot="Qtd. padrão"${qtdFixa ? ` class="pl-td-fixo"` : ""}>${qtd}</td>
     <td data-rot="Recall (dias)">${num(`data-k="recallD" data-p="${b.id}"`, rec, `${p.nome}, recall em dias (0 = sem recall)`, "pl-num--sm", 0, 730)}</td>
-    <td><button type="button" class="sw" role="switch" aria-checked="${p.ativo}" data-k="ativo" data-p="${b.id}" aria-label="${esc(p.nome)} ativo no catálogo"></button></td>
+    <td data-rot="Ativo"><button type="button" class="sw" role="switch" aria-checked="${p.ativo}" data-k="ativo" data-p="${b.id}" aria-label="${esc(p.nome)} ativo no catálogo"></button></td>
   </tr>`;
 }
 function exemplo(P, t) {
@@ -579,7 +632,7 @@ function renderTab() {
       <div class="tl-campo"><label for="pl-dc">Desconto máx. · Closer (%)</label>${num(`id="pl-dc" data-k="desc" data-perfil="closer"`, pg.descMax.closer, "Desconto máximo da closer em %", "", 0, 50)}</div>
       <div class="tl-campo"><label for="pl-dm">Desconto máx. · Médico (%)</label>${num(`id="pl-dm" data-k="desc" data-perfil="medico"`, pg.descMax.medico, "Desconto máximo do médico em %", "", 0, 50)}</div>
     </div>
-    <div class="aj-rod"><button type="button" class="bt-sec" id="pl-restaura">Restaurar valores do pacote</button><span class="tl-dica" id="pl-dica">Os planos já fechados mantêm o preço do dia do fechamento.</span><button type="button" class="tl-bt" id="pl-salva">Atualizar tabela de ${esc(P.rot.toLowerCase())}</button></div>`;
+    <div class="aj-rod"><button type="button" class="bt-sec" id="pl-restaura">Restaurar valores da especialidade</button><span class="tl-dica" id="pl-dica">Os planos já fechados mantêm o preço do dia do fechamento.</span><button type="button" class="tl-bt tl-bt--sec" id="pl-salva" data-sem-aviso>Salvar tabela</button></div>`;
 }
 function editaRasc(el) {
   const t = rascDe(tabPac), k = el.dataset.k, id = el.dataset.p;
@@ -605,7 +658,7 @@ $("pl-painel").addEventListener("click", e => {
   if (s) { const v = s.getAttribute("aria-checked") !== "true"; s.setAttribute("aria-checked", v); s.closest("tr").dataset.ativo = v; const t = rascDe(tabPac); ((t.procs = t.procs || {})[s.dataset.p] = t.procs[s.dataset.p] || {}).ativo = v; return; }
   if (e.target.closest("#pl-salva")) {
     const ok = PAC.salvaTabela(tabPac, rascDe(tabPac));
-    aviso(ok ? `Tabela de <b>${esc(nomePac(tabPac).toLowerCase())}</b> atualizada · vale para os próximos planos` : "Sem armazenamento neste navegador: a tabela vale só nesta tela");
+    aviso(ok ? `Tabela de <b>${esc(nomePac(tabPac).toLowerCase())}</b> salva · vale para os próximos planos` : "Sem armazenamento neste navegador: a tabela vale só nesta tela");
     return;
   }
   if (e.target.closest("#pl-restaura")) { PAC.limpaTabela(tabPac); delete rasc[tabPac]; renderTab(); $("pl-restaura").focus(); aviso(`Valores de demonstração restaurados · <b>${esc(nomePac(tabPac))}</b>`); }
@@ -616,7 +669,15 @@ renderPacs(); renderUso(); renderAbas();
 renderUs(); renderMatriz(); renderMod();
 // Índice acompanha a seção visível
 const secs = [...document.querySelectorAll(".coluna > section[id]")];
-const ix = () => { const y = innerHeight * .3; let at = secs[0]; secs.forEach(s => { if (s.getBoundingClientRect().top < y) at = s; }); document.querySelectorAll("#indice a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + at.id)); };
+const marcaIx = id => document.querySelectorAll("#indice a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + id));
+let ixClique = 0;   // o clique no índice manda por um instante (a última seção não sobe até o alto)
+const ix = () => {
+  if (Date.now() < ixClique) return;
+  const y = innerHeight * .3; let at = secs[0]; secs.forEach(s => { if (s.getBoundingClientRect().top < y) at = s; });
+  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) at = secs[secs.length - 1];
+  marcaIx(at.id);
+};
+$("indice").addEventListener("click", e => { const a = e.target.closest("a[href^='#']"); if (!a) return; marcaIx(a.getAttribute("href").slice(1)); ixClique = Date.now() + 1200; });
 addEventListener("scroll", ix, { passive: true }); ix();
 </script>
 <script src="telas.js"></script>

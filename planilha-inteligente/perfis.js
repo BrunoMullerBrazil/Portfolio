@@ -27,6 +27,11 @@
   const { P, AGENDA, ST_AGENDA } = VA;
   const { br, mil, real, av, escala, nomeMed, btWa, btAgenda, regTent } = UI;
   const pl = (n, um, varios) => n === 1 ? um : varios;
+  // Lead novo (1º contato) tem o próprio modelo de WhatsApp; comum.js monta a lista de modelos
+  // só quando a janela abre, então o acréscimo aqui entra no seletor.
+  if (UI.MODELOS && !UI.MODELOS.novo) {
+    UI.MODELOS.novo = { rot: "Primeiro contato", txt: c => `Olá, ${c.nome}! Tudo bem?\n\nObrigada pelo contato! Vou te ajudar por aqui. Para agendar sua consulta de avaliação com ${c.medArt}, me conte o melhor dia e período para você.` };
+  }
 
   /* =====================================================================
      1. PERFIL ATUAL
@@ -135,17 +140,21 @@
     const garg = linhas.slice().sort((a, b) => (b.parados.length - a.parados.length) || (b.risco - a.risco))[0];
     return { linhas, garg: garg && garg.parados.length ? garg : null };
   }
+  // Marcações feitas nesta sessão (só no front): sobrevivem à troca de médico e entram nas contas
+  const respondido = {}, registrado = {}, ligou = {};   // id → hora
   const dadosSDR = m => {
     const novos = VAP.NOVOS.filter(deMed(m));
-    const aguarda = novos.filter(n => n.st === "aguarda").sort((a, b) => b.espera - a.espera);
+    const fila = novos.filter(n => n.st === "aguarda").sort((a, b) => b.espera - a.espera);
+    const aguarda = fila.filter(n => !respondido[n.id]);
     const retornos = Object.values(P).filter(p => p.etapa === "contato" && (p.sev === "atrasado" || p.sev === "atencao") && deMed(m)(p))
       .sort((a, b) => ((b.sev === "atrasado") - (a.sev === "atrasado")) || ((b.venc || 0) - (a.venc || 0)));
+    const retPend = retornos.filter(p => !respondido[p.id]);
     const agHoje = novos.filter(n => n.st === "agendado");
-    return { novos, aguarda, retornos, agHoje, agendar: VAP.AGENDAR.filter(a => deMed(m)(P[a.id])) };
+    return { novos, fila, aguarda, retornos, retPend, agHoje, agendar: VAP.AGENDAR.filter(a => deMed(m)(P[a.id])) };
   };
   const dadosRecepcao = m => {
     const ag = hoje().filter(a => deMed(m)(P[a.id]));
-    const hojeConf = ag.filter(a => a.st === "aconf" || a.st === "semresp");
+    const hojeConf = ag.filter(a => (a.st === "aconf" || a.st === "semresp") && a.h > VA.AGORA);
     const prox = proxDia ? proxDia.itens.filter(i => !i.evento && i.st === "aconf" && deMed(m)(P[i.id])) : [];
     const faltas = [];
     semana0().forEach(dd => { if (dd.d < HOJE_D) dd.itens.forEach(i => { if ((i.st === "falta" || i.st === "semreg") && deMed(m)(P[i.id])) faltas.push(Object.assign({ data: dd.data }, i)); }); });
@@ -186,7 +195,7 @@
         const r = dadosRecepcao(m), nConf = r.hojeConf.length + r.prox.length;
         return [
           { n: r.ag.length, rot: pl(r.ag.length, "consulta hoje", "consultas hoje") },
-          { n: nConf, rot: "a confirmar", sub: `${r.hojeConf.length} hoje · ${r.prox.length} ${proxDia ? DIAS_SEM[proxDia.d.getDay()] : ""}`, alerta: r.hojeConf.length > 0 },
+          { n: nConf, rot: "a confirmar", sub: `${r.hojeConf.length} ainda hoje · ${r.prox.length} para ${proxDia ? DIAS_SEM[proxDia.d.getDay()] : "o próximo dia"}`, alerta: r.hojeConf.length > 0 },
           { n: r.nFaltas, rot: pl(r.nFaltas, "falta para remarcar", "faltas para remarcar") },
         ];
       }
@@ -202,7 +211,7 @@
       if (PERFIL === "closer") {
         const c = dadosCloser(m);
         return [
-          { n: Math.round(c.aberto.v / 1000), pre: "R$", suf: "mil", rot: "em planos abertos", sub: `${c.aberto.n} planos` },
+          { n: c.aberto.v, pre: "R$", rot: "em planos abertos", sub: `${c.aberto.n} planos` },
           { n: c.recall.length, rot: pl(c.recall.length, "recall vencido", "recalls vencidos"), alerta: c.recall.length > 0 },
           { n: c.fech.n, rot: "fechados no mês", sub: VIS.plano ? `R$ ${mil(c.fech.v)} mil` : "" },
         ];
@@ -212,37 +221,35 @@
       return [
         { n: dd.metaPct, suf: "%", rot: "da meta do mês" },
         { n: dd.parados, rot: pl(dd.parados, "lead parado", "leads parados"), alerta: dd.parados > 0 },
-        b.garg ? { n: b.garg.parados.length, rot: `parados com ${ARTIGO[b.garg.k]}`, sub: "gargalo da semana" }
+        b.garg ? { n: b.garg.parados.length, rot: `parados com ${ARTIGO[b.garg.k]}`, sub: "gargalo agora" }
           : { n: dd.pacientes, rot: "pacientes hoje" },
       ];
     }
     if (tipo === "encerramento") {
       const tarde = hora >= 17;   // o dia simulado: à noite a fila do dia foi trabalhada
       if (PERFIL === "sdr") {
-        const s = dadosSDR(m);
-        // respondidos: os leads novos de hoje + os retornos da fila; agendados: Luíza (08:24) e, à tarde, o Henrique (pediu horário à tarde)
-        const resp = s.novos.length + s.retornos.length, ag = s.agHoje.length + (tarde ? s.agendar.filter(a => a.sev === "atencao").length : 0);
+        const s = dadosSDR(m), comData = s.agendar.filter(a => a.prazo !== "Sem data").length, semData = s.agendar.length - comData;
+        const nResp = s.fila.length - s.aguarda.length;
         return [
-          { n: resp, rot: pl(resp, "lead respondido", "leads respondidos"), sub: `${s.novos.length} novos · ${s.retornos.length} retornos` },
-          { n: ag, rot: pl(ag, "agendado hoje", "agendados hoje") },
-          { n: Math.max(0, s.agendar.length - (tarde ? 1 : 0)), rot: "ficam para agendar", sub: "com data combinada" },
+          { n: s.novos.length, rot: pl(s.novos.length, "lead novo hoje", "leads novos hoje"), sub: nResp ? `${nResp} ${pl(nResp, "marcado", "marcados")} como respondido${nResp > 1 ? "s" : ""}` : `${s.aguarda.length} sem resposta registrada` },
+          { n: s.agHoje.length, rot: pl(s.agHoje.length, "agendado hoje", "agendados hoje") },
+          { n: s.agendar.length, rot: "ficam para agendar", sub: [comData ? `${comData} com data` : "", semData ? `${semData} sem data` : ""].filter(Boolean).join(" · ") },
         ];
       }
       if (PERFIL === "recepcao") {
         const r = dadosRecepcao(m), cheg = dd.atendidos + chegadasMarcadas();
         return [
-          { n: r.prox.length + r.hojeConf.filter(a => a.st === "aconf").length, rot: "confirmados", sub: `inclui ${nomeDia(proxDia)}` },
+          { n: r.prox.length, rot: pl(r.prox.length, "consulta a confirmar", "consultas a confirmar"), sub: proxDia ? `para ${nomeDia(proxDia)}` : "" },
           { n: Math.min(cheg, r.ag.length), rot: "chegadas", sub: `de ${r.ag.length} na agenda` },
-          { n: r.nFaltas, rot: pl(r.nFaltas, "falta remarcada", "faltas remarcadas") },
+          { n: r.nFaltas, rot: pl(r.nFaltas, "falta para remarcar", "faltas para remarcar") },
         ];
       }
       if (PERFIL === "medico") {
         const d = dadosMedico(MED_EU), h = `${String(Math.floor(hora)).padStart(2, "0")}:${String(Math.round((hora % 1) * 60)).padStart(2, "0")}`;
         const at = d.ag.filter(a => a.st === "feito" || a.st === "atend" || (a.h < h && a.st !== "semresp"));
-        const ind = at.filter(a => a.tipo === "1ª consulta").length;
         return [
           { n: at.length, rot: pl(at.length, "paciente atendido", "pacientes atendidos"), sub: `de ${d.ag.length} na agenda` },
-          { n: ind, rot: pl(ind, "plano indicado", "planos indicados"), sub: "nas 1ªs consultas" },
+          { n: d.nPlanos, rot: pl(d.nPlanos, "plano em aberto", "planos em aberto"), sub: "a Closer acompanha" },
           VIS.fat ? { n: d.pct, suf: "%", rot: "da sua meta" } : { n: d.plm[0], rot: "planos fechados no mês" },
         ];
       }
@@ -250,7 +257,7 @@
         const c = dadosCloser(m);
         return [
           { n: dd.valorHoje, pre: "R$", rot: "fechados hoje", sub: dd.planosHoje ? `${dd.planosHoje} plano${dd.planosHoje > 1 ? "s" : ""}` : "nenhum plano hoje" },
-          { n: tarde ? c.recall.length : 0, rot: "recalls feitos", sub: `de ${c.recall.length} vencidos` },
+          { n: c.recall.length, rot: pl(c.recall.length, "recall vencido", "recalls vencidos"), sub: c.recall.length ? "ficam para amanhã" : "" },
           { n: c.planos.filter(p => p.sev === "atrasado").length, rot: "planos para retomar", sub: "retorno vencido" },
         ];
       }
@@ -295,29 +302,36 @@
   };
   const tipoRot = t => `<span class="pf-tipo">${t}</span>`;
   const st = (sev, t) => `<span class="status ${SEV[sev] || sev}">${t}</span>`;
-  const btIco = (icone, rot, attrs = "") => `<button type="button" class="bt-ico bt-ico--sm bt-ico--plano pf-bt" aria-label="${esc(rot)}" title="${esc(rot)}" ${attrs}>${ico(icone, "ico ico-sm")}</button>`;
-  const vgestao = (rot, sub) => `<div class="pf-veu" role="note"><span class="pf-veu__ico" aria-hidden="true">${ico("i-info", "ico ico-sm")}</span><b>${rot}</b><span>${sub || "Visível para a gestão"}</span></div>`;
+  // data-sem-aviso: a própria tela dá o aviso (motion.js não soma o automático)
+  const btIco = (icone, rot, attrs = "") => `<button type="button" class="bt-ico bt-ico--sm bt-ico--plano pf-bt" aria-label="${esc(rot)}" title="${esc(rot)}" data-sem-aviso ${attrs}>${ico(icone, "ico ico-sm")}</button>`;
+  const SO_GESTAO = "Visível só para a gestão";
+  const vgestao = (rot, sub) => `<div class="pf-veu" role="note"><span class="pf-veu__ico" aria-hidden="true">${ico("i-info", "ico ico-sm")}</span><b>${rot}</b><span>${sub || SO_GESTAO}</span></div>`;
+  const verLink = (href, rot) => `<a class="bt-texto" href="${href}">${rot} <svg class="ico ico-sm" aria-hidden="true"><use href="#i-dir"/></svg></a>`;
+  // Linha marcada nesta sessão (respondido, registrado): status verde no lugar do prazo
+  const marca = (id, mapa, rot, prazo) => mapa[id] ? st("ok", `${rot} ${mapa[id]}`) : prazo;
 
   /* ---------- SDR ------------------------------------------------------- */
   function telaSDR(m) {
     const s = dadosSDR(m), velho = s.aguarda[0];
     const sevEspera = e => e > 60 ? "atrasado" : e > VAP.PRAZO_RESPOSTA ? "atencao" : "ok";
-    const novosHtml = s.aguarda.map(n => linha({ id: n.id,
+    const btResp = (id, nome) => btIco("i-check", `${respondido[id] ? "Desfazer respondido" : "Marcar como respondido"}: ${nome}`, `data-pf="respondido" aria-pressed="${!!respondido[id]}"`);
+    const novosHtml = s.fila.map(n => linha({ id: n.id, cls: respondido[n.id] ? "pf-l--feita" : "",
       chips: `${tipoRot("Lead novo")}<span class="chip">${n.origem}</span>`,
       txt: `${esc(n.pediu)} · ${n.canal} · chegou ${n.chegou}`,
-      prazo: `${st(sevEspera(n.espera), `esperando há ${esperaTxt(n.espera)}`)}${regTent(n.id)}`,
-      acoes: `${btWa(n.id, "followup")}${btIco("i-check", `Marcar como respondido: ${n.nome}`, 'data-pf="respondido"')}` })).join("");
-    const retHtml = s.retornos.map(p => linha({ id: p.id,
+      prazo: `${marca(n.id, respondido, "Respondido", st(sevEspera(n.espera), `esperando há ${esperaTxt(n.espera)}`))}${regTent(n.id)}`,
+      acoes: `${btWa(n.id, UI.MODELOS && UI.MODELOS.novo ? "novo" : "followup")}${btResp(n.id, n.nome)}` })).join("");
+    const retHtml = s.retornos.map(p => linha({ id: p.id, cls: respondido[p.id] ? "pf-l--feita" : "",
       chips: `${tipoRot("Retorno")}<span class="chip">${p.origem}</span>`,
       txt: `${esc(p.nota)} · ${p.proc}`,
-      prazo: `${st(p.sev, p.venc ? `${p.venc} dias de atraso` : "Hoje")}${regTent(p.id)}`,
-      acoes: `${btWa(p.id, "followup")}${btIco("i-check", `Marcar como respondido: ${p.nome}`, 'data-pf="respondido"')}` })).join("");
+      prazo: `${marca(p.id, respondido, "Respondido", st(p.sev, p.venc ? `${p.venc} dias de atraso` : "Hoje"))}${regTent(p.id)}`,
+      acoes: `${btWa(p.id, "followup")}${btResp(p.id, p.nome)}` })).join("");
+    const nAtras = s.retornos.filter(p => p.sev === "atrasado").length;
     const agendarHtml = s.agendar.map(a => { const p = P[a.id]; return linha({ id: a.id, cls: "pf-l--compacta",
       txt: `${a.motivo}`, prazo: st(a.sev, a.prazo),
-      acoes: `${btWa(a.id, "followup")}<a class="bt-ico bt-ico--sm bt-ico--plano pf-bt" href="agenda.html" aria-label="Ver horários livres para ${esc(p.nome)}" title="Ver horários livres">${ico("i-cal-mais", "ico ico-sm")}</a>` }); }).join("");
-    const safra = VA.safraNov(m), meta = VAP.META_AG, r = VA.ritmo(safra.n[1], meta.meta), max = meta.sup * 1.15, pc = x => x / max * 100;
+      acoes: `${btWa(a.id, "followup")}<a class="bt-ico bt-ico--sm bt-ico--plano pf-bt" href="agenda.html" aria-label="Ver horários livres para ${esc(p.nome)}" title="Ver horários livres">${ico("i-agenda", "ico ico-sm")}</a>` }); }).join("");
+    const safra = VA.safraNov("todos"), meta = VAP.META_AG, r = VA.ritmo(safra.n[1], meta.meta), max = meta.sup * 1.15, pc = x => x / max * 100;
     const metaAg = `<section class="cartao pf-meta" aria-labelledby="pf-t-meta">
-      <div class="cartao__cab"><h2 id="pf-t-meta">Meta de agendamentos <span class="cartao__sub">novembro</span></h2></div>
+      <div class="cartao__cab"><h2 id="pf-t-meta">Meta de agendamentos <span class="cartao__sub">novembro · clínica toda</span></h2></div>
       <div class="kpi__valor">${safra.n[1]}<small>de</small>${meta.meta}</div>
       <div class="kpi__nota">${st(r.cls.replace("status--", ""), r.rot)}<span>esperado hoje ${br(r.esp)}</span></div>
       <div class="pf-meta__barra">${UI.barra({ v: pc(safra.n[1]), m1: pc(meta.meta), m2: pc(meta.sup), r: pc(meta.meta * VA.FRAC), estado: UI.estadoDe(r.cls), aria: `${safra.n[1]} agendamentos de meta ${meta.meta}; esperado hoje ${br(r.esp)}` })}</div>
@@ -325,15 +339,15 @@
     </section>`;
     return {
       resumo: `${s.aguarda.length} ${pl(s.aguarda.length, "lead esperando resposta", "leads esperando resposta")} · ${s.agendar.length} para agendar`,
-      coluna: cartaoFoco({ rot: "Responder agora", seta: ["funil.html", "Abrir o funil"],
+      coluna: cartaoFoco({ rot: "Esperando resposta", seta: ["funil.html", "Abrir o funil"],
         valor: `${s.aguarda.length}<small>${pl(s.aguarda.length, "lead", "leads")}</small>`,
         nota: velho ? `<span>sem resposta · o mais antigo espera há <b>${esperaTxt(velho.espera)}</b></span>${st("atrasado", `prazo ${VAP.PRAZO_RESPOSTA} min`)}` : `<span>ninguém esperando · prazo de resposta ${VAP.PRAZO_RESPOSTA} min</span>`,
-        extra: [["Chegaram hoje", s.novos.length], ["Retornos vencidos", s.retornos.filter(p => p.sev === "atrasado").length], ["Agendados hoje", s.agHoje.length]] }) +
+        extra: [["Chegaram hoje", s.novos.length], ["Retornos para hoje", s.retPend.length], ["Agendados hoje", s.agHoje.length]] }) +
         cartaoLista({ id: "pf-t-resp", tit: "Responder agora", sub: "o mais antigo primeiro", cls: "pf-fila",
           acao: `<span class="pf-dica">${ico("i-relogio", "ico ico-sm")}responder em até ${VAP.PRAZO_RESPOSTA} min</span>`,
-          itens: novosHtml + (retHtml ? `<li class="pf-sep" role="presentation">Retornos combinados</li>${retHtml}` : ""), vazio: "Nenhum lead esperando resposta" }),
+          itens: novosHtml + (retHtml ? `<li class="pf-sep" role="presentation">Retornos para hoje${nAtras ? ` · ${nAtras} ${pl(nAtras, "atrasado", "atrasados")}` : ""}</li>${retHtml}` : ""), vazio: "Nenhum lead esperando resposta" }),
       lado: cartaoLista({ id: "pf-t-agendar", tit: "Agendar", sub: "qualificados sem data", itens: agendarHtml, vazio: "Nenhum lead para agendar",
-          pe: `<span>${s.agHoje.map(n => `${esc(n.nome)} agendou ${n.consulta[0]} às ${n.consulta[1]}`).join(" · ") || "Nenhum agendamento hoje"}</span><a class="bt-texto" href="agenda.html">Agenda <svg class="ico ico-sm"><use href="#i-dir"/></svg></a>` }) + metaAg,
+          pe: `<span>${s.agHoje.map(n => `${esc(n.nome)} agendou ${n.consulta[0]} às ${n.consulta[1]}`).join(" · ") || "Nenhum agendamento hoje"}</span>${verLink("agenda.html", "Ver agenda")}` }) + metaAg,
     };
   }
 
@@ -347,7 +361,7 @@
       const p = P[a.id], marcado = chegou[a.id], dentro = a.st === "atend" || a.st === "recep";
       const [cls, rot] = ST_AGENDA[a.st];
       const prazo = marcado ? st("ok", `Chegou ${marcado}`) : dentro ? `${st(cls.replace("status--", ""), rot)}<span class="pf-mini">${a.nota || ""}</span>` : st(cls.replace("status--", ""), rot);
-      const bt = dentro ? "" : `<button type="button" class="bt-sec pf-checkin" data-pf="checkin" aria-pressed="${!!marcado}" aria-label="${marcado ? "Desfazer chegada de" : "Marcar chegada de"} ${esc(p.nome)}">${ico("i-check", "ico ico-sm")}<span>${marcado ? "Chegou" : "Chegou?"}</span></button>`;
+      const bt = dentro ? "" : `<button type="button" class="bt-sec pf-checkin" data-pf="checkin" data-sem-aviso aria-pressed="${!!marcado}" aria-label="${marcado ? "Desfazer chegada de" : "Marcar chegada de"} ${esc(p.nome)}">${ico("i-check", "ico ico-sm")}<span>${marcado ? "Chegou" : "Marcar chegada"}</span></button>`;
       const wa = !marcado && (a.st === "aconf" || a.st === "semresp") ? btWa(a.id, "confirmacao") : "";
       return linha({ id: a.id, cls: marcado || dentro ? "pf-l--dentro" : "",
         lado: `<span class="hora${a.h <= VA.AGORA && !marcado && !dentro ? " hora--passou" : ""}">${a.h}</span>`,
@@ -359,33 +373,38 @@
       prazo: `${st(a.st === "semresp" ? "atrasado" : "atencao", a.st === "semresp" ? "Sem resposta" : `Hoje ${a.h}`)}${regTent(a.id)}`, acoes: btWa(a.id, "confirmacao") })).join("");
     const confProx = r.prox.map(i => linha({ id: i.id, cls: "pf-l--compacta",
       txt: `${i.tipo} ${proxDia.data} às ${i.h} · ${nomeMed(P[i.id].med)}`,
-      prazo: `${st("neutro", `${DIAS_SEM[proxDia.d.getDay()]} ${i.h}`)}${regTent(i.id)}`, acoes: btWa(i.id, "confirmacao") })).join("");
-    const faltas = r.faltas.map(f => linha({ id: f.id, cls: "pf-l--compacta",
+      prazo: `${st("atencao", "A confirmar")}${regTent(i.id)}`, acoes: btWa(i.id, "confirmacao") })).join("");
+    const faltas = r.faltas.map(f => linha({ id: f.id, cls: `pf-l--compacta${registrado[f.id] ? " pf-l--feita" : ""}`,
       com: { r: "recepcao" }, txt: f.st === "falta" ? `Faltou ${f.data} às ${f.h} · ${f.tipo}` : `Consulta ${f.data} às ${f.h} sem registro de comparecimento`,
-      prazo: st(f.st === "falta" ? "atrasado" : "atencao", f.st === "falta" ? "Remarcar" : "Sem registro"),
-      acoes: f.st === "falta" ? `${btWa(f.id, "falta")}${btIco("i-tel", `Ligar para remarcar: ${P[f.id].nome}`)}` : btIco("i-check", `Registrar comparecimento: ${P[f.id].nome}`, 'data-pf="registrar"') })).join("");
+      prazo: f.st === "falta" ? `${st("atrasado", "Remarcar")}${ligou[f.id] ? `<span class="pf-mini">ligação registrada às ${ligou[f.id]}</span>` : ""}`
+        : marca(f.id, registrado, "Registrado", st("atencao", "Sem registro")),
+      acoes: f.st === "falta" ? `${btWa(f.id, "falta")}${btIco("i-tel", `Ligar para remarcar: ${P[f.id].nome}`, 'data-pf="ligar"')}`
+        : btIco("i-check", `${registrado[f.id] ? "Desfazer comparecimento" : "Registrar comparecimento"}: ${P[f.id].nome}`, `data-pf="registrar" aria-pressed="${!!registrado[f.id]}"`) })).join("");
+    const nSemResp = r.hojeConf.filter(a => a.st === "semresp").length;
     return {
       resumo: `${r.ag.length} consultas hoje · ${nConf} a confirmar`,
       coluna: cartaoFoco({ rot: "A confirmar", seta: ["agenda.html", "Abrir a agenda"],
         valor: `${nConf}<small>${pl(nConf, "consulta", "consultas")}</small>`,
-        nota: `<span><b>${r.hojeConf.length}</b> ainda hoje · <b>${r.prox.length}</b> para ${nomeDia(proxDia)}</span>${r.hojeConf.some(a => a.st === "semresp") ? st("atrasado", "1 sem resposta") : ""}`,
+        nota: `<span><b>${r.hojeConf.length}</b> ainda hoje · <b>${r.prox.length}</b> para ${nomeDia(proxDia)}</span>${nSemResp ? st("atrasado", `${nSemResp} sem resposta`) : ""}`,
         extra: [["Consultas hoje", r.ag.length], ["Na clínica agora", `<span id="pf-na-clinica">${naClinica}</span>`], ["Faltas na semana", r.nFaltas]] }) +
         cartaoLista({ id: "pf-t-cheg", tit: "Chegadas de hoje", sub: `${feitas.length} já atendida${feitas.length === 1 ? "" : "s"} antes das ${VA.AGORA}`, cls: "pf-fila pf-fila--chegadas",
-          acao: `<a class="bt-texto" href="agenda.html">Agenda do dia <svg class="ico ico-sm"><use href="#i-dir"/></svg></a>`, itens: chegadas, vazio: "Ninguém mais na agenda de hoje" }),
-      lado: cartaoLista({ id: "pf-t-conf", tit: "Confirmar", sub: "pelo WhatsApp", itens: (confHoje ? `<li class="pf-sep" role="presentation">Ainda hoje</li>${confHoje}` : "") + (confProx ? `<li class="pf-sep" role="presentation">Véspera · ${nomeDia(proxDia)}</li>${confProx}` : ""), vazio: "Tudo confirmado" }) +
+          acao: verLink("agenda.html", "Ver agenda"), itens: chegadas, vazio: "Ninguém mais na agenda de hoje" }),
+      lado: cartaoLista({ id: "pf-t-conf", tit: "Confirmar", sub: "pelo WhatsApp", itens: (confHoje ? `<li class="pf-sep" role="presentation">Ainda hoje</li>${confHoje}` : "") + (confProx ? `<li class="pf-sep" role="presentation">Próximo dia de agenda · ${nomeDia(proxDia)}</li>${confProx}` : ""), vazio: "Tudo confirmado" }) +
         cartaoLista({ id: "pf-t-faltas", tit: "Faltas para remarcar", sub: "esta semana", itens: faltas, vazio: "Nenhuma falta nesta semana" }),
     };
   }
 
   /* ---------- Médico ---------------------------------------------------- */
-  function telaMedico() {
-    const med = MED_EU, d = dadosMedico(med);
+  const MED_DE = { g: "do Dr. Rafael", d: "da Dra. Lúcia" };
+  function telaMedico(m) {
+    const med = m === "g" || m === "d" ? m : MED_EU, eu = med === MED_EU, d = dadosMedico(med);
+    const suaMeta = eu ? "da sua meta" : "da meta";
     const prox = d.ag.find(a => a.h > VA.AGORA && a.st !== "feito");
     const nOport = d.ag.filter(a => VAP.ESTUDO[a.id] && a.st !== "feito" && /≈ R\$|complementa|consolidar|manutenção|peeling|recall|indique|retorno já/i.test(VAP.ESTUDO[a.id].oport)).length;
     const itens = d.ag.map(a => {
       const p = P[a.id], e = VAP.ESTUDO[a.id] || {}, [cls, rot] = ST_AGENDA[a.st], feito = a.st === "feito";
       const aberto = prox && prox.id === a.id;
-      const oport = VIS.plano ? e.oport : String(e.oport || "").replace(/\s*\(?≈ R\$ [\d.,]+ mil\)?/g, "").replace(/;\s*ticket estimado R\$ [\d.,]+ mil/, "");
+      const oport = VIS.plano ? e.oport : String(e.oport || "").replace(/\s*\(?≈ R\$ [\d.,]+ mil\)?/g, "").replace(/;\s*(ticket|valor) estimado R\$ [\d.,]+ mil/, "");
       return `<li class="pf-est${feito ? " pf-est--feito" : ""}" data-id="${a.id}" data-med="${p.med}">
         <details${aberto ? " open" : ""}>
           <summary class="pf-l">
@@ -411,7 +430,7 @@
         <div class="pf-mm__pe">${st(rr.cls.replace("status--", ""), rr.rot)}<span>esperado hoje ${rs ? "R$ " + mil(meta * VA.FRAC) + " mil" : br(meta * VA.FRAC)}</span></div></div>`;
     };
     const meta = `<section class="cartao pf-meta" aria-labelledby="pf-t-minha">
-      <div class="cartao__cab"><h2 id="pf-t-minha">Sua meta <span class="cartao__sub">novembro · ${nomeMed(med)}</span></h2><a class="bt-texto" href="metas.html">Metas <svg class="ico ico-sm"><use href="#i-dir"/></svg></a></div>
+      <div class="cartao__cab"><h2 id="pf-t-minha">${eu ? "Sua meta" : `Meta ${MED_DE[med]}`} <span class="cartao__sub">novembro${eu ? ` · ${nomeMed(med)}` : ""}</span></h2>${verLink("metas.html", "Ver metas")}</div>
       ${VIS.fat ? linhaMeta("Faturamento", d.fat, true) : `<div class="pf-mm">${vgestao("Faturamento")}</div>`}
       ${linhaMeta("Planos fechados", d.plm)}
       ${linhaMeta("Consultas", d.co)}
@@ -420,21 +439,21 @@
       txt: `${p.proc}${VIS.plano ? ` · <b class="pf-rs">R$ ${real(p.v)}</b>` : ""}`,
       prazo: st(p.sev, p.sev === "atrasado" ? `${p.venc} dias de atraso` : esc(p.prox || "")) })).join("");
     return {
-      resumo: `${d.ag.length} pacientes hoje${prox ? ` · próxima às ${prox.h}` : ""}`,
-      coluna: cartaoFoco({ rot: "Sua agenda · hoje", seta: ["agenda.html", "Abrir a agenda"],
-        anel: VIS.fat ? UI.anel({ p: d.pct, marca: VA.FRAC * 100, aria: `${d.pct}% da sua meta de faturamento; esperado hoje ${Math.round(VA.FRAC * 100)}%` })
+      resumo: `${eu ? "" : `${nomeMed(med)} · `}${d.ag.length} pacientes hoje${prox ? ` · próxima às ${prox.h}` : ""}`,
+      coluna: cartaoFoco({ rot: eu ? "Sua agenda · hoje" : `Agenda ${MED_DE[med]} · hoje`, seta: ["agenda.html", "Abrir a agenda"],
+        anel: VIS.fat ? UI.anel({ p: d.pct, marca: VA.FRAC * 100, aria: `Faturamento: ${d.pct}% ${suaMeta}; o esperado até hoje era ${Math.round(VA.FRAC * 100)}%` })
           : UI.anel({ p: d.plm[0] / d.plm[1] * 100, marca: VA.FRAC * 100, aria: `${d.plm[0]} de ${d.plm[1]} planos da meta` }),
         valor: `${d.ag.length}<small>pacientes</small>`,
         nota: (prox ? `<span>próxima: <b>${esc(P[prox.id].nome)}</b> · ${prox.h} · ${prox.tipo}</span>` : "<span>agenda concluída</span>") +
-          `<span class="pf-foco__leg">anel: ${VIS.fat ? `<b>${d.pct}%</b> da sua meta de faturamento` : `<b>${d.plm[0]} de ${d.plm[1]}</b> planos da meta`} · esperado hoje ${Math.round(VA.FRAC * 100)}%</span>`,
-        extra: [["1ªs consultas", d.ag.filter(a => a.tipo === "1ª consulta").length], ["Com oportunidade", nOport], ["Planos em aberto", d.nPlanos]] }) +
+          `<span class="pf-foco__leg">${VIS.fat ? `Faturamento: <b>${d.pct}%</b> ${suaMeta}` : `Planos fechados: <b>${d.plm[0]} de ${d.plm[1]}</b> ${suaMeta}`} · o esperado até hoje era ${Math.round(VA.FRAC * 100)}%</span>`,
+        extra: [["Primeiras consultas", d.ag.filter(a => a.tipo === "1ª consulta").length], ["Com oportunidade", nOport], ["Planos em aberto", d.nPlanos]] }) +
         `<section class="cartao pf-lista pf-fila pf-fila--estudo" aria-labelledby="pf-t-estudo">
           <div class="cartao__cab"><h2 id="pf-t-estudo">Agenda do dia <span class="cartao__sub">com o estudo de cada paciente</span></h2>
-            <span class="pf-dica">${ico("i-info", "ico ico-sm")}Coerência clínica, não só objetivo comercial</span></div>
+            <span class="pf-dica">${ico("i-info", "ico ico-sm")}Conduza pelo que é melhor para o paciente</span></div>
           <ul class="pf-ul">${itens}</ul>
         </section>`,
-      lado: meta + cartaoLista({ id: "pf-t-planos", tit: "Seus planos em aberto", sub: `${d.nPlanos} no funil · a Closer acompanha`, itens: planos, vazio: "Nenhum plano em aberto",
-        pe: `<span>${d.planos.length} com nome · os mais urgentes primeiro</span><a class="bt-texto" href="funil.html">Funil <svg class="ico ico-sm"><use href="#i-dir"/></svg></a>` }),
+      lado: meta + cartaoLista({ id: "pf-t-planos", tit: eu ? "Seus planos em aberto" : `Planos em aberto ${MED_DE[med]}`, sub: "a Closer acompanha", itens: planos, vazio: "Nenhum plano em aberto",
+        pe: `<span>${d.planos.length < d.nPlanos ? (d.planos.length === 1 ? `Mostrando o mais urgente de ${d.nPlanos}` : `Mostrando os ${d.planos.length} mais urgentes de ${d.nPlanos}`) : `${d.nPlanos} ${pl(d.nPlanos, "plano", "planos")} · os mais urgentes primeiro`}</span>${verLink("funil.html", "Ver no funil")}` }),
     };
   }
 
@@ -446,9 +465,12 @@
       txt: `${p.proc} · ${esc(p.nota)}`,
       prazo: `<span class="pf-rs pf-rs--lg"><small>R$</small>${real(p.v)}</span><span class="pf-mini">apresentado há ${p.d} dias</span>${st(p.sev, p.sev === "atrasado" ? `${p.venc} dias de atraso` : esc(p.prox || "No prazo"))}${regTent(p.id)}`,
       acoes: `${btWa(p.id, "plano")}${btIco("i-plano", `Montar orçamento para ${p.nome}`, 'data-pf="orcamento"')}` })).join("");
-    const saldos = c.saldos.map(s => linha({ id: s.id, cls: "pf-l--compacta",
-      txt: `${esc(s.txt)}`,
-      prazo: `<span class="pf-rs"><small>R$</small>${real(s.saldo)}</span>${st(s.sev, s.prazo)}`, acoes: btWa(s.id, "plano") })).join("");
+    // Saldo com a 2ª etapa marcada para hoje: confirmar o horário; sem data: retomar o plano
+    const saldos = c.saldos.map(s => { const hojeMarcado = s.prazo === "Hoje" && VA.consulta && VA.consulta(s.id);
+      return linha({ id: s.id, cls: "pf-l--compacta",
+        txt: `${esc(s.txt)}`,
+        prazo: `<span class="pf-rs"><small>R$</small>${real(s.saldo)}</span>${st(s.sev, s.prazo)}${regTent(s.id)}`,
+        acoes: hojeMarcado ? `${btWa(s.id, "confirmacao")}${btAgenda(s.id)}` : btWa(s.id, "plano") }); }).join("");
     const rec = c.recall.slice(0, 5).map(r => linha({ id: r.id, cls: "pf-l--compacta", com: { r: "closer" },
       chips: `${r.p.carteira ? `<span class="chip">Carteira ${r.p.carteira}</span>` : ""}`,
       txt: `${r.p.proc} · última ${r.ultTxt}`,
@@ -461,37 +483,51 @@
         extra: [["Fechados no mês", `${c.fech.n}<small> · R$ ${mil(c.fech.v)} mil</small>`], ["Saldos parciais", `<small>R$ </small>${mil(c.saldos.reduce((a, s) => a + s.saldo, 0))}<small> mil</small>`], ["Recall vencido", c.recall.length]] }) +
         cartaoLista({ id: "pf-t-planos", tit: "Planos em aberto", sub: "retorno vencido primeiro", cls: "pf-fila",
           acao: `<button type="button" class="bt-sec" data-pf="orcamento">${ico("i-plano", "ico ico-sm")}Montar orçamento</button>`, itens: planos, vazio: "Nenhum plano em aberto",
-          pe: `<span>${c.planos.length} com retorno combinado · ${c.aberto.n - c.planos.length} outros no funil</span><a class="bt-texto" href="funil.html">Ver no funil <svg class="ico ico-sm"><use href="#i-dir"/></svg></a>` }),
+          pe: `<span>${c.planos.length < c.aberto.n ? `Mostrando ${c.planos.length} de ${c.aberto.n} · retorno vencido primeiro` : `${c.aberto.n} planos`}</span>${verLink("funil.html", "Ver no funil")}` }),
       lado: cartaoLista({ id: "pf-t-saldos", tit: "Saldos de fechamento parcial", itens: saldos, vazio: "Nenhum saldo pendente" }) +
         cartaoLista({ id: "pf-t-recall", tit: "Recall vencido", sub: "recompras", itens: rec, vazio: "Nenhum recall vencido",
-          pe: `<span>${c.recall.length} vencidos${c.recall.length > 5 ? " · os 5 mais antigos" : ""}</span><a class="bt-texto" href="recall.html">Recall <svg class="ico ico-sm"><use href="#i-dir"/></svg></a>` }),
+          pe: `<span>${c.recall.length > 5 ? `Mostrando os 5 mais antigos de ${c.recall.length}` : `${c.recall.length} ${pl(c.recall.length, "vencido", "vencidos")}`}</span>${verLink("recall.html", "Ver recall")}` }),
     };
   }
 
   /* ---------- Gestão: passagem de bastão -------------------------------- */
-  const PESSOA = { sdr: primeiro(QUEM.sdr) || "SDR", recepcao: primeiro(QUEM.recepcao) || "Recepção", medico: "Médicos", closer: primeiro(QUEM.closer) || "Closer" };
+  const PESSOA = { sdr: primeiro(QUEM.sdr) || "SDR", recepcao: primeiro(QUEM.recepcao) || "Recepção", closer: primeiro(QUEM.closer) || "Closer" };
   const ARTIGO = { sdr: "a SDR", recepcao: "a Recepção", medico: "o Médico", closer: "a Closer" };
-  const NOTA_ET = { sdr: "1º contato · prazo 3 dias", recepcao: "confirmar e registrar", medico: "plano em 1 dia", closer: "retorno em 15 dias" };
+  // Mesmas palavras dos prazos das colunas do Funil (dados.js · ETAPAS)
+  const NOTA_ET = { sdr: `responder em ${VAP.PRAZO_RESPOSTA} min · prazo 3 dias`, recepcao: "confirmar na véspera · registrar no dia", medico: "plano em 1 dia", closer: "retorno em 15 dias" };
+  // Motivos do gargalo numa frase (as notas do registro vêm cruas: "Faltou", "Confirmação sem resposta"...)
+  const motivoCurto = n => /^faltou/i.test(n) ? "falta" : /sem registro de comparecimento/i.test(n) ? "consulta sem registro de comparecimento"
+    : n.replace(/^./, c => c.toLowerCase());
+  function frasemotivos(ps) {
+    const cont = new Map();
+    ps.forEach(p => { const k = motivoCurto(((p.nota || "").split(" · ")[0] || "").trim()); if (k) cont.set(k, (cont.get(k) || 0) + 1); });
+    const it = [...cont].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, n]) => n > 1 ? `${k} (${n})` : k);
+    if (!it.length) return "";
+    return `${pl(it.length, "Motivo", "Motivos")}: ${it.length > 1 ? it.slice(0, -1).join(", ") + " e " + it[it.length - 1] : it[0]}.`;
+  }
   function htmlBastao(m) {
-    const b = bastao(m);
+    const b = bastao(m), pessoa = k => k === "medico" ? (m === "g" || m === "d" ? nomeMed(m) : "2 médicos") : PESSOA[k];
     const passos = b.linhas.map((l, i) => {
-      const g = b.garg && b.garg.k === l.k;
+      const g = b.garg && b.garg.k === l.k, np = l.parados.length;
+      const rotLink = `${VAP.PAPEL[l.k]}: ${l.n} ${pl(l.n, "lead", "leads")}${np ? `, ${np} ${pl(np, "parado", "parados")}` : ""}. Ver no funil`;
       return `${i ? `<span class="pf-bt__seta" aria-hidden="true">${ico("i-dir")}</span>` : ""}
       <div class="pf-bt__passo${g ? " pf-bt__passo--garg" : ""}" role="listitem">
-        <div class="pf-bt__quem"><span class="pf-com pf-com--${l.k}"><i aria-hidden="true"></i>${VAP.PAPEL[l.k]}</span><span class="pf-bt__pessoa">${PESSOA[l.k]}</span></div>
+        <a class="pf-bt__link" href="funil.html${np ? "#parados" : ""}" aria-label="${esc(rotLink)}"></a>
+        <div class="pf-bt__quem"><span class="pf-com pf-com--${l.k}"><i aria-hidden="true"></i>${VAP.PAPEL[l.k]}</span><span class="pf-bt__pessoa">${pessoa(l.k)}</span></div>
         <div class="pf-bt__n"><span class="kpi__valor">${l.n}<small>${pl(l.n, "lead", "leads")}</small></span></div>
         <div class="pf-bt__rot">${NOTA_ET[l.k]}</div>
-        <div class="pf-bt__st">${l.parados.length ? `<span class="status status--forte">${l.parados.length} parado${l.parados.length > 1 ? "s" : ""}</span>` : `<span class="status status--neutro">nada parado</span>`}${g ? `<span class="pf-bt__garg">gargalo</span>` : ""}</div>
+        <div class="pf-bt__st">${np ? `<span class="status status--forte">${np} ${pl(np, "parado", "parados")}</span>` : `<span class="status status--neutro">nada parado</span>`}${g ? `<span class="pf-bt__garg">Gargalo</span>` : ""}</div>
       </div>`;
     }).join("");
     const g = b.garg;
-    const motivos = g ? [...new Set(g.parados.map(p => (p.nota || "").split(" · ")[0]))].slice(0, 3) : [];
-    return `<div class="cartao__cab"><h2 id="pf-t-bastao">Passagem de bastão <span class="cartao__sub">com quem está cada lead agora</span></h2>
-        <a class="bt-texto" href="funil.html#parados">Ver parados no funil <svg class="ico ico-sm"><use href="#i-dir"/></svg></a></div>
+    const par = VA.parados(m), risco = par.reduce((a, p) => a + VA.valorLead(p), 0);
+    const subTot = par.length ? `${par.length} ${pl(par.length, "parado", "parados")}${VIS.plano && risco ? ` · R$ ${mil(risco)} mil em risco` : ""}` : "com quem está cada lead agora";
+    return `<div class="cartao__cab"><h2 id="pf-t-bastao">Passagem de bastão <span class="cartao__sub">${subTot}</span></h2>
+        ${par.length ? verLink("funil.html#parados", "Ver parados no funil") : verLink("funil.html", "Ver funil")}</div>
       <div class="pf-bt__trilha" role="list">${passos}</div>
       ${g ? `<div class="pf-bt__gargalo">
         <span class="aviso__ico" aria-hidden="true">${ico("i-relogio")}</span>
-        <p><b>Gargalo da semana: ${VAP.PAPEL[g.k]}.</b> ${g.parados.length} leads parados com ${ARTIGO[g.k]}${VIS.plano ? ` · R$ ${mil(g.risco)} mil em risco` : ""}. <span class="muted">${motivos.map(esc).join(" · ")}.</span></p>
+        <p><b>Gargalo agora: ${VAP.PAPEL[g.k]}.</b> ${g.parados.length} ${pl(g.parados.length, "lead parado", "leads parados")} com ${ARTIGO[g.k]}${VIS.plano ? ` · R$ ${mil(g.risco)} mil em risco` : ""}. <span class="muted">${esc(frasemotivos(g.parados))}</span></p>
         <span class="pf-bt__nomes">${g.parados.map(p => av(p.med, p.nome, true)).join("")}</span>
       </div>` : `<p class="pf-bt__ok">Nenhum lead parado acima do prazo. O bastão está passando.</p>`}`;
   }
@@ -562,12 +598,16 @@
         const lin = $(`[data-id="${id}"]`, raizPerfil); if (lin && !REDUZ) anima(lin, [{ backgroundColor: "var(--ok-fundo)" }, { backgroundColor: "transparent" }], { duration: 900, easing: EASE });
         aviso(on ? `Chegada registrada · <b>${esc(p.nome)}</b> · ${hh}` : `Chegada desfeita · <b>${esc(p.nome)}</b>`);
       } else if (tipo === "respondido" || tipo === "registrar") {
-        const feito = li.classList.toggle("pf-l--feita");
-        bt.setAttribute("aria-pressed", feito);
-        const s = $(".pf-l__prazo .status", li);
-        if (feito) { li.dataset.orig = s ? s.outerHTML : ""; if (s) s.outerHTML = st("ok", tipo === "registrar" ? `Registrado ${hh}` : `Respondido ${hh}`); }
-        else if (s && li.dataset.orig) s.outerHTML = li.dataset.orig;
+        const mapa = tipo === "registrar" ? registrado : respondido, feito = !mapa[id];
+        if (feito) mapa[id] = hh; else delete mapa[id];
+        renderPerfil(false);   // cartão de foco, resumo do topo e lista andam juntos
+        const nova = $(`[data-id="${id}"] [data-pf="${tipo}"]`, raizPerfil); if (nova) nova.focus({ preventScroll: true });
         aviso(feito ? `${tipo === "registrar" ? "Comparecimento registrado" : "Marcado como respondido"} · <b>${esc(p.nome)}</b>` : `Desfeito · <b>${esc(p.nome)}</b>`);
+      } else if (tipo === "ligar") {
+        ligou[id] = hh;
+        renderPerfil(false);
+        const nova = $(`[data-id="${id}"] [data-pf="ligar"]`, raizPerfil); if (nova) nova.focus({ preventScroll: true });
+        aviso(`Tentativa registrada · ligação · <b>${esc(p.nome)}</b>`);
       }
     });
     // Estudo do paciente: abre com uma transição suave
@@ -604,19 +644,22 @@
     });
     mascara();
   }
-  // Troca o conteúdo de um bloco por "Visível para a gestão" sem abrir buraco no layout
+  // Troca o conteúdo de um bloco por "Visível só para a gestão" sem abrir buraco no layout
   // modo: "titulo" (o rótulo do cartão continua à vista; o véu não repete o nome),
   // "todo" (esconde também o rótulo), "curto" (o cartão encolhe: só o véu, sem altura vazia)
   function veu(el, rot, sub, modo = "titulo") {
     if (!el || el.classList.contains("pf-mascarado")) return;
+    // sem a seta, o recorte do canto ficaria como uma mordida vazia
+    if (el.classList.contains("recorte")) { el.classList.remove("recorte"); $$(":scope > .recorte__filete, :scope > .recorte__seta", el).forEach(x => x.remove()); }
+    sub = SO_GESTAO;
     el.classList.add("pf-mascarado", "pf-mascarado--" + modo);
     el.insertAdjacentHTML("beforeend", modo === "titulo" ? vgestao(sub, " ").replace("<span> </span>", "") : vgestao(rot, sub));
   }
   function mascara() {
     if (pagina === "metas" && !VIS.fat) {
-      veu($(".metas-foco"), "Faturamento · novembro", "Visível para a gestão");
-      const rit = $("#v-rit"); if (rit) veu(rit.closest(".kpi"), "Ritmo necessário", "Visível para a gestão");
-      const ano = $("#t-ano"); if (ano) veu(ano.closest(".cartao"), "Faturamento de 2026", "Visível para a gestão", "curto");
+      veu($(".metas-foco"), "Faturamento · novembro", SO_GESTAO);
+      const rit = $("#v-rit"); if (rit) veu(rit.closest(".kpi"), "Ritmo necessário", SO_GESTAO);
+      const ano = $("#t-ano"); if (ano) veu(ano.closest(".cartao"), "Faturamento de 2026", SO_GESTAO, "curto");
       $$("#lista-metas .metas-linha").forEach(li => {
         const n = ($(".linha__nome", li) || {}).textContent || "";
         if (/^Faturamento/.test(n) || (!VIS.plano && /^Valor em planos/.test(n))) li.classList.add("pf-linha-oculta");
@@ -626,21 +669,54 @@
       $$(".pilulas .pilula").forEach(b => { b.removeAttribute("title"); const n = $(".pilula__n", b); if (n) n.hidden = true; });
     }
     if (pagina === "rel") {
-      if (!VIS.fat) { const pr = $("#procedimentos"); if (pr) veu(pr, "Faturamento por procedimento", "Visível para a gestão", "todo"); }
+      if (!VIS.fat) { const pr = $("#procedimentos"); if (pr) veu(pr, "Faturamento por procedimento", SO_GESTAO, "todo"); }
       if (!VIS.plano) {
-        veu($(".rl-foco"), "Fechado em 2026", "Valores visíveis para a gestão");
-        const t = $("#k-ticket"); if (t) veu(t.closest(".kpi"), "Ticket médio", "Visível para a gestão");
-        $$("#orig .rl-num").forEach(x => { if (/R\$/.test(x.textContent)) x.classList.add("pf-oculto"); });
-        $$("#orig .rl-orig__cab").forEach(x => { if (/valor|R\$/i.test(x.textContent)) x.classList.add("pf-oculto"); });
+        veu($(".rl-foco"), "Fechado em 2026", SO_GESTAO);
+        const t = $("#k-ticket"); if (t) veu(t.closest(".kpi"), "Ticket médio", SO_GESTAO);
+        $$("#orig .rl-num").forEach(x => { if (/R\$/.test(x.textContent)) x.classList.add("pf-fora"); });
+        $$("#orig .rl-orig__cab").forEach(x => { if (/valor|R\$/i.test(x.textContent)) x.classList.add("pf-fora"); });
+        const av = $('#ord .aba[data-o="v"]');
+        if (av && !av.hidden) { av.hidden = true; if (av.getAttribute("aria-pressed") === "true") { const n = $('#ord .aba[data-o="n"]'); if (n) n.click(); } }
       }
     }
     if (pagina === "funil" && !VIS.plano) {
-      veu($(".fn-foco"), "Fechado em 2026", "Valores visíveis para a gestão");
-      const ab = $("#r-aberto"); if (ab) veu(ab.closest(".fn-num"), "Planos em aberto", "Valores visíveis para a gestão", "todo");
+      veu($(".fn-foco"), "Fechado em 2026", SO_GESTAO);
+      const ab = $("#r-aberto"); if (ab) veu(ab.closest(".fn-num"), "Planos em aberto", SO_GESTAO, "todo");
       const risco = $("#r-risco");
       if (risco && !risco.dataset.pf) { risco.dataset.pf = "1"; risco.hidden = true; const t = risco.nextSibling; if (t && t.nodeType === 3) t.nodeValue = ""; }
       $$(".fn-col__sel .status--ok").forEach(s => { s.textContent = s.textContent.replace(/\s*·\s*R\$.*$/, ""); });
+      $$(".fn-col__rot").forEach(x => { if (/^(potencial|em aberto) · /.test(x.textContent)) x.textContent = x.textContent.replace(/^(potencial|em aberto) · /, ""); });
     }
+    if (pagina === "ajustes") ajustes();
+  }
+
+  /* ---------- Ajustes fora da Gestão ------------------------------------
+     Metas (faturamento) e Tabela de preços seguem a matriz; acessos, perfis,
+     especialidades e dados da clínica ficam só para leitura: quem altera é a gestão. */
+  let ajFeito = false;
+  function ajustes() {
+    if (ajFeito || PERFIL === "gestao") return;
+    ajFeito = true;
+    const veus = [["#metas", "Metas do mês", !VIS.fat], ["#tabela", "Tabela de preços", !VIS.plano]];
+    veus.forEach(([sel, rot, esconde]) => {
+      if (!esconde) return;
+      veu($(sel), rot, SO_GESTAO, "curto");
+      const ix = $(`#indice a[href="${sel}"]`); if (ix) ix.hidden = true;
+    });
+    const secs = ["#acessos", "#perfis", "#metas", "#especialidades", "#tabela", "#clinica"].map(x => $(x)).filter(x => x && !x.classList.contains("pf-mascarado"));
+    // abas (trocar de especialidade na tabela) continuam: só olham, não alteram
+    const trava = sec => $$("button, select, input, textarea", sec).forEach(el => {
+      if (el.disabled || el.matches('[role="tab"]')) return;
+      el.disabled = true; el.dataset.pfTrava = "1";
+    });
+    secs.forEach(sec => {
+      sec.classList.add("pf-leitura");
+      const cab = $(".aj-cab", sec);
+      if (cab && !$(".pf-so-gestao", sec)) cab.insertAdjacentHTML("afterend", `<p class="aj-nota pf-so-gestao" role="note">${ico("i-info", "ico ico-sm")}<span>Só a gestão altera. Seu perfil (${ROT[PERFIL]}) vê esta parte para consulta.</span></p>`);
+      trava(sec);
+      // a página redesenha listas e tabelas depois de cada ação: o bloqueio acompanha
+      new MutationObserver(() => trava(sec)).observe(sec, { childList: true, subtree: true });
+    });
   }
 
   /* =====================================================================

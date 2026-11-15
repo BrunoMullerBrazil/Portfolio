@@ -44,6 +44,14 @@
 
   /* ---------- Trilho lateral (no celular, barra inferior) ---------------- */
   const pagina = document.body.dataset.pagina;
+  const qs = new URLSearchParams(location.search);
+  // perfil atual, pela mesma regra de perfis.js (que carrega depois): ?perfil=, o salvo, senão Gestão
+  const PF = (() => {
+    const ok = k => ["gestao", "medico", "sdr", "recepcao", "closer"].includes(k);
+    const p = (qs.get("perfil") || "").toLowerCase(); if (ok(p)) return p;
+    let s = null; try { s = localStorage.getItem("munin:perfil") || sessionStorage.getItem("munin:perfil"); } catch (e) { /* sem armazenamento */ }
+    return ok(s) ? s : "gestao";
+  })();
   const ITENS = [
     { k: "painel",  rot: "Painel",     ico: "i-painel",  href: "painel.html", cel: "o1" },
     { k: "funil",   rot: "Funil",      ico: "i-funil",   href: "funil.html",  cel: "o2" },
@@ -52,6 +60,8 @@
     { k: "metas",   rot: "Metas",      ico: "i-metas",   href: "metas.html",  cel: "o5" },
     { k: "rel",     rot: "Relatórios", ico: "i-rel",     href: "relatorios.html" },
   ];
+  // Barra do celular: a Closer faz recall todo dia, e na própria tela de Recall o item precisa aparecer ativo
+  if (PF === "closer" || pagina === "recall") { ITENS[3].cel = "o5"; delete ITENS[4].cel; }
   // data-rotulo: no computador (>= 1024px) a peça mostra só ícones e o rótulo vira tooltip
   const item = i => `<a class="trilho__item ${i.cel || "trilho__item--desk"}" href="${i.href}" data-rotulo="${i.rot}"${i.k === pagina ? ' aria-current="page"' : ""}>
       <svg class="ico" aria-hidden="true"><use href="#${i.ico}"/></svg><span class="trilho__rot">${i.rot}</span></a>`;
@@ -77,6 +87,14 @@
   document.querySelector("main").insertAdjacentHTML("beforebegin", nav);
   const ola = document.querySelector(".topo__ola");
   // Topo do conteúdo: símbolo Munin (só no celular) + nome da clínica do usuário
+  // ?hora= (demonstração de outro horário): a linha de data acompanha a saudação
+  const horaQ = qs.get("hora");
+  if (horaQ != null && horaQ !== "" && !isNaN(+horaQ)) {
+    const hq = Math.max(0, Math.min(23.99, +horaQ)), hTxt = `${String(Math.floor(hq)).padStart(2, "0")}:${String(Math.round((hq % 1) * 60) % 60).padStart(2, "0")}`;
+    document.querySelectorAll(".topo__data").forEach(el => el.childNodes.forEach(n => {
+      if (n.nodeType === 3 && /\b09:40\b/.test(n.nodeValue)) n.nodeValue = n.nodeValue.replace(/\b09:40\b/, hTxt);
+    }));
+  }
   if (ola) ola.insertAdjacentHTML("afterbegin", `<p class="cliente">${simbolo("marca-cel")}<span class="cliente__nome"><span class="sr">Clínica do usuário: </span>${CLIENTE}</span></p>`);
 
   /* ---------- Ações do topo: iguais nas 3 telas -------------------------- */
@@ -140,7 +158,8 @@
   /* Pílulas de médico: contagens e clique */
   function pilulasMedico(contagem, aoMudar) {
     document.querySelectorAll(".pilula[data-med]").forEach(b => {
-      const n = b.querySelector(".pilula__n"); if (n) n.textContent = contagem(b.dataset.med);
+      // no painel a contagem é a agenda de hoje: só faz sentido para quem trabalha a agenda (não SDR nem Closer)
+      const n = b.querySelector(".pilula__n"); if (n) { n.textContent = contagem(b.dataset.med); if (pagina === "painel" && (PF === "sdr" || PF === "closer")) n.hidden = true; }
       b.addEventListener("click", () => {
         document.querySelectorAll(".pilula[data-med]").forEach(x => x.setAttribute("aria-pressed", x === b));
         aoMudar(b.dataset.med);

@@ -6,7 +6,7 @@
    ===================================================================== */
 (function () {
   "use strict";
-  const doc = document, VA = window.VA, VA2 = window.VA2;
+  const doc = document, VA2 = window.VA2;
   const REDUZ = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const EASE = "cubic-bezier(.22,1,.36,1)";
   const anima = (el, kf, o) => { try { return el.animate(kf, o); } catch (e) { return null; } };
@@ -26,20 +26,28 @@
   const ico = (k, cls = "ico") => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
   const iniciais = n => { const p = n.replace(/^(Dra?\.)\s+/, "").split(/\s+/).filter(x => x.length > 1); return ((p[0] || "?")[0] + (p.length > 1 ? p[p.length - 1][0] : "")).toUpperCase(); };
 
-  /* Painel grafite: recorte do produto (números reais de dados.js) */
+  /* Painel grafite: recorte ILUSTRATIVO do produto. Esta tela é pública (vem antes do login),
+     então não mostra nenhum dado da clínica: nada de faturamento em R$, nomes de pacientes ou contagens reais. */
+  const EXEMPLO = {
+    pct: 54, esp: 60,
+    atencao: [
+      { nome: "Paciente A", s: "Recall · retorno vencido", st: "atrasado", prazo: "3 dias" },
+      { nome: "Paciente B", s: "Plano · aguardando resposta", st: "atencao", prazo: "hoje" },
+      { nome: "Paciente C", s: "Retorno · ainda não agendou", st: "atencao", prazo: "5 dias" },
+    ],
+  };
   function palco(el, { topo, titulo, texto }) {
-    const [fv, fm] = VA.metaVal("fat", "todos"), pct = Math.round(fv / fm * 100), esp = Math.round(VA.FRAC * 100);
-    const mil = v => (v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 });
-    const at = VA.ATENCAO.slice(0, 3).map(a => { const p = VA.P[a.id]; return `<li><span class="av av--${p.med} av--sm" aria-hidden="true">${iniciais(p.nome)}</span><div style="min-width:0"><b>${p.nome}</b><span class="s">${VA.TIPO_ROT[a.tipo]} · ${a.txt.split(" · ")[0]}</span></div><span class="status ${a.sev === "atrasado" ? "status--atrasado" : "status--atencao"}">${a.prazo || a.dias + " dias"}</span></li>`; }).join("");
+    const { pct, esp } = EXEMPLO;
+    const at = EXEMPLO.atencao.map(a => `<li><span class="av av--r av--sm" aria-hidden="true">${a.nome.slice(-1)}</span><div style="min-width:0"><b>${a.nome}</b><span class="s">${a.s}</span></div><span class="status status--${a.st}">${a.prazo}</span></li>`).join("");
     const c = 2 * Math.PI * 42;
     el.innerHTML = `${simbolo("en-palco__simbolo")}
       <div class="en-palco__topo"><span><i></i>${topo}</span><span>${CLIENTE}</span></div>
       <div class="en-previa" aria-hidden="true">
-        <div class="en-pc en-pc--escuro"><span class="en-pc__rot">Faturamento · novembro</span>
+        <div class="en-pc en-pc--escuro"><span class="en-pc__rot">Meta do mês · exemplo</span>
           <div class="en-pc__lin"><div class="anel"><svg viewBox="0 0 100 100" style="position:absolute;inset:0;width:100%;height:100%"><defs><linearGradient id="en-g" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#8591E2"/><stop offset="1" stop-color="#B9C0F2"/></linearGradient></defs><circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.11)" stroke-width="11"/><circle class="en-arco" cx="50" cy="50" r="42" fill="none" stroke="url(#en-g)" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(pct / 100 * c).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/></svg><span class="anel__v" style="color:#fff">${pct}<small>%</small></span></div>
-          <div><div class="en-pc__v"><small>R$</small>${mil(fv)}<small>mil</small></div><div class="en-pc__nota">meta R$ ${mil(fm)} mil · esperado hoje ${esp}%</div></div></div></div>
+          <div><div class="en-pc__v" style="font-size:20px;letter-spacing:-.015em">da meta do mês</div><div class="en-pc__nota">esperado hoje ${esp}%</div></div></div></div>
         <div class="en-pc"><span class="en-pc__rot">Atenção hoje</span><ul>${at}</ul></div>
-        <div class="en-pc en-pc--largo"><b>${VA.parados("todos").length} leads parados</b><span class="en-pc__barra"><i></i></span><b style="color:var(--texto-2);font-weight:500">${VA.AGENDA.filter(a => !a.evento).length} pacientes hoje</b></div>
+        <div class="en-pc en-pc--largo"><b>Com quem está cada lead</b><span class="en-pc__barra"><i></i></span><b style="color:var(--texto-2);font-weight:500">SDR → Recepção → Médico → Closer</b></div>
       </div>
       <div><div class="en-palco__frase"><h2>${titulo}</h2><p>${texto}</p></div>
       <div class="en-palco__pe" style="margin-top:26px"><span>${ico("agenda")}Agenda e confirmações</span><span>${ico("funil")}Funil de leads</span><span>${ico("recall")}Recall e metas</span></div></div>`;

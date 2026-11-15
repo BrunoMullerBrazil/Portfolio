@@ -34,12 +34,12 @@
   .fn-foco > .kpi__nota:last-child { margin-top: auto; }
   /* 3 números: 3 colunas com área útil ≥ 640px; mais estreito, 2 + 1 */
   .fn-nums { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 8px 0; align-items: stretch; }
-  .fn-num { padding: 12px 16px; display: grid; align-content: center; grid-template-rows: auto auto minmax(calc(2 * 1.45em), auto); gap: 4px; min-width: 0; container-type: inline-size; }
+  .fn-num { padding: 12px 16px; display: grid; align-content: start; grid-template-rows: auto auto minmax(calc(2 * 1.45em), auto); gap: 4px; min-width: 0; container-type: inline-size; }
   .fn-num .kpi__nota { align-content: flex-start; }
   .fn-num:nth-child(2) { border-left: 1px solid var(--linha); }
   .fn-num:nth-child(3) { grid-column: 1 / -1; border-top: 1px solid var(--linha); }
   @container app (min-width: 640px) {
-    .fn-nums { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 18px 8px; }
+    .fn-nums { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: calc(var(--pad) - 4px) 8px; }
     .fn-num { padding: 4px 18px; }
     .fn-num + .fn-num { border-left: 1px solid var(--linha); }
     .fn-num:nth-child(3) { grid-column: auto; border-top: 0; }
@@ -104,6 +104,7 @@
   .fn-col__valor small { font-size: .74em; font-weight: 500; opacity: .72; margin: 0 .15em; letter-spacing: 0; }
   .fn-col__rot { font-size: var(--t-xs); color: var(--texto-2); font-variant-numeric: tabular-nums; line-height: 1.4; min-height: 2.8em; margin-top: 4px; }
   .fn-col__mais { width: 100%; justify-content: center; }
+  .fn-col__pe { font-size: var(--t-xs); color: var(--texto-2); text-align: center; padding: 6px 8px 4px; line-height: 1.4; font-variant-numeric: tabular-nums; }
 
   /* Cartão de lead */
   .fn-card.recorte { --rc: 46px; --rf: 12px; --seta: 38px; --fundo-recorte: var(--suave); padding: 12px; border-radius: 18px; display: flex; flex-direction: column; gap: 6px; }
@@ -212,6 +213,7 @@
   /* Gaveta: agenda de hoje */
   .fn-gaveta { position: fixed; top: 0; right: 0; bottom: 0; width: 360px; z-index: 30; background: var(--porcelana); box-shadow: -12px 0 40px -16px rgba(22,23,28,.28); padding: 20px; overflow-y: auto; transform: translateX(105%); transition: transform .2s; }
   .fn-gaveta.aberta { transform: none; }
+  .fn-gaveta:not(.aberta) { visibility: hidden; transition: transform .2s, visibility 0s .2s; }
   .fn-gaveta .cartao__cab { margin-bottom: 12px; }
   #bt-agenda[aria-expanded="true"] { background: var(--suave-2); box-shadow: inset 0 0 0 1px var(--linha-forte); }
 
@@ -230,7 +232,7 @@
     .fn-etapas.so-parados { display: none; }
     .fn-quadro.so-parados .fn-col.tem-parado { display: flex; margin-bottom: 10px; }
     .fn-col__cab::after { display: none; }
-    .fn-gaveta { width: 100%; }
+    .fn-gaveta { display: none; }  /* celular: a agenda do dia é a aba Agenda da barra inferior */
     .fn-fora .bt-texto { margin-left: 0; }
     .fn-fora > b { width: 100%; }
   }
@@ -315,7 +317,7 @@
 
   <!-- FILTRO ATIVO: só os parados -->
   <div class="fn-filtro" id="filtro-parados" role="status" hidden>
-    <span>Mostrando só os <b id="filtro-n"></b> acima do prazo, do mais parado ao menos parado</span>
+    <span>Mostrando só os <b id="filtro-n"></b> acima do prazo, do maior atraso ao menor</span>
     <button type="button" class="bt-texto" id="limpa-parados">Mostrar todos os leads <svg class="ico ico-sm" aria-hidden="true"><use href="#i-fechar"/></svg></button>
   </div>
 
@@ -362,13 +364,21 @@
 const { P, ETAPAS, FECHOU_ANO, FORA, AGENDA, ativosEtapa, fechMes } = VA;
 const { mil, real, rsMil, av, escala, nomeMed, linhaDoTempo, pilulasMedico, btWa, btAgenda, regTent } = UI;
 const LEADS = Object.values(P).filter(p => p.etapa);
-const SEV = { atrasado: "status--atrasado", atencao: "status--atencao", ok: "status--ok", neutro: "status--neutro" };
+// Verde fica para "Fechou"; tempo na etapa sem problema é neutro
+const SEV = { atrasado: "status--atrasado", atencao: "status--atencao", ok: "status--neutro", neutro: "status--neutro" };
 const $ = id => document.getElementById(id);
+const nDias = n => n === 1 ? "1 dia" : `${n} dias`;
+/* Selo do cartão: "parado" é só o vermelho e mede o ATRASO (o mesmo número do Painel
+   e da ficha: "N dias de atraso"); âmbar é "no limite"; o resto, tempo na etapa. */
 const diasTxt = l => {
-  if (l.etapa === "fechou") return `há ${l.d} ${l.d === 1 ? "dia" : "dias"}`;
-  const base = l.d === 1 ? "1 dia" : `${l.d} dias`;
-  return l.sev === "atrasado" || l.sev === "atencao" ? `${base} parado` : `${base} na etapa`;
+  if (l.etapa === "fechou") return `há ${nDias(l.d)}`;
+  if (l.sev === "atrasado") return l.venc ? `${nDias(l.venc)} de atraso` : "acima do prazo";
+  if (l.sev === "atencao") return `${nDias(l.d)} · no limite`;
+  return `${nDias(l.d)} na etapa`;
 };
+// Coluna "Na etapa" da Lista: sempre o tempo na etapa
+const etapaTxt = l => l.etapa === "fechou" ? `há ${nDias(l.d)}` : nDias(l.d);
+const atraso = l => l.venc || 0;
 const passo = i => i === 5 ? `<span class="fn-passo fn-passo--fim"><svg class="ico"><use href="#i-check"/></svg></span>` : `<span class="fn-passo">${i + 1}</span>`;
 const valorTit = v => `R$ ${real(v)}`;
 // Fechamentos mais recentes primeiro (dd/mm do mesmo ano)
@@ -393,7 +403,7 @@ const totalLeads = m => {  // em andamento + fechados no ano + saíram
 function cartao(l) {
   const temData = l.dh && l.etapa !== "compareceu" && l.etapa !== "plano" && l.etapa !== "fechou";
   const valor = l.etapa === "plano" ? `<div class="fn-card__valor" title="${valorTit(l.v)}"><small>R$</small>${real(l.v)}</div>`
-    : l.etapa === "fechou" ? `<div class="fn-card__valor"><small>R$</small>${real(l.v)}${l.total !== l.v ? `<span class="fn-de">de ${real(l.total)}</span>` : ""}</div>` : "";
+    : l.etapa === "fechou" ? `<div class="fn-card__valor"><small>R$</small>${real(l.v)}${l.total !== l.v ? `<span class="fn-de">de R$ ${real(l.total)}</span>` : ""}</div>` : "";
   const pot = l.pot ? `<div class="fn-card__pot">ticket estimado ≈ R$ ${mil(l.pot)} mil</div>` : "";
   const dh = temData ? `<div class="datahora" aria-label="${l.falta ? "Faltou em" : "Consulta"} ${l.dh[0]} às ${l.dh[1]}"><div><span>${l.falta ? "Faltou" : "Data"}</span><b>${l.dh[0]}</b></div><div><span>Hora</span><b>${l.dh[1]}</b></div></div>` : "";
   const st = l.etapa === "fechou" ? `<span class="status status--ok">Fechou ${l.dt}</span>` : `<span class="status ${parado(l) ? "status--forte" : SEV[l.sev]}">${diasTxt(l)}</span>`;
@@ -419,7 +429,7 @@ function cartao(l) {
 function render() {
   const vis = LEADS.filter(l => okMed(l.med)), fech = fechAno(), fNov = fechMes(filtroMed);
   // Parados primeiro (do mais parado ao menos); com o filtro ligado, só eles
-  const porEtapa = k => vis.filter(l => l.etapa === k && (!soParados || parado(l))).sort((a, b) => (parado(b) - parado(a)) || (parado(a) ? b.d - a.d : 0));
+  const porEtapa = k => vis.filter(l => l.etapa === k && (!soParados || parado(l))).sort((a, b) => (parado(b) - parado(a)) || (parado(a) ? (atraso(b) - atraso(a)) || (b.d - a.d) : 0));
   const nEtapa = k => k === "fechou" ? fech.n : ativosEtapa(k, filtroMed).n;
   // Quadro
   $("quadro").innerHTML = ETAPAS.map((et, i) => {
@@ -433,11 +443,12 @@ function render() {
       const a = ativosEtapa(et.k, filtroMed); n = a.n; valor = `<small>≈ R$</small>${mil(a.v)}<small>mil</small>`; tit = `soma dos tickets estimados: ${valorTit(a.v)}`; rot = "potencial · " + et.prazo;
     }
     const parados = ls.filter(parado).length;
+    if (soParados && et.k !== "fechou") rot = `${parados} de ${n} acima do prazo · ${et.prazo}`;
     const mostra = et.k === "fechou" ? ls.slice(0, 4) : ls;
     const sel = et.k === "fechou" ? `<span class="status status--ok">${fNov.n} em novembro · R$ ${mil(fNov.v)} mil</span>`
       : parados ? `<span class="status status--forte">${parados} parado${parados > 1 ? "s" : ""} acima do prazo</span>` : `<span class="status status--neutro">nada parado</span>`;
     const mais = soParados ? "" : et.k === "fechou" ? `<button class="bt-texto fn-col__mais">Ver os ${fech.n} fechamentos do ano <svg class="ico ico-sm"><use href="#i-dir"/></svg></button>`
-      : n > mostra.length ? `<button class="bt-texto fn-col__mais">Ver os ${n} leads <svg class="ico ico-sm"><use href="#i-dir"/></svg></button>` : "";
+      : n > mostra.length ? `<p class="fn-col__pe">Mostrando ${mostra.length} de ${n} · com próximo passo</p>` : "";
     return `<section class="fn-col${et.k === etapaCel ? " ativa" : ""}${parados ? " tem-parado" : ""}" data-etapa="${et.k}" aria-label="${et.nome}: ${n}${parados ? `, ${parados} parados acima do prazo` : ""}">
       <header class="fn-col__cab">
         <div class="fn-col__tit">${passo(i)}<span>${et.nome}</span></div>
@@ -457,7 +468,7 @@ function render() {
   $("filtro-parados").hidden = !soParados; $("filtro-n").textContent = `${nPar} ${nPar === 1 ? "lead parado" : "leads parados"}`;
   const bp = $("bt-parados"); bp.setAttribute("aria-pressed", soParados);
   bp.innerHTML = soParados ? `Mostrar todos os leads <svg class="ico" aria-hidden="true"><use href="#i-fechar"/></svg>` : `Ver os ${nPar} parados <svg class="ico" aria-hidden="true"><use href="#i-dir"/></svg>`;
-  bp.hidden = !nPar && !soParados;
+  bp.hidden = soParados || !nPar;
 
   // Pílulas de etapa (celular)
   $("etapas").innerHTML = ETAPAS.map((et, i) => {
@@ -469,7 +480,7 @@ function render() {
   // Lista (tabela)
   $("tabela").innerHTML = ETAPAS.map((et, i) => {
     let ls = porEtapa(et.k); if (!ls.length) return "";
-    if (et.k === "fechou") ls = recentes(ls);
+    if (et.k === "fechou") ls = recentes(ls).slice(0, 4);
     const nt = nEtapa(et.k);
     const np = ls.filter(parado).length;
     const tot = soParados ? `${np} ${np > 1 ? "parados" : "parado"} acima do prazo` : et.k === "fechou" ? `${fNov.n} em novembro · ${fech.n} no ano · os ${ls.length} mais recentes` : `${nt} ${nt > 1 ? "leads" : "lead"}${nt > ls.length ? ` · mostrando ${ls.length} com próximo passo` : ""}`;
@@ -477,7 +488,7 @@ function render() {
       const quando = l.etapa === "fechou" ? `Fechou ${l.dt}<small>${l.nota}</small>`
         : l.dh ? `${l.falta ? "Faltou" : "Consulta"} ${l.dh[0]} · ${l.dh[1]}<small>${l.nota}</small>`
         : `${l.prox}<small>${l.nota}</small>`;
-      const st = l.etapa === "fechou" ? `<span class="status status--ok">${diasTxt(l)}</span>` : `<span class="status ${parado(l) ? "status--forte" : SEV[l.sev]}">${diasTxt(l)}</span>`;
+      const st = l.etapa === "fechou" ? `<span class="status status--ok">${etapaTxt(l)}</span>` : `<span class="status ${parado(l) ? "status--forte" : SEV[l.sev]}"${parado(l) && l.venc ? ` title="${nDias(l.venc)} de atraso"` : ""}>${etapaTxt(l)}</span>`;
       const v = l.v ? `<span class="fn-valor"><small>R$</small>${real(l.v)}</span>` : `<span class="fn-valor fn-valor--est" title="ticket estimado"><small>≈ R$</small>${real(l.pot)}</span>`;
       return `<tr data-med="${l.med}"${parado(l) ? ' class="fn-parado"' : ""}>
         <td><div class="fn-pac">${av(l.med, l.nome, true)}<div><b>${l.nome}</b><span>${nomeMed(l.med)}</span></div></div></td>
@@ -499,26 +510,31 @@ function render() {
   // Linha de números
   const ativos = vis.filter(l => l.etapa !== "fechou"), leads = totalLeads(filtroMed), nAt = nAtivos(filtroMed);
   const abertos = ativosEtapa("plano", filtroMed), vAberto = abertos.v;
-  const parTodos = VA.parados(filtroMed), vermelho = parTodos.length, ambar = VA.noLimite(filtroMed).length;
+  const parTodos = VA.parados(filtroMed).sort((a, b) => (atraso(b) - atraso(a)) || (b.d - a.d)), vermelho = parTodos.length, ambar = VA.noLimite(filtroMed).length;
   const outros = soma(FORA.recusou) + soma(FORA.faltou) + soma(FORA.esfriou), p = Math.round(fech.n / leads * 100);
-  UI.poeAnel($("r-anel"), { p, aria: `${p}% dos leads de 2026 fecharam plano` });
+  UI.poeAnel($("r-anel"), { p, aria: `${p}% dos leads de 2026 fecharam plano` }); $("r-anel").title = `${p}% dos leads de 2026 fecharam plano`;
   $("r-fech-v").innerHTML = rsMil(fech.v); $("r-fech-v").title = valorTit(fech.v); $("r-fech-n").textContent = `${fech.n} de ${leads}`;
-  $("r-ticket").textContent = `ticket médio fechado R$ ${mil(fech.v / fech.n)} mil · anel = % dos leads que fechou`;
+  $("r-ticket").textContent = `Ticket médio R$ ${mil(fech.v / fech.n)} mil · ${p}% dos leads do ano fecharam plano`;
   $("r-leads").textContent = leads; $("r-ativos").textContent = `${nAt} em andamento`;
   $("r-aberto").innerHTML = rsMil(vAberto); $("r-aberto").title = valorTit(vAberto);
   $("r-aberto-n").textContent = `${abertos.n} ${abertos.n === 1 ? "plano apresentado" : "planos apresentados"}`;
   $("r-perd").textContent = soma(FORA.perdido); $("r-fora").textContent = `+ ${outros} saíram por outro motivo`;
-  $("r-parados").textContent = vermelho; $("r-perto").textContent = `+ ${ambar} em atenção`;
+  $("r-parados").textContent = vermelho; $("r-perto").textContent = `+ ${ambar} no limite`;
   $("r-risco").textContent = `R$ ${mil(parTodos.reduce((a, l) => a + VA.valorLead(l), 0))} mil`;
   const nomeEt = k => ETAPAS.find(e => e.k === k).nome;
-  $("r-criticos").innerHTML = parTodos.slice(0, 3).map(l => `<li>${av(l.med, l.nome, true)}<div><b>${l.nome}</b><span class="et">${nomeEt(l.etapa)} <span class="nw">· ${nomeMed(l.med)}</span></span></div><span class="status status--forte">${l.d} dias parado</span></li>`).join("")
+  $("r-criticos").innerHTML = parTodos.slice(0, 3).map(l => `<li>${av(l.med, l.nome, true)}<div><b>${l.nome}</b><span class="et">${nomeEt(l.etapa)} <span class="nw">· ${nomeMed(l.med)}</span></span></div><span class="status status--forte">${diasTxt(l)}</span></li>`).join("")
     || `<li class="vazio">Nenhum lead parado acima do prazo</li>`;
-  $("resumo-dia").textContent = `Funil comercial · ${nAt} leads em andamento, ${vermelho} parados demais`;
+  $("resumo-dia").textContent = `Funil comercial · ${nAt} leads em andamento · ${vermelho} parados acima do prazo`;
   linhaDoTempo($("tempo"), filtroMed);
   $("gaveta-n").textContent = `${AGENDA.filter(a => !a.evento && okMed(P[a.id].med)).length} pacientes`;
 }
 
 pilulasMedico(m => totalLeads(m), m => { filtroMed = m; render(); });
+// O número das pílulas aqui é de leads no ano (no Painel é de pacientes hoje): diz o que é
+document.querySelectorAll(".pilula[data-med]").forEach(b => {
+  const n = totalLeads(b.dataset.med), quem = b.dataset.med === "todos" ? "Todos" : nomeMed(b.dataset.med);
+  b.title = `${n} leads em 2026`; b.setAttribute("aria-label", `${quem} · ${n} leads em 2026`);
+});
 // Filtro de parados: botão do cartão de alerta, "Mostrar todos" e o endereço funil.html#parados
 function filtraParados(ligar, rolar) {
   soParados = ligar;
@@ -526,7 +542,7 @@ function filtraParados(ligar, rolar) {
   render();
   if (ligar && rolar) document.querySelector(".fn-barra").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
 }
-$("bt-parados").addEventListener("click", () => filtraParados(!soParados, true));
+$("bt-parados").addEventListener("click", () => { filtraParados(!soParados, true); if (soParados) $("limpa-parados").focus({ preventScroll: true }); });
 $("limpa-parados").addEventListener("click", () => { filtraParados(false); $("bt-parados").focus(); });
 addEventListener("hashchange", () => { if ((location.hash === "#parados") !== soParados) filtraParados(location.hash === "#parados"); });
 document.querySelectorAll(".fn-vista .aba").forEach(b => b.addEventListener("click", () => {
@@ -536,9 +552,17 @@ document.querySelectorAll(".fn-vista .aba").forEach(b => b.addEventListener("cli
 // Gaveta da agenda
 const gav = $("gaveta"), btAg = $("bt-agenda");
 btAg.setAttribute("aria-expanded", "false"); btAg.setAttribute("aria-controls", "gaveta");
-const gaveta = abrir => { gav.classList.toggle("aberta", abrir); gav.setAttribute("aria-hidden", !abrir); btAg.setAttribute("aria-expanded", abrir); };
+const gaveta = (abrir, devolve = true) => {
+  const estava = gav.classList.contains("aberta"); if (estava === abrir) return;
+  gav.classList.toggle("aberta", abrir); gav.setAttribute("aria-hidden", !abrir); gav.inert = !abrir; btAg.setAttribute("aria-expanded", abrir);
+  if (abrir) setTimeout(() => $("gaveta-fechar").focus(), 30); else if (devolve) btAg.focus();
+};
+gav.inert = true;
 btAg.addEventListener("click", () => gaveta(!gav.classList.contains("aberta")));
 $("gaveta-fechar").addEventListener("click", () => gaveta(false));
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !e.defaultPrevented && gav.classList.contains("aberta")) gaveta(false); });  // outra camada aberta trata o Esc antes
+// Clique fora fecha (sem roubar o foco de onde a pessoa clicou)
+document.addEventListener("pointerdown", e => { if (gav.classList.contains("aberta") && !gav.contains(e.target) && !btAg.contains(e.target) && !e.target.closest(".tl-veu, .tl-gaveta, .tl-busca, .tl-pop, .wa-pop, .ag-menu, .demo-fab")) gaveta(false, false); });
 render();
 </script>
 <link rel="stylesheet" href="telas.css">
