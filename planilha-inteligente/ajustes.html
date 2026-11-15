@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Munin · Ajustes</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100.00 100.00%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%2316171C%22/%3E%3Csvg x=%2212.00%22 y=%2212.00%22 width=%2276.00%22 height=%2276.00%22 viewBox=%220 0 94 94%22%3E%3Cpath d=%22M5.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 L49.50,70.00 L86.50,70.00 L86.50,23.00 Z M42.49,69.39 C41.86,50.29 49.51,42.12 68.61,41.49 A18.5,18.5 0 1 0 49.51,23.61 C50.14,42.71 42.49,50.88 23.39,51.51 Z%22 fill=%22%23F4F3EF%22/%3E%3Cpath d=%22M5.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z%22 fill=%22%234657C8%22/%3E%3C/svg%3E%3C/svg%3E">
+<meta name="theme-color" content="#16171C">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+<link rel="stylesheet" href="telas.css">
+<style>
+  /* ===== Ajustes só da tela AJUSTES (prefixo .aj-) ===== */
+  section[id] { scroll-margin-top: 20px; }
+  .aj-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .aj-cab h2 { font-size: var(--t-h3); }
+  .aj-cab p { font-size: var(--t-sm); color: var(--texto-2); margin-top: 4px; max-width: 64ch; }
+  /* Conta (cartão em foco) */
+  .aj-conta { display: flex; flex-direction: column; gap: 16px; }
+  .aj-conta__quem { display: flex; align-items: center; gap: 14px; }
+  .aj-conta__quem .av { width: 52px; height: 52px; font-size: 16px; box-shadow: 0 0 0 2px rgba(255,255,255,.18); }
+  .aj-conta__quem div b { display: block; font: 600 var(--t-h3)/1.2 var(--f-titulo); }
+  .aj-conta__quem div span { display: block; font-size: var(--t-sm); color: var(--foco-texto-2); margin-top: 2px; }
+  .aj-conta__g { display: flex; align-items: center; gap: 8px; font-size: var(--t-xs); color: var(--foco-texto-2); padding-top: 12px; border-top: 1px solid rgba(255,255,255,.12); }
+  .aj-conta__g i { width: 7px; height: 7px; border-radius: 50%; background: #6FD39B; box-shadow: 0 0 0 4px rgba(111,211,155,.15); }
+  .aj-conta__bts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .aj-conta .tl-bt--claro { background: rgba(255,255,255,.1); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); }
+  .aj-conta .tl-bt--claro:hover { background: rgba(255,255,255,.16); }
+  .aj-conta .tl-bt--sair { background: #fff; color: var(--atrasado); }
+  .aj-conta .tl-bt--sair:hover { background: var(--atrasado-fundo); }
+  .aj-conta .tl-bt:focus-visible { outline-color: var(--pena-claro); }
+  .aj-indice { display: flex; flex-direction: column; }
+  .aj-indice a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 10px; border-radius: 12px; color: var(--tinta); text-decoration: none; font-weight: 500; font-size: var(--t-sm); }
+  .aj-indice a:hover, .aj-indice a[aria-current="true"] { background: var(--suave-2); }
+  .aj-indice a .ico { color: var(--texto-2); }
+  .aj-indice a span { margin-left: auto; font-size: var(--t-xs); color: var(--texto-2); }
+  /* Usuários */
+  :root { --cols-us: 36px minmax(0, 1.4fr) 160px minmax(0, 1fr) 150px; }
+  .aj-us .linha__sub { display: block; }
+  .aj-badge { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--pena); background: var(--suave-2); padding: 2px 6px; border-radius: 6px; margin-left: 6px; vertical-align: 1px; }
+  .aj-sel { min-height: 36px; height: 36px; font-size: var(--t-sm); padding-left: 12px; }
+  .aj-acoes { display: flex; gap: 6px; justify-content: flex-end; }
+  .aj-convite { margin-top: 12px; padding: 16px; border-radius: var(--r-md); background: var(--porcelana); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 170px auto; gap: 12px; align-items: end; }
+  .aj-convite[hidden] { display: none; }
+  .aj-convite .tl-input, .aj-convite .tl-select { background: var(--cartao); }
+  .aj-convite__tit { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+  .aj-convite .tl-erro { grid-column: 1 / -1; }
+  @container (max-width: 760px) {
+    :root { --cols-us: 36px minmax(0, 1fr) auto; }
+    .aj-us { grid-template-areas: "av nm ac" "av pf pf" "av st st"; row-gap: 6px; align-items: start; }
+    .aj-us > .av { grid-area: av; } .aj-us > .aj-q { grid-area: nm; } .aj-us > .aj-pf { grid-area: pf; } .aj-us > .aj-st { grid-area: st; } .aj-us > .aj-acoes { grid-area: ac; }
+    .aj-convite { grid-template-columns: minmax(0, 1fr); }
+    .aj-us-cab { display: none !important; }
+  }
+  /* Matriz: o que cada perfil vê */
+  .aj-matriz { width: 100%; border-collapse: collapse; font-size: var(--t-sm); }
+  .aj-matriz th { font-size: var(--t-xs); color: var(--texto-2); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; text-align: center; padding: 8px 6px; border-bottom: 1px solid var(--linha-forte); vertical-align: bottom; }
+  .aj-matriz th:first-child { text-align: left; }
+  .aj-matriz td { padding: 10px 6px; border-bottom: 1px solid var(--linha); text-align: center; }
+  .aj-matriz td:first-child { text-align: left; }
+  .aj-matriz td b { display: block; font-weight: 600; }
+  .aj-matriz td small { display: block; color: var(--texto-2); font-size: var(--t-xs); margin-top: 2px; }
+  .aj-rolagem { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
+  .sw { position: relative; width: 44px; height: 26px; border-radius: 999px; border: 0; background: var(--linha-forte); padding: 0; vertical-align: middle; transition: background .35s cubic-bezier(.22,1,.36,1); }
+  .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(22,23,28,.3); transition: transform .35s cubic-bezier(.22,1,.36,1); }
+  .sw[aria-checked="true"] { background: var(--pena); }
+  .sw[aria-checked="true"]::after { transform: translateX(18px); }
+  .sw:disabled { opacity: .55; cursor: not-allowed; }
+  .aj-nota { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: var(--t-xs); color: var(--texto-2); line-height: 1.5; }
+  .aj-nota .ico { flex: none; margin-top: 1px; }
+  /* Metas */
+  .aj-metas { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr); gap: 10px 14px; align-items: center; }
+  .aj-metas > span.c { font-size: var(--t-xs); color: var(--texto-2); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .aj-metas b { font-weight: 600; font-size: var(--t-sm); }
+  .aj-metas small { display: block; font-size: var(--t-xs); color: var(--texto-2); }
+  .aj-pre { position: relative; }
+  .aj-pre span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: var(--t-sm); color: var(--texto-2); pointer-events: none; }
+  .aj-pre .tl-input { padding-left: 38px; font-variant-numeric: tabular-nums; }
+  .aj-rod { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--linha); }
+  @container (max-width: 560px) { .aj-metas { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .aj-metas > .nm { grid-column: 1 / -1; margin-top: 6px; } .aj-metas > span.c0 { display: none; } }
+  /* Modelos */
+  .aj-mod { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; }
+  .aj-mod__lista { display: flex; flex-direction: column; gap: 4px; }
+  .aj-mod__lista .aba { justify-content: flex-start; height: auto; min-height: 44px; padding: 8px 12px; border-radius: 12px; white-space: normal; text-align: left; }
+  .aj-mod__ed { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+  .aj-bolha { background: #E9E6DD; border-radius: var(--r-md); padding: 16px; display: flex; flex-direction: column; justify-content: flex-start; }
+  .aj-bolha p.r { font-size: var(--t-xs); color: var(--texto-2); margin-bottom: 8px; font-weight: 600; }
+  .aj-bolha div { align-self: flex-end; max-width: 92%; background: #fff; border-radius: 14px 14px 4px 14px; padding: 10px 12px; font-size: var(--t-sm); line-height: 1.5; white-space: pre-wrap; box-shadow: var(--sombra-1); }
+  .aj-bolha small { display: block; text-align: right; color: var(--texto-2); font-size: 10.5px; margin-top: 4px; }
+  @container (max-width: 820px) { .aj-mod { grid-template-columns: minmax(0, 1fr); } .aj-mod__lista { flex-direction: row; overflow-x: auto; } .aj-mod__lista .aba { white-space: nowrap; } .aj-mod__ed { grid-template-columns: minmax(0, 1fr); } }
+  /* Avisos */
+  .aj-av { list-style: none; margin: 0; padding: 0; }
+  .aj-av li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; }
+  .aj-av li + li { border-top: 1px solid var(--linha); }
+  .aj-av b { display: block; font-weight: 600; font-size: var(--t-sm); }
+  .aj-av span { display: block; font-size: var(--t-xs); color: var(--texto-2); margin-top: 2px; }
+  /* Clínica */
+  .aj-clin { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+  .aj-clin .larga { grid-column: 1 / -1; }
+  @container (max-width: 600px) { .aj-clin { grid-template-columns: minmax(0, 1fr); } }
+  /* ===== Especialidades e tabela de preços (revisão pacotes, prefixo .pl-) ===== */
+  .pl-pacs { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 10px; }
+  .pl-pac { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 14px 12px 12px; border-radius: var(--r-md); background: var(--porcelana); box-shadow: inset 0 0 0 1px var(--linha); transition: background .35s cubic-bezier(.22,1,.36,1), box-shadow .35s cubic-bezier(.22,1,.36,1); }
+  .pl-pac[data-on="true"] { background: var(--cartao); box-shadow: inset 0 0 0 1.5px var(--pena), var(--sombra-1); }
+  .pl-pac__ico { width: 48px; height: 48px; border-radius: 12px; background: var(--cartao); color: var(--ardosia); display: grid; place-items: center; box-shadow: inset 0 0 0 1px var(--linha); }
+  .pl-pac[data-on="true"] .pl-pac__ico { background: var(--suave-2); color: var(--pena); box-shadow: none; }
+  .pl-pac__ico svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+  .pl-pac b { display: block; font-weight: 600; font-size: var(--t-sm); }
+  .pl-pac small { display: block; font-size: var(--t-xs); color: var(--texto-2); margin-top: 2px; line-height: 1.4; }
+  .pl-pac--breve { background: transparent; box-shadow: inset 0 0 0 1px var(--linha); }
+  .pl-pac--breve b, .pl-pac--breve .pl-pac__ico { color: var(--nevoa); }
+  .pl-pac--breve .pl-pac__ico { background: transparent; }
+  .pl-breve { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-2); background: var(--suave); padding: 3px 7px; border-radius: 6px; white-space: nowrap; }
+  .pl-sub { font: 600 var(--t-sm)/1.3 var(--f-texto); margin: 22px 0 8px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .pl-sub span { font-weight: 400; font-size: var(--t-xs); color: var(--texto-2); }
+  .pl-uso td { vertical-align: middle; }
+  .pl-ck { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; }
+  .pl-ck:hover { background: var(--suave); }
+  .pl-ck input { width: 18px; height: 18px; margin: 0; accent-color: var(--pena); cursor: pointer; }
+  .pl-uso .aj-sel { width: auto; min-width: 150px; }
+  .pl-demo-chip { font-size: 10.5px; font-weight: 600; color: var(--texto-2); box-shadow: inset 0 0 0 1px var(--linha-forte); padding: 1px 6px; border-radius: 6px; margin-left: 6px; vertical-align: 1px; }
+  .pl-link { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; margin-top: 16px; max-width: 560px; }
+  .pl-aviso { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--r-sm); background: var(--suave-2); color: var(--tinta); font-size: var(--t-sm); line-height: 1.45; margin-bottom: 14px; }
+  .pl-aviso .ico { flex: none; color: var(--pena); margin-top: 1px; }
+  .pl-aviso b { font-weight: 600; }
+  .pl-abas { margin-bottom: 10px; }
+  .pl-tab { width: 100%; }
+  .pl-tab th:nth-child(n+3), .pl-tab td:nth-child(n+3) { text-align: right; }
+  .pl-tab th:last-child, .pl-tab td:last-child { text-align: center; }
+  .pl-tab td { padding: 8px 10px; height: 52px; vertical-align: middle; }
+  .pl-tab tr[data-ativo="false"] td:not(:last-child) { opacity: .5; }
+  .pl-nome { display: flex; flex-direction: column; gap: 2px; min-width: 210px; }
+  .pl-nome__sel { align-self: flex-start; appearance: none; -webkit-appearance: none; border: 0; background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235A5D68' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 4px center; padding: 0 20px 0 0; font: 600 var(--t-sm)/1.3 var(--f-texto); color: var(--tinta); min-height: 28px; max-width: 100%; border-radius: 6px; cursor: pointer; }
+  .pl-nome__sel:disabled { background-image: none; cursor: default; opacity: 1; }
+  .pl-nome__sel:focus-visible { outline: 2px solid var(--pena); outline-offset: 2px; }
+  .pl-nome small { font-size: var(--t-xs); color: var(--texto-2); }
+  .pl-num { width: 92px; height: 36px; min-height: 36px; padding: 0 10px; text-align: right; font-variant-numeric: tabular-nums; font-size: var(--t-sm); }
+  .pl-num--sm { width: 72px; }
+  .pl-rs { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; }
+  .pl-rs > span { font-size: var(--t-xs); color: var(--texto-2); }
+  .pl-faces { display: inline-grid; grid-template-columns: repeat(3, auto); gap: 6px; }
+  .pl-faces label { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 10.5px; color: var(--texto-2); }
+  .pl-un { font-size: var(--t-xs); color: var(--texto-2); white-space: nowrap; }
+  .pl-por { display: none; font-size: var(--t-xs); color: var(--texto-2); white-space: nowrap; }
+  .pl-traco { color: var(--nevoa); }
+  .pl-ex { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--t-sm); color: var(--texto-2); margin-top: 12px; }
+  .pl-ex b { color: var(--tinta); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pl-combos { list-style: none; margin: 0; padding: 0; }
+  .pl-combos li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px; align-items: center; padding: 10px 0; }
+  .pl-combos li + li { border-top: 1px solid var(--linha); }
+  .pl-combos b { display: block; font-weight: 600; font-size: var(--t-sm); }
+  .pl-combos small { display: block; font-size: var(--t-xs); color: var(--texto-2); margin-top: 2px; line-height: 1.4; }
+  .pl-combos s { font-size: var(--t-xs); color: var(--texto-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pl-pag { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .pl-pag .tl-campo > label { font-size: var(--t-xs); font-weight: 600; }
+  .pl-pag .pl-num { width: 100%; }
+  @container (max-width: 640px) {
+    .pl-tab thead { display: none; }
+    .pl-tab, .pl-tab tbody { display: block; }
+    .pl-tab tr { display: grid; grid-template-columns: auto auto minmax(0, 1fr); grid-template-areas: "nome nome sw" "preco qtd rec"; gap: 8px 12px; padding: 12px 0; border-bottom: 1px solid var(--linha); }
+    .pl-tab tr.pl-tr--faces { grid-template-areas: "nome nome sw" "preco preco preco" "rec rec rec"; }
+    .pl-tab tr:hover td { background: transparent; }
+    .pl-tab td { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; height: auto; padding: 0; border: 0; text-align: left !important; }
+    .pl-tab td:nth-child(1), .pl-tab td:nth-child(6) { flex-direction: row; align-items: center; }
+    .pl-tab tr.pl-tr--faces td:nth-child(5) { flex-direction: row; align-items: center; gap: 8px; }
+    .pl-por { display: inline !important; }
+    .pl-tab td:nth-child(1) { grid-area: nome; } .pl-tab td:nth-child(2) { display: none; }
+    .pl-tab td:nth-child(3) { grid-area: preco; } .pl-tab td:nth-child(4) { grid-area: qtd; }
+    .pl-tab td:nth-child(5) { grid-area: rec; } .pl-tab td:nth-child(6) { grid-area: sw; justify-content: flex-end; }
+    .pl-tab td[data-rot]::before { content: attr(data-rot); font-size: 10.5px; font-weight: 600; letter-spacing: .02em; color: var(--texto-2); white-space: nowrap; }
+    .pl-tab tr.pl-tr--faces td:nth-child(4) { display: none; }
+    .pl-tab .pl-rs > span:first-child { display: none; }
+    .pl-tab .pl-num { width: 84px; } .pl-tab .pl-num--sm { width: 68px; }
+    .pl-nome { min-width: 0; }
+    .pl-combos li { grid-template-columns: minmax(0, 1fr) auto; } .pl-combos s { display: none; }
+    .pl-pag { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .pl-tab td.pl-td-fixo { visibility: hidden; }
+    .pl-uso thead { display: none; }
+    .pl-uso, .pl-uso tbody { display: block; }
+    .pl-uso tr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 12px 0; border-bottom: 1px solid var(--linha); }
+    .pl-uso td { display: flex; align-items: center; padding: 0; border: 0; }
+    .pl-uso td:first-child { flex: 1 0 100%; display: block; }
+    .pl-uso td[data-rot]::before { content: attr(data-rot); font-size: var(--t-xs); color: var(--texto-2); }
+    .pl-uso td:last-child { flex: 1 0 100%; justify-content: space-between; gap: 10px; }
+    .pl-uso .aj-sel { min-width: 128px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .pl-pac { transition: none; } }
+  @media (max-width: 720px) { .grade .lado { order: -1; } }
+</style>
+</head>
+<body data-pagina="ajustes">
+
+<main class="app">
+  <header class="topo">
+    <div class="topo__ola">
+      <h1>Bom dia, Dra. Lúcia</h1>
+      <p class="topo__data"><b>Sexta-feira, 13 de novembro</b> · 09:40 · Ajustes da clínica e da sua conta</p>
+    </div>
+    <div class="topo__acoes"><div class="linha-flex" id="acoes-topo"></div></div>
+  </header>
+
+  <div class="grade">
+    <div class="coluna">
+
+      <!-- USUÁRIOS E ACESSOS -->
+      <section class="cartao" id="acessos" aria-labelledby="t-acessos">
+        <div class="aj-cab"><div><h2 id="t-acessos">Usuários e acessos</h2><p>Só entram no Munin os e-mails desta lista, com login do Google. Cada pessoa tem um perfil, que define o que ela vê.</p></div>
+          <button type="button" class="tl-bt" id="bt-convidar" aria-expanded="false" aria-controls="f-convite"><svg class="ico" aria-hidden="true"><use href="#i-mais"/></svg>Convidar</button></div>
+        <form class="aj-convite" id="f-convite" hidden novalidate>
+          <div class="aj-convite__tit"><span>Novo convite</span><button type="button" class="bt-ico bt-ico--sm bt-ico--plano" id="conv-fechar" aria-label="Fechar convite"><svg class="ico ico-sm"><use href="#i-fechar"/></svg></button></div>
+          <div class="tl-campo"><label for="c-email">E-mail Google</label><input class="tl-input" id="c-email" type="email" placeholder="nome@gmail.com" autocomplete="off" required></div>
+          <div class="tl-campo"><label for="c-nome">Nome</label><input class="tl-input" id="c-nome" placeholder="Nome e sobrenome" autocomplete="off" required></div>
+          <div class="tl-campo"><label for="c-perfil">Perfil</label><select class="tl-select" id="c-perfil"></select></div>
+          <button type="submit" class="tl-bt tl-bt--pena">Enviar convite</button>
+          <p class="tl-erro" id="c-erro" role="alert"></p>
+        </form>
+        <div class="linha__cab aj-us-cab" style="--cols:var(--cols-us);margin-top:14px"><span></span><span>Pessoa</span><span>Perfil</span><span>Situação</span><span></span></div>
+        <ul class="lista" id="usuarios" style="--cols:var(--cols-us)"></ul>
+      </section>
+
+      <!-- O QUE CADA PERFIL VÊ -->
+      <section class="cartao" id="perfis" aria-labelledby="t-perfis">
+        <div class="aj-cab"><div><h2 id="t-perfis">O que cada perfil vê</h2><p>Liga e desliga por perfil. Vale para todas as pessoas daquele perfil, na próxima tela que abrirem.</p></div></div>
+        <div class="aj-rolagem"><table class="aj-matriz" id="matriz"></table></div>
+        <p class="aj-nota"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-info"/></svg><span>A Gestão sempre vê tudo (é quem autoriza os acessos). Mensagens de WhatsApp nunca levam valores, para nenhum perfil.</span></p>
+      </section>
+
+      <!-- METAS DO MÊS -->
+      <section class="cartao" id="metas" aria-labelledby="t-metas">
+        <div class="aj-cab"><div><h2 id="t-metas">Metas de novembro</h2><p>Meta é o alvo do mês; supermeta é a faixa de excelência. O “esperado hoje” das telas sai daqui (meta × dias úteis concluídos ÷ 19).</p></div><a class="bt-texto" href="metas.html">Ver metas <svg class="ico ico-sm"><use href="#i-dir"/></svg></a></div>
+        <form id="f-metas" novalidate>
+          <div class="aj-metas" id="metas-campos"></div>
+          <div class="aj-rod"><span class="tl-erro" id="m-erro" role="alert"></span><span class="tl-dica" id="m-dica">Valores da clínica inteira; a divisão por médico segue a do mês anterior.</span><button type="submit" class="tl-bt">Atualizar metas</button></div>
+        </form>
+      </section>
+
+      <!-- MODELOS DE MENSAGEM -->
+      <section class="cartao" id="modelos" aria-labelledby="t-mod">
+        <div class="aj-cab"><div><h2 id="t-mod">Modelos de mensagem do WhatsApp</h2><p>Os botões de WhatsApp abrem a mensagem pronta e editável. Sem procedimento, diagnóstico ou valores: a mensagem pode ser lida por outra pessoa no celular.</p></div></div>
+        <div class="aj-mod">
+          <div class="aj-mod__lista" role="tablist" aria-label="Modelo" id="mod-lista"></div>
+          <div class="aj-mod__ed">
+            <div class="tl-campo"><label for="mod-txt">Texto <span>· exemplo com uma paciente</span></label><textarea class="tl-area" id="mod-txt" rows="10"></textarea><span class="tl-dica">Nome, médico, dia e hora entram sozinhos. A assinatura é sempre o nome da clínica.</span></div>
+            <div class="aj-bolha" aria-live="polite"><p class="r">Prévia no WhatsApp</p><div id="mod-prev"></div><small>09:41 ✓✓</small></div>
+          </div>
+        </div>
+        <div class="aj-rod"><span class="tl-dica" id="mod-dica"></span><button type="button" class="tl-bt" id="bt-mod">Atualizar modelo</button></div>
+      </section>
+
+      <!-- AVISOS -->
+      <section class="cartao" id="avisos" aria-labelledby="t-av">
+        <div class="aj-cab"><div><h2 id="t-av">Avisos</h2><p>O que aparece no sino do topo. Só para você.</p></div></div>
+        <ul class="aj-av" id="av-lista"></ul>
+      </section>
+
+      <!-- ESPECIALIDADES E PACOTES (revisão pacotes) -->
+      <section class="cartao" id="especialidades" aria-labelledby="t-esp">
+        <div class="aj-cab"><div><h2 id="t-esp">Especialidades e pacotes</h2><p>A clínica liga os pacotes que usa e cada profissional trabalha com um ou mais. O pacote traz os desenhos, o catálogo e o recall; as telas continuam as mesmas.</p></div></div>
+        <div class="pl-pacs" id="pl-pacs" role="list"></div>
+        <h3 class="pl-sub" id="t-uso">Quem usa o quê <span>marque os pacotes de cada pessoa e o que abre primeiro num plano</span></h3>
+        <div class="aj-rolagem"><table class="aj-matriz pl-uso" id="pl-uso" aria-labelledby="t-uso"></table></div>
+        <div class="tl-campo pl-link"><label for="pl-pront">Link do prontuário externo <span>· o botão “Abrir no prontuário” usa este endereço; {id} vira o código da paciente</span></label><input class="tl-input" id="pl-pront" type="url" inputmode="url" spellcheck="false" autocomplete="off"></div>
+        <p class="aj-nota"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-info"/></svg><span>Cada pacote traz um catálogo com nomes neutros, revisado para não registrar dado clínico. Diagnóstico, exames e fotos ficam no prontuário da clínica.</span></p>
+        <p class="aj-nota" style="display:flex;flex-wrap:wrap;gap:4px;margin-left:-12px"><a class="bt-texto" href="plano.html?demo=dermato">Ver o mapa de exemplo · Estética ›</a><a class="bt-texto" href="plano.html?demo=odonto">Ver o mapa de exemplo · Odontologia ›</a></p>
+        <p class="aj-nota"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-info"/></svg><span>Créditos dos desenhos da Estética: rosto baseado em “Realistic female head study”, de CoryRichards (Sketchfab), CC BY 4.0; corpo baseado em “Male &amp; Female Base Mesh Pack”, de FormForge3D (Sketchfab), CC BY 4.0. Alterações: convertido em silhueta 2D vetorial, simetrizado e simplificado, com linhas e regiões adicionadas.</span></p>
+      </section>
+
+      <!-- TABELA DE PREÇOS (revisão pacotes) -->
+      <section class="cartao" id="tabela" aria-labelledby="t-tab">
+        <div class="aj-cab"><div><h2 id="t-tab">Tabela de preços</h2><p>Preço, quantidade padrão e recall de cada procedimento, por pacote ativo. O nome vem do catálogo revisado: dá para trocar só por um sinônimo aprovado.</p></div></div>
+        <p class="pl-aviso" role="note"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-info"/></svg><span><b>Valores de demonstração.</b> Substitua pelos da clínica. O Munin não sugere preço: estes números são só o ponto de partida.</span></p>
+        <div class="abas pl-abas" role="tablist" aria-label="Pacote" id="pl-abas"></div>
+        <div id="pl-painel" role="tabpanel" aria-labelledby="pl-aba-dermato"></div>
+      </section>
+
+      <!-- DADOS DA CLÍNICA -->
+      <section class="cartao" id="clinica" aria-labelledby="t-clin">
+        <div class="aj-cab"><div><h2 id="t-clin">Dados da clínica</h2><p>Aparecem na assinatura das mensagens, nos convites de agenda (.ics) e no topo das telas.</p></div></div>
+        <form id="f-clin" novalidate>
+          <div class="aj-clin" id="clin-campos"></div>
+          <div class="aj-rod"><span class="tl-dica">Fuso horário fixo: America/Sao_Paulo (UTC−3).</span><button type="submit" class="tl-bt">Atualizar dados</button></div>
+        </form>
+      </section>
+    </div>
+
+    <aside class="lado" aria-label="Sua conta">
+      <section class="cartao cartao--foco aj-conta" id="conta" aria-labelledby="t-conta">
+        <h2 class="sr" id="t-conta">Sua conta</h2>
+        <div class="aj-conta__quem"><span class="av" id="conta-av" aria-hidden="true"></span><div style="min-width:0"><b id="conta-nome"></b><span id="conta-perfil"></span></div></div>
+        <p class="aj-conta__g"><i aria-hidden="true"></i><span id="conta-email"></span></p>
+        <div class="aj-conta__bts">
+          <a class="tl-bt tl-bt--claro" href="entrar.html">Trocar de conta</a>
+          <button type="button" class="tl-bt tl-bt--sair" data-tl-sair><svg class="ico" aria-hidden="true"><use href="#i-seta"/></svg>Sair</button>
+        </div>
+      </section>
+      <nav class="cartao" aria-label="Seções de ajustes">
+        <div class="aj-indice" id="indice">
+          <a href="#acessos"><svg class="ico" aria-hidden="true"><use href="#i-leads"/></svg>Usuários e acessos<span id="ix-us"></span></a>
+          <a href="#perfis"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg>O que cada perfil vê<span>5 perfis</span></a>
+          <a href="#metas"><svg class="ico" aria-hidden="true"><use href="#i-metas"/></svg>Metas do mês</a>
+          <a href="#modelos"><svg class="ico" aria-hidden="true"><use href="#i-whats"/></svg>Modelos de mensagem<span id="ix-mod"></span></a>
+          <a href="#avisos"><svg class="ico" aria-hidden="true"><use href="#i-sino"/></svg>Avisos</a>
+          <a href="#especialidades"><svg class="ico" aria-hidden="true"><use href="#i-quadro"/></svg>Especialidades e pacotes<span id="ix-pac"></span></a>
+          <a href="#tabela"><svg class="ico" aria-hidden="true"><use href="#i-moeda"/></svg>Tabela de preços</a>
+          <a href="#clinica"><svg class="ico" aria-hidden="true"><use href="#i-plano"/></svg>Dados da clínica</a>
+        </div>
+      </nav>
+    </aside>
+  </div>
+</main>
+
+<script src="dados.js"></script>
+<script src="dados2.js"></script>
+<script src="perfis_dados.js"></script>
+<script src="pacotes.js"></script>
+<script src="planos_dados.js"></script>
+<script src="plano_motor.js"></script>
+<script src="comum.js"></script>
+<script>
+const { EQUIPE, PERFIS, VISAO, CLINICA_DADOS } = VA2;
+const { ini, MODELOS, mensagem } = UI;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const aviso = h => { if (window.TL) TL.aviso(h); };
+const salvo = aviso;   // botões "Atualizar…" (os "Salvar…" ganham o aviso genérico de motion.js)
+const ORDEM = ["gestao", "medico", "sdr", "recepcao", "closer"];
+const optsPerfil = sel => ORDEM.map(k => `<option value="${k}"${k === sel ? " selected" : ""}>${PERFIS[k].rot}</option>`).join("");
+const avCor = p => /^Dr\. /.test(p.nome) ? "g" : /^Dra\. /.test(p.nome) ? "d" : "r";
+const linkConvite = u => { const q = new URLSearchParams({ nome: u.nome, email: u.email, perfil: u.perfil, por: "Marina Albuquerque" }); return new URL("convite.html?" + q, location.href).href; };
+
+/* ---------- Usuários ---------- */
+const equipe = EQUIPE.map(u => Object.assign({}, u));
+function renderUs() {
+  $("usuarios").innerHTML = equipe.map((u, i) => `<li class="linha aj-us" data-i="${i}">
+    <span class="av av--${avCor(u)}" aria-hidden="true">${ini(u.nome.replace(/^Dra?\. /, "") + (u.nome.split(" ").length > 1 ? "" : " x"))}</span>
+    <div class="aj-q" style="min-width:0"><span class="linha__nome">${esc(u.nome)}${u.gestora ? `<span class="aj-badge" title="Autoriza os acessos">gestora</span>` : ""}</span><span class="linha__sub">${esc(u.email)}</span></div>
+    <div class="aj-pf"><label class="sr" for="pf-${i}">Perfil de ${esc(u.nome)}</label><select class="tl-select aj-sel" id="pf-${i}" data-pf="${i}"${u.gestora ? " disabled" : ""}>${optsPerfil(u.perfil)}</select></div>
+    <div class="aj-st">${u.st === "convite" ? `<span class="status status--atencao">Convite pendente</span>` : `<span class="status status--ok">Ativo</span>`}<span class="linha__sub" style="margin-top:3px">${u.st === "convite" ? u.visto : "último acesso " + u.visto}</span></div>
+    <div class="aj-acoes">${u.st === "convite" ? `<button type="button" class="bt-sec" data-copiar="${i}" aria-label="Copiar link do convite de ${esc(u.nome)}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-plano"/></svg>Copiar link</button>` : ""}
+      ${u.gestora ? "" : `<button type="button" class="bt-ico bt-ico--sm bt-ico--plano" data-remover="${i}" aria-label="Remover acesso de ${esc(u.nome)}" title="Remover acesso"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-fechar"/></svg></button>`}</div>
+  </li>`).join("");
+  $("ix-us").textContent = `${equipe.length} pessoas`;
+}
+$("usuarios").addEventListener("change", e => {
+  const s = e.target.closest("[data-pf]"); if (!s) return;
+  const u = equipe[+s.dataset.pf]; u.perfil = s.value; aviso(`Perfil atualizado · <b>${esc(u.nome)}</b> agora é ${PERFIS[u.perfil].rot}`);
+});
+$("usuarios").addEventListener("click", e => {
+  const c = e.target.closest("[data-copiar]");
+  if (c) {
+    const u = equipe[+c.dataset.copiar], link = linkConvite(u);
+    const ok = () => { c.innerHTML = `<svg class="ico ico-sm" aria-hidden="true"><use href="#i-check"/></svg>Copiado`; aviso(`Link do convite copiado · <b>${esc(u.nome)}</b>`); setTimeout(() => renderUs(), 2200); };
+    const velho = () => { const t = document.createElement("textarea"); t.value = link; t.style.position = "fixed"; t.style.opacity = "0"; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch (x) { /* ok */ } t.remove(); c.focus(); ok(); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(link).then(ok, velho); else velho();
+    return;
+  }
+  const r = e.target.closest("[data-remover]");
+  if (r) {
+    const i = +r.dataset.remover, u = equipe[i];
+    if (r.dataset.confirma !== "1") { r.dataset.confirma = "1"; r.classList.add("bt-sec"); r.classList.remove("bt-ico", "bt-ico--sm", "bt-ico--plano"); r.textContent = "Remover?"; r.setAttribute("aria-label", `Confirmar: remover acesso de ${u.nome}`); r.focus(); return; }
+    equipe.splice(i, 1); renderUs(); aviso(`Acesso removido · <b>${esc(u.nome)}</b> não entra mais no Munin`);
+    const f = document.querySelector("#usuarios [data-remover]") || $("bt-convidar"); f.focus();
+  }
+});
+// Convite
+$("c-perfil").innerHTML = optsPerfil("sdr");
+const abreConv = v => { $("f-convite").hidden = !v; $("bt-convidar").setAttribute("aria-expanded", v); if (v) { $("c-email").focus(); if (!matchMedia("(prefers-reduced-motion: reduce)").matches) $("f-convite").animate([{ opacity: 0, transform: "translateY(-6px)" }, { opacity: 1, transform: "none" }], { duration: 480, easing: "cubic-bezier(.22,1,.36,1)" }); } else $("bt-convidar").focus(); };
+$("bt-convidar").addEventListener("click", () => abreConv($("f-convite").hidden));
+$("conv-fechar").addEventListener("click", () => abreConv(false));
+$("f-convite").addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); abreConv(false); } });
+$("f-convite").addEventListener("submit", e => {
+  e.preventDefault();
+  const email = $("c-email").value.trim().toLowerCase(), nome = $("c-nome").value.trim().replace(/\s+/g, " ");
+  const erro = !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(email) ? "Escreva um e-mail válido (precisa ser uma conta Google)." : equipe.some(u => u.email === email) ? "Este e-mail já está na lista." : nome.length < 3 ? "Escreva o nome da pessoa." : "";
+  $("c-erro").textContent = erro; $("c-email").setAttribute("aria-invalid", /e-mail/.test(erro)); $("c-nome").setAttribute("aria-invalid", /nome/.test(erro));
+  if (erro) { (/nome/.test(erro) ? $("c-nome") : $("c-email")).focus(); return; }
+  equipe.push({ nome, email, perfil: $("c-perfil").value, st: "convite", visto: "convite enviado hoje, 09:41" });
+  renderUs(); $("f-convite").reset(); $("c-perfil").value = "sdr"; abreConv(false);
+  aviso(`Convite enviado · <b>${esc(nome)}</b> como ${PERFIS[equipe[equipe.length - 1].perfil].rot}`);
+  const novo = document.querySelector(`#usuarios [data-i="${equipe.length - 1}"]`); if (novo) { novo.classList.add("tl-destaque"); novo.querySelector("[data-copiar]").focus(); }
+});
+
+/* ---------- Matriz de visão ---------- */
+const COLS = [["fat", "Faturamento da clínica", "receita, ticket e projeção"], ["plano", "Valores de plano", "valor de cada plano e lead"], ["metas", "Metas da clínica", "tela Metas e anéis"], ["funil", "Funil completo", "todas as etapas e os parados"]];
+const visao = JSON.parse(JSON.stringify(VISAO));
+// A matriz fica no navegador (munin:visao, {perfil: {fat, plano, metas, funil}}); as telas leem essa chave (perfis.js)
+try { const salvo = JSON.parse(localStorage.getItem("munin:visao") || "null"); if (salvo) Object.keys(visao).forEach(k => Object.assign(visao[k], salvo[k] || {})); } catch (e) { /* sem armazenamento */ }
+const gravaVisao = () => { try { localStorage.setItem("munin:visao", JSON.stringify(visao)); } catch (e) { /* sem armazenamento: vale só nesta tela */ } };
+function renderMatriz() {
+  $("matriz").innerHTML = `<thead><tr><th scope="col">Perfil</th>${COLS.map(c => `<th scope="col">${c[1]}</th>`).join("")}</tr></thead><tbody>` +
+    ORDEM.map(k => `<tr><td><b>${PERFIS[k].rot}</b><small>${PERFIS[k].desc}</small></td>${COLS.map(([c, rot]) => `<td><button type="button" class="sw" role="switch" aria-checked="${visao[k][c]}" data-k="${k}" data-c="${c}" aria-label="${PERFIS[k].rot} vê ${rot.toLowerCase()}"${k === "gestao" ? " disabled" : ""}></button></td>`).join("")}</tr>`).join("") + `</tbody>`;
+}
+$("matriz").addEventListener("click", e => {
+  const s = e.target.closest(".sw"); if (!s || s.disabled) return;
+  const { k, c } = s.dataset, v = !visao[k][c]; visao[k][c] = v; s.setAttribute("aria-checked", v); gravaVisao();
+  aviso(`<b>${PERFIS[k].rot}</b> ${v ? "passa a ver" : "deixa de ver"} ${COLS.find(x => x[0] === c)[1].toLowerCase()}`);
+});
+
+/* ---------- Metas ---------- */
+const MT = [["fat", "Faturamento", "recebido no mês", true], ["pl", "Planos fechados", "todas as origens"], ["co", "Consultas", "1ª consulta e retorno"], ["rc", "Recall · contatos", "pacientes contatados"], ["ra", "Recall · agendamentos", "voltaram para a agenda"]];
+$("metas-campos").innerHTML = `<span class="c c0"></span><span class="c">Meta</span><span class="c">Supermeta</span>` + MT.map(([id, nome, sub, rs]) => {
+  const [, m, s] = VA.metaVal(id, "todos");
+  const campo = (t, v) => `<div class="aj-pre"><span aria-hidden="true">${rs ? "R$" : "nº"}</span><input class="tl-input" id="m-${id}-${t}" inputmode="numeric" value="${v.toLocaleString("pt-BR")}" aria-label="${t === "m" ? "Meta" : "Supermeta"} de ${nome.toLowerCase()}"></div>`;
+  return `<div class="nm"><b>${nome}</b><small>${sub}</small></div>${campo("m", m)}${campo("s", s)}`;
+}).join("");
+document.querySelectorAll("#metas-campos input").forEach(i => i.addEventListener("input", () => { const d = i.value.replace(/\D/g, ""); i.value = d ? (+d).toLocaleString("pt-BR") : ""; }));
+$("f-metas").addEventListener("submit", e => {
+  e.preventDefault();
+  const num = id => +($(id).value.replace(/\D/g, "")) || 0;
+  const ruim = MT.find(([id]) => num(`m-${id}-s`) < num(`m-${id}-m`) || !num(`m-${id}-m`));
+  $("m-erro").textContent = ruim ? `${ruim[1]}: a supermeta precisa ser maior ou igual à meta.` : "";
+  $("m-dica").hidden = !!ruim;
+  if (ruim) { $(`m-${ruim[0]}-s`).focus(); return; }
+  salvo("Metas de novembro salvas");
+});
+
+/* ---------- Modelos ---------- */
+const EXEMPLO = { confirmacao: "raquel", followup: "livia", plano: "camila", recall: "cristina", falta: "renata" };
+let modSel = "confirmacao";
+$("mod-lista").innerHTML = Object.entries(MODELOS).map(([k, m]) => `<button class="aba" role="tab" aria-selected="${k === modSel}" data-m="${k}">${m.rot}</button>`).join("");
+$("ix-mod").textContent = `${Object.keys(MODELOS).length} modelos`;
+const textos = {};
+function renderMod() {
+  const t = textos[modSel] || mensagem(EXEMPLO[modSel], modSel);
+  $("mod-txt").value = t; $("mod-prev").textContent = t;
+  $("mod-dica").textContent = `Exemplo com ${VA.P[EXEMPLO[modSel]].nome.split(" ")[0]} · ${MODELOS[modSel].rot}`;
+}
+$("mod-lista").addEventListener("click", e => { const b = e.target.closest("[data-m]"); if (!b) return; modSel = b.dataset.m; document.querySelectorAll("#mod-lista .aba").forEach(x => x.setAttribute("aria-selected", x === b)); renderMod(); });
+$("mod-txt").addEventListener("input", () => { $("mod-prev").textContent = $("mod-txt").value; });
+$("bt-mod").addEventListener("click", () => {
+  const t = $("mod-txt").value;
+  if (/R\$\s*\d|\d+[.,]\d{3}/.test(t)) { $("mod-dica").textContent = "Tire o valor da mensagem: ela pode ser lida por outra pessoa."; $("mod-txt").focus(); return; }
+  textos[modSel] = t; salvo(`Modelo salvo · <b>${MODELOS[modSel].rot}</b>`);
+});
+
+/* ---------- Avisos ---------- */
+const AV = [["Lead parado acima do prazo", "Quando um lead passa do prazo da etapa", true], ["Recall vencido", "Todo dia às 08:00, com os vencidos do dia", true], ["Resumo da meta", "Às 18:00: faturamento × esperado do dia", true], ["Consulta sem confirmação na véspera", "Às 16:00, com quem ainda não confirmou", false]];
+$("av-lista").innerHTML = AV.map(([t, s, on], i) => `<li><div><b id="av-t-${i}">${t}</b><span>${s}</span></div><button type="button" class="sw" role="switch" aria-checked="${on}" aria-labelledby="av-t-${i}" data-av="${i}"></button></li>`).join("");
+$("av-lista").addEventListener("click", e => { const s = e.target.closest(".sw"); if (!s) return; const v = s.getAttribute("aria-checked") !== "true"; s.setAttribute("aria-checked", v); aviso(`${AV[+s.dataset.av][0]} · ${v ? "ligado" : "desligado"}`); });
+
+/* ---------- Clínica ---------- */
+const CL = [["nome", "Nome da clínica"], ["razao", "Razão social"], ["cnpj", "CNPJ"], ["fone", "Telefone"], ["end", "Endereço", true], ["whats", "WhatsApp da recepção"], ["horario", "Horário de atendimento"]];
+$("clin-campos").innerHTML = CL.map(([k, rot, larga]) => `<div class="tl-campo${larga ? " larga" : ""}"><label for="cl-${k}">${rot}</label><input class="tl-input" id="cl-${k}" value="${esc(CLINICA_DADOS[k])}"></div>`).join("");
+$("f-clin").addEventListener("submit", e => { e.preventDefault(); salvo("Dados da clínica salvos"); });
+
+/* ---------- Especialidades e pacotes (revisão pacotes · munin:pacotes) ---------- */
+const GLIFO = {
+  rosto:   `<path d="M17 4c-5.6 0-9 4.3-9 10.2C8 20.6 12 26 17 26s9-5.4 9-11.8C26 8.3 22.6 4 17 4z"/><path d="M13 26.6V31M21 26.6V31M13.2 13.6h2.4M18.4 13.6h2.4M17 15.5v3.2l-1 .6M15.2 21.6c1.2.7 2.4.7 3.6 0"/>`,
+  dente:   `<path d="M10.5 5.5c-3.2 0-5 2.6-5 6.2 0 3 1.6 5.1 2.4 8.1.9 3.4 1.3 9.7 3.6 9.7 2.1 0 2.2-6.4 5.5-6.4s3.4 6.4 5.5 6.4c2.3 0 2.7-6.3 3.6-9.7.8-3 2.4-5.1 2.4-8.1 0-3.6-1.8-6.2-5-6.2-2.7 0-4 1.6-6.5 1.6s-3.8-1.6-6.5-1.6z"/>`,
+  perfil:  `<path d="M21 4.5c-6.2 0-10.5 4.6-10.5 10.4 0 1.6-1.4 3.4-3 5.1l3 1v3.8c0 2 1.4 3.2 3.4 3.2H16V31"/><path d="M20.5 11.5c2.6 0 4.3 1.9 4.3 4.3 0 2.2-1.7 3.1-2.7 4.3-.8 1-.7 2.5-1.9 2.5"/>`,
+  pacote:  `<rect x="8" y="6" width="18" height="24" rx="3"/><path d="M13 6V4h8v2M12.5 13.5h9M12.5 18.5h9M12.5 23.5h5"/>`,
+  corpo:   `<circle cx="17" cy="5.5" r="2.8"/><path d="M12 11h10l-1.6 9.2H19L18.4 31M15.6 31 15 20.2h-1.4L12 11"/>`,
+  capilar: `<path d="M7 21c0-7.6 4.4-13.5 10-13.5S27 13.4 27 21"/><path d="M11 18.5c1-3.2 3.1-5.2 6-5.2s5 2 6 5.2M14 9.6l1.1 3.4M20 9.6 18.9 13"/>`,
+};
+const glifo = k => `<svg viewBox="0 0 34 34" aria-hidden="true">${GLIFO[k] || GLIFO.pacote}</svg>`;
+let cfg = PAC.config();
+const ativosIds = () => cfg.ativos.slice();
+const nomePac = id => PAC.get(id).rot;
+const vistasTxt = p => p.estado === "ativo" ? (p.abas || p.vistas).map(v => v.rot).join(" · ") : p.vistasPrevistas.join(" · ");
+const gravaCfg = () => { if (!PAC.salvaConfig(cfg)) aviso("Sem armazenamento neste navegador: a mudança vale só nesta tela"); };
+function renderPacs() {
+  $("pl-pacs").innerHTML = PAC.lista().map(p => {
+    const breve = p.estado !== "ativo", on = cfg.ativos.includes(p.id);
+    return `<div class="pl-pac${breve ? " pl-pac--breve" : ""}" role="listitem" data-on="${on}">
+      <span class="pl-pac__ico">${glifo(p.ico)}</span>
+      <div style="min-width:0"><b id="pl-n-${p.id}">${esc(p.rot)}</b><small>${breve ? "Previsto: " : "Vistas: "}${esc(vistasTxt(p))}</small></div>
+      ${breve ? `<span class="pl-breve">Em breve</span>` : `<button type="button" class="sw" role="switch" aria-checked="${on}" data-pac="${p.id}" aria-labelledby="pl-n-${p.id}" title="${on ? "Ativo" : "Desligado"}"></button>`}
+    </div>`;
+  }).join("");
+  $("ix-pac").textContent = `${cfg.ativos.length} ativos`;
+}
+// profissionais: médicos da equipe + profissional de demonstração do odonto + closer
+const medKey = u => /Lúcia|Lucia/.test(u.nome) ? "d" : /Rafael/.test(u.nome) ? "g" : u.email;
+const PROFS = [
+  ...EQUIPE.filter(u => u.perfil === "medico").map(u => ({ k: medKey(u), nome: u.nome, sub: "Médico · estética", cor: avCor(u) })),
+  ...Object.entries(PLD.profissionais).map(([k, p]) => ({ k, nome: p.nome, sub: "Dentista", demo: true, cor: "g" })),
+  ...EQUIPE.filter(u => u.perfil === "closer").map(u => ({ k: "closer", nome: u.nome, sub: "Closer · monta e fecha os planos", cor: "r" })),
+];
+function renderUso() {
+  const at = ativosIds();
+  $("pl-uso").innerHTML = `<thead><tr><th scope="col">Profissional</th>${at.map(id => `<th scope="col">${esc(nomePac(id))}</th>`).join("")}<th scope="col">Abre primeiro</th></tr></thead><tbody>` +
+    PROFS.map(p => {
+      const uso = (cfg.uso[p.k] || []).filter(id => at.includes(id));
+      const op = uso.length ? uso : at;
+      const pad = op.includes(cfg.padrao[p.k]) ? cfg.padrao[p.k] : op[0];
+      return `<tr><td><b>${esc(p.nome)}${p.demo ? `<span class="pl-demo-chip" title="Profissional de demonstração">demo</span>` : ""}</b><small>${esc(p.sub)}</small></td>` +
+        at.map(id => `<td data-rot="${esc(nomePac(id))}"><label class="pl-ck"><input type="checkbox" data-uso="${p.k}" data-pac="${id}"${uso.includes(id) ? " checked" : ""} aria-label="${esc(p.nome)} usa ${esc(nomePac(id))}"></label></td>`).join("") +
+        `<td data-rot="Abre primeiro"><label class="sr" for="pl-pad-${p.k}">Pacote ao abrir um plano · ${esc(p.nome)}</label><select class="tl-select aj-sel" id="pl-pad-${p.k}" data-pad="${p.k}">${op.map(id => `<option value="${id}"${id === pad ? " selected" : ""}>${esc(nomePac(id))}</option>`).join("")}</select></td></tr>`;
+    }).join("") + `</tbody>`;
+}
+$("pl-pacs").addEventListener("click", e => {
+  const s = e.target.closest(".sw[data-pac]"); if (!s) return;
+  const id = s.dataset.pac, on = cfg.ativos.includes(id);
+  if (on && cfg.ativos.length === 1) { aviso("Deixe ao menos um pacote ativo"); return; }
+  cfg.ativos = on ? cfg.ativos.filter(x => x !== id) : PAC.ORDEM.filter(x => x === id || cfg.ativos.includes(x));
+  gravaCfg(); renderPacs(); renderUso(); renderAbas();
+  const f = document.querySelector(`#pl-pacs .sw[data-pac="${id}"]`); if (f) f.focus();
+  aviso(`<b>${esc(nomePac(id))}</b> ${on ? "desligado · some do seletor de pacote nos planos" : "ativo · aparece no seletor de pacote nos planos"}`);
+});
+$("pl-uso").addEventListener("change", e => {
+  const c = e.target.closest("[data-uso]"), s = e.target.closest("[data-pad]");
+  if (c) {
+    const k = c.dataset.uso, lst = new Set(cfg.uso[k] || []);
+    c.checked ? lst.add(c.dataset.pac) : lst.delete(c.dataset.pac);
+    cfg.uso[k] = PAC.ORDEM.filter(x => lst.has(x)); gravaCfg(); renderUso();
+    const f = document.querySelector(`#pl-uso [data-uso="${k}"][data-pac="${c.dataset.pac}"]`); if (f) f.focus();
+    aviso(`${esc(PROFS.find(p => p.k === k).nome)} ${c.checked ? "passa a usar" : "deixa de usar"} <b>${esc(nomePac(c.dataset.pac))}</b>`);
+  }
+  if (s) { cfg.padrao[s.dataset.pad] = s.value; gravaCfg(); aviso(`Ao abrir um plano: <b>${esc(nomePac(s.value))}</b>`); }
+});
+$("pl-pront").value = cfg.prontuario;
+$("pl-pront").addEventListener("change", () => {
+  const v = $("pl-pront").value.trim(), ok = /^https:\/\/[^\s]+$/.test(v) && v.includes("{id}");
+  $("pl-pront").setAttribute("aria-invalid", !ok);
+  if (!ok) { aviso("Use um endereço https com {id} no lugar do código da paciente"); return; }
+  cfg.prontuario = v; gravaCfg(); aviso("Link do prontuário salvo");
+});
+
+/* ---------- Tabela de preços (munin:tabela:<pacote>) ---------- */
+let tabPac = null; const rasc = {};
+const brl = n => "R$ " + Math.round(n).toLocaleString("pt-BR");
+const UN = PAC.UNIDADES;
+const rascDe = id => rasc[id] || (rasc[id] = JSON.parse(JSON.stringify(PAC.tabelaSalva(id) || {})));
+function renderAbas() {
+  const at = ativosIds(); if (!at.includes(tabPac)) tabPac = at[0];
+  $("pl-abas").innerHTML = at.map(id => `<button type="button" class="aba" role="tab" id="pl-aba-${id}" aria-selected="${id === tabPac}" aria-controls="pl-painel" tabindex="${id === tabPac ? 0 : -1}" data-tab="${id}">${esc(nomePac(id))}</button>`).join("");
+  $("pl-painel").setAttribute("aria-labelledby", "pl-aba-" + tabPac);
+  renderTab();
+}
+const num = (attr, v, rot, cls, min, max) => `<input class="tl-input pl-num${cls ? " " + cls : ""}" type="number" inputmode="numeric" min="${min || 0}"${max ? ` max="${max}"` : ""} step="1" value="${v}" ${attr} aria-label="${esc(rot)}">`;
+function linhaProc(P, b, t) {
+  const p = PAC.proc(P, b.id, t), un = UN[b.unidade], sin = b.sinonimos || [b.nome];
+  const nome = `<div class="pl-nome"><label class="sr" for="pl-sn-${b.id}">Nome exibido de ${esc(b.nome)} (lista fechada de sinônimos neutros)</label>
+    <select class="pl-nome__sel" id="pl-sn-${b.id}" data-k="nome" data-p="${b.id}"${sin.length < 2 ? " disabled" : ""}>${sin.map(s => `<option${s === p.nome ? " selected" : ""}>${esc(s)}</option>`).join("")}</select>
+    <small>${esc(P.familias.find(f => f.id === b.familia).rot)}${b.recorrenteMensal ? " · recorrente mensal" : ""}${b.serie ? ` · série de ${b.serie.n}` : ""}</small></div>`;
+  let preco;
+  if (b.aDefinir) preco = `<span class="pl-un">sem valor · o dentista define</span>`;
+  else if (b.porFace) preco = `<span class="pl-faces">${["1 face", "2 faces", "3 ou mais"].map((r, i) => `<label>${r}${num(`data-k="face" data-i="${i}" data-p="${b.id}"`, p.precoFaces[i], `${p.nome}, ${r}, em reais`, "pl-num--sm")}</label>`).join("")}</span>`;
+  else if (b.unidade === "lesao") preco = `<span class="pl-faces" style="grid-template-columns:repeat(2,auto)"><label>1ª unidade${num(`data-k="precoBase" data-p="${b.id}"`, p.precoBase, `${p.nome}, 1ª unidade, em reais`, "pl-num--sm")}</label><label>seguintes${num(`data-k="precoAdicional" data-p="${b.id}"`, p.precoAdicional, `${p.nome}, unidades seguintes, em reais`, "pl-num--sm")}</label></span>`;
+  else preco = `<span class="pl-rs"><span aria-hidden="true">R$</span>${num(`data-k="precoBase" data-p="${b.id}"`, p.precoBase, `${p.nome}, preço por ${un.um}, em reais`)}<span class="pl-por" aria-hidden="true">/ ${esc(un.um)}</span></span>`;
+  const qtdFixa = b.porFace || b.unidade === "dente" || b.unidade === "pacote";
+  const qd = typeof p.qtdPadrao === "number" ? p.qtdPadrao : (p.qtdPadrao && p.qtdPadrao._) || 1;
+  const qtd = qtdFixa ? `<span class="pl-traco" aria-label="quantidade fixa">—</span>` : num(`data-k="qtdPadrao" data-p="${b.id}" step="${un.passo}"`, qd, `${p.nome}, quantidade padrão em ${un.varios}`, "pl-num--sm", un.min, un.max);
+  const rec = p.recall && p.recall[0] ? p.recall[0].d : 0;
+  return `<tr data-ativo="${p.ativo}"${b.porFace || b.unidade === "lesao" ? ` class="pl-tr--faces"` : ""}>
+    <td>${nome}</td>
+    <td><span class="pl-un">${esc(un.um)}</span></td>
+    <td data-rot="Preço (R$)">${preco}</td>
+    <td data-rot="Qtd. padrão"${qtdFixa ? ` class="pl-td-fixo"` : ""}>${qtd}</td>
+    <td data-rot="Recall (dias)">${num(`data-k="recallD" data-p="${b.id}"`, rec, `${p.nome}, recall em dias (0 = sem recall)`, "pl-num--sm", 0, 730)}</td>
+    <td><button type="button" class="sw" role="switch" aria-checked="${p.ativo}" data-k="ativo" data-p="${b.id}" aria-label="${esc(p.nome)} ativo no catálogo"></button></td>
+  </tr>`;
+}
+function exemplo(P, t) {
+  if (P.id === "dermato") {
+    const v = PL.valorLinha({ alvo: "glabela", proc: "tox", qtd: 20 }, P, null, t);
+    return `Exemplo no plano: <b>Glabela · Toxina 20 U = ${brl(v)}</b> · plano da Cristina V. <b>${brl(PL.total(PLD.plano("cristina"), t))}</b>`;
+  }
+  const v = PL.valorLinha({ alvo: "d36", proc: "rest", faces: ["M", "O"], qtd: 2 }, P, null, t);
+  return `Exemplo no plano: <b>36 · Restauração M + O (2 faces) = ${brl(v)}</b> · plano da Mariana A. <b>${brl(PL.total(PLD.plano("mariana-alves"), t))}</b>`;
+}
+function renderTab() {
+  const P = PAC.get(tabPac), t = rascDe(tabPac), pg = PAC.pagamento(P, t);
+  const somaAvulsa = c => c.itens.reduce((s, [a, pr, q, l]) => s + PL.valorLinha({ alvo: a, proc: pr, qtd: q, lado: l }, P, null, t), 0);
+  $("pl-painel").innerHTML = `
+    <div class="aj-rolagem"><table class="tabela pl-tab"><thead><tr><th scope="col">Procedimento</th><th scope="col">Unidade</th><th scope="col">Preço base</th><th scope="col">Qtd. padrão</th><th scope="col">Recall (dias)</th><th scope="col">Ativo</th></tr></thead>
+    <tbody>${P.procedimentos.map(b => linhaProc(P, b, t)).join("")}</tbody></table></div>
+    <p class="pl-ex" id="pl-ex" aria-live="polite">${exemplo(P, t)}</p>
+    <h3 class="pl-sub">Combos <span>o preço do combo é distribuído em proporção pelas linhas</span></h3>
+    <ul class="pl-combos">${P.combos.map(c0 => { const c = PAC.combo(P, c0.id, t); return `<li><div><b>${esc(c.nome)}</b><small>${esc(c.itens.map(([a, pr, q, l]) => `${PAC.nomeAlvo(P, { alvo: a, lado: l })} · ${PAC.proc(P, pr, t).nome}${UN[PAC.procBase(P, pr).unidade].max > 1 ? ` ${q} ${UN[PAC.procBase(P, pr).unidade].rot}` : ""}`).join(" + "))}${c.serie ? " · em série" : ""}</small></div>
+      <s title="Soma avulsa">${brl(somaAvulsa(c))}</s><span class="pl-rs"><span aria-hidden="true">R$</span>${num(`data-k="combo" data-c="${c.id}"`, c.preco, `Preço do combo ${c.nome}, em reais`)}</span></li>`; }).join("")}</ul>
+    <h3 class="pl-sub">Pagamento <span>acima do desconto máximo, “Fechar plano” vira “Pedir aprovação à Gestão”</span></h3>
+    <div class="pl-pag">
+      <div class="tl-campo"><label for="pl-pix">Desconto Pix (%)</label>${num(`id="pl-pix" data-k="pixDesc"`, pg.pagamento.pixDesc, "Desconto Pix em %", "", 0, 30)}</div>
+      <div class="tl-campo"><label for="pl-parc">Parcelas máximas</label>${num(`id="pl-parc" data-k="maxParcelas"`, pg.pagamento.maxParcelas, "Parcelas máximas", "", 1, 24)}</div>
+      <div class="tl-campo"><label for="pl-dc">Desconto máx. · Closer (%)</label>${num(`id="pl-dc" data-k="desc" data-perfil="closer"`, pg.descMax.closer, "Desconto máximo da closer em %", "", 0, 50)}</div>
+      <div class="tl-campo"><label for="pl-dm">Desconto máx. · Médico (%)</label>${num(`id="pl-dm" data-k="desc" data-perfil="medico"`, pg.descMax.medico, "Desconto máximo do médico em %", "", 0, 50)}</div>
+    </div>
+    <div class="aj-rod"><button type="button" class="bt-sec" id="pl-restaura">Restaurar valores do pacote</button><span class="tl-dica" id="pl-dica">Os planos já fechados mantêm o preço do dia do fechamento.</span><button type="button" class="tl-bt" id="pl-salva">Atualizar tabela de ${esc(P.rot.toLowerCase())}</button></div>`;
+}
+function editaRasc(el) {
+  const t = rascDe(tabPac), k = el.dataset.k, id = el.dataset.p;
+  const v = el.type === "number" ? Math.max(+el.min || 0, Math.min(el.max ? +el.max : 1e7, Math.round(+el.value || 0))) : el.value;
+  if (k === "combo") { (t.combos = t.combos || {})[el.dataset.c] = { preco: v }; }
+  else if (k === "pixDesc" || k === "maxParcelas") { (t.pagamento = t.pagamento || {})[k] = v; }
+  else if (k === "desc") { (t.descMax = t.descMax || {})[el.dataset.perfil] = v; }
+  else if (id) {
+    const o = ((t.procs = t.procs || {})[id] = t.procs[id] || {});
+    if (k === "face") { o.precoFaces = (o.precoFaces || PAC.proc(tabPac, id, t).precoFaces).slice(); o.precoFaces[+el.dataset.i] = v; } else o[k] = v;
+  }
+  $("pl-ex").innerHTML = exemplo(PAC.get(tabPac), t);
+}
+$("pl-abas").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; tabPac = b.dataset.tab; renderAbas(); $("pl-aba-" + tabPac).focus(); });
+$("pl-abas").addEventListener("keydown", e => {
+  if (!/^Arrow(Left|Right)$/.test(e.key)) return;
+  const at = ativosIds(), i = at.indexOf(tabPac); tabPac = at[(i + (e.key === "ArrowRight" ? 1 : at.length - 1)) % at.length]; renderAbas(); $("pl-aba-" + tabPac).focus();
+});
+$("pl-painel").addEventListener("change", e => { const el = e.target.closest("[data-k]"); if (el && el.tagName !== "BUTTON") editaRasc(el); });
+$("pl-painel").addEventListener("input", e => { const el = e.target.closest("input[data-k]"); if (el && el.value !== "") editaRasc(el); });
+$("pl-painel").addEventListener("click", e => {
+  const s = e.target.closest(".sw[data-k='ativo']");
+  if (s) { const v = s.getAttribute("aria-checked") !== "true"; s.setAttribute("aria-checked", v); s.closest("tr").dataset.ativo = v; const t = rascDe(tabPac); ((t.procs = t.procs || {})[s.dataset.p] = t.procs[s.dataset.p] || {}).ativo = v; return; }
+  if (e.target.closest("#pl-salva")) {
+    const ok = PAC.salvaTabela(tabPac, rascDe(tabPac));
+    aviso(ok ? `Tabela de <b>${esc(nomePac(tabPac).toLowerCase())}</b> atualizada · vale para os próximos planos` : "Sem armazenamento neste navegador: a tabela vale só nesta tela");
+    return;
+  }
+  if (e.target.closest("#pl-restaura")) { PAC.limpaTabela(tabPac); delete rasc[tabPac]; renderTab(); $("pl-restaura").focus(); aviso(`Valores de demonstração restaurados · <b>${esc(nomePac(tabPac))}</b>`); }
+});
+renderPacs(); renderUso(); renderAbas();
+
+/* ---------- Conta ---------- */
+renderUs(); renderMatriz(); renderMod();
+// Índice acompanha a seção visível
+const secs = [...document.querySelectorAll(".coluna > section[id]")];
+const ix = () => { const y = innerHeight * .3; let at = secs[0]; secs.forEach(s => { if (s.getBoundingClientRect().top < y) at = s; }); document.querySelectorAll("#indice a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + at.id)); };
+addEventListener("scroll", ix, { passive: true }); ix();
+</script>
+<script src="telas.js"></script>
+<script>
+// Cartão da conta: quem entrou (telas.js sabe nome e perfil)
+(function () {
+  const q = window.TL.quem;
+  const av = document.getElementById("conta-av"); av.className = "av av--" + q.cor; av.textContent = q.ini;
+  document.getElementById("conta-nome").textContent = q.completo;
+  document.getElementById("conta-perfil").textContent = `Perfil ${q.perfil} · ${VA2.PERFIS[q.perfilK] ? VA2.PERFIS[q.perfilK].desc : ""}`;
+  document.getElementById("conta-email").textContent = `Conectado com Google · ${q.email || "conta da clínica"}`;
+  if (location.hash && document.querySelector(location.hash)) setTimeout(() => { const el = document.querySelector(location.hash); el.scrollIntoView({ block: "start" }); el.classList.add("tl-destaque"); }, 450);
+})();
+</script>
+<link rel="stylesheet" href="perfis.css">
+<script src="perfis.js"></script>
+<link rel="stylesheet" href="motion.css">
+<script src="motion.js"></script>
+<script src="demo.js"></script>
+</body>
+</html>

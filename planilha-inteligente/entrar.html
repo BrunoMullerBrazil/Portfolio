@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Munin · Entrar</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100.00 100.00%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%2316171C%22/%3E%3Csvg x=%2212.00%22 y=%2212.00%22 width=%2276.00%22 height=%2276.00%22 viewBox=%220 0 94 94%22%3E%3Cpath d=%22M5.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 L49.50,70.00 L86.50,70.00 L86.50,23.00 Z M42.49,69.39 C41.86,50.29 49.51,42.12 68.61,41.49 A18.5,18.5 0 1 0 49.51,23.61 C50.14,42.71 42.49,50.88 23.39,51.51 Z%22 fill=%22%23F4F3EF%22/%3E%3Cpath d=%22M5.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z%22 fill=%22%234657C8%22/%3E%3C/svg%3E%3C/svg%3E">
+<meta name="theme-color" content="#F4F3EF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&family=Outfit:wght@600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+<link rel="stylesheet" href="telas.css">
+<link rel="stylesheet" href="entrar.css">
+</head>
+<body class="en" data-pagina="entrar">
+<div class="en-tela">
+  <main class="en-lado">
+    <a class="en-marca" href="entrar.html" aria-label="Munin" data-entra><span id="en-simbolo"></span><span class="en-marca__nome">Munin</span></a>
+
+    <div class="en-meio"><div class="en-caixa">
+
+      <!-- 1. Início -->
+      <section class="en-etapa" id="e-inicio" aria-labelledby="t-inicio">
+        <p class="en-aviso" id="saiu" role="status" hidden></p>
+        <p class="en-cliente" data-entra id="en-cliente"></p>
+        <h1 id="t-inicio" data-entra>Entrar no Munin</h1>
+        <p class="en-lead" data-entra>Use a conta Google que a clínica autorizou. Agenda, funil, recall e metas da equipe, num lugar só.</p>
+        <div class="en-acoes" data-entra>
+          <button type="button" class="bt-google" id="bt-google"><span id="g-ico"></span><span id="g-txt">Entrar com Google</span></button>
+          <p class="en-priv"><span id="ico-priv"></span><span>Só e-mails autorizados pela clínica entram. Seus dados ficam na conta Google da clínica.</span></p>
+        </div>
+      </section>
+
+      <!-- 2. Escolha da conta (simula a janela do Google) -->
+      <section class="en-etapa" id="e-contas" aria-label="Escolha uma conta" hidden></section>
+
+      <!-- 3. Acesso não autorizado -->
+      <section class="en-etapa" id="e-negado" aria-labelledby="t-negado" hidden>
+        <div class="en-selo" id="selo-negado"></div>
+        <h2 id="t-negado">Este e-mail ainda não tem acesso</h2>
+        <p class="en-lead"><span id="neg-email-txt"></span> não está na lista de e-mails autorizados da <b id="neg-clinica"></b>.</p>
+        <ol class="en-passos">
+          <li><span>Peça à <b>gestão da clínica</b> para incluir seu e-mail em <b>Ajustes › Usuários e acessos</b>.</span></li>
+          <li><span>Você recebe um convite por e-mail, com o seu perfil (SDR, Recepção, Closer…).</span></li>
+          <li><span>Depois é só entrar de novo com o mesmo e-mail.</span></li>
+        </ol>
+        <div class="en-bts">
+          <button type="button" class="tl-bt tl-bt--pena" id="bt-pedir"></button>
+          <button type="button" class="tl-bt tl-bt--sec" id="bt-voltar-neg"></button>
+        </div>
+      </section>
+
+      <!-- 4. Pedido de acesso enviado -->
+      <section class="en-etapa" id="e-pedido" aria-labelledby="t-pedido" hidden>
+        <div class="en-selo en-selo--ok" id="selo-ok"></div>
+        <h2 id="t-pedido" role="status">Pedido enviado à gestão</h2>
+        <p class="en-lead">Avisamos a gestão da <b class="cli"></b> que <b id="ped-email"></b> quer acesso. Quando liberarem, você recebe o convite por e-mail.</p>
+        <div class="en-bts"><button type="button" class="tl-bt tl-bt--sec" id="bt-voltar-ped"></button></div>
+      </section>
+
+    </div></div>
+
+    <footer class="en-rodape" data-entra>
+      <span>Munin © 2026</span><a href="convite.html#termos">Termos de uso</a><a href="convite.html#termos">Privacidade</a><a href="convite.html">Recebeu um convite?</a>
+    </footer>
+  </main>
+
+  <aside class="en-palco" id="palco" aria-label="Sobre o Munin"></aside>
+</div>
+
+<script src="dados.js"></script>
+<script src="dados2.js"></script>
+<script src="entrar.js"></script>
+<script>
+const { simbolo, G, ico, palco, seletor, mostra, abertura, entra, CLIENTE, REDUZ } = EN;
+const $ = id => document.getElementById(id);
+const etapas = [...document.querySelectorAll(".en-etapa")];
+$("en-simbolo").outerHTML = simbolo("");
+$("en-cliente").textContent = CLIENTE;
+document.querySelectorAll(".cli").forEach(e => e.textContent = CLIENTE);
+$("neg-clinica").textContent = CLIENTE;
+$("g-ico").outerHTML = G;
+$("ico-priv").outerHTML = ico("escudo");
+$("selo-negado").innerHTML = ico("cadeado"); $("selo-ok").innerHTML = ico("envio");
+$("bt-pedir").innerHTML = `${ico("envio")}Pedir acesso à gestão`;
+$("bt-voltar-neg").innerHTML = `${ico("esq")}Usar outra conta`;
+$("bt-voltar-ped").innerHTML = `${ico("esq")}Voltar ao início`;
+palco($("palco"), { topo: "Munin · planilha inteligente", titulo: "A clínica inteira numa planilha que pensa junto.", texto: "Quem precisa de retorno, quem está parado no funil e quanto falta para a meta: o Munin mostra a cada pessoa da equipe o que é dela hoje." });
+if (new URLSearchParams(location.search).get("saiu")) { const s = $("saiu"); s.hidden = false; s.innerHTML = `${ico("check", "ico ico-sm")}Você saiu do Munin. Até logo!`; }
+abertura(document.body);
+
+// Contas do Google neste navegador: uma por perfil + um e-mail pessoal sem acesso
+const CONTAS = VA2.CONTAS.concat([{ completo: "Paulo Henrique", email: "paulo.henrique.dm@gmail.com", ini: "PH", negada: true }]);
+let emailNegado = "";
+function mostraContas() {
+    $("e-contas").innerHTML = seletor({ titulo: "Escolha uma conta", sub: `para continuar no <b>Munin</b> · ${CLIENTE}`, contas: CONTAS }) +
+    `<button type="button" class="bt-texto en-voltar" id="bt-voltar-contas">${ico("esq", "ico ico-sm")}Voltar</button>`;
+  mostra(etapas, "e-contas");
+  $("e-contas").querySelector(".en-conta").focus();
+}
+$("bt-google").addEventListener("click", () => {
+  const b = $("bt-google"); if (b.getAttribute("aria-busy") === "true") return;
+  b.setAttribute("aria-busy", "true");
+  b.querySelector("svg").outerHTML = `<span class="en-gira" aria-hidden="true"></span>`; $("g-txt").textContent = "Conectando ao Google…";
+  setTimeout(() => {
+    b.removeAttribute("aria-busy"); b.querySelector(".en-gira").outerHTML = G; $("g-txt").textContent = "Entrar com Google";
+    mostraContas();
+  }, REDUZ ? 300 : 900);
+});
+$("e-contas").addEventListener("click", e => {
+  if (e.target.closest("#bt-voltar-contas")) { mostra(etapas, "e-inicio"); $("bt-google").focus(); return; }
+  const bt = e.target.closest(".en-conta"); if (!bt) return;
+  const c = bt.hasAttribute("data-outra") ? { negada: true, email: "seu.email@gmail.com" } : CONTAS[+bt.dataset.i];
+  if (c.negada) {
+    emailNegado = c.email; $("neg-email-txt").innerHTML = `<b>${c.email}</b>`;
+    $("bt-pedir").disabled = false; mostra(etapas, "e-negado"); return;
+  }
+  // autorizada: confirma na própria linha e segue para o painel
+  bt.setAttribute("aria-busy", "true"); bt.insertAdjacentHTML("beforeend", `<span class="en-gira" aria-hidden="true"></span>`);
+  bt.querySelector("small").textContent = `Entrando como ${VA2.PERFIS[c.perfil].rot}…`;
+  setTimeout(() => entra(c), REDUZ ? 150 : 650);
+});
+$("bt-voltar-neg").addEventListener("click", mostraContas);
+$("bt-pedir").addEventListener("click", () => {
+  const b = $("bt-pedir"); b.disabled = true; b.innerHTML = `<span class="en-gira" aria-hidden="true"></span>Enviando…`;
+  setTimeout(() => { $("ped-email").textContent = emailNegado; mostra(etapas, "e-pedido"); b.innerHTML = `${ico("envio")}Pedir acesso à gestão`; }, REDUZ ? 150 : 700);
+});
+$("bt-voltar-ped").addEventListener("click", () => { mostra(etapas, "e-inicio"); $("bt-google").focus(); });
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("e-contas").hidden || !$("e-negado").hidden || !$("e-pedido").hidden) { mostra(etapas, "e-inicio"); $("bt-google").focus(); }
+});
+</script>
+<script src="demo.js"></script>
+</body>
+</html>

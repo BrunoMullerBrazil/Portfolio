@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Resumo do seu plano</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100.00 100.00%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%2316171C%22/%3E%3Csvg x=%2212.00%22 y=%2212.00%22 width=%2276.00%22 height=%2276.00%22 viewBox=%220 0 94 94%22%3E%3Cpath d=%22M5.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 L49.50,70.00 L86.50,70.00 L86.50,23.00 Z M42.49,69.39 C41.86,50.29 49.51,42.12 68.61,41.49 A18.5,18.5 0 1 0 49.51,23.61 C50.14,42.71 42.49,50.88 23.39,51.51 Z%22 fill=%22%23F4F3EF%22/%3E%3Cpath d=%22M5.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z%22 fill=%22%234657C8%22/%3E%3C/svg%3E%3C/svg%3E">
+<meta name="theme-color" content="#F4F3EF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@200;300;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+<style>
+  /* Página do link que expira (resumo.html?t=): sem trilho, sem desenho anatômico. */
+  body { background: var(--porcelana); }
+  .rs { max-width: 560px; margin: 0 auto; padding: 28px 16px 48px; display: flex; flex-direction: column; gap: 16px; }
+  .rs-marca { display: flex; align-items: center; gap: 10px; font-size: var(--t-sm); color: var(--texto-2); }
+  .rs-marca b { color: var(--tinta); font-weight: 600; }
+  .rs h1 { font: 300 clamp(30px, 8vw, 40px)/1.1 var(--f-titulo); letter-spacing: -.02em; }
+  .rs h1 b { font-weight: 600; }
+  .rs-sub { color: var(--texto-2); font-size: var(--t-sm); margin-top: 6px; }
+  .rs-cartao { background: var(--cartao); border-radius: 22px; padding: 18px; box-shadow: var(--sombra-1); }
+  .rs-k { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--texto-2); font-weight: 600; }
+  .rs-itens { list-style: none; margin: 8px 0 0; padding: 0; }
+  .rs-itens li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 12px 0; border-bottom: 1px solid var(--linha); }
+  .rs-itens li:last-child { border-bottom: 0; }
+  .rs-itens b { font-weight: 600; font-size: var(--t-md); }
+  .rs-itens span { grid-column: 1; font-size: var(--t-xs); color: var(--texto-2); }
+  .rs-itens .v { grid-row: 1 / span 2; grid-column: 2; align-self: center; font: 600 var(--t-md) var(--f-titulo); font-variant-numeric: tabular-nums; color: var(--tinta); }
+  .rs-total { color: #fff; background: radial-gradient(130% 110% at 0% 0%, #2A2E44 0%, var(--grafite-2) 46%, var(--grafite) 100%); border-radius: 22px; padding: 20px; }
+  .rs-total .rs-k { color: var(--foco-texto-2); }
+  .rs-total b { display: block; font: 300 44px/1.05 var(--f-titulo); letter-spacing: -.02em; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
+  .rs-total b small { font-size: .45em; opacity: .7; margin-right: .2em; }
+  .rs-total > span:last-child { color: var(--foco-texto-2); font-size: var(--t-sm); }
+  .rs-tl { list-style: none; margin: 12px 0 0; padding: 0; }
+  .rs-tl li { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 12px; padding-bottom: 14px; position: relative; }
+  .rs-tl li::before { content: ""; position: absolute; left: 6px; top: 16px; bottom: 0; width: 1px; background: var(--linha-forte); }
+  .rs-tl li:last-child { padding-bottom: 0; }
+  .rs-tl li:last-child::before { display: none; }
+  .rs-tl i { width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid var(--pena); margin-top: 3px; }
+  .rs-tl li.hoje i { background: var(--pena); }
+  .rs-tl b { display: block; font-weight: 600; font-size: var(--t-sm); }
+  .rs-tl span { font-size: var(--t-xs); color: var(--texto-2); }
+  .rs-bt { height: 48px; border: 0; border-radius: var(--r-pill); background: var(--grafite); color: #fff; font: 600 var(--t-md) var(--f-texto); width: 100%; cursor: pointer; }
+  .rs-bt:hover { background: #2A2C36; }
+  .rs-val { text-align: center; font-size: var(--t-xs); color: var(--texto-2); }
+  .rs-nota { font-size: 11px; color: var(--texto-2); text-align: center; border-top: 1px dashed var(--linha-forte); padding-top: 12px; }
+  .rs-auth { display: flex; flex-direction: column; gap: 12px; }
+  .rs-auth .campos { display: flex; gap: 8px; }
+  .rs-auth label { display: flex; flex-direction: column; gap: 6px; font-size: var(--t-xs); color: var(--texto-2); flex: 1; }
+  .rs-auth input { width: 100%; min-width: 0; box-sizing: border-box; height: 48px; border: 1px solid var(--linha-forte); border-radius: 14px; padding: 0 14px; font: 600 20px var(--f-titulo); text-align: center; letter-spacing: .1em; background: var(--cartao); color: var(--tinta); }
+  .rs-auth input:focus { outline: 2px solid var(--pena); outline-offset: 1px; }
+  .rs-erro { color: var(--atrasado); font-size: var(--t-xs); min-height: 16px; }
+  .rs-ok { font-size: var(--t-sm); color: var(--ok); text-align: center; min-height: 1px; }
+  .rs-expirou { text-align: center; padding: 40px 18px; }
+</style>
+</head>
+<body>
+<main class="rs" id="rs" aria-live="polite"></main>
+<script src="dados.js"></script>
+<script src="pacotes.js"></script>
+<script src="plano_motor.js"></script>
+<script src="planos_dados.js"></script>
+<script>
+/* Resumo do plano para a paciente · link que expira (protótipo: autenticação simulada).
+   Mostra itens (região · procedimento · quantidade), total, parcela e a linha do tempo.
+   Sem desenho anatômico. Token inválido ou vencido: "Este link expirou". */
+(function () {
+  const raiz = document.getElementById("rs");
+  const q = new URLSearchParams(location.search), t = (q.get("t") || "").trim();
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const real = v => Math.round(v).toLocaleString("pt-BR");
+  const cent = v => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const CLINICA = "Clínica Aurora";
+  const MARCA = '<p class="rs-marca"><svg width="22" height="22" viewBox="0 0 94 94" aria-hidden="true"><path fill="#16171C" d="M5.5 70a18.5 18.5 0 1 0 37 0a18.5 18.5 0 1 0-37 0ZM49.5 23a18.5 18.5 0 1 0 37 0a18.5 18.5 0 1 0-37 0ZM49.5 70a18.5 18.5 0 1 0 37 0a18.5 18.5 0 1 0-37 0ZM49.5 23V70H86.5V23ZM42.49 69.39C41.86 50.29 49.51 42.12 68.61 41.49A18.5 18.5 0 1 0 49.51 23.61C50.14 42.71 42.49 50.88 23.39 51.51Z"/><path fill="#4657C8" d="M5.5 23a18.5 18.5 0 1 0 37 0a18.5 18.5 0 1 0-37 0Z"/></svg><b>' + CLINICA + '</b></p>';
+  // procura o plano pelo token: o que a tela salvou no navegador ou a semente
+  function acha(tok) {
+    if (!tok) return null;
+    const ids = new Set(PLD.ids);
+    try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf("munin:plano:") === 0) ids.add(k.slice(12)); } } catch (e) { /* sem armazenamento */ }
+    for (const id of ids) { const p = PLD.plano(id); if (p && p.resumo && p.resumo.token === tok) return p; }
+    return null;
+  }
+  const plano = acha(t);
+  const vencido = !plano || PL.data.diasEntre(PL.HOJE, plano.resumo.expira) < 0;
+  if (vencido) {
+    raiz.innerHTML = MARCA + '<section class="rs-cartao rs-expirou"><h1>Este link expirou.</h1><p class="rs-sub">Peça um novo à clínica pelo WhatsApp.</p></section>' +
+      '<p class="rs-nota">Por segurança, o resumo do plano fica disponível só por alguns dias.</p>';
+    return;
+  }
+  const pac = PAC.get(plano.pacote), pessoa = PLD.paciente(plano.paciente) || { nome: "" };
+  function autentica() {
+    raiz.innerHTML = MARCA + `<h1>Resumo do <b>seu plano</b></h1>
+      <form class="rs-cartao rs-auth" id="rs-f" novalidate><p class="rs-sub" style="margin:0">Para abrir, confirme o dia e o mês do seu nascimento.</p>
+        <div class="campos"><label>Dia<input inputmode="numeric" maxlength="2" id="rs-d" autocomplete="bday-day" placeholder="DD" required></label><label>Mês<input inputmode="numeric" maxlength="2" id="rs-m" autocomplete="bday-month" placeholder="MM" required></label></div>
+        <p class="rs-erro" id="rs-e" role="alert"></p><button class="rs-bt" type="submit">Ver o resumo</button></form>
+      <p class="rs-val">Válido até ${esc(plano.resumo.expira)}</p>
+      <p class="rs-nota">Protótipo: qualquer dia e mês com 4 dígitos passam. No produto, a data é conferida com o cadastro.</p>`;
+    document.getElementById("rs-d").focus();
+    document.getElementById("rs-f").addEventListener("submit", e => {
+      e.preventDefault();
+      const d = document.getElementById("rs-d").value.trim(), m = document.getElementById("rs-m").value.trim();
+      if (!/^\d{2}$/.test(d) || !/^\d{2}$/.test(m)) { document.getElementById("rs-e").textContent = "Digite o dia e o mês com 2 números cada (ex.: 07 e 03)."; return; }
+      try { sessionStorage.setItem("munin:resumo:" + t, "1"); } catch (er) { /* ok */ }
+      mostra();
+    });
+  }
+  function mostra() {
+    const tot = PL.totalPlano(plano), vals = {};
+    tot.itens.forEach(i => (vals[i.uid] = i.valor));
+    // sugestão do profissional que a closer ainda não aceitou não vai para a paciente
+    const its = plano.itens.filter(i => i.status !== "recusado" && !i.sugerido);
+    const planoV = Object.assign({}, plano, { itens: plano.itens.filter(i => !i.sugerido) });
+    const qtd = it => { const p = PAC.proc(pac, it.proc), u = PAC.UNIDADES[p.unidade] || {}; if (p.porFace) { const n = (it.faces || []).length; return n + (n > 1 ? " faces" : " face"); } if (p.unidade === "U") return it.qtd + " U"; if (p.unidade === "dente" || p.unidade === "pacote") return ""; return it.qtd + " " + (it.qtd === 1 ? u.um : u.varios); };
+    const nome = it => { const a = PAC.alvo(pac, it.alvo); return a && a.tipo === "dente" ? "Dente " + a.nomeCurto : PAC.nomeAlvo(pac, it); };
+    const recs = PL.recallsDe(planoV, { incluirPropostos: true }).filter(r => r.dias > 0 && r.dias <= 400);
+    const tl = [{ rot: "Início", txt: "primeira sessão, combinada com a clínica", hoje: true }].concat(recs.slice(0, 4).map(r => ({ rot: r.mes, txt: (r.rot === "Recall" ? "retorno" : r.rot.toLowerCase()) + " · " + r.procNome.split(" · ")[0].toLowerCase() })));
+    raiz.innerHTML = MARCA + `<div><h1>Olá, <b>${esc(pessoa.nome.split(" ")[0])}</b></h1><p class="rs-sub">Este é o resumo do plano que você conversou com a clínica.</p></div>
+      <section class="rs-cartao" aria-labelledby="rs-t-i"><span class="rs-k" id="rs-t-i">O que está no plano</span><ul class="rs-itens">${its.map(it => { const p = PAC.proc(pac, it.proc); return `<li><b>${esc(nome(it))}</b><span>${esc(p.nome)}${qtd(it) ? " · " + esc(qtd(it)) : ""}</span><span class="v">${p.aDefinir ? "a definir" : "R$ " + real(vals[it.uid] || 0)}</span></li>`; }).join("")}</ul></section>
+      <section class="rs-total" aria-label="Total"><span class="rs-k">Total</span><b><small>R$</small>${real(tot.total)}</b><span>${tot.parcelas > 1 ? tot.parcelas + "× de R$ " + cent(tot.parcela) + " sem juros" : "à vista"}${tot.desconto ? " · com desconto de R$ " + real(tot.desconto) : ""}</span></section>
+      <section class="rs-cartao" aria-labelledby="rs-t-t"><span class="rs-k" id="rs-t-t">Seu plano no tempo</span><ol class="rs-tl">${tl.map(x => `<li class="${x.hoje ? "hoje" : ""}"><i></i><div><b>${esc(x.rot)}</b><span>${esc(x.txt)}</span></div></li>`).join("")}</ol></section>
+      <button class="rs-bt" type="button" id="rs-ag">Quero agendar</button><p class="rs-ok" id="rs-ok" role="status"></p>
+      <p class="rs-val">Válido até ${esc(plano.resumo.expira)}</p>
+      <p class="rs-nota">Este resumo é comercial: não substitui a consulta nem o prontuário. Protótipo com dados fictícios.</p>`;
+    document.getElementById("rs-ag").addEventListener("click", () => { document.getElementById("rs-ok").textContent = "Pedido enviado. A clínica responde pelo WhatsApp para marcar o horário."; });
+  }
+  let ok = false; try { ok = sessionStorage.getItem("munin:resumo:" + t) === "1"; } catch (e) { /* ok */ }
+  if (ok) mostra(); else autentica();
+})();
+</script>
+</body>
+</html>

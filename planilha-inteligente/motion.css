@@ -1,0 +1,204 @@
+/* =====================================================================
+   MOVIMENTO · camada separada do sistema visual (proto.css).
+   Incluído no fim do <body>, junto com motion.js. Não muda layout:
+   só transições, estados de hover e as telas de abertura/encerramento.
+   Regras (revisão "suave"): curvas macias, uso diário entre 280 e 520ms
+   (abertura e encerramento à parte); nada infinito; nada anima enquanto
+   se digita; com prefers-reduced-motion, só opacidade e curto.
+   ===================================================================== */
+:root {
+  --ease-out: cubic-bezier(.22, 1, .36, 1);     /* entradas: desacelera longo e macio */
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);  /* cortina, trocas de lugar */
+  --ease-in: cubic-bezier(.55, 0, .75, .3);      /* saídas: começa devagar, sem tranco */
+  --ease-cortina: var(--ease-in-out);
+  --d-1: 200ms;  /* micro: cor, opacidade de dica */
+  --d-2: 280ms;  /* saída de gaveta/popover (260), aviso */
+  --d-3: 380ms;  /* entrada de gaveta/popover, FLIP, pílula do trilho */
+  --d-4: 520ms;  /* cartões entrando */
+  --d-hover: 320ms;
+}
+
+/* ---------- 1. Navegação entre páginas (View Transitions) ------------- */
+/* @view-transition { navigation: auto } é injetado por motion.js só em http(s):
+   em file:// o navegador recusa a transição entre documentos e usa o fallback. */
+.trilho { view-transition-name: vam-trilho; }
+.vam-pilula { view-transition-name: vam-pilula; }
+/* Troca de página: crossfade de 400ms com curva macia (o velho some um pouco antes do novo firmar) */
+::view-transition-group(root) { animation-duration: 400ms; animation-timing-function: var(--ease-in-out); }
+::view-transition-old(root) { animation: vam-vt-sai 400ms var(--ease-in-out) both; }
+::view-transition-new(root) { animation: vam-vt-entra 400ms var(--ease-out) both; }
+@keyframes vam-vt-sai { to { opacity: 0; } }
+@keyframes vam-vt-entra { from { opacity: 0; } }
+::view-transition-group(vam-pilula) { animation-duration: 440ms; animation-timing-function: var(--ease-out); }
+::view-transition-old(vam-trilho), ::view-transition-new(vam-trilho) { animation: none; }
+
+/* Pílula ativa do trilho como peça única que desliza entre itens.
+   O item atual perde o fundo próprio; a pílula (injetada) assume o desenho. */
+.trilho.vam-pil .trilho__item[aria-current="page"] { background: transparent; box-shadow: none; }
+.trilho.vam-pil .trilho__item[aria-current="page"]::before { opacity: 0; }
+.vam-pilula {
+  position: absolute; left: 0; top: 0; width: 60px; height: 52px; border-radius: 14px; pointer-events: none; z-index: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.08));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  will-change: transform;
+}
+.vam-pilula > i { position: absolute; left: -6px; top: 14px; bottom: 14px; width: 3px; border-radius: 3px; background: var(--pena-claro); }
+.trilho__item, .trilho__logo, .trilho__aba { z-index: 1; }
+.trilho__item { transition: background-color var(--d-1) var(--ease-out), color var(--d-1) var(--ease-out); }
+@media (max-width: 720px) {
+  .vam-pilula > i { left: 18px; right: 18px; top: auto; bottom: -6px; width: auto; height: 3px; }
+}
+/* Computador (>= 1024px): a peça flutuante tem pílula CLARA com ícone escuro.
+   A peça (.trilho__peca) é posicionada, então a pílula e os itens sobem de camada. */
+@media (min-width: 1024px) {
+  .vam-pilula {
+    z-index: 1; border-radius: var(--r-pill, 999px);
+    background: linear-gradient(180deg, #FFFFFF, var(--porcelana));
+    box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 4px 12px -6px rgba(0,0,0,.45);
+  }
+  /* o ponto azul pena da pílula ativa (eco do ponto do símbolo Munin) */
+  .vam-pilula > i { left: 7px; top: 7px; bottom: auto; width: 6px; height: 6px; border-radius: 50%; background: var(--pena); }
+  .trilho .trilho__item { z-index: 2; }
+  .trilho.vam-pil .trilho__item[aria-current="page"] { color: var(--grafite); }
+}
+
+/* ---------- 2. Hover em cartão --------------------------------------- */
+@media (hover: hover) and (pointer: fine) {
+  .cartao.recorte { transition: transform var(--d-hover) var(--ease-out), box-shadow var(--d-hover) var(--ease-out), opacity var(--d-hover); }
+  .cartao.recorte:hover { transform: translateY(-2px); box-shadow: var(--sombra-2); }
+  .cartao--foco.recorte:hover { box-shadow: 0 14px 32px -14px rgba(22, 23, 28, .55); }
+  .recorte__seta .ico { transition: transform var(--d-hover) var(--ease-out); }
+  .cartao.recorte:hover .recorte__seta .ico { transform: rotate(12deg) translate(1px, -1px); }
+  .recorte__seta { transition: background-color var(--d-hover) var(--ease-out), box-shadow var(--d-hover) var(--ease-out), border-color var(--d-hover) var(--ease-out); }
+  .cartao.recorte:not(.cartao--foco):hover .recorte__seta { background-color: var(--suave-2); }
+  /* vidro realça: brilho mais forte no alto e borda mais clara */
+  .cartao--foco.recorte:hover .recorte__seta {
+    border-color: rgba(255,255,255,.46);
+    background: radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,.38) 0%, rgba(255,255,255,0) 58%), linear-gradient(180deg, rgba(58,62,80,.9), rgba(32,34,42,.95));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 10px 22px -10px rgba(22,23,28,.8);
+  }
+  .trilho__novo { transition: background var(--d-hover) var(--ease-out), transform var(--d-hover) var(--ease-out); }
+  .trilho__novo:hover { transform: scale(1.04); }
+}
+
+/* ---------- 3. Gavetas e popovers: entram em 380ms, saem em 260ms ---- */
+.fn-gaveta, .gaveta, .vam-gaveta {
+  transition: transform 260ms var(--ease-in), visibility 0s linear 260ms;
+  visibility: hidden;
+}
+.fn-gaveta.aberta, .gaveta.aberta, .vam-gaveta.aberta, .gaveta[open], .gaveta.is-open {
+  transition: transform 380ms var(--ease-out), visibility 0s;
+  visibility: visible;
+}
+[popover]:popover-open { animation: vam-pop-in 380ms var(--ease-out); }
+.popover.aberto, .popover.is-open, .pop.aberto { animation: vam-pop-in 380ms var(--ease-out); }
+@keyframes vam-pop-in { from { opacity: 0; transform: translateX(10px); } }
+
+/* ---------- 4. Tique + aviso que sobe pela base ---------------------- */
+.vam-tique-on > :not(.vam-tique) { opacity: 0; transition: opacity var(--d-1) var(--ease-out); }
+.vam-tique { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; color: var(--ok, var(--pena)); }
+.vam-tique svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.vam-tique path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: vam-traco 420ms var(--ease-out) forwards; }
+@keyframes vam-traco { to { stroke-dashoffset: 0; } }
+
+.vam-avisos { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 90; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; width: max-content; max-width: calc(100vw - 32px); }
+.vam-aviso {
+  display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border-radius: var(--r-pill, 999px);
+  background: var(--tinta); color: #fff; font: 500 var(--t-sm, 14px)/1.3 var(--f-texto, Inter, sans-serif);
+  box-shadow: 0 10px 28px -12px rgba(22,23,28,.55); pointer-events: auto;
+}
+.vam-aviso__ok { width: 24px; height: 24px; border-radius: 50%; background: var(--pena-2); display: grid; place-items: center; flex: none; }
+.vam-aviso__ok svg { width: 14px; height: 14px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.vam-aviso__ok path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: vam-traco 420ms var(--ease-out) 160ms forwards; }
+.vam-aviso b { font-weight: 600; }
+@media (max-width: 720px) { .vam-avisos { bottom: calc(var(--barra-cel, 68px) + 20px + env(safe-area-inset-bottom)); } }
+
+.vam-fantasma { position: fixed; margin: 0; z-index: 25; pointer-events: none; }
+
+/* ---------- 5. Abertura (saudação + placar) e "Encerrar o dia" -------- */
+.vam-tela {
+  position: fixed; inset: 0; z-index: 100; color: var(--tinta);
+  display: grid; place-items: center; padding: 24px 16px 56px; overflow: hidden; cursor: pointer;
+}
+/* o fundo é uma camada própria: some/aparece só por opacidade (60fps), sem repintar a tela inteira */
+.vam-tela__fundo { position: absolute; inset: 0; z-index: -1; background: var(--porcelana); pointer-events: none; }
+.vam-tela__centro { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: clamp(16px, 2.8vh, 26px); width: min(960px, 100%); }
+/* Símbolo Munin: o contorno se desenha, o corpo enche e o ponto azul pena chega por último */
+.vam-mono { height: clamp(68px, 11vh, 100px); width: auto; aspect-ratio: 1; overflow: visible; color: var(--grafite); transform-origin: 50% 50%; will-change: transform; }
+.vam-mono .vam-forma { fill: currentColor; fill-opacity: 0; stroke: currentColor; stroke-width: 1.2; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.vam-mono .vam-ponto { fill: var(--pena); transform-box: fill-box; transform-origin: center; opacity: 0; }
+.vam-tela__ola { font: 600 clamp(28px, 4.2vw, 50px)/1.12 var(--f-titulo, "Inter Tight", sans-serif); letter-spacing: -.025em; margin: 0; text-wrap: balance; }
+.vam-tela__ola span { display: inline-block; white-space: pre; }
+.vam-tela__pular { position: absolute; right: 20px; bottom: 18px; font: 500 12px/1 var(--f-texto, Inter, sans-serif); color: var(--texto-2); }
+.vam-demo { position: absolute; left: 20px; bottom: 14px; display: inline-flex; align-items: center; gap: 8px; font: 500 12px/1 var(--f-texto, Inter, sans-serif); color: var(--texto-2); cursor: default; }
+.vam-demo select { font: inherit; color: var(--tinta); background: transparent; border: 1px solid var(--linha-forte); border-radius: 8px; padding: 6px 8px; min-height: 32px; }
+
+/* Placar: 4 colunas no computador, 2 × 2 no celular. Número grande (unidade menor), rótulo pequeno embaixo. */
+.vam-pl { list-style: none; margin: clamp(4px, 1.4vh, 14px) 0 0; padding: 0; width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.vam-pl__item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 4px clamp(8px, 1.8vw, 26px); }
+.vam-pl__item + .vam-pl__item::before { content: ""; position: absolute; left: 0; top: 10%; bottom: 10%; width: 1px; background: var(--linha-forte); }
+.vam-pl__v { display: inline-flex; align-items: baseline; gap: .1em; font: 600 clamp(36px, 4.4vw, 58px)/1 var(--f-titulo, "Inter Tight", sans-serif); letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--tinta); }
+.vam-pl__v small { font-size: .46em; font-weight: 600; letter-spacing: -.01em; color: var(--texto-2); }
+.vam-pl__n { position: relative; display: inline-block; }
+.vam-pl__fant { visibility: hidden; }
+.vam-pl__vivo { position: absolute; inset: 0; text-align: center; white-space: pre; }
+.vam-pl__rot { font: 500 var(--t-sm, 14px)/1.3 var(--f-texto, Inter, sans-serif); color: var(--texto-2); }
+.vam-pl__sub { margin-top: -4px; font: 500 var(--t-xs, 12px)/1.3 var(--f-texto, Inter, sans-serif); color: var(--texto-2); }
+/* alerta discreto (leads parados): número em vermelho de status e um ponto antes do rótulo */
+.vam-pl__item--alerta .vam-pl__v { color: var(--atrasado); }
+.vam-pl__item--alerta .vam-pl__rot::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--atrasado); vertical-align: .12em; }
+@media (max-width: 600px) {
+  .vam-pl { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 22px; }
+  .vam-pl__item:nth-child(2n+1)::before { display: none; }
+}
+@media (max-width: 720px) {
+  .vam-tela { padding-bottom: 64px; }
+  .vam-tela__pular { right: 16px; bottom: 16px; }
+  .vam-demo { left: 16px; bottom: 12px; }
+}
+
+/* Encerrar o dia: modo noite (grafite com gradiente radial sutil) */
+.vam-fim { cursor: default; color: var(--porcelana); }
+.vam-fim .vam-tela__fundo { background: radial-gradient(120% 90% at 50% 36%, #262833 0%, #16171C 58%, #0E0F13 100%); }
+.vam-fim .vam-mono { color: var(--porcelana); }
+.vam-fim .vam-pl__v { color: var(--porcelana); }
+.vam-fim .vam-pl__v small, .vam-fim .vam-pl__rot { color: #CDCFD8; }       /* 11:1 sobre o grafite */
+.vam-fim .vam-pl__sub { color: var(--foco-texto-2, #A9ACB9); }             /* 7,1:1 */
+.vam-fim .vam-pl__item + .vam-pl__item::before { background: rgba(255, 255, 255, .14); }
+.vam-fim__ate { font: 500 clamp(15px, 1.5vw, 18px)/1.2 var(--f-titulo, "Inter Tight", sans-serif); color: var(--foco-texto-2, #A9ACB9); margin: 4px 0 0; }
+.vam-fim__fechar { min-height: var(--alvo, 36px); padding: 0 20px; border-radius: var(--r-pill, 999px); border: 1px solid rgba(255, 255, 255, .24); background: transparent; color: var(--porcelana); font: 600 var(--t-sm, 14px)/1 var(--f-texto, Inter, sans-serif); cursor: pointer; transition: background-color var(--d-1) var(--ease-out); }
+.vam-fim__fechar:hover { background: rgba(255, 255, 255, .08); }
+.vam-fim__fechar:focus-visible { outline: 2px solid var(--pena-claro); outline-offset: 3px; }
+.topo__ola h1[tabindex="-1"]:focus { outline: none; }
+
+/* Versão pública: o botão flutuante "Demonstração" (demo.js, que só existe lá) some enquanto a abertura
+   ou o encerramento está na tela, para não cobrir o aviso "Clique ou tecle para pular". */
+.demo-fab { transition: opacity 320ms var(--ease-out), visibility 0s; }
+.vam-camada .demo-fab { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 200ms var(--ease-out), visibility 0s linear 200ms; }
+
+/* Botão "Encerrar o dia" no trilho (desktop) e no topo (celular) */
+.vam-encerrar .ico { width: 20px; height: 20px; }
+.vam-encerrar.vam-feito { color: var(--foco-texto-2); }
+.vam-encerrar-cel { display: none; }
+@media (max-width: 720px) {
+  .vam-encerrar-cel { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin-top: 6px; min-height: var(--alvo); padding: 0 12px; border-radius: var(--r-pill, 999px); border: 1px solid var(--linha-forte); background: transparent; color: var(--texto-2); font: 500 var(--t-xs, 12px)/1 var(--f-texto, Inter, sans-serif); }
+  .vam-encerrar-cel .ico { width: 15px; height: 15px; }
+}
+
+/* Enquanto o usuário digita, nada se move */
+.vam-digitando main *, .vam-digitando main *::before, .vam-digitando main *::after { transition: none !important; animation: none !important; }
+
+/* ---------- 6. Movimento reduzido: só opacidade --------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .cartao.recorte:hover { transform: none; }
+  .cartao.recorte:hover .recorte__seta .ico, .trilho__novo:hover { transform: none; }
+  .fn-gaveta, .gaveta, .vam-gaveta { transition: opacity 160ms linear, visibility 0s linear 160ms; }
+  .fn-gaveta:not(.aberta), .gaveta:not(.aberta), .vam-gaveta:not(.aberta) { opacity: 0; }
+  .fn-gaveta.aberta, .gaveta.aberta, .vam-gaveta.aberta { transition: opacity 200ms linear, visibility 0s; opacity: 1; }
+  .cartao.recorte, .recorte__seta, .trilho__novo { transition-property: opacity, background-color, box-shadow, border-color; }
+  ::view-transition-group(root), ::view-transition-old(root), ::view-transition-new(root), ::view-transition-group(vam-pilula) { animation-duration: 200ms; }
+  [popover]:popover-open, .popover.aberto, .popover.is-open, .pop.aberto { animation-name: vam-fade-in; }
+  [popover]:popover-open, .popover.aberto, .popover.is-open, .pop.aberto { animation-duration: 200ms; }
+  @keyframes vam-fade-in { from { opacity: 0; } }
+  .vam-tique path, .vam-aviso__ok path { animation: none; stroke-dashoffset: 0; }
+}

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Munin · Convite</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100.00 100.00%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%2316171C%22/%3E%3Csvg x=%2212.00%22 y=%2212.00%22 width=%2276.00%22 height=%2276.00%22 viewBox=%220 0 94 94%22%3E%3Cpath d=%22M5.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 L49.50,70.00 L86.50,70.00 L86.50,23.00 Z M42.49,69.39 C41.86,50.29 49.51,42.12 68.61,41.49 A18.5,18.5 0 1 0 49.51,23.61 C50.14,42.71 42.49,50.88 23.39,51.51 Z%22 fill=%22%23F4F3EF%22/%3E%3Cpath d=%22M5.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z%22 fill=%22%234657C8%22/%3E%3C/svg%3E%3C/svg%3E">
+<meta name="theme-color" content="#F4F3EF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&family=Outfit:wght@600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+<link rel="stylesheet" href="telas.css">
+<link rel="stylesheet" href="entrar.css">
+</head>
+<body class="en" data-pagina="convite">
+<div class="en-tela">
+  <main class="en-lado">
+    <a class="en-marca" href="entrar.html" aria-label="Munin · Entrar" data-entra><span id="en-simbolo"></span><span class="en-marca__nome">Munin</span></a>
+
+    <div class="en-meio"><div class="en-caixa">
+
+      <!-- 1. O convite -->
+      <section class="en-etapa" id="c-convite" aria-labelledby="t-convite">
+        <div class="en-trilha" aria-hidden="true" data-entra><span class="atual"></span><span></span><span></span></div>
+        <p class="en-passo-rot" data-entra>Passo 1 de 3 · Convite</p>
+        <h1 id="t-convite" data-entra></h1>
+        <p class="en-lead" data-entra id="convite-lead"></p>
+        <div class="en-convite" data-entra id="convite-de"></div>
+        <div class="en-acoes" data-entra>
+          <button type="button" class="bt-google" id="bt-google"><span id="g-ico"></span><span id="g-txt">Entrar com Google para aceitar</span></button>
+          <p class="en-priv"><span id="ico-priv"></span><span>Use a conta Google do e-mail convidado. Não existe cadastro aberto: só entra quem a clínica autoriza.</span></p>
+        </div>
+      </section>
+
+      <!-- 1b. Conta Google -->
+      <section class="en-etapa" id="c-google" aria-label="Escolha a conta do convite" hidden></section>
+
+      <!-- 2. Perfil: nome e foto -->
+      <section class="en-etapa" id="c-perfil" aria-labelledby="t-perfil" hidden>
+        <div class="en-trilha" aria-hidden="true"><span class="feito"></span><span class="atual"></span><span></span></div>
+        <p class="en-passo-rot">Passo 2 de 3 · Seu perfil</p>
+        <h2 id="t-perfil">Como você aparece para a equipe</h2>
+        <form id="f-perfil" novalidate style="display:flex;flex-direction:column;gap:16px;margin-top:20px">
+          <div class="en-foto">
+            <span class="en-foto__prev" id="foto-prev" aria-hidden="true"></span>
+            <fieldset class="en-cores"><legend>Foto</legend>
+              <label class="google" title="Foto da conta Google"><input type="radio" name="cor" value="google" aria-label="Foto da conta Google"></label>
+              <label style="background:var(--grafite)" title="Iniciais em grafite"><input type="radio" name="cor" value="grafite" aria-label="Iniciais em grafite" checked></label>
+              <label style="background:var(--pena)" title="Iniciais em azul pena"><input type="radio" name="cor" value="pena" aria-label="Iniciais em azul pena"></label>
+              <label style="background:var(--ardosia)" title="Iniciais em ardósia"><input type="radio" name="cor" value="ardosia" aria-label="Iniciais em ardósia"></label>
+            </fieldset>
+          </div>
+          <div class="tl-duas">
+            <div class="tl-campo"><label for="p-nome">Nome de exibição</label><input class="tl-input" id="p-nome" autocomplete="name" required aria-describedby="p-nome-erro"><span class="tl-erro" id="p-nome-erro"></span></div>
+            <div class="tl-campo"><label for="p-chama">Na saudação <span>“Bom dia, …”</span></label><input class="tl-input" id="p-chama" autocomplete="nickname"></div>
+          </div>
+          <div class="en-convite" style="margin-top:0;grid-template-columns:minmax(0,1fr)"><div><b id="faz-tit"></b><ul class="en-faz" id="faz"></ul></div></div>
+          <div class="en-bts" style="margin-top:4px"><button type="submit" class="tl-bt tl-bt--pena" id="bt-perfil"></button></div>
+        </form>
+      </section>
+
+      <!-- 3. Termos (LGPD) -->
+      <section class="en-etapa" id="c-termos" aria-labelledby="t-termos" hidden>
+        <div class="en-trilha" aria-hidden="true" id="trilha-termos"><span class="feito"></span><span class="feito"></span><span class="atual"></span></div>
+        <p class="en-passo-rot" id="termos-rot">Passo 3 de 3 · Termos</p>
+        <h2 id="t-termos">Termos de uso e privacidade</h2>
+        <div class="en-termos" id="termos" tabindex="0" aria-label="Resumo dos termos de uso e da política de privacidade">
+          <p><b>Em poucas palavras</b> (Lei Geral de Proteção de Dados, LGPD):</p>
+          <ul>
+            <li>Os dados dos pacientes pertencem à <b class="cli"></b>, que é a controladora. O Munin só organiza e mostra.</li>
+            <li>Tudo fica na conta Google da clínica. Seu acesso vale enquanto a gestão mantiver seu e-mail autorizado.</li>
+            <li>Use os dados só para o atendimento da clínica. Nada de prints, planilhas paralelas ou envio para fora.</li>
+            <li>Mensagens de WhatsApp saem sem diagnóstico, procedimento ou valores.</li>
+            <li>Registramos quem viu e alterou o quê (data e hora), para a segurança de todos.</li>
+            <li>Dúvidas sobre dados pessoais: fale com a gestão da clínica, responsável pelo tratamento.</li>
+          </ul>
+        </div>
+        <label class="en-check" id="aceite-wrap"><input type="checkbox" id="aceite"><span>Li e aceito os <a href="#termos">Termos de uso</a> e a <a href="#termos">Política de privacidade</a> do Munin.</span></label>
+        <div class="en-bts">
+          <button type="button" class="tl-bt tl-bt--pena" id="bt-aceitar" disabled></button>
+          <button type="button" class="tl-bt tl-bt--sec" id="bt-voltar-termos"></button>
+        </div>
+      </section>
+
+    </div></div>
+
+    <footer class="en-rodape" data-entra>
+      <span>Munin © 2026</span><a href="entrar.html">Já tenho acesso · Entrar</a><a href="#termos">Termos e privacidade</a>
+    </footer>
+  </main>
+
+  <aside class="en-palco" id="palco" aria-label="Sobre o Munin"></aside>
+</div>
+
+<script src="dados.js"></script>
+<script src="dados2.js"></script>
+<script src="entrar.js"></script>
+<script>
+const { simbolo, G, ico, palco, seletor, mostra, abertura, entra, iniciais, CLIENTE, REDUZ } = EN;
+const $ = id => document.getElementById(id);
+const etapas = [...document.querySelectorAll(".en-etapa")];
+// Convite (vem no link enviado pela gestão): ?nome=&email=&perfil=&por=
+const q = new URLSearchParams(location.search);
+const PERFIL = VA2.PERFIS[q.get("perfil")] ? q.get("perfil") : "sdr";
+const NOME = (q.get("nome") || "Júlia Moraes").trim().slice(0, 60);
+const EMAIL = (q.get("email") || "julia@clinica-aurora.com.br").trim().slice(0, 80);
+const POR = (q.get("por") || "Marina Albuquerque").trim().slice(0, 60);
+const P = VA2.PERFIS[PERFIL], primeiro = NOME.split(" ")[0];
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+$("en-simbolo").outerHTML = simbolo("");
+$("g-ico").outerHTML = G; $("ico-priv").outerHTML = ico("escudo");
+document.querySelectorAll(".cli").forEach(e => e.textContent = CLIENTE);
+$("t-convite").textContent = `${primeiro}, você foi convidada para o Munin`;
+if (/o$/.test(primeiro) && !/a$/.test(primeiro)) $("t-convite").textContent = `${primeiro}, você foi convidado para o Munin`;
+$("convite-lead").innerHTML = `A <b>${CLIENTE}</b> convidou você para usar o Munin como <b>${P.rot}</b>: ${P.desc.charAt(0).toLowerCase() + P.desc.slice(1)}.`;
+$("convite-de").innerHTML = `<span class="av av--r" aria-hidden="true">${iniciais(POR)}</span><div style="min-width:0"><b>Convite de ${esc(POR)} · Gestão</b><span>Para ${esc(EMAIL)} · vale até 20/11</span></div>`;
+$("bt-perfil").innerHTML = `Continuar ${ico("seta")}`;
+$("bt-aceitar").innerHTML = `${ico("check")}Aceitar e entrar`;
+$("bt-voltar-termos").innerHTML = `${ico("esq")}Voltar`;
+palco($("palco"), { topo: `Convite · ${P.rot}`, titulo: "Sua parte da clínica, pronta quando você chega.", texto: `Cada perfil vê o que é seu: a ${P.rot === "SDR" ? "SDR" : P.rot} começa o dia com a lista do que fazer, sem planilha paralela.` });
+abertura(document.body);
+
+// 1 → conta Google do convite
+$("bt-google").addEventListener("click", () => {
+  const b = $("bt-google"); if (b.getAttribute("aria-busy") === "true") return;
+  b.setAttribute("aria-busy", "true"); b.querySelector("svg").outerHTML = `<span class="en-gira" aria-hidden="true"></span>`; $("g-txt").textContent = "Conectando ao Google…";
+  setTimeout(() => {
+    b.removeAttribute("aria-busy"); b.querySelector(".en-gira").outerHTML = G; $("g-txt").textContent = "Entrar com Google para aceitar";
+    $("c-google").innerHTML = seletor({ titulo: "Escolha uma conta", sub: `para aceitar o convite da <b>${CLIENTE}</b>`, contas: [{ completo: NOME, email: EMAIL, perfil: PERFIL, ini: iniciais(NOME), cor: "r" }] }) +
+      `<p class="tl-erro" id="g-erro" role="alert" style="margin-top:12px"></p><button type="button" class="bt-texto en-voltar" id="bt-voltar-g">${ico("esq", "ico ico-sm")}Voltar</button>`;
+    mostra(etapas, "c-google"); $("c-google").querySelector(".en-conta").focus();
+  }, REDUZ ? 300 : 900);
+});
+$("c-google").addEventListener("click", e => {
+  if (e.target.closest("#bt-voltar-g")) { mostra(etapas, "c-convite"); $("bt-google").focus(); return; }
+  const bt = e.target.closest(".en-conta"); if (!bt) return;
+  if (bt.hasAttribute("data-outra")) { $("g-erro").textContent = `O convite é para ${EMAIL}. Entre com essa conta ou peça um novo convite à gestão.`; return; }
+  bt.setAttribute("aria-busy", "true"); bt.insertAdjacentHTML("beforeend", `<span class="en-gira" aria-hidden="true"></span>`);
+  setTimeout(() => { mostra(etapas, "c-perfil"); }, REDUZ ? 100 : 600);
+});
+
+// 2 → nome, saudação e foto
+$("p-nome").value = NOME; $("p-chama").value = primeiro;
+const CORES = { google: "conic-gradient(from 200deg, #4285F4, #34A853, #FBBC05, #EA4335, #4285F4)", grafite: "var(--grafite)", pena: "var(--pena)", ardosia: "var(--ardosia)" };
+function foto() {
+  const c = document.querySelector("input[name=cor]:checked").value, prev = $("foto-prev");
+  prev.style.background = CORES[c]; prev.textContent = iniciais($("p-nome").value || NOME);
+}
+document.querySelectorAll("input[name=cor]").forEach(r => r.addEventListener("change", foto));
+$("p-nome").addEventListener("input", foto); foto();
+$("faz-tit").textContent = `O que ${P.rot === "Gestão" ? "a Gestão" : P.rot === "Médico" ? "o Médico" : "a " + P.rot} faz no Munin`;
+$("faz").innerHTML = P.faz.map(t => `<li>${ico("check")}<span>${t}</span></li>`).join("");
+$("f-perfil").addEventListener("submit", e => {
+  e.preventDefault();
+  const ok = $("p-nome").value.trim().length >= 3;
+  $("p-nome").setAttribute("aria-invalid", !ok); $("p-nome-erro").textContent = ok ? "" : "Escreva como a equipe conhece você.";
+  if (!ok) { $("p-nome").focus(); return; }
+  mostra(etapas, "c-termos");
+});
+
+// 3 → termos e entrada
+$("aceite").addEventListener("change", () => { $("bt-aceitar").disabled = !$("aceite").checked; });
+$("bt-voltar-termos").addEventListener("click", () => {
+  if (leitura) { history.replaceState(null, "", location.pathname + location.search); leitura = false; modoTermos(false); mostra(etapas, "c-convite"); return; }
+  mostra(etapas, "c-perfil");
+});
+$("bt-aceitar").addEventListener("click", () => {
+  const b = $("bt-aceitar"); b.disabled = true; b.innerHTML = `<span class="en-gira" aria-hidden="true"></span>Criando seu acesso…`;
+  setTimeout(() => entra({ nome: ($("p-chama").value.trim() || primeiro).slice(0, 40), perfil: PERFIL }), REDUZ ? 150 : 800);
+});
+// Termos só para leitura (link "Termos e privacidade")
+let leitura = false;
+function modoTermos(sim) {
+  $("trilha-termos").hidden = sim; $("aceite-wrap").hidden = sim; $("bt-aceitar").hidden = sim;
+  $("termos-rot").textContent = sim ? "Para ler com calma" : "Passo 3 de 3 · Termos";
+}
+function verTermos() { if (location.hash !== "#termos" || !$("c-termos").hidden) return; leitura = true; modoTermos(true); mostra(etapas, "c-termos"); }
+addEventListener("hashchange", verTermos); verTermos();
+</script>
+<script src="demo.js"></script>
+</body>
+</html>
