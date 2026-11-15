@@ -31,6 +31,8 @@
   box.innerHTML = `
     <div class="demo-menu" id="demoMenu" role="menu" hidden>
       <h4>Demonstração</h4>
+      <a role="menuitem" href="entrar.html">Tela de login<small>Entrar com Google, escolha de conta e acesso negado</small></a>
+      <a role="menuitem" href="convite.html">Cadastro por convite<small>Como a pessoa convidada cria o acesso</small></a>
       <a role="menuitem" href="${url("painel.html", { intro: 1 })}">Abertura "Bom dia"<small>Como a pessoa vê no primeiro acesso do dia</small></a>
       <button role="menuitem" class="it" id="demoNoite" type="button">Encerrar o dia · "Boa noite"<small>Resumo do dia e despedida</small></button>
       <a role="menuitem" href="funil.html#parados">Leads parados<small>Funil filtrado nos que passaram do prazo</small></a>
