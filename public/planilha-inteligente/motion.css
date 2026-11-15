@@ -115,47 +115,66 @@
 
 .vam-fantasma { position: fixed; margin: 0; z-index: 25; pointer-events: none; }
 
-/* ---------- 5. Abertura "Bom dia" e "Encerrar o dia" ----------------- */
+/* ---------- 5. Abertura (saudação + placar) e "Encerrar o dia" -------- */
 .vam-tela {
-  position: fixed; inset: 0; z-index: 100; background: var(--porcelana); color: var(--tinta);
-  display: grid; place-items: center; padding: 24px 16px; overflow: hidden; cursor: pointer;
+  position: fixed; inset: 0; z-index: 100; color: var(--tinta);
+  display: grid; place-items: center; padding: 24px 16px 56px; overflow: hidden; cursor: pointer;
 }
-.vam-tela::after { /* filete de luz na borda da cortina */
-  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--linha);
-}
-.vam-tela__centro { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 22px; max-width: 720px; }
-/* Símbolo Munin da abertura e do encerramento: o contorno se desenha, o corpo enche e o ponto azul pena chega por último */
-.vam-mono { height: clamp(72px, 12vh, 104px); width: auto; aspect-ratio: 1; overflow: visible; color: var(--grafite); }
+/* o fundo é uma camada própria: some/aparece só por opacidade (60fps), sem repintar a tela inteira */
+.vam-tela__fundo { position: absolute; inset: 0; z-index: -1; background: var(--porcelana); pointer-events: none; }
+.vam-tela__centro { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: clamp(16px, 2.8vh, 26px); width: min(960px, 100%); }
+/* Símbolo Munin: o contorno se desenha, o corpo enche e o ponto azul pena chega por último */
+.vam-mono { height: clamp(68px, 11vh, 100px); width: auto; aspect-ratio: 1; overflow: visible; color: var(--grafite); transform-origin: 50% 50%; will-change: transform; }
 .vam-mono .vam-forma { fill: currentColor; fill-opacity: 0; stroke: currentColor; stroke-width: 1.2; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
 .vam-mono .vam-ponto { fill: var(--pena); transform-box: fill-box; transform-origin: center; opacity: 0; }
-.vam-tela__ola { font: 600 clamp(28px, 4.2vw, 48px)/1.1 var(--f-titulo, "Inter Tight", sans-serif); letter-spacing: -.025em; margin: 0; }
+.vam-tela__ola { font: 600 clamp(28px, 4.2vw, 50px)/1.12 var(--f-titulo, "Inter Tight", sans-serif); letter-spacing: -.025em; margin: 0; text-wrap: balance; }
 .vam-tela__ola span { display: inline-block; white-space: pre; }
-.vam-tela__resumo { font: 500 clamp(14px, 1.4vw, 17px)/1.4 var(--f-texto, Inter, sans-serif); color: var(--texto-2); font-variant-numeric: tabular-nums; margin: 0; }
-.vam-tela__resumo b { color: var(--tinta); font-weight: 600; }
-.vam-tela__pular { position: absolute; right: 20px; bottom: 18px; font: 500 12px/1 var(--f-texto, Inter, sans-serif); color: var(--texto-2); opacity: .8; }
+.vam-tela__pular { position: absolute; right: 20px; bottom: 18px; font: 500 12px/1 var(--f-texto, Inter, sans-serif); color: var(--texto-2); }
 .vam-demo { position: absolute; left: 20px; bottom: 14px; display: inline-flex; align-items: center; gap: 8px; font: 500 12px/1 var(--f-texto, Inter, sans-serif); color: var(--texto-2); cursor: default; }
 .vam-demo select { font: inherit; color: var(--tinta); background: transparent; border: 1px solid var(--linha-forte); border-radius: 8px; padding: 6px 8px; min-height: 32px; }
+
+/* Placar: 4 colunas no computador, 2 × 2 no celular. Número grande (unidade menor), rótulo pequeno embaixo. */
+.vam-pl { list-style: none; margin: clamp(4px, 1.4vh, 14px) 0 0; padding: 0; width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.vam-pl__item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 4px clamp(8px, 1.8vw, 26px); }
+.vam-pl__item + .vam-pl__item::before { content: ""; position: absolute; left: 0; top: 10%; bottom: 10%; width: 1px; background: var(--linha-forte); }
+.vam-pl__v { display: inline-flex; align-items: baseline; gap: .1em; font: 600 clamp(36px, 4.4vw, 58px)/1 var(--f-titulo, "Inter Tight", sans-serif); letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--tinta); }
+.vam-pl__v small { font-size: .46em; font-weight: 600; letter-spacing: -.01em; color: var(--texto-2); }
+.vam-pl__n { position: relative; display: inline-block; }
+.vam-pl__fant { visibility: hidden; }
+.vam-pl__vivo { position: absolute; inset: 0; text-align: center; white-space: pre; }
+.vam-pl__rot { font: 500 var(--t-sm, 14px)/1.3 var(--f-texto, Inter, sans-serif); color: var(--texto-2); }
+.vam-pl__sub { margin-top: -4px; font: 500 var(--t-xs, 12px)/1.3 var(--f-texto, Inter, sans-serif); color: var(--texto-2); }
+/* alerta discreto (leads parados): número em vermelho de status e um ponto antes do rótulo */
+.vam-pl__item--alerta .vam-pl__v { color: var(--atrasado); }
+.vam-pl__item--alerta .vam-pl__rot::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--atrasado); vertical-align: .12em; }
+@media (max-width: 600px) {
+  .vam-pl { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 22px; }
+  .vam-pl__item:nth-child(2n+1)::before { display: none; }
+}
 @media (max-width: 720px) {
+  .vam-tela { padding-bottom: 64px; }
   .vam-tela__pular { right: 16px; bottom: 16px; }
   .vam-demo { left: 16px; bottom: 12px; }
 }
 
-/* Encerrar o dia */
-.vam-fim { cursor: default; }
-.vam-fim .vam-tela__centro { gap: 20px; }
-.vam-fim__nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 4px 0 0; width: min(620px, 100%); }
-.vam-fim__nums > div { padding: 4px 18px; display: flex; flex-direction: column; gap: 4px; align-items: center; }
-.vam-fim__nums > div + div { border-left: 1px solid var(--linha); }
-.vam-fim__nums dt { font-size: var(--t-xs, 12px); color: var(--texto-2); }
-.vam-fim__nums dd { margin: 0; font: 600 clamp(26px, 3.4vw, 36px)/1.05 var(--f-titulo, "Inter Tight", sans-serif); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-.vam-fim__nums dd small { display: block; font: 500 var(--t-xs, 12px)/1.3 var(--f-texto, Inter, sans-serif); color: var(--texto-2); letter-spacing: 0; margin-top: 4px; }
-.vam-fim__ate { font: 500 clamp(16px, 1.6vw, 19px)/1.2 var(--f-titulo, "Inter Tight", sans-serif); color: var(--ardosia); margin: 0; }
-.vam-fim__fechar { margin-top: 6px; min-height: var(--alvo, 36px); padding: 0 18px; border-radius: var(--r-pill, 999px); border: 1px solid var(--linha-forte); background: var(--cartao); color: var(--tinta); font: 600 var(--t-sm, 14px)/1 var(--f-texto, Inter, sans-serif); cursor: pointer; }
-.vam-fim__fechar { transition: background-color var(--d-1) var(--ease-out); }
-.vam-fim__fechar:hover { background: var(--suave); }
-@media (max-width: 520px) {
-  .vam-fim__nums > div { padding: 4px 8px; }
-}
+/* Encerrar o dia: modo noite (grafite com gradiente radial sutil) */
+.vam-fim { cursor: default; color: var(--porcelana); }
+.vam-fim .vam-tela__fundo { background: radial-gradient(120% 90% at 50% 36%, #262833 0%, #16171C 58%, #0E0F13 100%); }
+.vam-fim .vam-mono { color: var(--porcelana); }
+.vam-fim .vam-pl__v { color: var(--porcelana); }
+.vam-fim .vam-pl__v small, .vam-fim .vam-pl__rot { color: #CDCFD8; }       /* 11:1 sobre o grafite */
+.vam-fim .vam-pl__sub { color: var(--foco-texto-2, #A9ACB9); }             /* 7,1:1 */
+.vam-fim .vam-pl__item + .vam-pl__item::before { background: rgba(255, 255, 255, .14); }
+.vam-fim__ate { font: 500 clamp(15px, 1.5vw, 18px)/1.2 var(--f-titulo, "Inter Tight", sans-serif); color: var(--foco-texto-2, #A9ACB9); margin: 4px 0 0; }
+.vam-fim__fechar { min-height: var(--alvo, 36px); padding: 0 20px; border-radius: var(--r-pill, 999px); border: 1px solid rgba(255, 255, 255, .24); background: transparent; color: var(--porcelana); font: 600 var(--t-sm, 14px)/1 var(--f-texto, Inter, sans-serif); cursor: pointer; transition: background-color var(--d-1) var(--ease-out); }
+.vam-fim__fechar:hover { background: rgba(255, 255, 255, .08); }
+.vam-fim__fechar:focus-visible { outline: 2px solid var(--pena-claro); outline-offset: 3px; }
+.topo__ola h1[tabindex="-1"]:focus { outline: none; }
+
+/* Versão pública: o botão flutuante "Demonstração" (demo.js, que só existe lá) some enquanto a abertura
+   ou o encerramento está na tela, para não cobrir o aviso "Clique ou tecle para pular". */
+.demo-fab { transition: opacity 320ms var(--ease-out), visibility 0s; }
+.vam-camada .demo-fab { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 200ms var(--ease-out), visibility 0s linear 200ms; }
 
 /* Botão "Encerrar o dia" no trilho (desktop) e no topo (celular) */
 .vam-encerrar .ico { width: 20px; height: 20px; }

@@ -387,7 +387,7 @@
   }, true);
 
   /* =====================================================================
-     1. ABERTURA "BOM DIA"
+     1. ABERTURA ("Bom dia" / "Boa tarde" / "Boa noite" + placar)
      ===================================================================== */
   // Símbolo Munin (Munin_marca/svg/munin_simbolo.svg) para a abertura e o encerramento.
   // .vam-forma é o contorno externo da mesma forma (cápsula + gota + ponte) num só traço, para
@@ -397,101 +397,215 @@
   const mono = () => `<svg class="vam-mono" viewBox="0 0 94 94" aria-hidden="true">${MONO}</svg>`;
   const palavras = s => s.split(/(\s+)/).filter(Boolean).map(w => /^\s+$/.test(w) ? w : `<span>${w}</span>`).join("");
 
+  /* Números do dia: MESMA fonte do painel (dados.js / window.VA), na visão "todos" (o filtro com que o painel abre).
+     Abertura: meta do mês, pacientes de hoje, pendências atrasadas e leads parados (as mesmas contas dos cartões do painel).
+     Encerramento: o que foi feito hoje. O registro congela o dia às 09:40 (VA.AGORA); para a noite simulada (?hora=19)
+     algumas coisas são DERIVADAS da hora, e cada derivação está explicada abaixo. */
+  const ETAPA_HOJE = p => p.etapa === "fechou" && p.total > p.v && /para hoje/i.test(p.nota || "");
   function dadosDoDia() {
     const AG = (VA.AGENDA || []).filter(a => !a.evento);
     const AT = VA.ATENCAO || [];
+    const agora = hhmm(HORA);
+    // atendido até a hora (simulada): já feito, em atendimento ou horário que passou (menos quem não confirmou)
+    const passou = a => a.st === "feito" || a.st === "atend" || (a.h < agora && a.st !== "semresp");
+    // % da meta do mês = faturamento realizado ÷ meta (a mesma conta do anel do painel, VA.metaVal("fat"))
+    const fat = VA.metaVal ? VA.metaVal("fat", "todos") : [0, 0];
+    // Planos fechados HOJE (derivado): fechamentos com dt = hoje (o registro não tem nenhum) + 2ª etapas de
+    // parciais que a nota do registro diz "combinada para hoje" (Gabriela, R$ 2.050), contadas como fechadas
+    // a partir das 17h, quando o dia é encerrado.
+    const PS = Object.values(VA.P || {});
+    const fechHoje = PS.filter(p => p.etapa === "fechou" && p.dt === VA.HOJE).map(p => p.v || 0);
+    if (HORA >= 17) PS.filter(ETAPA_HOJE).forEach(p => fechHoje.push(p.total - p.v));
+    // Pendências resolvidas hoje (derivado): itens de "Atenção hoje" cujo paciente já passou pela agenda até a
+    // hora simulada (recall e confirmação se resolvem na visita) + as 2ª etapas fechadas acima.
+    const resolvida = a => {
+      const ag = AG.find(x => x.id === a.id);
+      if (ag && ag.h < agora && passou(ag)) return true;
+      const p = VA.P && VA.P[a.id];
+      return HORA >= 17 && !!p && ETAPA_HOJE(p);
+    };
+    const res = AT.filter(resolvida);
     return {
       pacientes: AG.length,
       atrasadas: AT.filter(a => a.sev === "atrasado").length,
       pendencias: AT.length,
-      // atendidos até a hora (simulada): já feitos, em atendimento e os horários que passaram (menos quem não confirmou)
-      atendidos: AG.filter(a => a.st === "feito" || a.st === "atend" || (a.h < hhmm(HORA) && a.st !== "semresp")).length,
-      planosHoje: Object.values(VA.P || {}).filter(p => p.etapa === "fechou" && p.dt === VA.HOJE).length,
-      planosMes: VA.FECH_NOV ? VA.FECH_NOV.g.n + VA.FECH_NOV.d.n : 0,
-      valorMes: VA.FECH_NOV ? VA.FECH_NOV.g.v + VA.FECH_NOV.d.v : 0,
+      metaPct: fat[1] ? Math.round(fat[0] / fat[1] * 100) : 0,
+      parados: VA.parados ? VA.parados("todos").length : 0,   // mesma regra do aviso do painel e do Funil
+      atendidos: AG.filter(passou).length,
+      planosHoje: fechHoje.length,
+      valorHoje: fechHoje.reduce((s, v) => s + v, 0),
+      resolvidas: res.length,
+      abertas: AT.length - res.length,
+      atrasadasAbertas: AT.filter(a => a.sev === "atrasado" && !resolvida(a)).length,
     };
   }
-  const mil = v => (v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 
-  function inerte(sim) { doc.querySelectorAll("main, .trilho").forEach(el => { if (sim) el.setAttribute("inert", ""); else el.removeAttribute("inert"); }); }
+  /* ---------- Placar: blocos lado a lado; o número conta de 0 até o valor -------------------
+     A largura de cada número fica travada no valor final (texto fantasma invisível) e o número que
+     corre é desenhado por cima, então nada pula enquanto conta. Leitor de tela lê só o .sr. */
+  const fmtN = v => Math.round(v).toLocaleString("pt-BR");
+  function placar(itens) {
+    return `<ul class="vam-pl">${itens.map(it => {
+      const fim = fmtN(it.n);
+      return `<li class="vam-pl__item${it.alerta ? " vam-pl__item--alerta" : ""}">
+        <span class="vam-pl__v" aria-hidden="true">${it.pre ? `<small>${it.pre}</small>` : ""}<span class="vam-pl__n" data-fim="${it.n}"><span class="vam-pl__fant">${fim}</span><span class="vam-pl__vivo">${fim}</span></span>${it.suf ? `<small>${it.suf}</small>` : ""}</span>
+        <span class="vam-pl__rot" aria-hidden="true">${it.rot}</span>${it.sub ? `<span class="vam-pl__sub" aria-hidden="true">${it.sub}</span>` : ""}
+        <span class="sr">${[it.pre, fim + (it.suf || ""), it.rot, it.sub].filter(Boolean).join(" ")}</span>
+      </li>`; }).join("")}</ul>`;
+  }
+  // Contagem com relógio em Web Animations (opacidade 1→1, curva easeOut forte): pausa, adianta e cancela junto com as outras.
+  function contaPlacar(raiz, atrasoDe, A, dur = 1100) {
+    raiz.querySelectorAll(".vam-pl__n").forEach((n, i) => {
+      const vivo = n.querySelector(".vam-pl__vivo"), fim = +n.dataset.fim;
+      if (REDUZ || !fim) return;   // movimento reduzido: número final direto
+      vivo.textContent = fmtN(0);
+      const rel = A(n, [{ opacity: 1 }, { opacity: 1 }], { duration: dur, delay: atrasoDe(i), easing: CONTA });
+      if (!rel) { vivo.textContent = fmtN(fim); return; }
+      const passo = () => {
+        if (!n.isConnected) return;
+        const st = rel.playState;
+        if (st === "finished" || st === "idle") { vivo.textContent = fmtN(fim); return; }
+        vivo.textContent = fmtN(fim * (rel.effect.getComputedTiming().progress || 0));
+        requestAnimationFrame(passo);
+      };
+      requestAnimationFrame(passo);
+    });
+  }
+  // aria-live discreto: só a frase da saudação (e o resumo), anunciada uma vez
+  const anuncia = (tela, txt) => setTimeout(() => { const s = tela.querySelector(".vam-tela__voz"); if (s) s.textContent = txt; }, 80);
+  // Símbolo do menu (destino do voo da abertura): o do trilho; no celular, o do topo
+  const alvoSimbolo = () => [...doc.querySelectorAll(".trilho__logo svg, .marca-cel")].find(el => { const r = el.getBoundingClientRect(); return r.width > 0 && naTela(r); });
+
+  function inerte(sim) {
+    doc.querySelectorAll("main, .trilho").forEach(el => { if (sim) el.setAttribute("inert", ""); else el.removeAttribute("inert"); });
+    // classe no <html> enquanto a camada está na tela (a versão pública esconde o botão "Demonstração")
+    html.classList.toggle("vam-camada", sim);
+  }
 
   function abertura(forcada) {
     const dd = dadosDoDia();
+    const frase = `${saudacao(HORA)}, ${NOME}.`;
+    const pl = (n, um, varios) => n === 1 ? um : varios;
     const tela = doc.createElement("div");
     tela.className = "vam-tela vam-intro";
     tela.setAttribute("role", "dialog"); tela.setAttribute("aria-modal", "true"); tela.setAttribute("aria-label", "Abertura do dia");
     const opts = PESSOAS.map(p => `<option${p === NOME ? " selected" : ""}>${p}</option>`).join("") + (PESSOAS.includes(NOME) ? "" : `<option selected>${NOME}</option>`);
-    tela.innerHTML = `<div class="vam-tela__centro">
+    tela.innerHTML = `<div class="vam-tela__fundo" aria-hidden="true"></div>
+      <div class="vam-tela__centro">
         ${mono()}
-        <h2 class="vam-tela__ola">${palavras(`${saudacao(HORA)}, ${NOME}.`)}</h2>
-        <p class="vam-tela__resumo"><b>${dd.pacientes}</b> pacientes hoje · <b>${dd.atrasadas}</b> pendências atrasadas</p>
+        <h2 class="vam-tela__ola">${palavras(frase)}</h2>
+        ${placar([
+          { n: dd.metaPct, suf: "%", rot: "da meta do mês" },
+          { n: dd.pacientes, rot: pl(dd.pacientes, "paciente hoje", "pacientes hoje") },
+          { n: dd.atrasadas, rot: pl(dd.atrasadas, "pendência atrasada", "pendências atrasadas") },
+          { n: dd.parados, rot: pl(dd.parados, "lead parado", "leads parados"), alerta: dd.parados > 0 },
+        ])}
       </div>
+      <p class="sr vam-tela__voz" role="status" aria-live="polite"></p>
       <label class="vam-demo" title="Seletor de demonstração">Entrar como <select aria-label="Pessoa (demonstração)">${opts}</select></label>
       <span class="vam-tela__pular" aria-hidden="true">Clique ou tecle para pular</span>`;
     body.appendChild(tela);
     inerte(true);
+    anuncia(tela, `${frase} ${dd.metaPct}% da meta do mês, ${dd.pacientes} pacientes hoje, ${dd.atrasadas} pendências atrasadas, ${dd.parados} leads parados.`);
 
     const anims = [];
     const A = (el, kf, o) => { const a = anima(el, kf, Object.assign({ fill: "both" }, o)); if (a) anims.push(a); return a; };
-    const forma = tela.querySelector(".vam-mono .vam-forma"), ponto = tela.querySelector(".vam-mono .vam-ponto");
-    const ws = tela.querySelectorAll(".vam-tela__ola span");
-    const resumo = tela.querySelector(".vam-tela__resumo");
+    const fundo = tela.querySelector(".vam-tela__fundo"), svg = tela.querySelector(".vam-mono");
+    const forma = svg.querySelector(".vam-forma"), ponto = svg.querySelector(".vam-ponto");
+    const ola = tela.querySelector(".vam-tela__ola"), ws = ola.querySelectorAll("span");
+    const itens = tela.querySelectorAll(".vam-pl__item");
     const extras = tela.querySelectorAll(".vam-demo, .vam-tela__pular");
+    const alvo = alvoSimbolo();
+    let alvoAnim = null, T_SAI, T_ENTRADA, ultima;
 
-    /* Linha do tempo (~4,5s; com movimento reduzido, metade e só opacidade):
-       0,0–1,5s  símbolo Munin: o contorno se desenha (0,1–1,0s), o corpo enche (0,8–1,2s)
-                 e o ponto azul pena chega por último (1,05–1,5s)
-       1,1–2,3s  saudação palavra por palavra (600ms cada, desfoque saindo, subida pequena)
-       2,2–2,9s  resumo do dia
-       2,9–3,5s  pausa de leitura
-       3,5–4,4s  a cortina sobe (900ms, curva macia) e o painel entra em seguida */
-    const T = REDUZ ? .5 : 1, t = ms => Math.round(ms * T);
-    const sobe = (y, blur) => REDUZ ? [{ opacity: 0 }, { opacity: 1 }]
-      : [{ opacity: 0, transform: `translateY(${y}px)`, filter: `blur(${blur}px)` }, { opacity: 1, transform: "none", filter: "blur(0)" }];
+    /* Linha do tempo (~5s; movimento reduzido: ~3s, só opacidade, números finais direto):
+       0,00–1,50s  símbolo Munin: o contorno se desenha (0,1–1,0), o corpo enche (0,8–1,2), o ponto azul chega (1,05–1,5)
+       1,15–2,15s  saudação pela hora + nome, palavra por palavra (650ms cada, 130ms entre elas, desfoque saindo)
+       1,95–3,50s  placar: 4 blocos entram em sequência (700ms cada, 120ms entre eles) e contam de 0 ao valor (1,1s, easeOut)
+       3,50–3,95s  pausa de leitura
+       3,95–5,05s  saída ligada ao painel: saudação e placar sobem desfocando (3,95–4,6); o símbolo encolhe e voa até
+                   o símbolo do menu (FLIP, 4,03–4,93); o fundo porcelana se dissolve (4,33–5,05) enquanto os cartões
+                   do painel entram por baixo */
+    const sobe = (y, blur) => [{ opacity: 0, transform: `translateY(${y}px)`, filter: `blur(${blur}px)` }, { opacity: 1, transform: "none", filter: "none" }];
+    // saídas usam fill "forwards": o preenchimento para trás de uma saída esconderia a entrada do mesmo elemento
+    const saiCima = (y, blur) => [{ opacity: 1, transform: "none", filter: "blur(0)" }, { opacity: 0, transform: `translateY(${-y}px)`, filter: `blur(${blur}px)` }];
     if (REDUZ) {
-      A(forma, [{ fillOpacity: 0, strokeDashoffset: 0, opacity: 0 }, { fillOpacity: 1, strokeDashoffset: 0, opacity: 1 }], { duration: 300, delay: 60 });
-      A(ponto, [{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 260 });
+      const fade = (el, d, dur = 300) => A(el, [{ opacity: 0 }, { opacity: 1 }], { duration: dur, delay: d });
+      forma.style.strokeDashoffset = 0;
+      A(forma, [{ fillOpacity: 1, opacity: 0 }, { fillOpacity: 1, opacity: 1 }], { duration: 300 });
+      fade(ponto, 150);
+      fade(ola, 350);
+      itens.forEach(it => fade(it, 650));
+      extras.forEach(x => fade(x, 300));
+      T_SAI = 2700; T_ENTRADA = T_SAI + 100;
+      ultima = A(tela, [{ opacity: 1 }, { opacity: 0 }], { duration: 400, delay: T_SAI });
     } else {
       A(forma, [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 900, delay: 100, easing: "cubic-bezier(.45,0,.2,1)" });
       A(forma, [{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: 420, delay: 800, easing: EASE_IO });
-      A(ponto, [{ opacity: 0, transform: "scale(.2)" }, { opacity: 1, transform: "scale(1.08)", offset: .7 }, { opacity: 1, transform: "scale(1)" }], { duration: 450, delay: 1050, easing: EASE });
+      A(ponto, [{ opacity: 0, transform: "scale(.2)" }, { opacity: 1, transform: "scale(1.06)", offset: .7 }, { opacity: 1, transform: "scale(1)" }], { duration: 450, delay: 1050, easing: EASE });
+      const T_OLA = 1150, PASSO_W = 130, DUR_W = 650;
+      ws.forEach((w, i) => A(w, sobe(10, 6), { duration: DUR_W, delay: T_OLA + i * PASSO_W, easing: EASE }));
+      const fimOla = T_OLA + Math.max(0, ws.length - 1) * PASSO_W + DUR_W;
+      const T_PL = Math.max(1950, fimOla - 200), PASSO_PL = 120, DUR_PL = 700, DUR_CONTA = 1100;
+      itens.forEach((it, i) => A(it, sobe(16, 6), { duration: DUR_PL, delay: T_PL + i * PASSO_PL, easing: EASE }));
+      contaPlacar(tela, i => T_PL + i * PASSO_PL + 80, A, DUR_CONTA);
+      extras.forEach(x => A(x, [{ opacity: 0 }, { opacity: 1 }], { duration: 600, delay: 700, easing: EASE }));
+      const fimPl = T_PL + (itens.length - 1) * PASSO_PL + 80 + DUR_CONTA;
+      T_SAI = fimPl + 450;
+      // saída: a saudação e o placar sobem um pouco e desfocam (em sequência) e somem ANTES de o fundo se abrir,
+      // para não se misturarem aos cartões do painel que entram por baixo
+      A(ola, saiCima(12, 6), { duration: 480, delay: T_SAI, easing: EASE_IO, fill: "forwards" });
+      itens.forEach((it, i) => A(it, saiCima(14, 6), { duration: 480, delay: T_SAI + 40 + i * 50, easing: EASE_IO, fill: "forwards" }));
+      extras.forEach(x => A(x, [{ opacity: 1 }, { opacity: 0 }], { duration: 300, delay: T_SAI, easing: EASE_IO, fill: "forwards" }));
+      // FLIP do símbolo: da posição atual até o símbolo do menu (ponto continua azul; o corpo vira a cor do destino)
+      const T_VOO = T_SAI + 80, DUR_VOO = 900;
+      if (alvo) {
+        const s = svg.getBoundingClientRect(), r = alvo.getBoundingClientRect();
+        const dx = (r.left + r.width / 2) - (s.left + s.width / 2), dy = (r.top + r.height / 2) - (s.top + s.height / 2), k = r.height / s.height;
+        const cor = getComputedStyle(alvo).color;
+        A(svg, [{ transform: "none", color: getComputedStyle(svg).color }, { transform: `translate(${dx}px, ${dy}px) scale(${k})`, color: cor }], { duration: DUR_VOO, delay: T_VOO, easing: EASE_IO });
+        // o símbolo de verdade fica escondido até o voo pousar e então troca com o que voou (160ms)
+        alvoAnim = A(alvo, [{ opacity: 0 }, { opacity: 1 }], { duration: 160, delay: T_VOO + DUR_VOO - 120, easing: EASE });
+        A(svg, [{ opacity: 1 }, { opacity: 0 }], { duration: 160, delay: T_VOO + DUR_VOO - 120, easing: EASE, fill: "forwards" });
+      } else {
+        A(svg, saiCima(10, 6), { duration: 600, delay: T_SAI, easing: EASE_IO, fill: "forwards" });
+      }
+      A(fundo, [{ opacity: 1 }, { opacity: 0 }], { duration: 720, delay: T_SAI + 380, easing: EASE_IO, fill: "forwards" });
+      T_ENTRADA = T_SAI + 380;
+      // a camada termina quando o voo pousa e o fundo some
+      const fimTudo = Math.max(T_VOO + DUR_VOO + 60, T_SAI + 1100);
+      ultima = A(tela, [{ opacity: 1 }, { opacity: 1 }], { duration: fimTudo });
     }
-    const T_OLA = t(1100);
-    const passoW = ws.length > 1 ? Math.max(110, Math.min(200, 800 / (ws.length - 1))) : 0;
-    ws.forEach((w, i) => A(w, sobe(8, 6), { duration: t(600), delay: T_OLA + t(i * passoW), easing: EASE }));
-    const fimOla = T_OLA + t(Math.max(0, ws.length - 1) * passoW + 600);
-    const T_RESUMO = Math.max(t(2200), fimOla - t(150));
-    A(resumo, sobe(6, 3), { duration: t(700), delay: T_RESUMO, easing: EASE });
-    extras.forEach(x => A(x, [{ opacity: 0 }, { opacity: 1 }], { duration: t(600), delay: t(700), easing: EASE }));
-    // pausa de leitura e a cortina sobe; o conteúdo dela sobe um pouco mais devagar (profundidade)
-    const T_CORTINA = T_RESUMO + t(700) + t(600), DUR_CORTINA = t(900);
-    const cortina = A(tela, REDUZ ? [{ opacity: 1 }, { opacity: 0 }] : [{ transform: "translateY(0)" }, { transform: "translateY(-100%)" }], { duration: DUR_CORTINA, delay: T_CORTINA, easing: CORTINA });
-    if (!REDUZ) A(tela.querySelector(".vam-tela__centro"), [{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(48px)" }], { duration: t(700), delay: T_CORTINA, easing: EASE_IO });
-    // o painel entra logo atrás da cortina
-    const inicio = performance.now(), T_ENTRADA = T_CORTINA + t(320);
+    // o painel entra por baixo da camada que se dissolve
+    const inicio = performance.now();
     entrada(T_ENTRADA);
 
     let acabou = false;
     const termina = () => {
       if (acabou) return; acabou = true;
+      doc.removeEventListener("keydown", tecla, true);
+      if (alvoAnim) try { alvoAnim.cancel(); } catch (e) { /* ok */ }
+      const dentro = tela.contains(doc.activeElement) || doc.activeElement === body;
       tela.remove(); inerte(false);
       ls.set(chaveDia(), new Date().toISOString());
+      // foco devolvido ao painel: o título da saudação do topo
+      const h1 = doc.querySelector(".topo__ola h1");
+      if (dentro && h1) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }
     };
-    if (cortina) cortina.finished.then(termina, termina); else termina();
-    // segurança: nada fica travado mesmo se uma animação não terminar (folga sobre os ~4,5s)
-    setTimeout(termina, T_CORTINA + DUR_CORTINA + 2000);
+    if (ultima) ultima.finished.then(termina, termina); else termina();
+    // segurança: nada fica travado mesmo se uma animação não terminar
+    setTimeout(termina, T_SAI + 3500);
 
     const pular = () => {
       if (acabou) return;
       anims.forEach(a => { try { a.cancel(); } catch (e) { /* ok */ } });
-      // a entrada do painel não espera a cortina: adianta para começar agora
+      // a entrada do painel não espera a linha do tempo: adianta para começar agora
       adiantaEntrada(Math.max(0, T_ENTRADA - (performance.now() - inicio)));
-      // pular continua imediato (sem esperar a linha do tempo): só um esmaecer curto
+      // pular continua imediato: só um esmaecer curto
       const s = anima(tela, [{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: EASE, fill: "forwards" });
       if (s) s.finished.then(termina, termina); else termina();
-      doc.removeEventListener("keydown", tecla, true);
     };
-    const tecla = e => { if (e.target.closest && e.target.closest(".vam-demo")) return; e.preventDefault(); pular(); };
+    function tecla(e) { if (e.target.closest && e.target.closest(".vam-demo")) return; e.preventDefault(); pular(); }
     tela.addEventListener("click", e => { if (!e.target.closest(".vam-demo")) pular(); });
     doc.addEventListener("keydown", tecla, true);
     const sel = tela.querySelector(".vam-demo select");
@@ -503,7 +617,7 @@
       const u = new URL(location.href); u.searchParams.delete("nome"); u.searchParams.set("intro", "1");
       location.replace(u.href);
     });
-    VAM.intro = { tela, anims, pular, duracao: T_CORTINA + DUR_CORTINA, cortina: T_CORTINA, entrada: T_ENTRADA };
+    VAM.intro = { tela, anims, pular, saida: T_SAI, entrada: T_ENTRADA };
     return tela;
   }
   const chaveDia = () => `vam:abertura:${NOME}:${hojeISO}`;
@@ -544,69 +658,88 @@
     if (doc.querySelector(".vam-tela")) return;
     const dd = dadosDoDia();
     const quem = doc.activeElement;
+    const pl = n => n === 1 ? "" : "s";
+    // Despedida pela hora: à noite "Boa noite"; antes disso a saudação da hora + "Até amanhã."
+    const frase = HORA >= 18 ? `Boa noite, ${NOME}.` : `${saudacao(HORA)}, ${NOME}. Até amanhã.`;
+    const final = HORA >= 18 ? "Até amanhã." : "Bom descanso.";
     const tela = doc.createElement("div");
     tela.className = "vam-tela vam-fim";
     tela.setAttribute("role", "dialog"); tela.setAttribute("aria-modal", "true"); tela.setAttribute("aria-label", "Encerrar o dia");
-    const pl = n => n === 1 ? "" : "s";
-    tela.innerHTML = `<div class="vam-tela__centro">
+    tela.innerHTML = `<div class="vam-tela__fundo" aria-hidden="true"></div>
+      <div class="vam-tela__centro">
         ${mono()}
-        <h2 class="vam-tela__ola">${palavras(`Boa noite, ${NOME}.`)}</h2>
-        <dl class="vam-fim__nums">
-          <div><dt>Atendidos hoje</dt><dd>${dd.atendidos}<small>de ${dd.pacientes} na agenda</small></dd></div>
-          <div><dt>Planos fechados</dt><dd>${dd.planosHoje}<small>hoje · ${dd.planosMes} no mês (R$ ${mil(dd.valorMes)} mil)</small></dd></div>
-          <div><dt>Para amanhã</dt><dd>${dd.pendencias}<small>pendência${pl(dd.pendencias)} · ${dd.atrasadas} atrasada${pl(dd.atrasadas)}</small></dd></div>
-        </dl>
-        <p class="vam-fim__ate">Até amanhã.</p>
+        <h2 class="vam-tela__ola">${palavras(frase)}</h2>
+        ${placar([
+          { n: dd.atendidos, rot: `atendimento${pl(dd.atendidos)} realizado${pl(dd.atendidos)}`, sub: `de ${dd.pacientes} na agenda` },
+          { n: dd.valorHoje, pre: "R$", rot: "em planos fechados hoje", sub: dd.planosHoje ? `${dd.planosHoje} plano${pl(dd.planosHoje)}` : "nenhum plano hoje" },
+          { n: dd.resolvidas, rot: `pendência${pl(dd.resolvidas)} resolvida${pl(dd.resolvidas)}`, sub: `de ${dd.pendencias} na lista` },
+          { n: dd.abertas, rot: "ficam para amanhã", sub: `${dd.atrasadasAbertas} atrasada${pl(dd.atrasadasAbertas)}` },
+        ])}
+        <p class="vam-fim__ate">${final}</p>
         <button type="button" class="vam-fim__fechar">Fechar</button>
-      </div>`;
+      </div>
+      <p class="sr vam-tela__voz" role="status" aria-live="polite"></p>`;
     body.appendChild(tela);
     inerte(true);
     ls.set(chaveFim(), new Date().toISOString());
+    anuncia(tela, `${frase} ${dd.atendidos} atendimentos realizados, ${dd.resolvidas} pendências resolvidas, ${dd.abertas} ficam para amanhã.`);
 
-    /* Linha do tempo (~3,6s até "Até amanhã" firmar; reduzido: metade, só opacidade):
-       0,0–0,6s  a tela clareia
-       0,3–1,5s  "Boa noite" palavra por palavra (600ms cada, 200ms entre elas)
-       1,3–2,2s  os três números do dia
-       2,1–3,4s  o símbolo se desfaz devagar: o ponto apaga, o corpo esvazia e o contorno se recolhe
-       2,9–3,6s  "Até amanhã." e o botão Fechar */
-    const T = REDUZ ? .5 : 1, t = ms => Math.round(ms * T);
-    const A = (el, kf, o) => anima(el, kf, Object.assign({ fill: "both" }, o));
-    const fade = (el, d, dur, y = 8, blur = 0) => A(el, REDUZ ? [{ opacity: 0 }, { opacity: 1 }]
-      : [{ opacity: 0, transform: `translateY(${y}px)`, filter: `blur(${blur}px)` }, { opacity: 1, transform: "none", filter: "blur(0)" }],
-      { duration: t(dur), delay: t(d), easing: EASE });
-    A(tela, [{ opacity: 0 }, { opacity: 1 }], { duration: t(600), easing: EASE });
-    const forma = tela.querySelector(".vam-mono .vam-forma"), ponto = tela.querySelector(".vam-mono .vam-ponto");
+    /* Linha do tempo (~5,6s até o botão Fechar; movimento reduzido: ~2,5s, só opacidade, números finais direto):
+       0,00–1,00s  a tela escurece suave para o grafite (gradiente radial sutil): modo noite
+       0,35–1,15s  o símbolo aparece inteiro (claro sobre o grafite, ponto azul)
+       0,70–1,74s  despedida pela hora + nome, palavra por palavra (650ms cada, 130ms entre elas)
+       1,55–3,10s  placar do dia: 4 blocos em sequência (700ms, 120ms entre eles), contando de 0 ao valor (1,1s)
+       3,50–5,10s  o símbolo se desfaz no sentido inverso da abertura: o corpo esvazia (3,5–4,0), o contorno
+                   se recolhe (3,85–4,65) e o ponto azul sai por último (4,55–5,10)
+       4,90–5,60s  a frase final pequena e o botão Fechar */
+    const anims = [];
+    const A = (el, kf, o) => { const a = anima(el, kf, Object.assign({ fill: "both" }, o)); if (a) anims.push(a); return a; };
+    const fundo = tela.querySelector(".vam-tela__fundo"), svg = tela.querySelector(".vam-mono");
+    const forma = svg.querySelector(".vam-forma"), ponto = svg.querySelector(".vam-ponto");
+    const ws = tela.querySelectorAll(".vam-tela__ola span"), itens = tela.querySelectorAll(".vam-pl__item");
+    const ate = tela.querySelector(".vam-fim__ate"), btFechar = tela.querySelector(".vam-fim__fechar");
     forma.style.fillOpacity = 1; forma.style.strokeDashoffset = 0; ponto.style.opacity = 1;
-    fade(tela.querySelector(".vam-mono"), 0, 700, 4, 4);
-    tela.querySelectorAll(".vam-tela__ola span").forEach((w, i) => fade(w, 300 + i * 200, 600, 8, 6));
-    tela.querySelectorAll(".vam-fim__nums > div").forEach((n, i) => fade(n, 1300 + i * 150, 600, 6, 3));
-    // o símbolo se desfaz (o inverso da abertura): o ponto apaga, o corpo esvazia, o contorno se recolhe; fica um vestígio
     if (REDUZ) {
-      A(ponto, [{ opacity: 1 }, { opacity: .15 }], { duration: 300, delay: t(2100) });
-      A(forma, [{ opacity: 1 }, { opacity: .1 }], { duration: 300, delay: t(2200) });
+      const fade = (el, d, de = 0, ate_ = 1) => A(el, [{ opacity: de }, { opacity: ate_ }], { duration: 300, delay: d });
+      fade(fundo, 0); fade(svg, 150); ws.forEach(w => fade(w, 350)); itens.forEach(it => fade(it, 650));
+      fade(ponto, 1700, 1, 0); fade(forma, 1500, 1, 0);   // o ponto sai por último
+      fade(ate, 2000); fade(btFechar, 2200);
     } else {
-      A(ponto, [{ opacity: 1, transform: "scale(1)" }, { opacity: .15, transform: "scale(.6)" }], { duration: 420, delay: 2100, easing: EASE_IO });
-      A(forma, [{ fillOpacity: 1 }, { fillOpacity: .1 }], { duration: 420, delay: 2300, easing: EASE_IO });
-      A(forma, [{ strokeDashoffset: 0 }, { strokeDashoffset: -1 }], { duration: 760, delay: 2560, easing: EASE_IO });
+      const sobe = (el, d, dur, y, blur) => A(el, [{ opacity: 0, transform: `translateY(${y}px)`, filter: `blur(${blur}px)` }, { opacity: 1, transform: "none", filter: "none" }], { duration: dur, delay: d, easing: EASE });
+      A(fundo, [{ opacity: 0 }, { opacity: 1 }], { duration: 1000, easing: EASE_IO });
+      sobe(svg, 350, 800, 6, 6);
+      ws.forEach((w, i) => sobe(w, 700 + i * 130, 650, 10, 6));
+      const fimOla = 700 + Math.max(0, ws.length - 1) * 130 + 650;
+      const T_PL = Math.max(1550, fimOla - 200);
+      itens.forEach((it, i) => sobe(it, T_PL + i * 120, 700, 16, 6));
+      contaPlacar(tela, i => T_PL + i * 120 + 80, A, 1100);
+      const T_DESFAZ = T_PL + 3 * 120 + 80 + 1100 + 400;
+      A(forma, [{ fillOpacity: 1 }, { fillOpacity: 0 }], { duration: 500, delay: T_DESFAZ, easing: EASE_IO });
+      A(forma, [{ strokeDashoffset: 0 }, { strokeDashoffset: -1 }], { duration: 800, delay: T_DESFAZ + 350, easing: EASE_IO });
+      A(ponto, [{ opacity: 1, transform: "scale(1)" }, { opacity: 1, transform: "scale(1.12)", offset: .3 }, { opacity: 0, transform: "scale(0)" }], { duration: 550, delay: T_DESFAZ + 1050, easing: EASE_IO });
+      sobe(ate, T_DESFAZ + 1400, 700, 6, 4);
+      sobe(btFechar, T_DESFAZ + 1650, 500, 0, 0);
     }
-    fade(tela.querySelector(".vam-fim__ate"), 2900, 700, 6, 4);
-    fade(tela.querySelector(".vam-fim__fechar"), 3200, 500, 0);
 
+    let fechado = false;
     const fechar = () => {
+      if (fechado) return; fechado = true;
       doc.removeEventListener("keydown", tecla, true);
-      const s = anima(tela, [{ opacity: 1 }, { opacity: 0 }], { duration: REDUZ ? 160 : 360, easing: EASE_IO, fill: "forwards" });
+      const s = anima(tela, [{ opacity: 1 }, { opacity: 0 }], { duration: REDUZ ? 160 : 420, easing: EASE_IO, fill: "forwards" });
       const fim = () => {
+        anims.forEach(a => { try { a.cancel(); } catch (e) { /* ok */ } });
         tela.remove(); inerte(false);
         if (VAM.botaoEncerrar) { VAM.botaoEncerrar.classList.add("vam-feito"); VAM.botaoEncerrar.querySelector(".trilho__rot").textContent = "Encerrado"; VAM.botaoEncerrar.dataset.rotulo = "Dia encerrado · rever o resumo"; }
-        if (quem && quem.focus) quem.focus();
+        if (quem && quem.focus && quem !== body) quem.focus();
+        else { const h1 = doc.querySelector(".topo__ola h1"); if (h1) { h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); } }
       };
       if (s) s.finished.then(fim, fim); else fim();
     };
-    const tecla = e => { if (e.key === "Escape" || e.key === "Enter" || e.key === " ") { e.preventDefault(); fechar(); } };
+    function tecla(e) { if (e.key === "Escape" || e.key === "Enter" || e.key === " ") { e.preventDefault(); fechar(); } }
     doc.addEventListener("keydown", tecla, true);
-    tela.querySelector(".vam-fim__fechar").addEventListener("click", fechar);
-    tela.querySelector(".vam-fim__fechar").focus({ preventScroll: true });
-    VAM.fim = { tela, fechar };
+    btFechar.addEventListener("click", fechar);
+    btFechar.focus({ preventScroll: true });
+    VAM.fim = { tela, fechar, anims };
   }
 
   /* =====================================================================
