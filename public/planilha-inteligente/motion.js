@@ -659,9 +659,10 @@
     const dd = dadosDoDia();
     const quem = doc.activeElement;
     const pl = n => n === 1 ? "" : "s";
-    // Despedida pela hora: à noite "Boa noite"; antes disso a saudação da hora + "Até amanhã."
-    const frase = HORA >= 18 ? `Boa noite, ${NOME}.` : `${saudacao(HORA)}, ${NOME}. Até amanhã.`;
-    const final = HORA >= 18 ? "Até amanhã." : "Bom descanso.";
+    // Despedida: encerrar o dia nunca diz "Bom dia". A partir das 18h "Boa noite";
+    // à tarde "Boa tarde… Até amanhã."; de manhã (encerramento antecipado) só "Até amanhã".
+    const frase = HORA >= 18 ? `Boa noite, ${NOME}.` : HORA >= 12 ? `Boa tarde, ${NOME}. Até amanhã.` : `Até amanhã, ${NOME}.`;
+    const final = HORA >= 18 ? "Bom descanso." : "Até amanhã.";
     const tela = doc.createElement("div");
     tela.className = "vam-tela vam-fim";
     tela.setAttribute("role", "dialog"); tela.setAttribute("aria-modal", "true"); tela.setAttribute("aria-label", "Encerrar o dia");
