@@ -232,6 +232,8 @@
 </main>
 
 <script src="dados.js"></script>
+<script src="dados2.js"></script>
+<script src="perfis_dados.js"></script>
 <script src="comum.js"></script>
 <script>
 /* Tudo vem de dados.js (window.VA). Nenhum número digitado aqui. */
@@ -302,7 +304,13 @@ function aplicaKPI(m) {
     c.sem ? `<span class="status status--atencao">${c.sem} sem registro</span>` : ""].join("");
 }
 
-const MAX_AT = 6;  // Atenção hoje: só os 6 mais urgentes (a lista já vem em ordem de urgência)
+let MAX_AT = 6;  // Atenção hoje: só os 6 mais urgentes (a lista já vem em ordem de urgência); "Ver todos" abre a lista inteira
+document.getElementById("atencao-todos").addEventListener("click", e => {
+  const todos = MAX_AT === 6; MAX_AT = todos ? Infinity : 6;
+  e.currentTarget.setAttribute("aria-expanded", todos);
+  e.currentTarget.firstElementChild.innerHTML = todos ? `Ver só os 6 mais urgentes<span id="atencao-tot" hidden></span>` : `Ver todos (<span id="atencao-tot"></span>)`;
+  filtra();
+});
 let filtroMed = "todos", filtroTipo = "todos";
 function filtra() {
   const okMed = el => filtroMed === "todos" || el.dataset.med === filtroMed;
@@ -339,6 +347,10 @@ renderAtencao(); miniCal($("mcal"), { pontos: true });
 document.querySelectorAll("#mcal .mcal__dia").forEach((d, i) => { if (i < 7 || i > 13) d.classList.add("fora-semana"); });  // 8 a 14/11
 filtra();
 </script>
+<link rel="stylesheet" href="telas.css">
+<script src="telas.js"></script>
+<link rel="stylesheet" href="perfis.css">
+<script src="perfis.js"></script>
 <link rel="stylesheet" href="motion.css">
 <script src="motion.js"></script>
 <script src="demo.js"></script>

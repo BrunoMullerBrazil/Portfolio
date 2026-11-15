@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Munin · Relatórios</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100.00 100.00%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%2316171C%22/%3E%3Csvg x=%2212.00%22 y=%2212.00%22 width=%2276.00%22 height=%2276.00%22 viewBox=%220 0 94 94%22%3E%3Cpath d=%22M5.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 L49.50,70.00 L86.50,70.00 L86.50,23.00 Z M42.49,69.39 C41.86,50.29 49.51,42.12 68.61,41.49 A18.5,18.5 0 1 0 49.51,23.61 C50.14,42.71 42.49,50.88 23.39,51.51 Z%22 fill=%22%23F4F3EF%22/%3E%3Cpath d=%22M5.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z%22 fill=%22%234657C8%22/%3E%3C/svg%3E%3C/svg%3E">
+<meta name="theme-color" content="#16171C">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+<link rel="stylesheet" href="telas.css">
+<style>
+  /* ===== Ajustes só da tela RELATÓRIOS (prefixo .rl-) ===== */
+  .app { --max: 1880px; }
+  .rl-foco__corpo { display: flex; align-items: center; gap: 18px; flex: 1; }
+  .rl-foco .anel { --tam: clamp(68px, 26cqi, 100px); }
+  .rl-foco .kpi__nota b { color: #fff; font-weight: 600; }
+  section[id] { scroll-margin-top: 20px; }
+  .rl-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .rl-cab h2 { font-size: var(--t-h3); }
+  .rl-cab p { font-size: var(--t-sm); color: var(--texto-2); margin-top: 4px; max-width: 62ch; }
+  /* Origem: barras horizontais (leads) + conversão */
+  .rl-orig { display: grid; grid-template-columns: 130px minmax(0, 1fr) 92px 92px 108px; align-items: center; gap: 10px 16px; }
+  .rl-orig__cab { font-size: var(--t-xs); color: var(--texto-2); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding-bottom: 6px; border-bottom: 1px solid var(--linha-forte); }
+  .rl-orig__cab.dir, .rl-orig .dir { text-align: right; }
+  .rl-orig__nome { font-weight: 600; font-size: var(--t-sm); display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .rl-funil { position: relative; height: 26px; border-radius: 8px; background: var(--porcelana); overflow: hidden; }
+  .rl-funil i { position: absolute; inset: 3px auto 3px 0; border-radius: 6px; }
+  .rl-funil .l { background: linear-gradient(90deg, #DADDF2, #C9CEF0); }
+  .rl-funil .a { background: linear-gradient(90deg, var(--pena-claro), #A3ABEA); }
+  .rl-funil .f { background: linear-gradient(90deg, var(--pena), #5B6BD3); }
+  .rl-funil span { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font: 600 11.5px/1 var(--f-titulo); color: var(--texto-2); font-variant-numeric: tabular-nums; }
+  .rl-num { font: 600 var(--t-md)/1 var(--f-titulo); font-variant-numeric: tabular-nums; }
+  .rl-num small { font-size: .74em; font-weight: 500; color: var(--texto-2); margin-left: 2px; }
+  .rl-conv { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
+  .rl-conv b { font: 600 var(--t-md)/1 var(--f-titulo); font-variant-numeric: tabular-nums; }
+  .rl-melhor { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ok); background: var(--ok-fundo); padding: 3px 6px; border-radius: 6px; }
+  .rl-leg { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; font-size: var(--t-xs); color: var(--texto-2); }
+  .rl-leg span { display: inline-flex; align-items: center; gap: 6px; }
+  .rl-leg i { width: 14px; height: 8px; border-radius: 3px; display: inline-block; }
+  .rl-insight { display: flex; gap: 10px; align-items: flex-start; margin-top: 16px; padding: 12px 14px; border-radius: var(--r-sm); background: var(--suave-2); font-size: var(--t-sm); line-height: 1.5; }
+  .rl-insight .ico { color: var(--pena); flex: none; margin-top: 2px; }
+  @container (max-width: 680px) {
+    .rl-orig { grid-template-columns: 96px minmax(0, 1fr) 64px; }
+    .rl-orig > .opc { display: none; }
+    .rl-melhor { display: none; }
+    .rl-orig__nome { font-size: var(--t-xs); }
+  }
+  /* Procedimentos: barras horizontais com valor e participação */
+  .rl-proc { display: flex; flex-direction: column; gap: 12px; }
+  .rl-proc__l { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: baseline; }
+  .rl-proc__l b { font-weight: 600; font-size: var(--t-sm); }
+  .rl-proc__l .v { font: 600 var(--t-sm)/1 var(--f-titulo); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .rl-proc__l .v small { color: var(--texto-2); font-weight: 500; margin-left: 6px; font-family: var(--f-texto); }
+  .rl-proc__barra { grid-column: 1 / -1; height: 10px; border-radius: 999px; background: var(--suave); position: relative; overflow: hidden; }
+  .rl-proc__barra i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: linear-gradient(90deg, var(--pena), var(--pena-claro)); }
+  .rl-proc__barra i.g2 { background: linear-gradient(90deg, var(--ardosia), var(--nevoa)); }
+  .rl-total { display: flex; justify-content: space-between; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--linha); font-size: var(--t-sm); color: var(--texto-2); }
+  .rl-total b { color: var(--tinta); font: 600 var(--t-md)/1 var(--f-titulo); }
+  /* Comparecimento: colunas por mês com meta */
+  .rl-comp { position: relative; display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; align-items: end; height: 220px; padding-top: 22px; }
+  .rl-comp__mes { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; border-radius: 8px; }
+  .rl-comp__area { position: relative; width: 100%; flex: 1; }
+  .rl-comp__barra { position: absolute; left: 50%; bottom: 0; width: clamp(10px, 56%, 26px); transform: translateX(-50%); border-radius: 7px 7px 3px 3px; background: linear-gradient(180deg, var(--pena-claro), var(--pena)); }
+  .rl-comp__mes--abaixo .rl-comp__barra { background: linear-gradient(180deg, #C9CCD8, var(--nevoa)); }
+  .rl-comp__mes--atual { background: linear-gradient(180deg, rgba(230,232,247,0), var(--suave-2)); }
+  .rl-comp__mes--atual .rl-comp__barra { background: linear-gradient(180deg, #2A2E44, var(--grafite)); }
+  .rl-comp__v { position: absolute; left: 50%; transform: translateX(-50%); font: 600 10.5px/1 var(--f-titulo); color: var(--texto-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .rl-comp__mes--atual .rl-comp__v { color: var(--tinta); }
+  .rl-comp__rot { font-size: 11px; color: var(--texto-2); font-weight: 600; margin-top: 6px; text-transform: uppercase; }
+  .rl-comp__meta { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px dashed var(--tinta); pointer-events: none; }
+  .rl-comp__meta span { position: absolute; left: 0; top: -9px; transform: translateX(-2px); font-size: 10.5px; font-weight: 600; background: var(--cartao); padding: 0 4px; }
+  /* Motivos */
+  .rl-mot { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .rl-mot > div { background: var(--porcelana); border-radius: var(--r-md); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .rl-mot b { font: 600 var(--t-h2)/1 var(--f-titulo); font-variant-numeric: tabular-nums; }
+  .rl-mot span { font-size: var(--t-sm); color: var(--texto-2); }
+  .rl-mot .rl-proc__barra { height: 6px; }
+  @container (max-width: 640px) { .rl-mot { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 720px) { .kpis .kpi:not(.cartao--foco) { padding: 14px; min-height: 0; } .kpi__ctx { display: none; } .rl-comp { height: 180px; } .rl-comp__v { font-size: 9.5px; } }
+</style>
+</head>
+<body data-pagina="rel">
+
+<main class="app">
+  <header class="topo">
+    <div class="topo__ola">
+      <h1>Bom dia, Dra. Lúcia</h1>
+      <p class="topo__data"><b>Sexta-feira, 13 de novembro</b> · 09:40 · Relatórios de 2026, de 01/01 a 13/11</p>
+    </div>
+    <div class="topo__acoes">
+      <div class="pilulas" role="group" aria-label="Filtrar por médico">
+        <button class="pilula" data-med="todos" aria-pressed="true">Todos</button>
+        <button class="pilula" data-med="g" aria-pressed="false"><span class="av av--g av--sm" aria-hidden="true">RS</span>Dr. Rafael</button>
+        <button class="pilula" data-med="d" aria-pressed="false"><span class="av av--d av--sm" aria-hidden="true">LS</span>Dra. Lúcia</button>
+      </div>
+      <div class="linha-flex" id="acoes-topo"></div>
+    </div>
+  </header>
+
+  <div class="coluna">
+    <section class="kpis" aria-label="Resumo do ano">
+      <article class="cartao cartao--foco kpi rl-foco">
+        <span class="kpi__rot">Fechado em 2026 · jan a 13/nov</span>
+        <div class="rl-foco__corpo">
+          <div class="anel" id="k-anel"></div>
+          <div>
+            <div class="kpi__valor kpi__valor--lg" id="k-fech"></div>
+            <div class="kpi__nota" id="k-fech-n"></div>
+          </div>
+        </div>
+        <div class="kpi__ctx">anel = % dos leads do ano que fecharam plano</div>
+      </article>
+      <article class="cartao kpi">
+        <span class="kpi__rot">Leads no ano</span>
+        <div class="kpi__valor"><span id="k-leads"></span><small>leads</small></div>
+        <div class="kpi__nota" id="k-leads-n"></div>
+        <div class="kpi__ctx">todas as origens</div>
+      </article>
+      <article class="cartao kpi">
+        <span class="kpi__rot">Ticket médio fechado</span>
+        <div class="kpi__valor" id="k-ticket"></div>
+        <div class="kpi__nota" id="k-ticket-n"></div>
+        <div class="kpi__ctx">valor fechado ÷ planos fechados</div>
+      </article>
+      <article class="cartao kpi">
+        <span class="kpi__rot">Comparecimento · 1ª consulta</span>
+        <div class="kpi__valor"><span id="k-comp"></span><small>%</small></div>
+        <div class="kpi__nota" id="k-comp-n"></div>
+        <div class="kpi__ctx">meta da clínica: 85%</div>
+      </article>
+    </section>
+
+    <section class="cartao" id="origem" aria-labelledby="t-origem">
+      <div class="rl-cab"><div><h2 id="t-origem">Origem dos leads e conversão</h2><p>De onde vêm os leads do ano e quantos chegam ao fechamento. A barra mostra leads, quem agendou e quem fechou.</p></div>
+        <div class="abas" role="tablist" aria-label="Ordenar origens" id="ord">
+          <button class="aba" role="tab" aria-selected="true" data-o="n">Mais leads</button>
+          <button class="aba" role="tab" aria-selected="false" data-o="c">Melhor conversão</button>
+          <button class="aba" role="tab" aria-selected="false" data-o="v">Mais valor</button>
+        </div></div>
+      <div class="rl-orig" id="orig" role="table" aria-label="Leads e conversão por origem"></div>
+      <div class="rl-leg" aria-hidden="true"><span><i style="background:#D3D7F1"></i>leads</span><span><i style="background:var(--pena-claro)"></i>agendaram</span><span><i style="background:var(--pena)"></i>fecharam</span></div>
+      <p class="rl-insight" id="orig-insight"></p>
+    </section>
+
+    <div class="duas">
+      <section class="cartao" id="procedimentos" aria-labelledby="t-proc">
+        <div class="rl-cab"><div><h2 id="t-proc">Faturamento por procedimento</h2><p>Recebido, por família de procedimento.</p></div>
+          <div class="abas" role="tablist" aria-label="Período" id="per">
+            <button class="aba" role="tab" aria-selected="true" data-p="nov">Novembro</button>
+            <button class="aba" role="tab" aria-selected="false" data-p="ano">2026</button>
+          </div></div>
+        <div class="rl-proc" id="proc"></div>
+        <div class="rl-total" id="proc-total"></div>
+      </section>
+
+      <section class="cartao" id="comparecimento" aria-labelledby="t-comp">
+        <div class="rl-cab"><div><h2 id="t-comp">Comparecimento por mês</h2><p>% dos leads com 1ª consulta marcada que compareceram.</p></div></div>
+        <div class="rl-comp" id="comp" role="img"></div>
+        <div class="rl-total" id="comp-total"></div>
+      </section>
+    </div>
+
+    <section class="cartao" id="motivos" aria-labelledby="t-mot">
+      <div class="rl-cab"><div><h2 id="t-mot">Por que os leads saíram do funil</h2><p>Leads de 2026 que não seguem mais em andamento. “Esfriaram” não chegaram a agendar.</p></div><a class="bt-texto" href="funil.html#parados">Ver os parados agora <svg class="ico ico-sm"><use href="#i-dir"/></svg></a></div>
+      <div class="rl-mot" id="mot"></div>
+    </section>
+  </div>
+</main>
+
+<script src="dados.js"></script>
+<script src="dados2.js"></script>
+<script src="comum.js"></script>
+<script>
+const { FECHOU_ANO, FORA, ETAPAS, ativosEtapa } = VA;
+const { ORIGENS, PROC, COMP_MES } = VA2;
+const { mil, real, rsMil, pilulasMedico, poeAnel } = UI;
+const $ = id => document.getElementById(id);
+let med = "todos", ordem = "n", per = "nov";
+const s2 = a => med === "todos" ? a[0] + a[1] : a[med === "g" ? 0 : 1];
+const sm = o => med === "todos" ? o.g + o.d : o[med];
+
+function render() {
+  // Origem
+  const os = ORIGENS.map(o => ({ k: o.k, n: s2(o.n), ag: s2(o.ag), f: s2(o.f), v: s2(o.v) })).map(o => Object.assign(o, { c: o.f / o.n * 100 }));
+  os.sort((a, b) => ordem === "n" ? b.n - a.n : ordem === "c" ? b.c - a.c : b.v - a.v);
+  const maxN = Math.max(...os.map(o => o.n)), melhor = os.reduce((a, b) => b.c > a.c ? b : a);
+  $("orig").innerHTML = `<span class="rl-orig__cab" role="columnheader">Origem</span><span class="rl-orig__cab" role="columnheader">Leads › agendaram › fecharam</span><span class="rl-orig__cab dir opc" role="columnheader">Agendaram</span><span class="rl-orig__cab dir" role="columnheader">Conversão</span><span class="rl-orig__cab dir opc" role="columnheader">Valor fechado</span>` +
+    os.map(o => `<span class="rl-orig__nome" role="cell">${o.k}</span>
+      <span class="rl-funil" role="cell" title="${o.n} leads · ${o.ag} agendaram · ${o.f} fecharam"><i class="l" style="width:${(o.n / maxN * 100).toFixed(1)}%"></i><i class="a" style="width:${(o.ag / maxN * 100).toFixed(1)}%"></i><i class="f" style="width:${(o.f / maxN * 100).toFixed(1)}%"></i><span>${o.n}</span></span>
+      <span class="dir opc rl-num" role="cell">${Math.round(o.ag / o.n * 100)}<small>%</small></span>
+      <span class="dir" role="cell"><span class="rl-conv">${o === melhor ? `<span class="rl-melhor">melhor</span>` : ""}<b>${o.c.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</b></span></span>
+      <span class="dir opc rl-num" role="cell"><small>R$</small> ${mil(o.v)}<small>mil</small></span>`).join("");
+  const insta = os.find(o => o.k === "Instagram"), ind = os.find(o => o.k === "Indicação");
+  $("orig-insight").innerHTML = `<svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span><b>${ind.k}</b> converte ${(ind.c / insta.c).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}× mais que <b>Instagram</b> (${ind.c.toFixed(0)}% contra ${insta.c.toFixed(0)}%), que traz o maior volume. Vale um programa de indicação para quem já fechou.</span>`;
+  // Procedimentos
+  const ps = PROC.map(p => ({ k: p.k, v: s2(p[per]) })).sort((a, b) => b.v - a.v), tot = ps.reduce((a, p) => a + p.v, 0), maxV = ps[0].v;
+  $("proc").innerHTML = ps.map((p, i) => `<div class="rl-proc__l"><b>${p.k}</b><span class="v">R$ ${mil(p.v)} mil<small>${Math.round(p.v / tot * 100)}%</small></span><span class="rl-proc__barra" aria-hidden="true"><i${i > 3 ? ' class="g2"' : ""} style="width:${(p.v / maxV * 100).toFixed(1)}%"></i></span></div>`).join("");
+  $("proc-total").innerHTML = `<span>Total recebido ${per === "nov" ? "em novembro (até 13/11)" : "em 2026"}</span><b>R$ ${mil(tot)} mil</b>`;
+  // Comparecimento
+  const cs = COMP_MES.map(c => ({ m: c.m, foi: s2(c.foi), reg: s2(c.reg), atual: c.atual })).map(c => Object.assign(c, { p: c.foi / c.reg * 100 }));
+  const MIN = 60, esc = p => (p - MIN) / (100 - MIN) * 100;
+  $("comp").innerHTML = cs.map(c => `<div class="rl-comp__mes${c.atual ? " rl-comp__mes--atual" : ""}${c.p < 85 ? " rl-comp__mes--abaixo" : ""}" title="${c.m}: ${c.foi} de ${c.reg} (${Math.round(c.p)}%)"><div class="rl-comp__area"><span class="rl-comp__barra" style="height:${esc(c.p).toFixed(1)}%"></span><span class="rl-comp__v" style="bottom:calc(${esc(c.p).toFixed(1)}% + 4px)">${Math.round(c.p)}</span></div><span class="rl-comp__rot">${c.m}</span></div>`).join("") +
+    `<span class="rl-comp__meta" style="bottom:calc(20px + ${(esc(85) / 100).toFixed(3)} * (100% - 42px))"><span>meta 85%</span></span>`;
+  const foi = cs.reduce((a, c) => a + c.foi, 0), reg = cs.reduce((a, c) => a + c.reg, 0), acima = cs.filter(c => c.p >= 85).length;
+  $("comp").setAttribute("aria-label", `Comparecimento por mês: ${cs.map(c => `${c.m} ${Math.round(c.p)}%`).join(", ")}`);
+  $("comp-total").innerHTML = `<span>${acima} de ${cs.length} meses na meta · escala de 60 a 100%</span><b>${Math.round(foi / reg * 100)}% no ano</b>`;
+  // Motivos
+  const fs = Object.values(FORA).map(f => ({ rot: f.rot, n: sm(f) })), maxF = Math.max(...fs.map(f => f.n)), totF = fs.reduce((a, f) => a + f.n, 0);
+  $("mot").innerHTML = fs.map(f => `<div><b>${f.n}</b><span>${f.rot} · ${Math.round(f.n / totF * 100)}%</span><span class="rl-proc__barra" aria-hidden="true"><i class="g2" style="width:${(f.n / maxF * 100).toFixed(1)}%"></i></span></div>`).join("");
+  // Números do alto
+  const fech = { n: sm({ g: FECHOU_ANO.g.n, d: FECHOU_ANO.d.n }), v: sm({ g: FECHOU_ANO.g.v, d: FECHOU_ANO.d.v }) };
+  const leads = ORIGENS.reduce((a, o) => a + s2(o.n), 0), ag = ORIGENS.reduce((a, o) => a + s2(o.ag), 0), pc = Math.round(fech.n / leads * 100);
+  $("k-fech").innerHTML = rsMil(fech.v);
+  poeAnel($("k-anel"), { p: pc, aria: `${pc}% dos leads de 2026 fecharam plano` });
+  $("k-fech-n").innerHTML = `<span class="nw"><b>${fech.n}</b> planos de ${leads} leads</span>`;
+  $("k-leads").textContent = leads; $("k-leads-n").innerHTML = `<span>${ag} agendaram</span><span class="status status--neutro">${Math.round(ag / leads * 100)}%</span>`;
+  $("k-ticket").innerHTML = rsMil(fech.v / fech.n);
+  $("k-ticket-n").innerHTML = `<span>maior em ${os.slice().sort((a, b) => b.v / b.f - a.v / a.f)[0].k}</span>`;
+  $("k-comp").textContent = Math.round(foi / reg * 100);
+  const nov = cs[cs.length - 1];
+  $("k-comp-n").innerHTML = `<span>novembro ${Math.round(nov.p)}%</span><span class="status ${nov.p >= 85 ? "status--ok" : "status--atencao"}">${nov.p >= 85 ? "na meta" : "abaixo da meta"}</span>`;
+}
+pilulasMedico(() => "", m => { med = m; render(); });
+document.querySelectorAll("#ord .aba").forEach(b => b.addEventListener("click", () => { document.querySelectorAll("#ord .aba").forEach(x => x.setAttribute("aria-selected", x === b)); ordem = b.dataset.o; render(); }));
+document.querySelectorAll("#per .aba").forEach(b => b.addEventListener("click", () => { document.querySelectorAll("#per .aba").forEach(x => x.setAttribute("aria-selected", x === b)); per = b.dataset.p; render(); }));
+render();
+// Vindo de outra tela (#origem, #procedimentos, #motivos): destaca o relatório
+if (location.hash && document.querySelector(location.hash)) setTimeout(() => { const el = document.querySelector(location.hash); el.scrollIntoView({ block: "start" }); el.classList.add("tl-destaque"); }, 500);
+</script>
+<script src="telas.js"></script>
+<link rel="stylesheet" href="motion.css">
+<script src="motion.js"></script>
+<script src="demo.js"></script>
+</body>
+</html>

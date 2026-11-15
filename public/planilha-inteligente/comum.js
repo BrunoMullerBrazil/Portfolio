@@ -47,10 +47,10 @@
   const ITENS = [
     { k: "painel",  rot: "Painel",     ico: "i-painel",  href: "painel.html", cel: "o1" },
     { k: "funil",   rot: "Funil",      ico: "i-funil",   href: "funil.html",  cel: "o2" },
-    { k: "agenda",  rot: "Agenda",     ico: "i-agenda",  href: "#",           cel: "o4" },
-    { k: "recall",  rot: "Recall",     ico: "i-recall",  href: "#" },
+    { k: "agenda",  rot: "Agenda",     ico: "i-agenda",  href: "agenda.html", cel: "o4" },
+    { k: "recall",  rot: "Recall",     ico: "i-recall",  href: "recall.html" },
     { k: "metas",   rot: "Metas",      ico: "i-metas",   href: "metas.html",  cel: "o5" },
-    { k: "rel",     rot: "Relatórios", ico: "i-rel",     href: "#" },
+    { k: "rel",     rot: "Relatórios", ico: "i-rel",     href: "relatorios.html" },
   ];
   // data-rotulo: no computador (>= 1024px) a peça mostra só ícones e o rótulo vira tooltip
   const item = i => `<a class="trilho__item ${i.cel || "trilho__item--desk"}" href="${i.href}" data-rotulo="${i.rot}"${i.k === pagina ? ' aria-current="page"' : ""}>
@@ -69,7 +69,7 @@
     ${logo}
     ${ITENS.map(item).join("")}
     <span class="trilho__sep"></span>
-    ${item({ k: "ajustes", rot: "Ajustes", ico: "i-ajustes", href: "#" })}
+    ${item({ k: "ajustes", rot: "Ajustes", ico: "i-ajustes", href: "ajustes.html" })}
     </div>
   </nav>`;
   // .trilho__peca: no computador é a peça escura flutuante (só a altura dos itens);
