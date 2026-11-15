@@ -381,7 +381,7 @@
     badge();
     // "Agenda de hoje" (o Funil abre a gaveta própria): leva à Agenda
     const bAg = $("#bt-agenda");
-    if (bAg && pagina !== "funil") bAg.addEventListener("click", () => { if (pagina === "agenda") { const h = $(".ag-dia--hoje, #ag-hoje"); if (h) h.scrollIntoView({ behavior: REDUZ ? "auto" : "smooth", block: "center" }); } else location.href = "agenda.html"; });
+    if (bAg && pagina !== "funil") bAg.addEventListener("click", () => { if (pagina === "agenda") { const h = $("#sem-hoje"); if (h && !h.hidden) h.click(); rola($(".ag-dia--hoje") || $("#ag-hoje")); } else location.href = "agenda.html"; });
   }
   const novo = $(".trilho__novo");
   if (novo) { novo.setAttribute("aria-haspopup", "dialog"); novo.addEventListener("click", () => formNovoLead(novo)); }

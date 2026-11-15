@@ -136,7 +136,7 @@
 
       <!-- O QUE CADA PERFIL VÊ -->
       <section class="cartao" id="perfis" aria-labelledby="t-perfis">
-        <div class="aj-cab"><div><h2 id="t-perfis">O que cada perfil vê</h2><p>Liga e desliga por perfil. Vale para todas as pessoas daquele perfil, na próxima vez que abrirem o Munin.</p></div></div>
+        <div class="aj-cab"><div><h2 id="t-perfis">O que cada perfil vê</h2><p>Liga e desliga por perfil. Vale para todas as pessoas daquele perfil, na próxima tela que abrirem.</p></div></div>
         <div class="aj-rolagem"><table class="aj-matriz" id="matriz"></table></div>
         <p class="aj-nota"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-info"/></svg><span>A Gestão sempre vê tudo (é quem autoriza os acessos). Mensagens de WhatsApp nunca levam valores, para nenhum perfil.</span></p>
       </section>
@@ -205,6 +205,7 @@
 
 <script src="dados.js"></script>
 <script src="dados2.js"></script>
+<script src="perfis_dados.js"></script>
 <script src="comum.js"></script>
 <script>
 const { EQUIPE, PERFIS, VISAO, CLINICA_DADOS } = VA2;
@@ -240,8 +241,8 @@ $("usuarios").addEventListener("click", e => {
   if (c) {
     const u = equipe[+c.dataset.copiar], link = linkConvite(u);
     const ok = () => { c.innerHTML = `<svg class="ico ico-sm" aria-hidden="true"><use href="#i-check"/></svg>Copiado`; aviso(`Link do convite copiado · <b>${esc(u.nome)}</b>`); setTimeout(() => renderUs(), 2200); };
-    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(link).then(ok, () => prompt("Copie o link do convite:", link));
-    else { const t = document.createElement("textarea"); t.value = link; t.style.position = "fixed"; t.style.opacity = "0"; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch (x) { /* ok */ } t.remove(); ok(); }
+    const velho = () => { const t = document.createElement("textarea"); t.value = link; t.style.position = "fixed"; t.style.opacity = "0"; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch (x) { /* ok */ } t.remove(); c.focus(); ok(); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(link).then(ok, velho); else velho();
     return;
   }
   const r = e.target.closest("[data-remover]");
@@ -273,13 +274,16 @@ $("f-convite").addEventListener("submit", e => {
 /* ---------- Matriz de visão ---------- */
 const COLS = [["fat", "Faturamento da clínica", "receita, ticket e projeção"], ["plano", "Valores de plano", "valor de cada plano e lead"], ["metas", "Metas da clínica", "tela Metas e anéis"], ["funil", "Funil completo", "todas as etapas e os parados"]];
 const visao = JSON.parse(JSON.stringify(VISAO));
+// A matriz fica no navegador (munin:visao, {perfil: {fat, plano, metas, funil}}); as telas leem essa chave (perfis.js)
+try { const salvo = JSON.parse(localStorage.getItem("munin:visao") || "null"); if (salvo) Object.keys(visao).forEach(k => Object.assign(visao[k], salvo[k] || {})); } catch (e) { /* sem armazenamento */ }
+const gravaVisao = () => { try { localStorage.setItem("munin:visao", JSON.stringify(visao)); } catch (e) { /* sem armazenamento: vale só nesta tela */ } };
 function renderMatriz() {
   $("matriz").innerHTML = `<thead><tr><th scope="col">Perfil</th>${COLS.map(c => `<th scope="col">${c[1]}</th>`).join("")}</tr></thead><tbody>` +
     ORDEM.map(k => `<tr><td><b>${PERFIS[k].rot}</b><small>${PERFIS[k].desc}</small></td>${COLS.map(([c, rot]) => `<td><button type="button" class="sw" role="switch" aria-checked="${visao[k][c]}" data-k="${k}" data-c="${c}" aria-label="${PERFIS[k].rot} vê ${rot.toLowerCase()}"${k === "gestao" ? " disabled" : ""}></button></td>`).join("")}</tr>`).join("") + `</tbody>`;
 }
 $("matriz").addEventListener("click", e => {
   const s = e.target.closest(".sw"); if (!s || s.disabled) return;
-  const { k, c } = s.dataset, v = !visao[k][c]; visao[k][c] = v; s.setAttribute("aria-checked", v);
+  const { k, c } = s.dataset, v = !visao[k][c]; visao[k][c] = v; s.setAttribute("aria-checked", v); gravaVisao();
   aviso(`<b>${PERFIS[k].rot}</b> ${v ? "passa a ver" : "deixa de ver"} ${COLS.find(x => x[0] === c)[1].toLowerCase()}`);
 });
 
@@ -349,6 +353,8 @@ addEventListener("scroll", ix, { passive: true }); ix();
   if (location.hash && document.querySelector(location.hash)) setTimeout(() => { const el = document.querySelector(location.hash); el.scrollIntoView({ block: "start" }); el.classList.add("tl-destaque"); }, 450);
 })();
 </script>
+<link rel="stylesheet" href="perfis.css">
+<script src="perfis.js"></script>
 <link rel="stylesheet" href="motion.css">
 <script src="motion.js"></script>
 <script src="demo.js"></script>
