@@ -24,23 +24,44 @@
     ["carolina", "Carolina Mendes", "d", "Site", "Bioestimulador"],
     ["regina", "Regina Pacheco", "g", "Indicação", "Liftera papada"],
     ["isabela", "Isabela Torres", "d", "Instagram", "Laser · manchas"],
-    ["monica", "Mônica Fagundes", "g", "Google", "Mapeamento de pintas"],
+    ["monica", "Mônica Fagundes", "g", "Google", "Consulta de pele"],
     ["lorena", "Lorena Campos", "d", "Indicação", "Toxina botulínica"],
     ["denise", "Denise Arantes", "g", "Site", "Skinbooster"],
     ["paloma", "Paloma Ribeiro", "d", "Campanha", "Peeling químico"],
     ["giovana", "Giovana Castilho", "g", "Instagram", "Preenchimento labial"],
-    ["leticia", "Letícia Amaral", "d", "Google", "Acne adulta"],
+    ["leticia", "Letícia Amaral", "d", "Google", "Tratamento de pele"],
     ["marcelo", "Marcelo Viana", "g", "Indicação", "Toxina botulínica"],
-    ["andre", "André Quintela", "d", "Google", "Mapeamento de pintas"],
+    ["andre", "André Quintela", "d", "Google", "Consulta de pele"],
     ["rodrigo", "Rodrigo Saldanha", "g", "Site", "Consulta dermatológica"],
     ["elisa", "Elisa Barreto", "d", "Indicação", "Bioestimulador"],
     ["nathalia", "Nathália Gouveia", "g", "Instagram", "Laser · rejuvenescimento"],
     ["bruna", "Bruna Esteves", "d", "Campanha", "Toxina botulínica"],
     ["cintia", "Cíntia Lacerda", "g", "Indicação", "Skinbooster"],
     ["irene", "Irene Valente", "d", "Site", "Ultrassom microfocado"],
-    ["renan", "Renan Mota", "g", "Google", "Acne adulta"],
+    ["renan", "Renan Mota", "g", "Google", "Tratamento de pele"],
   ];
   EXTRAS.forEach(([id, nome, med, origem, proc]) => add(id, { nome, med, origem, proc }));
+  // Pacientes da casa sem recall pendente: só ocupam os horários gerados da agenda (cada um no máximo
+  // uma vez por semana). Nomes fixos, montados de duas listas; não entram no funil nem no recall.
+  const CASA_N = ["Alice", "Bárbara", "Cecília", "Daniela", "Estela", "Fabiana", "Gabriela", "Heloísa", "Ivone", "Juliana", "Kátia", "Luíza",
+    "Michele", "Natália", "Olívia", "Pietra", "Raíssa", "Sabrina", "Talita", "Úrsula", "Valéria", "Yara", "Zilda", "Adélia", "Bianca", "Celina",
+    "Dalva", "Elaine", "Flávia", "Glória", "Helga", "Inês", "Jussara", "Lídia", "Marisa", "Nádia", "Odete", "Priscila", "Rosana", "Selma",
+    "Tereza", "Vera", "Wanda", "Aurora", "Beatriz", "Carmem", "Diana", "Eliane", "Fernanda", "Gisele", "Hilda", "Ivana", "Joice", "Lúcia",
+    "Fábio", "Rafael", "Henrique", "Leonardo", "Paulo", "Sérgio"];
+  const CASA_S = ["Albuquerque", "Bastos", "Cardoso", "Damasceno", "Escobar", "Falcão", "Galvão", "Hortência", "Ibrahim", "Jardim", "Leme",
+    "Macedo", "Nogueira", "Oliveira", "Paixão", "Queiroz", "Rezende", "Sampaio", "Teixeira", "Uchôa", "Vasconcelos", "Xavier", "Zanetti",
+    "Antunes", "Brandão", "Coutinho", "Dourado", "Esteves", "Figueira", "Godoy", "Holanda", "Lacerda", "Medeiros", "Neves", "Pacheco"];
+  const CASA_P = ["Toxina botulínica", "Bioestimulador", "Laser · rejuvenescimento", "Skinbooster", "Peeling químico", "Preenchimento labial",
+    "Ultrassom microfocado", "Laser · manchas", "Tratamento de pele", "Consulta dermatológica", "Consulta de pele", "Liftera papada"];
+  const CASA_O = ["Indicação", "Instagram", "Google", "Site", "Campanha", "Indicação"];
+  const NOMES_JA = new Set(Object.values(P).map(x => x.nome));
+  const CASA = [];
+  CASA_N.forEach((pn, i) => {
+    const nome = `${pn} ${CASA_S[(i * 11 + 5) % CASA_S.length]}`; if (NOMES_JA.has(nome)) return;
+    const id = "casa" + String(i + 1).padStart(2, "0"), med = i % 2 ? "d" : "g";
+    add(id, { nome, med, origem: CASA_O[i % CASA_O.length], proc: CASA_P[(i * 5 + 2) % CASA_P.length], casa: true });
+    CASA.push([id, nome, med]);
+  });
 
   /* ---------- Recall: retorno de manutenção --------------------------------
      ult: última sessão · meses: intervalo de manutenção do procedimento
@@ -75,7 +96,7 @@
       const p = P[r.id], ult = dataDe(p.ult), venc = new Date(ult); venc.setMonth(venc.getMonth() + r.meses);
       const dias = diasEntre(HOJE_D, venc);                 // < 0 venceu há |dias|
       const grupo = dias < 0 ? "vencido" : dias <= 7 ? "semana" : dias <= 17 ? "mes" : "depois";
-      return Object.assign({}, r, { p, venc: fmt(venc), dias, grupo, ultTxt: fmt(ult) + "/" + String(ult.getFullYear()).slice(2) });
+      return Object.assign({}, r, { p, venc: fmt(venc), dias, grupo, ultTxt: fmt(ult) + (ult.getFullYear() === ANO ? "" : "/" + String(ult.getFullYear()).slice(2)) });
     }).filter(r => r.grupo !== "depois").sort((a, b) => a.dias - b.dias);
   }
 
@@ -95,17 +116,40 @@
     ["17/11", "10:00", "claudia", "Retorno", "aconf"],
     ["18/11", "16:00", "roberto", "1ª consulta", "aconf"],
     ["19/11", "10:30", "teresa", "Recall", "aconf"],
+    // recall que voltou para a agenda em novembro (os 3 da Dra. Lúcia + Teresa = meta "Recall · agendamentos": 4)
+    ["04/11", "10:00", "anabeatriz", "Recall", "feito"],
+    ["06/11", "14:00", "carolina", "Recall", "feito"],
+    ["10/11", "09:00", "isabela", "Recall", "feito"],
   ];
+  FIXOS.forEach(f => { if (f[3] === "Recall" && f[4] === "feito") P[f[2]].ult = f[0] + "/" + ANO; });
   const ST = Object.assign({}, VA.ST_AGENDA, {
     falta: ["status--atrasado", "Faltou"], semreg: ["status--atencao", "Sem registro"],
   });
-  const POOL = { g: EXTRAS.filter(e => e[2] === "g").map(e => e[0]), d: EXTRAS.filter(e => e[2] === "d").map(e => e[0]) };
+  // Quem está no recall só entra na agenda pelos FIXOS (senão teria horário e "recall vencido" ao mesmo tempo)
+  const NO_RECALL = new Set(RECALL.map(r => r.id));
+  const CASA_TODOS = EXTRAS.map(e => [e[0], e[2]]).filter(e => !NO_RECALL.has(e[0])).concat(CASA.map(c => [c[0], c[2]]));
+  const POOL = { g: CASA_TODOS.filter(e => e[1] === "g").map(e => e[0]), d: CASA_TODOS.filter(e => e[1] === "d").map(e => e[0]) };
   const min = h => { const [a, b] = h.split(":").map(Number); return a * 60 + b; };
   const hh = m => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
   function rng(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
-  const TIPOS = ["Procedimento", "Retorno", "Procedimento", "Recall", "Retorno", "Procedimento"];  // extras são pacientes da casa (1ª consulta só de leads do funil)
-  const cache = {};
+  // extras são pacientes da casa (1ª consulta só de leads do funil; recall só pelos FIXOS, o mesmo número das Metas)
+  const TIPOS = ["Procedimento", "Retorno", "Procedimento", "Retorno", "Procedimento"];
+  const cache = {}, usadosSem = {};
+  // cada semana é gerada inteira, de segunda a sexta, para que um paciente apareça no máximo uma vez nela
   function dia(d) {   // d: Date
+    const k = fmt(d); if (cache[k]) return cache[k];
+    const seg = new Date(d); seg.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    const ks = fmt(seg);
+    if (!usadosSem[ks]) {
+      usadosSem[ks] = new Set();
+      const sex = new Date(seg); sex.setDate(seg.getDate() + 4);
+      if (fmt(sex) === VA.HOJE) VA.AGENDA.forEach(a => { if (a.id) usadosSem[ks].add(a.id); });
+      for (let i = 0; i < 5; i++) { const x = new Date(seg); x.setDate(seg.getDate() + i); FIXOS.filter(f => f[0] === fmt(x)).forEach(f => usadosSem[ks].add(f[2])); }
+      for (let i = 0; i < 5; i++) { const x = new Date(seg); x.setDate(seg.getDate() + i); if (fmt(x) !== k) geraDia(x, usadosSem[ks]); }
+    }
+    return cache[k] || geraDia(d, usadosSem[ks]);
+  }
+  function geraDia(d, usadosS) {
     const k = fmt(d); if (cache[k]) return cache[k];
     let itens = [];
     const dow = d.getDay(), feriado = d.getMonth() === 10 && VA.FERIADOS.includes(d.getDate());
@@ -124,14 +168,15 @@
     const fixos = FIXOS.filter(f => f[0] === k);
     ["g", "d"].forEach(m => {
       const meus = fixos.filter(f => P[f[2]].med === m).map(f => ({ h: f[1], fim: hh(min(f[1]) + DUR[f[3]]), id: f[2], med: m, tipo: f[3], st: f[4] }));
-      let t = 8 * 60 + (r() < .5 ? 0 : 30), usados = new Set(meus.map(x => x.id));
+      let t = 8 * 60 + (r() < .5 ? 0 : 30);
       while (t < 17 * 60 + 30) {
         if (t >= 12 * 60 && t < 13 * 60 + 30) { t = 13 * 60 + 30; continue; }        // almoço
         const tipo = TIPOS[Math.floor(r() * TIPOS.length)], dur = DUR[tipo];
         const choca = meus.some(x => t < min(x.fim) && t + dur > min(x.h));
-        if (!choca && r() < .62) {
-          let id; do { id = POOL[m][Math.floor(r() * POOL[m].length)]; } while (usados.has(id) && usados.size < POOL[m].length);
-          usados.add(id);
+        const livres = POOL[m].filter(x => !usadosS.has(x));
+        if (!choca && livres.length && r() < .58) {
+          const id = livres[Math.floor(r() * livres.length)];
+          usadosS.add(id);
           const st = passado ? (r() < .035 ? "falta" : "feito") : (r() < .7 ? "conf" : "aconf");
           meus.push({ h: hh(t), fim: hh(t + dur), id, med: m, tipo, st });
           t += dur;
@@ -239,9 +284,11 @@
   };
 
   /* ---------- Avisos do sino ------------------------------------------ */
-  const par = VA.parados("todos");
+  // "parado" = dias de atraso sobre o prazo da etapa (p.venc), o mesmo selo de Atenção hoje e do Closer
+  const par = VA.parados("todos"), pior = par.slice().sort((a, b) => (b.venc || 0) - (a.venc || 0))[0];
+  const etapaDe = k => ((VA.ETAPAS || []).find(e => e.k === k) || {}).nome || "";
   const AVISOS = [
-    { tipo: "atrasado", ico: "i-relogio", tit: `${par[0].nome} está parada há ${par[0].d} dias`, txt: `Plano apresentado sem retorno · ${par.length} leads acima do prazo`, href: "funil.html#parados", quando: "há 12 min" },
+    { tipo: "atrasado", ico: "i-relogio", tit: `${pior.nome} · ${pior.venc} ${pior.venc === 1 ? "dia" : "dias"} de atraso`, txt: `${etapaDe(pior.etapa)} · ${(pior.prox || "").replace(/^Retorno (\d)/, "retorno venceu $1").replace(/^Retorno venceu/, "retorno venceu")} · ${par.length} leads acima do prazo`.replace(/ ·  · /, " · "), href: "funil.html#parados", quando: "há 12 min" },
     { tipo: "atencao", ico: "i-recall", tit: "Recall vencido: Cristina Valadares", txt: "Toxina a cada 4 meses · venceu há 12 dias", href: "recall.html?ficha=cristina", quando: "hoje, 08:00" },
     { tipo: "neutro", ico: "i-metas", tit: "Faturamento em 54% da meta", txt: "Esperado hoje: 42% · faltam 11 dias úteis", href: "metas.html", quando: "ontem, 18:00" },
   ];

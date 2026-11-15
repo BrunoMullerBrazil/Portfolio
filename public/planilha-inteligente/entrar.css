@@ -4,8 +4,8 @@
    recorte do produto. No celular o painel vira uma faixa no alto.
    ===================================================================== */
 body.en { min-height: 100vh; margin: 0; background: var(--porcelana); }
-.en-tela { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); }
-.en-lado { display: flex; flex-direction: column; padding: clamp(24px, 4vw, 56px) clamp(20px, 5vw, 80px); min-width: 0; }
+.en-tela { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); grid-template-rows: minmax(0, 1fr) auto; }
+.en-lado { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; padding: clamp(24px, 4vw, 56px) clamp(20px, 5vw, 80px) 0; min-width: 0; }
 .en-marca { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--grafite); }
 .en-marca .munin { height: 34px; color: var(--grafite); }
 .en-marca__nome { font: 600 26px/1 "Outfit", var(--f-titulo); letter-spacing: -.01em; }
@@ -19,9 +19,15 @@ body.en { min-height: 100vh; margin: 0; background: var(--porcelana); }
 .en-acoes { margin-top: 32px; display: flex; flex-direction: column; gap: 14px; }
 .en-priv { display: flex; gap: 10px; align-items: flex-start; font-size: var(--t-sm); color: var(--texto-2); line-height: 1.5; }
 .en-priv .ico { margin-top: 2px; color: var(--pena); }
-.en-rodape { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: var(--t-xs); color: var(--texto-2); }
-.en-rodape a { color: inherit; text-decoration: none; }
-.en-rodape a:hover { color: var(--tinta); text-decoration: underline; }
+/* Rodapé: irmão do painel (no celular vai para o fim da página); links com alvo de 44px */
+.en-rodape { grid-column: 1; grid-row: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 0 12px; font-size: var(--t-xs); color: var(--texto-2); padding: 0 clamp(14px, calc(5vw - 6px), 74px) clamp(12px, 3vw, 40px); }
+.en-rodape > span { padding: 0 6px; }
+.en-rodape a, .en-rodape button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; border: 0; background: none; font: inherit; color: inherit; text-decoration: none; border-radius: 8px; cursor: pointer; }
+.en-rodape a:hover, .en-rodape button:hover { color: var(--tinta); text-decoration: underline; }
+.en-rodape a:focus-visible, .en-rodape button:focus-visible { outline: 2px solid var(--pena); outline-offset: 0; }
+.en-dica[hidden] { display: none; }
+.en-dica { display: flex; gap: 10px; align-items: flex-start; margin-top: 18px; padding: 12px 14px; border-radius: 14px; background: var(--suave-2); color: var(--tinta); font-size: var(--t-sm); line-height: 1.5; }
+.en-dica .ico { flex: none; margin-top: 2px; color: var(--pena); }
 .en-aviso[hidden] { display: none; }
 .en-aviso { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 14px; background: var(--ok-fundo); color: var(--ok); font-size: var(--t-sm); font-weight: 500; margin-bottom: 22px; }
 
@@ -81,6 +87,7 @@ body.en { min-height: 100vh; margin: 0; background: var(--porcelana); }
 
 /* Painel grafite com o recorte do produto */
 .en-palco {
+  grid-column: 2; grid-row: 1 / 3;
   position: relative; overflow: hidden; margin: 12px 12px 12px 0; border-radius: 32px; color: #fff; display: flex; flex-direction: column; justify-content: space-between;
   padding: clamp(28px, 4vw, 56px);
   background: radial-gradient(120% 90% at 0% 0%, #2A2E44 0%, var(--grafite-2) 44%, var(--grafite) 100%);
@@ -141,7 +148,10 @@ body.en { min-height: 100vh; margin: 0; background: var(--porcelana); }
 .en-cores input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
 .en-cores label:has(input:checked) { box-shadow: 0 0 0 2px var(--porcelana), 0 0 0 4px var(--pena); }
 .en-cores label:has(input:focus-visible) { outline: 2px solid var(--pena); outline-offset: 5px; }
-.en-cores label.google { background: conic-gradient(#4285F4 0 25%, #34A853 0 50%, #FBBC05 0 75%, #EA4335 0); }
+/* "Foto do Google": silhueta genérica (não imita o logotipo do Google) */
+.en-cores label.google { background: var(--ardosia); color: #fff; }
+.en-cores label.google svg { width: 22px; height: 22px; fill: currentColor; pointer-events: none; }
+.en-foto__prev svg { width: 34px; height: 34px; fill: currentColor; }
 .en-termos { margin-top: 16px; max-height: 210px; overflow-y: auto; padding: 14px 16px; border-radius: 16px; background: var(--cartao); box-shadow: 0 0 0 1px var(--linha); font-size: var(--t-sm); line-height: 1.55; color: var(--texto-2); }
 .en-termos b { color: var(--tinta); }
 .en-termos ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
@@ -150,7 +160,9 @@ body.en { min-height: 100vh; margin: 0; background: var(--porcelana); }
 .en-check a { color: var(--pena); font-weight: 600; }
 
 @media (max-width: 959px) {
-  .en-tela { grid-template-columns: minmax(0, 1fr); }
+  .en-tela { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+  .en-lado, .en-palco, .en-rodape { grid-column: 1; grid-row: auto; }
+  .en-rodape { padding: 4px 14px 16px; justify-content: center; }
   .en-palco { margin: 0 12px 12px; border-radius: 26px; min-height: 0; padding: 22px 22px 24px; }
   .en-palco__topo span:last-child { display: none; }
   .en-palco { justify-content: flex-start; }
@@ -160,7 +172,6 @@ body.en { min-height: 100vh; margin: 0; background: var(--porcelana); }
   .en-palco__frase h2 { font-size: 22px; }
   .en-palco__frase p { font-size: var(--t-sm); margin-top: 8px; }
   .en-lado { padding-top: 22px; min-height: 0; }
-  .en-rodape { margin-bottom: 8px; }
   .en-meio { padding: 26px 0 32px; align-items: flex-start; }
   .en-caixa { max-width: 520px; }
 }

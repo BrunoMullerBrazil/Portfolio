@@ -162,7 +162,7 @@
 
         <article class="cartao kpi recorte">
           <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>
-          <a class="recorte__seta" href="funil.html" aria-label="Abrir comparecimento"><svg class="ico"><use href="#i-seta"/></svg></a>
+          <a class="recorte__seta" href="relatorios.html#comparecimento" aria-label="Abrir comparecimento"><svg class="ico"><use href="#i-seta"/></svg></a>
           <span class="kpi__rot">Comparecimento</span>
           <div class="kpi__valor"><span id="k-comp"></span><small>%</small></div>
           <div class="kpi__nota"><span id="k-comp-n"></span><span id="k-comp-s" class="linha-flex" style="flex-wrap:wrap;gap:4px"></span></div>
@@ -184,7 +184,7 @@
           <div class="abas" role="tablist" aria-label="Tipo de pendência" id="abas-atencao">
             <button class="aba" role="tab" aria-selected="true" data-tipo="todos">Todos</button>
             <button class="aba" role="tab" aria-selected="false" data-tipo="recall">Recall <span class="pilula__n" data-n="recall"></span></button>
-            <button class="aba" role="tab" aria-selected="false" data-tipo="fu">Follow-up <span class="pilula__n" data-n="fu"></span></button>
+            <button class="aba" role="tab" aria-selected="false" data-tipo="fu">Retornos <span class="pilula__n" data-n="fu"></span></button>
             <button class="aba" role="tab" aria-selected="false" data-tipo="plano">Planos <span class="pilula__n" data-n="plano"></span></button>
             <button class="aba" role="tab" aria-selected="false" data-tipo="agenda">Agenda <span class="pilula__n" data-n="agenda"></span></button>
           </div>
@@ -208,7 +208,7 @@
     <aside class="lado" aria-label="Agenda do dia">
       <section class="cartao cartao--cal">
         <div class="mcal__cab">
-          <h2>9 a 13 de novembro</h2>
+          <h2 id="mcal-tit">8 a 14 de novembro</h2>
           <div class="mcal__nav">
             <button class="bt-ico bt-ico--sm bt-ico--plano" aria-label="Semana anterior"><svg class="ico ico-sm"><use href="#i-esq"/></svg></button>
             <button class="bt-ico bt-ico--sm bt-ico--plano" aria-label="Próxima semana"><svg class="ico ico-sm"><use href="#i-dir"/></svg></button>
@@ -239,6 +239,8 @@
 /* Tudo vem de dados.js (window.VA). Nenhum número digitado aqui. */
 const { P, AGENDA, ATENCAO, TIPO_ROT, ST_AGENDA, FRAC, METAS, safraNov, comparecimento, fechNov, somaV, metaVal, ritmo, situacao } = VA;
 const { br, mil, rsMil, av, escala, real, linhaDoTempo, miniCal, pilulasMedico, poeAnel, btWa, btAgenda, regTent } = UI;
+// Mesmas palavras em todas as telas: "Retorno" no lugar de "Follow-up" (o rótulo vem de dados.js)
+const ROT_TIPO = Object.assign({}, TIPO_ROT, { fu: "Retorno" });
 const ACAO = { tel: ["i-tel", "Ligar"], msg: ["i-msg", "Mandar mensagem"], check: ["i-check", "Registrar"] };
 const SEV = { atrasado: "status--atrasado", atencao: "status--atencao", neutro: "status--neutro" };
 const $ = id => document.getElementById(id);
@@ -256,7 +258,7 @@ function renderAtencao() {
       ${av(p.med, p.nome)}
       <div class="at-corpo" style="min-width:0">
         <div class="at-l1"><span class="linha__nome">${p.nome}</span><span class="at-ctx">${ctx}</span></div>
-        <div class="at-l2"><span class="tipo-rot">${TIPO_ROT[a.tipo]}</span><span class="at-txt">${a.txt}</span></div>
+        <div class="at-l2"><span class="tipo-rot">${ROT_TIPO[a.tipo]}</span><span class="at-txt">${a.txt}</span></div>
       </div>
       <div class="at-prazo"><span class="status ${SEV[a.sev]}">${prazo}</span>${regTent(a.id)}</div>
       <div class="at-acoes">${btWa(a.id, a.wa)}${a.agenda ? btAgenda(a.id) : ""}${extra}</div>
@@ -270,12 +272,15 @@ function renderFunil(m) {
   $("funil").innerHTML = s.n.map((n, i) => {
     const taxa = i ? (s.n[i - 1] ? Math.round(n / s.n[i - 1] * 100) : 0) : 0;
     const seta = i ? `<span class="funil__taxa" title="${taxa}% de “${rot[i - 1]}” chegaram a “${rot[i]}”"><svg class="ico" aria-hidden="true"><use href="#i-dir"/></svg>${taxa}%</span>` : "";
-    const pct = i === 0 ? "base da safra" : i === 4 ? `R$ ${mil(s.fv)} mil` : Math.round(n / n0 * 100) + "% da safra";
+    const pct = i === 0 ? "base da safra" : i === 4 ? `R$ ${mil(s.fv)} mil da safra` : Math.round(n / n0 * 100) + "% da safra";
     return `${seta}<div class="funil__etapa${i === 4 ? " funil__etapa--fim" : ""}" style="--h:${(n / n0).toFixed(3)}">
       <span class="funil__rot">${rot[i]}</span><span class="funil__n">${n}</span>
       <span class="funil__col" title="${rot[i]}: ${n} de ${n0} leads"><i></i></span><span class="funil__pct">${pct}</span></div>`;
   }).join("");
-  $("funil-obs").textContent = `${s.futuras} consultas desta safra ainda vão acontecer`;
+  // O KPI "Planos fechados" conta todo fechamento do mês; aqui só os leads novos. A diferença fica explicada.
+  const [pv] = metaVal("pl", m), antes = pv - s.n[4];
+  $("funil-obs").textContent = `${s.futuras} consultas desta safra ainda vão acontecer` +
+    (antes > 0 ? ` · os outros ${antes} ${antes === 1 ? "plano fechado" : "planos fechados"} do mês vieram de leads anteriores` : "");
   return s;
 }
 
@@ -295,7 +300,7 @@ function aplicaKPI(m) {
   $("k-planos").textContent = pv; $("k-planos-m").textContent = pm;
   $("k-planos-v").textContent = `R$ ${mil(metaVal("fechv", m)[0])} mil`;
   const st = $("k-planos-s"); st.className = "status " + r.cls; st.textContent = r.rot;
-  $("k-planos-esp").textContent = `Esperado hoje: ${br(r.esp)} planos`;
+  $("k-planos-esp").textContent = `todo o mês · esperado hoje: ${br(r.esp)}`;
   // Comparecimento na 1ª consulta
   const c = comparecimento(m);
   $("k-comp").textContent = c.pct; $("k-comp-n").textContent = `${c.foi} de ${c.reg}`;
@@ -344,7 +349,9 @@ document.querySelectorAll("#abas-atencao .aba").forEach(b => b.addEventListener(
   filtroTipo = b.dataset.tipo; filtra();
 }));
 renderAtencao(); miniCal($("mcal"), { pontos: true });
-document.querySelectorAll("#mcal .mcal__dia").forEach((d, i) => { if (i < 7 || i > 13) d.classList.add("fora-semana"); });  // 8 a 14/11
+// Só a semana de hoje (domingo 8 a sábado 14/11); o título sai dos mesmos dias que a grade mostra
+const semana = [...document.querySelectorAll("#mcal .mcal__dia")].filter((d, i) => { const fora = i < 7 || i > 13; d.classList.toggle("fora-semana", fora); return !fora; });
+if (semana.length) $("mcal-tit").textContent = `${semana[0].textContent.trim()} a ${semana[semana.length - 1].textContent.trim()} de novembro`;
 filtra();
 </script>
 <link rel="stylesheet" href="telas.css">

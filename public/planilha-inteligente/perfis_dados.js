@@ -18,7 +18,7 @@
     { id: "marcela",  nome: "Marcela Tavares",  med: "d", origem: "Instagram", proc: "Toxina botulínica",      t: 3, pot: 1800, chegou: "08:12", canal: "Direct do Instagram", pediu: "Perguntou o valor do botox", st: "aguarda" },
     { id: "luiza",    nome: "Luíza Arruda",     med: "d", origem: "Indicação", proc: "Skinbooster",            t: 4, pot: 2400, chegou: "08:20", canal: "WhatsApp", pediu: "Indicada pela Joana Bastos", st: "agendado", resp: "08:24", consulta: ["19/11", "14:00"] },
     { id: "henrique", nome: "Henrique Saboia",  med: "g", origem: "Parceria", proc: "Ultrassom microfocado",  t: 4, pot: 7800, chegou: "08:50", canal: "Parceiro", pediu: "Quer horário à tarde", st: "respondido", resp: "08:58" },
-    { id: "gisele",   nome: "Gisele Nóbrega",   med: "g", origem: "Google",    proc: "Clareamento de melasma", t: 3, pot: 2600, chegou: "09:05", canal: "Formulário do site", pediu: "Manchas no rosto há 2 anos", st: "aguarda" },
+    { id: "gisele",   nome: "Gisele Nóbrega",   med: "g", origem: "Google",    proc: "Clareamento de manchas", t: 3, pot: 2600, chegou: "09:05", canal: "Formulário do site", pediu: "Manchas no rosto há 2 anos", st: "aguarda" },
     { id: "barbara",  nome: "Bárbara Quintana", med: "d", origem: "Site",      proc: "Bioestimulador",         t: 3, pot: 3600, chegou: "09:31", canal: "WhatsApp", pediu: "Quer saber como funciona", st: "aguarda" },
   ];
   NOVOS.forEach(n => {
@@ -43,19 +43,19 @@
     ingrid:  { hist: "Laser em 3 sessões (campanha de setembro). Hoje é a sessão 2.", plano: "Sessão 3 já paga, a marcar para dezembro.", oport: "Skinbooster depois do laser pode consolidar a textura.", tom: "Primeiro o resultado do laser; o resto fica para a sessão 3." },
     mariana: { hist: "Carteira Diamante. Bioestimulador em 2 sessões; hoje fecha o ciclo.", plano: "Ciclo pago por inteiro.", oport: "Manutenção do bioestimulador em 6 meses: deixe o recall combinado na saída.", tom: "Cliente fiel: conversa de acompanhamento, sem pressa de vender." },
     debora:  { hist: "Toxina botulínica há 5 meses. Chegou pelo Instagram.", plano: "Nenhum plano em aberto.", oport: "Manutenção a cada 4 meses: o próximo retorno já pode sair marcado hoje.", tom: "Reaplicação simples; reforce o intervalo certo." },
-    paula:   { hist: "1ª consulta. Lead do Google de 04/11, quer retirar um sinal.", plano: "Ainda sem plano.", oport: "Biópsia/retirada se o sinal tiver critério; ticket estimado R$ 1,2 mil.", tom: "Puramente clínico: estética não entra nesta consulta." },
-    aline:   { hist: "Mapeamento anual de pintas; uma lesão em observação desde maio.", plano: "Nenhum plano em aberto.", oport: "Se a lesão mudou, indique biópsia; senão, retorno em 6 meses.", tom: "Consulta de segurança. Não é momento de oferta estética." },
+    paula:   { hist: "1ª consulta. Lead do Google de 04/11.", plano: "Ainda sem plano.", oport: "Conduta clínica fica com a médica; plano estético só se ela indicar.", tom: "Primeira consulta: ouvir antes de propor." },
+    aline:   { hist: "Consulta anual de rotina.", plano: "Nenhum plano em aberto.", oport: "Retorno em 6 meses.", tom: "Consulta de segurança. Não é momento de oferta estética." },
     raquel:  { hist: "1ª consulta. Lead do Instagram de 06/11; não respondeu à confirmação.", plano: "Ainda sem plano.", oport: "Interesse no Protocolo Natural Lift (≈ R$ 6,5 mil), mas está morna.", tom: "Entenda a queixa antes de falar em protocolo." },
     joana:   { hist: "Veio por indicação. Skinbooster em 3 sessões; hoje é a 1ª.", plano: "3 sessões fechadas.", oport: "Indicou a Luíza Arruda (agendada para 19/11): vale agradecer.", tom: "Explique o que esperar entre as sessões e o cuidado em casa." },
     simone:  { hist: "1ª consulta. Indicada pela Parceria; confirmou rápido.", plano: "Ainda sem plano.", oport: "Interesse em ultrassom microfocado (≈ R$ 7,8 mil).", tom: "Se a flacidez não justificar, diga por quê. Indicação certa fideliza." },
-    kelly:   { hist: "Acne adulta, tratamento oral há 3 meses, com melhora parcial.", plano: "Tratamento em curso.", oport: "Com a acne estável, as manchas residuais podem ir para peeling.", tom: "Só se ela trouxer o assunto: a prioridade é a acne." },
+    kelly:   { hist: "Retorno de acompanhamento, 3ª consulta.", plano: "Acompanhamento em curso.", oport: "Peeling para manchas, se a médica indicar.", tom: "Só se ela trouxer o assunto." },
     thais:   { hist: "1ª consulta. Lead do Google de 07/11; ainda não confirmou.", plano: "Ainda sem plano.", oport: "Protocolo Natural Lift (≈ R$ 6,5 mil).", tom: "Ouça a expectativa; proponha só o que a pele pede." },
-    luana:   { hist: "Peeling químico em série, 2ª sessão.", plano: "Série em curso.", oport: "Manutenção semestral; avalie se há melasma.", tom: "Reforce a fotoproteção; é ela que segura o resultado." },
+    luana:   { hist: "Peeling químico em série, 2ª sessão.", plano: "Série em curso.", oport: "Manutenção semestral; avalie manchas.", tom: "Reforce a fotoproteção; é ela que segura o resultado." },
   };
 
   /* ---------- Closer: saldos de fechamento parcial ---------------------- */
   const SALDOS = [
-    { id: "gabriela", saldo: 2050, total: 4100, txt: "Bioestimulador · 2ª etapa combinada para hoje", sev: "atencao", prazo: "Hoje" },
+    { id: "gabriela", saldo: 2050, total: 4100, txt: "Bioestimulador · 2ª etapa combinada para hoje, horário a marcar", sev: "atencao", prazo: "Hoje" },
     { id: "patricia", saldo: 8114, total: null, txt: "Natural Lift · fechou a 1ª etapa em julho, 2ª sem data", sev: "atrasado", prazo: "8 dias de atraso" },
   ];
 

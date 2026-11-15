@@ -31,6 +31,7 @@
           <button type="button" class="bt-google" id="bt-google"><span id="g-ico"></span><span id="g-txt">Entrar com Google</span></button>
           <p class="en-priv"><span id="ico-priv"></span><span>Só e-mails autorizados pela clínica entram. Seus dados ficam na conta Google da clínica.</span></p>
         </div>
+        <p class="en-dica" id="dica-convite" role="status" hidden></p>
       </section>
 
       <!-- 2. Escolha da conta (simula a janela do Google) -->
@@ -61,13 +62,13 @@
       </section>
 
     </div></div>
-
-    <footer class="en-rodape" data-entra>
-      <span>Munin © 2026</span><a href="convite.html#termos">Termos de uso</a><a href="convite.html#termos">Privacidade</a><a href="convite.html">Recebeu um convite?</a>
-    </footer>
   </main>
 
   <aside class="en-palco" id="palco" aria-label="Sobre o Munin"></aside>
+
+  <footer class="en-rodape" data-entra>
+    <span>Munin © 2026</span><a href="convite.html?de=entrar#termos">Termos e privacidade</a><button type="button" id="bt-convite" aria-expanded="false" aria-controls="dica-convite">Recebeu um convite?</button>
+  </footer>
 </div>
 
 <script src="dados.js"></script>
@@ -90,6 +91,12 @@ $("bt-voltar-ped").innerHTML = `${ico("esq")}Voltar ao início`;
 palco($("palco"), { topo: "Munin · planilha inteligente", titulo: "A clínica inteira numa planilha que pensa junto.", texto: "Quem precisa de retorno, quem está parado no funil e quanto falta para a meta: o Munin mostra a cada pessoa da equipe o que é dela hoje." });
 if (new URLSearchParams(location.search).get("saiu")) { const s = $("saiu"); s.hidden = false; s.innerHTML = `${ico("check", "ico ico-sm")}Você saiu do Munin. Até logo!`; }
 abertura(document.body);
+// "Recebeu um convite?": o convite é um link pessoal que chega por e-mail (não há convite de exemplo aqui)
+$("bt-convite").addEventListener("click", () => {
+  const d = $("dica-convite"), abre = d.hidden;
+  if (abre) { d.innerHTML = `${ico("envio")}<span>O convite chega por e-mail, com um link só seu. Abra o link e entre com a conta Google do e-mail convidado. Não achou? Peça à gestão da clínica para reenviar.</span>`; if ($("e-inicio").hidden) { mostra(etapas, "e-inicio"); } }
+  d.hidden = !abre; $("bt-convite").setAttribute("aria-expanded", abre);
+});
 
 // Contas do Google neste navegador: uma por perfil + um e-mail pessoal sem acesso
 const CONTAS = VA2.CONTAS.concat([{ completo: "Paulo Henrique", email: "paulo.henrique.dm@gmail.com", ini: "PH", negada: true }]);

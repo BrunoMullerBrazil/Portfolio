@@ -138,6 +138,9 @@
     clareamento: "Clareamento", "clareamento-casa": "Clareamento caseiro", placa: "Placa noturna", "protese-total": "Prótese total", protocolo: "Protocolo",
     alinhadores: "Alinhadores", aparelho: "Aparelho" };
   const curto = id => CURTO[id] || (procDe(id) || { nome: id }).nome.split(" · ")[0];
+  // sem repetir a região: "Masseter · Toxina · masseter" vira "Masseter · Toxina"
+  const curtoEm = (id, alvoNome) => { const c = curto(id), i = c.lastIndexOf(" · "); return i > 0 && alvoNome && String(alvoNome).toLowerCase().includes(c.slice(i + 3).toLowerCase()) ? c.slice(0, i) : c; };
+  const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
   const ESTETICO = p => p && (p.familia === "estetica" || p.familia === "ortodontia");
   const ST = { proposto: ["Proposto", "neutro"], aceito: ["Aceito", "ok"], realizado: ["Realizado", "neutro"], em_aberto: ["Em aberto", "atencao"], recusado: ["Recusado", "neutro"] };
   // estado agregado de um alvo (ordem de força para o ponto do mapa)
@@ -379,9 +382,13 @@
     const fechado = ss.get("munin:fechado:" + PID);
     const sub = S.plano.subStatus ? `<span class="chip chip--borda">${esc(S.plano.subStatus)}</span>` : "";
     $("#pl-data").innerHTML = `<b>Plano · ${esc(PACOTE.rot)}</b> · ${esc(medCurto(S.plano.med))} · closer ${esc(closerNome(S.plano.closer))} · atualizado ${esc(S.plano.atualizado.replace("/2026", ""))} ${sub}${fechado ? ` <span class="status status--ok">Fechado nesta sessão</span>` : ""}${MEDICO ? ` <span class="chip">Modo médico · sem valores</span>` : ""}`;
-    const sel = ativos.length > 1 ? `<label class="pl-pacote"><span class="sr">Pacote</span><select id="pl-pacote" ${S.plano.itens.length ? 'disabled title="O pacote é escolhido ao começar um plano novo"' : ""}>${ativos.map(p => `<option value="${p.id}"${p.id === PACOTE.id ? " selected" : ""}>${esc(p.rot)}</option>`).join("")}</select></label>` : `<span class="chip">${esc(PACOTE.rot)}</span>`;
+    // com itens no plano a especialidade fica fixa: selo estático (um select desabilitado parecia clicável)
+    const sel = ativos.length > 1 && !S.plano.itens.length ? `<label class="pl-pacote"><span class="sr">Especialidade</span><select id="pl-pacote">${ativos.map(p => `<option value="${p.id}"${p.id === PACOTE.id ? " selected" : ""}>${esc(p.rot)}</option>`).join("")}</select></label>` : `<span class="pl-selo-esp">${esc(PACOTE.rot)}</span>`;
+    const linkPront = PAC.linkProntuario(PID), pront = /exemplo\.com\.br/.test(linkPront)
+      ? `<button type="button" class="bt-sec pl-pront" data-pront-cfg>Abrir no prontuário ${ico("i-pl-ext")}</button>`
+      : `<a class="bt-sec pl-pront" href="${esc(linkPront)}" target="_blank" rel="noopener">Abrir no prontuário ${ico("i-pl-ext")}</a>`;
     $("#pl-topo").innerHTML = `${sel}
-      <a class="bt-sec pl-pront" href="${esc(PAC.linkProntuario(PID))}" target="_blank" rel="noopener">Abrir no prontuário ${ico("i-pl-ext")}</a>
+      ${pront}
       <button type="button" class="bt-ico pl-mais" id="pl-mais" aria-haspopup="menu" aria-label="Mais ações do plano" title="Mais">${ico("i-pl-mais3", "ico")}</button>`;
     const s = $("#pl-pacote"); if (s) s.addEventListener("change", () => {
       if (S.plano.itens.length) return;
@@ -392,6 +399,7 @@
       const html = `<div class="pl-menu" role="menu">
         <button role="menuitem" type="button" data-acao="apres">${ico("i-pl-olho")}Mostrar à paciente</button>
         ${VER_RS ? `<button role="menuitem" type="button" data-acao="resumo">${ico("i-whats")}Enviar resumo</button>` : ""}
+        ${ODONTO() && !MEDICO ? `<button role="menuitem" type="button" data-acao="titulos">${ico("i-pl-combo")}Títulos das fases</button>` : ""}
         <button role="menuitem" type="button" data-acao="restaura">${ico("i-recall")}Restaurar o exemplo</button>
         <a role="menuitem" href="ajustes.html#tabela">${ico("i-ajustes")}Tabela de preços</a></div>`;
       abreCamada(html, { tipo: "pop", bt: e.currentTarget, rotulo: "Mais ações" });
@@ -402,7 +410,29 @@
     const a = b.dataset.acao;
     if (a === "apres") { fechaCamada(true); apresentacao(); }
     else if (a === "resumo") { fechaCamada(true); enviaResumo(); }
+    else if (a === "titulos") { fechaCamada(true); titulosFases(); }
     else if (a === "restaura") { ls.del(chave); S.plano = normalizaPlano(PLD.plano(PID) || planoNovo()); PACOTE = PAC.get(S.plano.pacote); S.sel = null; fechaCamada(true); renderTudo(); aviso("Plano de exemplo restaurado"); }
+  });
+
+  // odonto: o título comercial de cada fase sai do cabeçalho do orçamento e fica aqui (menu ···)
+  function titulosFases() {
+    const html = `<div class="pl-dlg"><div class="pl-dlg__cab"><h2>Títulos das fases</h2><button type="button" class="bt-ico bt-ico--sm bt-ico--plano" data-dlg-fecha aria-label="Fechar">${ico("i-fechar")}</button></div>
+      <div class="pl-titulos">${PACOTE.grupos.map(g => `<label class="pl-mot"><span>${esc(g.nome)}</span><select data-titulo="${g.id}">${PACOTE.titulosFase.map(x => `<option${((S.plano.titulos || {})[g.id] || g.titulo) === x ? " selected" : ""}>${esc(x)}</option>`).join("")}</select></label>`).join("")}</div>
+      <p class="pl-dlg__nota">${ico("i-info")}O título aparece no orçamento, na apresentação e no resumo da paciente.</p>
+      <div class="pl-dlg__pe"><button type="button" class="bt-principal" data-dlg-fecha>Pronto</button></div></div>`;
+    abreCamada(html, { tipo: "dlg", bt: $("#pl-mais"), rotulo: "Títulos das fases" });
+    delete camada.dataset.uid; delete camada.dataset.alvo;
+  }
+  camada.addEventListener("change", e => {
+    const s = e.target.closest("[data-titulo]"); if (!s) return;
+    S.plano.titulos = Object.assign({}, S.plano.titulos, { [s.dataset.titulo]: s.value }); salva(); render();
+  });
+  // prontuário ainda com o endereço de exemplo: explica onde configurar em vez de abrir uma página que não existe
+  doc.addEventListener("click", e => {
+    const bt = e.target.closest("[data-pront-cfg]"); if (!bt) return;
+    abreCamada(`<div class="pl-pop"><div class="pl-pop__cab"><b>Prontuário ainda sem link</b><span>Informe o endereço do prontuário da clínica para abrir a ficha da paciente direto daqui.</span></div>
+      <div class="pl-pop__pe"><button type="button" class="bt-texto" data-dlg-fecha>Agora não</button><a class="bt-sec" href="ajustes.html#especialidades">Configurar em Ajustes</a></div></div>`, { tipo: "pop", bt, rotulo: "Link do prontuário" });
+    delete camada.dataset.uid; delete camada.dataset.alvo;
   });
 
   /* =====================================================================
@@ -432,8 +462,8 @@
     if (ehPele) corpo = pele();
     else if (lista) corpo = listaHtml() + (mapaCel ? `<button type="button" class="bt-sec pl-mapa-tg" id="pl-mapa-tg" aria-expanded="${S.mapaCel}">${S.mapaCel ? "Recolher o mapa" : "Ver no mapa"} ${ico(S.mapaCel ? "i-pl-cima" : "i-pl-baixo")}</button>${S.mapaCel ? areaHtml() : ""}` : "");
     else corpo = areaHtml();
-    const leg = !ehPele && (!lista || S.mapaCel) ? `<div class="pl-legenda" aria-label="Legenda do mapa"><span><i class="pl-lg pl-lg--aceito"></i>aceito</span><span><i class="pl-lg pl-lg--proposto"></i>proposto</span><span><i class="pl-lg pl-lg--em_aberto"></i>em aberto</span><span><i class="pl-lg pl-lg--realizado"></i>realizado</span>${ODONTO() ? "" : `<span class="pl-legenda__dica">Use a lista para montar mais rápido.</span>`}</div>` : "";
-    const cred = !ODONTO() && !ehPele ? `<p class="pl-credito">Desenho a partir de malhas 3D de CoryRichards e FormForge3D (Sketchfab), CC BY 4.0, convertidas em traço 2D.</p>` : "";
+    const leg = !ehPele && (!lista || S.mapaCel) ? `<div class="pl-legenda" aria-label="Legenda do mapa"><span><i class="pl-lg pl-lg--aceito"></i>aceito</span><span><i class="pl-lg pl-lg--proposto"></i>proposto</span><span><i class="pl-lg pl-lg--em_aberto"></i>em aberto</span><span><i class="pl-lg pl-lg--realizado"></i>realizado</span>${ODONTO() || lista ? "" : `<span class="pl-legenda__dica">Na Lista dá para montar mais rápido.</span>`}</div>` : "";
+    // crédito dos desenhos (CC BY 4.0): fica em Ajustes › Sobre e créditos e no LEIAME dos desenhos, fora da tela do plano
     return `<section class="cartao pl-mapa${ODONTO() ? " pl-mapa--odo" : ""}" id="pl-mapa" aria-labelledby="pl-t-mapa">
       <h2 class="sr" id="pl-t-mapa">Mapa do plano</h2>
       <div class="cartao__cab pl-mapa__cab">${abasHtml()}<div class="linha-flex pl-cab-dir">${ehPele ? "" : modoBt}${combos}</div></div>
@@ -442,7 +472,6 @@
       <div class="pl-mapa__corpo">${corpo}${ODONTO() && !celular() ? `<div class="pl-dente" id="pl-dente">${painelDente()}</div>` : ""}</div>
       ${leg}
       ${!ODONTO() && !ehPele && !celular() ? `<div class="pl-chips-sec" id="pl-chips">${chipsHtml()}</div>` : ""}
-      ${cred}
     </section>`;
   }
   function areaHtml() {
@@ -488,7 +517,7 @@
     return [...por.values()].map(o => {
       const it0 = o.itens[0], nome = PAC.nomeAlvo(PACOTE, it0);
       const v = o.itens.reduce((s, i) => s + valorUid(t, i.uid), 0);
-      const det = o.itens.length === 1 ? [curto(it0.proc), qtdTxt(it0)].filter(Boolean).join(" ") : `${o.itens.length} itens`;
+      const det = o.itens.length === 1 ? [curtoEm(it0.proc, nome), qtdTxt(it0)].filter(Boolean).join(" ") : `${o.itens.length} itens`;
       const aberto = o.itens.every(i => i.status === "em_aberto");
       const ehSel = [...o.ids].some(i => sel.includes(i));
       return { ids: [...o.ids], html: `<b>${esc(nome)}</b><span>${esc(det)}${VER_RS && v ? ` · R$ ${real(v)}` : ""}</span>`, cls: (aberto ? "is-aberto" : "") + (ehSel ? " is-sel" : "") };
@@ -549,7 +578,7 @@
   }
   function chipsHtml() {
     const a = S.sel && alvoDe(S.sel);
-    if (!a) return `<p class="pl-chips__vazio">${ico("i-info")}Toque numa região do desenho para ver os procedimentos.${MEDICO ? " Seus toques entram como sugestão para a closer." : ""}</p>`;
+    if (!a) return `<p class="pl-chips__vazio">${ico("i-info")}${S.modo === "lista" ? "Escolha uma região na lista" : "Escolha uma região no desenho"} para ver os procedimentos.${MEDICO ? " O que você marcar entra como sugestão para a closer." : ""}</p>`;
     const ps = procsDoAlvo(a);
     const ladoTg = a.par ? `<div class="pilulas pl-pil pl-lado-tg" role="group" aria-label="Lados"><button type="button" class="pilula" aria-pressed="${S.lado === "bi"}" data-lado="bi">Os dois lados</button><button type="button" class="pilula" aria-pressed="${S.lado !== "bi"}" data-lado="um">Só o ${a.lado === "E" ? "esquerdo" : "direito"}</button></div>` : "";
     return `<div class="pl-chips__cab"><b>${esc(a.par && S.lado === "bi" ? a.nomePar : PAC.nomeAlvo(PACOTE, a.id))}</b>${a.beneficio ? `<span>${esc(a.beneficio)}</span>` : ""}${ladoTg}</div>
@@ -617,7 +646,7 @@
       return `<details class="pl-lg-grupo"${aberto ? " open" : ""}><summary><span>${esc(g.nome)}</span>${nIt ? `<span class="pilula__n">${nIt}</span>` : ""}${ico("i-pl-baixo")}</summary><ul class="pl-lg-lista">${alvos.map(a => {
         const its = S.plano.itens.filter(it => it.status !== "recusado" && (it.alvo === a.id || (a.par && it.alvo === a.par)));
         const nome = a.par ? a.nomePar : a.tipo === "dente" ? a.nome : a.nome;
-        return `<li><button type="button" class="pl-lg-alvo${S.sel === a.id ? " is-sel" : ""}" data-alvo-lista="${a.id}"><span class="pl-lg-alvo__n">${esc(nome)}</span>${its.length ? `<span class="pl-lg-alvo__its">${its.map(it => `${esc(curto(it.proc))}${qtdTxt(it) ? " " + esc(qtdTxt(it)) : ""}${VER_RS ? ` · R$ ${real(valorUid(t, it.uid))}` : ""}`).join(" · ")}</span>` : `<span class="pl-lg-alvo__its muted">${esc(a.procs.slice(0, 3).map(curto).join(", "))}</span>`}${ico("i-dir")}</button></li>`;
+        return `<li><button type="button" class="pl-lg-alvo${S.sel === a.id ? " is-sel" : ""}" data-alvo-lista="${a.id}"><span class="pl-lg-alvo__n">${esc(nome)}</span>${its.length ? `<span class="pl-lg-alvo__its">${its.map(it => `${esc(curtoEm(it.proc, nome))}${qtdTxt(it) ? " " + esc(qtdTxt(it)) : ""}${VER_RS ? ` · R$ ${real(valorUid(t, it.uid))}` : ""}`).join(" · ")}</span>` : `<span class="pl-lg-alvo__its muted">${esc(a.procs.slice(0, 3).map(x => curtoEm(x, nome)).join(", "))}</span>`}${ico("i-dir")}</button></li>`;
       }).join("")}</ul></details>`;
     }).join("");
     return `<div class="pl-listagem"><label class="pl-busca">${ico("i-busca")}<span class="sr">Buscar região ou procedimento</span><input type="search" id="pl-busca" placeholder="Buscar região ou procedimento" value="${esc(S.busca)}" aria-controls="pl-lg" autocomplete="off"></label>
@@ -639,13 +668,13 @@
       <ul class="pl-pele__lista">${areas.map(a => {
         if (a.fixo) {
           const it = S.plano.itens.find(i => i.alvo === a.id && i.status !== "recusado");
-          return `<li class="pl-pele__l"><div><b>Mapeamento corporal</b><span>${esc(a.nome)} · serviço, nunca um ponto</span></div><div class="pl-pele__v">${it && VER_RS ? `R$ ${real(valorUid(t, it.uid))}` : ""}</div>
+          return `<li class="pl-pele__l"><div><b>Mapeamento corporal</b><span>${esc(a.nome)} · por sessão</span></div><div class="pl-pele__v">${it && VER_RS ? `R$ ${real(valorUid(t, it.uid))}` : ""}</div>
             <button type="button" class="bt-sec" data-pele-fixo="${a.id}" aria-pressed="${!!it}">${it ? ico("i-check") + "No plano" : ico("i-mais") + "Adicionar"}</button></li>`;
         }
         const it = S.plano.itens.find(i => i.alvo === a.id && i.proc === "remocao" && i.status !== "recusado");
         const n = it ? it.qtd : 0;
         const outros = a.procs.filter(p => p !== "remocao").map(procDe).filter(p => p && p.ativo !== false);
-        return `<li class="pl-pele__l"><div><b>${esc(a.nome)}</b><span>${n ? `${n} ${n === 1 ? "lesão" : "lesões"} · 1ª cheia, seguintes com adicional` : "Remoção por unidade"}</span>
+        return `<li class="pl-pele__l"><div><b>${esc(a.nome)}</b><span>${n ? `${n} ${n === 1 ? "lesão" : "lesões"}${n > 1 ? " · a partir da 2ª, valor adicional" : ""}` : "Remoção por lesão"}</span>
             ${outros.length ? `<div class="pl-chips pl-chips--min">${outros.map(p => { const ja = S.plano.itens.some(i => i.alvo === a.id && i.proc === p.id && i.status !== "recusado"); return `<button type="button" class="pl-chip" data-add-area="${a.id}|${p.id}" aria-pressed="${ja}">${ja ? ico("i-check") : ico("i-mais")}${esc(curto(p.id))}</button>`; }).join("")}</div>` : ""}</div>
           <div class="pl-pele__v">${n && VER_RS ? `R$ ${real(valorUid(t, it.uid))}` : ""}</div>
           <div class="pl-step" role="group" aria-label="Lesões em ${esc(a.nome)}"><button type="button" class="bt-ico bt-ico--sm bt-ico--plano" data-pele="${a.id}" data-d="-1" aria-label="Menos uma" ${n ? "" : "disabled"}>${ico("i-pl-menos")}</button><output class="num">${n}</output><button type="button" class="bt-ico bt-ico--sm bt-ico--plano" data-pele="${a.id}" data-d="1" aria-label="Mais uma">${ico("i-mais")}</button></div></li>`;
@@ -665,7 +694,7 @@
       else if (it.sessao) ev.push({ d: it.data || HOJE, nome: `${nome} ${it.sessao.i}ª de ${it.sessao.n}`, alvo, tipo: "sessao", feito: it.status === "realizado", st: it.status, it });
       else ev.push({ d: it.data || HOJE, nome, alvo, tipo: "sessao", feito: it.status === "realizado", st: it.status, it });
     });
-    PL.recallsDe(plano, { incluirPropostos: true }).forEach(r => ev.push({ d: r.data, nome: `${r.rot === "Recall" ? "retorno" : r.rot.toLowerCase()} · ${curto(r.proc).toLowerCase()}`, tipo: "recall", st: "recall" }));
+    PL.recallsDe(plano, { incluirPropostos: true }).forEach(r => ev.push({ d: r.data, nome: `${r.rot === "Recall" ? "Retorno" : cap(r.rot.toLowerCase())} · ${curto(r.proc)}`, tipo: "recall", st: "recall" }));
     const ord = e => e.d ? D.parse(e.d) + (e.d === HOJE ? 0 : 864e5) : D.parse(HOJE) + 1;
     return ev.filter(e => !opts.futuro || !e.d || D.diasEntre(HOJE, e.d) >= 0).sort((a, b) => ord(a) - ord(b));
   }
@@ -673,25 +702,32 @@
     const ev = eventos(plano), m = new Map();
     ev.forEach(e => {
       if (!e.d) { const n = m.get("agendar") || { k: "agendar", d: HOJE, dias: 0, agendar: true, ev: [] }; n.ev.push(e); m.set("agendar", n); return; }
-      const dias = D.diasEntre(HOJE, e.d); const k = dias > 120 ? D.mesAno(e.d) : e.d; const n = m.get(k) || { k, d: e.d, dias, ev: [] }; n.ev.push(e); m.set(k, n);
+      const dias = D.diasEntre(HOJE, e.d); const k = dias > 30 ? D.mesAno(e.d) : e.d; const n = m.get(k) || { k, d: e.d, dias, ev: [] }; n.ev.push(e); m.set(k, n);
     });
     const ordN = n => D.parse(n.d) + (n.agendar ? 1 : 0);
     let L = [...m.values()].sort((a, b) => ordN(a) - ordN(b));
     if (L.length > max) L = L.slice(0, max - 1).concat([{ k: "mais", d: L[max - 1].d, dias: L[max - 1].dias, ev: L.slice(max - 1).flatMap(x => x.ev), mais: true }]);
     return L;
   }
-  const rotNo = n => n.agendar ? "A agendar" : n.mais ? "depois" : n.dias === 0 ? "Hoje" : n.dias < 0 ? n.d.slice(0, 5) : n.dias <= 120 ? `+${n.dias} dias` : D.mesAno(n.d);
+  // mesma grafia de data do orçamento e do resumo ("mar/27"); só o primeiro mês fala em dias
+  // "Retorno · Bioestimulador" + "Retorno · Ultrassom" → "Retorno · Bioestimulador e Ultrassom"
+  function juntaNomes(nomes) {
+    const out = [], por = new Map();
+    nomes.forEach(x => { const i = x.indexOf(" · "); if (i < 0) { out.push(x); return; } const k = x.slice(0, i); if (!por.has(k)) { por.set(k, []); out.push({ k }); } por.get(k).push(x.slice(i + 3)); });
+    return out.map(o => typeof o === "string" ? o : `${o.k} · ${por.get(o.k).length > 1 ? por.get(o.k).slice(0, -1).join(", ") + " e " + por.get(o.k).slice(-1) : por.get(o.k)[0]}`);
+  }
+  const rotNo = n => n.agendar ? "A agendar" : n.mais ? "Depois" : n.dias === 0 ? "Hoje" : n.dias < 0 ? n.d.slice(0, 5) : n.dias === 1 ? "Amanhã" : n.dias <= 30 ? `Em ${n.dias} dias` : D.mesAno(n.d);
   function cartaoTempo() {
     const L = nos(S.plano, celular() ? 6 : 8);
     if (!L.length) return "";
     return `<section class="cartao pl-tempo" aria-labelledby="pl-t-tempo"><div class="cartao__cab"><h2 id="pl-t-tempo">Linha do tempo do plano <span class="cartao__sub">sessões e retornos que este plano cria</span></h2></div>
       <ol class="pl-tl">${L.map(n => {
         const feito = n.ev.every(e => e.feito), hoje = n.dias === 0 && !n.agendar, so = n.ev.every(e => e.tipo === "recall");
-        const nomes = [...new Set(n.ev.map(e => e.nome))];
+        const nomes = juntaNomes([...new Set(n.ev.map(e => e.nome))]);
         return `<li class="pl-tl__no${feito ? " is-feito" : ""}${hoje ? " is-hoje" : ""}${so ? " is-recall" : ""}"><span class="pl-tl__q">${esc(rotNo(n))}</span><span class="pl-tl__p" aria-hidden="true">${feito ? ico("i-check") : ""}</span>
-          <span class="pl-tl__ev">${nomes.slice(0, 3).map(x => `<span>${esc(x)}</span>`).join("")}${nomes.length > 3 ? `<span class="muted">+${nomes.length - 3}</span>` : ""}</span></li>`;
+          <span class="pl-tl__ev">${nomes.slice(0, 3).map(x => `<span>${esc(x)}</span>`).join("")}${nomes.length > 3 ? `<span class="muted">+${nomes.length - 3} ${nomes.length - 3 === 1 ? "item" : "itens"}</span>` : ""}</span></li>`;
       }).join("")}</ol>
-      <p class="pl-tempo__nota">Retorno pós-procedimento não é recall de venda: fica fora da fila de Recall. A mensagem de recall é sempre o modelo neutro.</p></section>`;
+</section>`;
   }
 
   /* =====================================================================
@@ -722,8 +758,8 @@
     };
     const blocos = grupos.filter(x => x.its.length).map(({ g, its }) => {
       const sub = its.filter(i => i.status !== "recusado" && !i.sugerido).reduce((s, i) => s + valorUid(t, i.uid), 0);
-      const tit = ODONTO() && !MEDICO && g.id !== "_" ? `<span>${esc(g.nome)} · </span><select class="pl-titulo" data-titulo="${g.id}" aria-label="Título comercial da ${esc(g.nome)}">${PACOTE.titulosFase.map(x => `<option${((S.plano.titulos || {})[g.id] || g.titulo) === x ? " selected" : ""}>${x}</option>`).join("")}</select>` : `<span>${esc(nomeGrupo(g))}</span>`;
-      return `<div class="pl-grupo"><h3 class="pl-grupo__t">${tit}${VER_RS ? `<span class="num">${real(sub)}</span>` : ""}</h3><ul class="pl-linhas">${its.map(linha).join("")}</ul></div>`;
+      const tit = `<span>${esc(nomeGrupo(g))}</span>`;
+      return `<div class="pl-grupo"><h3 class="pl-grupo__t">${tit}${VER_RS ? `<span class="num">${sub ? real(sub) : "—"}</span>` : ""}</h3><ul class="pl-linhas">${its.map(linha).join("")}</ul></div>`;
     }).join("");
     const pg = PAC.pagamento(PACOTE).pagamento, dm = PAC.pagamento(PACOTE).descMax, maxD = dm[PERFIL] != null ? dm[PERFIL] : dm.closer;
     const pct = (S.plano.desconto || {}).pct || 0, forma = (S.plano.pagamento || {}).forma || "cartao";
@@ -733,13 +769,14 @@
     // desconto e pagamento ficam fora da rolagem do orçamento (cartão próprio, logo acima do total)
     const cond = VER_RS ? `<section class="cartao pl-cond" aria-label="Desconto e pagamento"><div class="pl-rod">
       <div class="pl-rod__l"><span>Subtotal</span><b class="num">${real(t.subtotal)}</b></div>
-      <div class="pl-rod__l"><label for="pl-desc">Desconto</label><span class="linha-flex"><select id="pl-desc">${opDesc.map(d => `<option value="${d}"${d === pct ? " selected" : ""}>${d}%${d > maxD ? " · pedir aprovação" : ""}</option>`).join("")}</select><b class="num">−${real(t.desconto)}</b></span></div>
+      <div class="pl-rod__l"><label for="pl-desc">Desconto</label><span class="linha-flex"><select id="pl-desc">${opDesc.map(d => `<option value="${d}"${d === pct ? " selected" : ""}>${d}%${d > maxD ? " · pedir aprovação" : ""}</option>`).join("")}</select><b class="num">${t.desconto ? "−" + real(t.desconto) : "—"}</b></span></div>
       <div class="pl-rod__l pl-rod__pg"><span>Pagamento</span><span class="linha-flex"><span class="pilulas pl-pil" role="group" aria-label="Forma de pagamento"><button type="button" class="pilula" data-forma="pix" aria-pressed="${forma === "pix"}">Pix −${pg.pixDesc}%</button><button type="button" class="pilula" data-forma="cartao" aria-pressed="${forma === "cartao"}">Cartão</button></span>
         ${forma === "cartao" ? `<select id="pl-parc" aria-label="Parcelas">${Array.from({ length: pg.maxParcelas }, (_, i) => i + 1).map(n => `<option value="${n}"${n === t.parcelas ? " selected" : ""}>${n}×</option>`).join("")}</select>` : ""}</span></div>
       ${t.recorrenteMensal ? `<div class="pl-rod__l"><span>Recorrente previsto <small>informativo, fora da meta</small></span><b class="num">${real(t.recorrenteMensal)}/mês</b></div>` : ""}
     </div></section>` : "";
+    const recAno = PL.recallsDe(S.plano, { incluirPropostos: true }).filter(r => r.dias >= 0 && r.dias <= 365).reduce((s, r) => s + r.valorPrevisto, 0);
     const rodape = VER_RS ? `<div class="pl-rod">
-      ${recsU.length ? `<div class="pl-rod__rec"><span>Recall que este plano cria</span><ul>${recsU.slice(0, 4).map(r => `<li><span>${esc(curto(r.proc))} · ${esc(r.alvoNome.toLowerCase())}</span><b>${r.mes}</b></li>`).join("")}</ul></div>` : ""}
+      ${recsU.length ? `<div class="pl-rod__rec"><span>Recall que este plano cria${recAno ? ` <em>R$ ${real(recAno)} previstos em 12 meses</em>` : ""}</span><ul>${recsU.slice(0, 4).map(r => `<li><span>${esc(curtoEm(r.proc, r.alvoNome))} · ${esc(r.alvoNome.toLowerCase())}</span><b>${r.mes}</b></li>`).join("")}</ul></div>` : ""}
     </div>` : `<p class="pl-med-nota">${ico("i-info")}Valores ocultos no modo médico. Os itens que você marcar entram como sugestão para a closer.</p>`;
     return `<section class="cartao pl-orc" id="pl-orc" aria-labelledby="pl-t-orc">
       <div class="cartao__cab"><h2 id="pl-t-orc">${MEDICO ? "Itens do plano" : "Orçamento"} <span class="cartao__sub">${vivos().length} ${vivos().length === 1 ? "item" : "itens"}</span></h2>
@@ -762,13 +799,20 @@
 
   function cartaoTotal() {
     const t = tot(), pg = PAC.pagamento(PACOTE).pagamento;
-    const recAno = PL.recallsDe(S.plano, { incluirPropostos: true }).filter(r => r.dias >= 0 && r.dias <= 365).reduce((s, r) => s + r.valorPrevisto, 0);
     if (!VER_RS) {
       const sug = S.plano.itens.filter(i => i.sugerido).length, reg = new Set(vivos().map(i => i.alvo.replace(/_(e|d)$/, ""))).size;
+      const nDentes = new Set(vivos().filter(i => (alvoDe(i.alvo) || {}).tipo === "dente").map(i => i.alvo)).size;
+      const rotReg = ODONTO() ? `${nDentes} ${nDentes === 1 ? "dente" : "dentes"}` : `${reg} ${reg === 1 ? "região" : "regiões"}`;
       return `<section class="cartao cartao--foco pl-total"><span class="kpi__rot">Plano de ${esc(PAC_.nome.split(" ")[0])}</span>
         <div class="pl-total__v">${vivos().length}<small>${vivos().length === 1 ? "item" : "itens"}</small></div>
-        <div class="pl-total__parc">${reg} ${reg === 1 ? "região" : "regiões"} · ${sug} ${sug === 1 ? "sugestão sua" : "sugestões suas"} para a closer</div></section>`;
+        <div class="pl-total__parc">${rotReg} · ${sug ? `${sug} ${sug === 1 ? "sugestão sua" : "sugestões suas"} para a closer` : "nenhuma sugestão sua ainda"}</div></section>`;
     }
+    // a trinca soma o total: o que conta nele, por status (sugestão não aceita fica fora)
+    const pS = { aceito: 0, proposto: 0, em_aberto: 0 };
+    S.plano.itens.forEach(i => { if (i.status === "recusado" || i.sugerido) return; const k = i.status === "realizado" ? "aceito" : i.status; if (k in pS) pS[k] += valorUid(t, i.uid); });
+    // com o mesmo % de desconto do plano, para a trinca fechar com o total do cartão
+    const fator = t.subtotal ? t.total / t.subtotal : 1;
+    const mil = v => v ? `<small>R$</small>${milTxt(v * fator)}<small>mil</small>` : `<span class="pl-total__nada">—</span>`;
     const forma = (S.plano.pagamento || {}).forma || "cartao";
     const parc = forma === "pix" ? `à vista no Pix <b>R$ ${real(t.aVista)}</b> <small>(−${pg.pixDesc}%)</small>` : `<b>${t.parcelas}× R$ ${cent(t.parcela)}</b> sem juros`;
     return `<section class="cartao cartao--foco pl-total" aria-labelledby="pl-t-total">
@@ -776,9 +820,9 @@
       <div class="pl-total__v"><small>R$</small><span id="pl-tv" data-v="${t.total}">${real(t.total)}</span></div>
       <div class="pl-total__parc">${parc}</div>
       <div class="pl-total__x">
-        <div><span>Aceito</span><b><small>R$</small>${milTxt(t.aceito + t.realizado)}<small>mil</small></b></div>
-        <div><span>Em aberto</span><b><small>R$</small>${milTxt(t.emAberto)}<small>mil</small></b></div>
-        <div><span>Recall previsto</span><b><small>R$</small>${milTxt(recAno)}<small>mil/ano</small></b></div>
+        <div><span>Aceito</span><b>${mil(pS.aceito)}</b></div>
+        <div><span>Proposto</span><b>${mil(pS.proposto)}</b></div>
+        <div><span>Em aberto</span><b>${mil(pS.em_aberto)}</b></div>
       </div>
       <p class="sr" aria-live="polite" id="pl-vivo"></p>
     </section>`;
@@ -787,7 +831,8 @@
     const t = tot(), dm = PAC.pagamento(PACOTE).descMax, maxD = dm[PERFIL] != null ? dm[PERFIL] : dm.closer;
     const pede = ((S.plano.desconto || {}).pct || 0) > maxD;
     if (MEDICO) return `<div class="pl-acoes"><button type="button" class="bt-sec" data-apres>${ico("i-pl-olho")}Mostrar à paciente</button>
-      <button type="button" class="bt-principal" id="pl-enviar" ${S.plano.itens.some(i => i.sugerido) ? "" : "disabled"}>${ico("i-pl-enviar")}Enviar para a closer</button></div>`;
+      <button type="button" class="bt-principal" id="pl-enviar" ${S.plano.itens.some(i => i.sugerido) ? "" : `disabled aria-describedby="pl-enviar-dica"`}>${ico("i-pl-enviar")}Enviar para a closer</button>
+      ${S.plano.itens.some(i => i.sugerido) ? "" : `<p class="pl-acoes__dica" id="pl-enviar-dica">Nenhuma sugestão ainda · toque ${ODONTO() ? "num dente" : "numa região"} para sugerir.</p>`}</div>`;
     return `<div class="pl-acoes"><button type="button" class="bt-sec" data-apres>${ico("i-pl-olho")}Mostrar à paciente</button>
       <button type="button" class="bt-sec pl-bt-wa" data-resumo>${ico("i-whats")}Enviar resumo</button>
       <button type="button" class="bt-principal" id="pl-fechar" ${t.total || S.plano.itens.length ? "" : "disabled"}>${pede ? `${ico("i-sino")}Pedir aprovação à Gestão` : `${ico("i-check")}Fechar plano`}</button></div>`;
@@ -859,7 +904,7 @@
     const t = tot();
     if (!b) { b = doc.createElement("button"); b.type = "button"; b.id = "pl-barra"; b.className = "pl-barra"; body.appendChild(b); b.addEventListener("click", () => abreOrc(!body.classList.contains("pl-orc-aberto"))); }
     b.setAttribute("aria-expanded", String(body.classList.contains("pl-orc-aberto")));
-    b.innerHTML = `<span class="pl-barra__v" id="pl-barra-v">${VER_RS ? `<small>R$</small>${real(t.total)}` : `${vivos().length}<small> itens</small>`}</span><span class="pl-barra__p">${VER_RS ? (t.parcelas > 1 ? `${t.parcelas}× ${real(t.parcela)}` : "à vista") : "sugestões para a closer"}</span><span class="pl-barra__a">${body.classList.contains("pl-orc-aberto") ? "Fechar" : MEDICO ? "Itens" : "Orçamento"}${ico(body.classList.contains("pl-orc-aberto") ? "i-pl-baixo" : "i-pl-cima")}</span>`;
+    b.innerHTML = `<span class="pl-barra__v" id="pl-barra-v">${VER_RS ? `<small>R$</small>${real(t.total)}` : `${vivos().length}<small> itens</small>`}</span><span class="pl-barra__p">${VER_RS ? (t.parcelas > 1 ? `${t.parcelas}× R$ ${cent(t.parcela)}` : "à vista") : "sugestões para a closer"}</span><span class="pl-barra__a">${body.classList.contains("pl-orc-aberto") ? "Fechar" : MEDICO ? "Itens" : "Orçamento"}${ico(body.classList.contains("pl-orc-aberto") ? "i-pl-baixo" : "i-pl-cima")}</span>`;
   }
   // gaveta do orçamento (celular): o que fica atrás dela sai do foco e da leitura (inert)
   // (a barra do total continua ativa: com a gaveta aberta ela é o botão "Fechar" e entra no laço de foco)
@@ -1026,7 +1071,14 @@
     const arc = t.closest("button[data-arc]"); if (arc) { S.arc = arc.dataset.arc; renderTudo(); return; }
     const mt = t.closest("#pl-mapa-tg"); if (mt) { S.mapaCel = !S.mapaCel; renderTudo(); return; }
     const ld = t.closest(".pl-lado-tg [data-lado]"); if (ld) { S.lado = ld.dataset.lado === "bi" ? "bi" : "um"; render(); return; }
-    const alvoEl = t.closest("#pl-des [data-alvo]");
+    let alvoEl = t.closest("#pl-des [data-alvo]");
+    // odontograma no celular: toque no espaço entre os dentes vai para o dente mais próximo (até 26px),
+    // o que amplia a área útil dos incisivos inferiores sem sobrepor alvos; a folha confirma o dente escolhido
+    if (!alvoEl && ODONTO() && celular() && t.closest("#pl-des svg")) {
+      let melhor = null, dm = 26;
+      $$("#pl-des .pl-dente[data-alvo]").forEach(d => { const r = d.getBoundingClientRect(); if (!r.width) return; const dd = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)); if (dd < dm) { dm = dd; melhor = d; } });
+      alvoEl = melhor;
+    }
     if (alvoEl) {
       const face = t.closest("[data-face]");
       if (face && ODONTO() && S.escopo === "dente" && S.sel === alvoEl.dataset.alvo && !celular()) { togFace(face.dataset.face); render(); return; }
@@ -1130,13 +1182,17 @@
       return;
     }
     const t = tot(), its = S.plano.itens.filter(i => i.status !== "recusado" && i.status !== "realizado");
+    // "Tudo" aceita também as sugestões do profissional: o valor mostrado é o total já com elas (e com o desconto)
+    const nSug = its.filter(i => i.sugerido).length;
+    const tTudo = nSug ? PL.totalPlano(Object.assign({}, S.plano, { itens: S.plano.itens.map(i => Object.assign({}, i, { sugerido: false })) })) : t;
+    const vTudo = tTudo.total, valorTudo = uid => valorUid(tTudo, uid);
     const html = `<div class="pl-dlg"><div class="pl-dlg__cab"><h2>Fechar o plano de ${esc(PAC_.nome.split(" ")[0])}</h2><button type="button" class="bt-ico bt-ico--sm bt-ico--plano" data-dlg-fecha aria-label="Fechar">${ico("i-fechar")}</button></div>
       <fieldset class="pl-esc"><legend class="sr">O que a paciente aceitou</legend>
-        <label><input type="radio" name="pl-esc" value="tudo" checked><span><b>Tudo</b><small>${its.length} ${its.length === 1 ? "item" : "itens"} · R$ ${real(t.total)}</small></span></label>
+        <label><input type="radio" name="pl-esc" value="tudo" checked><span><b>Tudo</b><small>${its.length} ${its.length === 1 ? "item" : "itens"} · R$ ${real(vTudo)}${t.desconto || tTudo.desconto ? " com desconto" : ""}${nSug ? ` · inclui ${nSug === 1 ? "a sugestão" : `as ${nSug} sugestões`} de ${esc(medCurto(S.plano.med))}` : ""}</small></span></label>
         <label><input type="radio" name="pl-esc" value="marcados"><span><b>Só os marcados</b><small>os demais ficam em aberto, com motivo</small></span></label>
         <label><input type="radio" name="pl-esc" value="recusou"><span><b>Recusou</b><small>tudo fica em aberto e entra em Leads parados com o valor</small></span></label>
       </fieldset>
-      <ul class="pl-dlg__its" id="pl-dlg-its" hidden>${its.map(i => `<li><label><input type="checkbox" value="${i.uid}"${i.status === "aceito" ? " checked" : ""}><span>${esc(alvoDe(i.alvo).tipo === "dente" ? alvoDe(i.alvo).nomeCurto : PAC.nomeAlvo(PACOTE, i))} · ${esc(curto(i.proc))}</span><b class="num">${real(valorUid(t, i.uid))}</b></label></li>`).join("")}</ul>
+      <ul class="pl-dlg__its" id="pl-dlg-its" hidden>${its.map(i => `<li><label><input type="checkbox" value="${i.uid}"${i.status === "aceito" ? " checked" : ""}><span>${esc(alvoDe(i.alvo).tipo === "dente" ? alvoDe(i.alvo).nomeCurto : PAC.nomeAlvo(PACOTE, i))} · ${esc(curto(i.proc))}</span><b class="num">${real(valorTudo(i.uid))}</b></label></li>`).join("")}</ul>
       <label class="pl-mot" id="pl-dlg-mot" hidden><span>Motivo para o que ficou em aberto</span><select id="pl-dlg-motivo">${MOTIVOS().map(m => `<option>${m}</option>`).join("")}</select></label>
       <p class="pl-dlg__nota">${ico("i-info")}Ao confirmar, os aceitos viram recall com data e os em aberto aparecem em Leads parados com o valor. A etapa do lead no funil não muda neste protótipo.</p>
       <div class="pl-dlg__pe"><button type="button" class="bt-sec" data-dlg-fecha>Cancelar</button><button type="button" class="bt-principal" data-dlg-ok>${ico("i-check")}Confirmar</button></div></div>`;
@@ -1162,11 +1218,13 @@
     S.plano.fechado = HOJE; minutos++;
     salva(true); fechaCamada(true);
     const t = tot(), recs = PL.recallsDe(S.plano).length;
+    // valor fechado = aceitos com o mesmo % de desconto do plano (com "Tudo", é o total do cartão)
+    const fechadoV = esc_ === "tudo" ? t.total : t.subtotal ? Math.round((t.aceito + t.realizado) * t.total / t.subtotal) : 0;
     ss.set("munin:fechado:" + PID, "1");
-    try { W.dispatchEvent(new CustomEvent("munin:plano-fechado", { detail: { paciente: PID, total: t.aceito + t.realizado, recalls: recs } })); } catch (er) { /* ok */ }
+    try { W.dispatchEvent(new CustomEvent("munin:plano-fechado", { detail: { paciente: PID, total: fechadoV, recalls: recs } })); } catch (er) { /* ok */ }
     ls.set("munin:plano-fechado", JSON.stringify({ paciente: PID, ts: Date.now() }));
     render();
-    aviso(esc_ === "recusou" ? `Plano em aberto · R$ ${real(t.emAberto)} em Leads parados` : `Plano fechado · R$ ${real(t.aceito + t.realizado)} · ${recs} ${recs === 1 ? "recall criado" : "recalls criados"}`);
+    aviso(esc_ === "recusou" ? `Plano em aberto · R$ ${real(t.emAberto)} em Leads parados` : `Plano fechado · R$ ${real(fechadoV)} · ${recs} ${recs === 1 ? "recall criado" : "recalls criados"}`);
   });
 
   /* ---------- médico: enviar para a closer (evento storage na outra aba) ---------- */
@@ -1197,13 +1255,15 @@
     if (!S.plano.resumo || D.diasEntre(HOJE, S.plano.resumo.expira) < 0) S.plano.resumo = { token: Math.random().toString(36).slice(2, 6), expira: D.somaDias(HOJE, 7) };
     salva(true);
     const link = new URL("resumo.html?t=" + S.plano.resumo.token, location.href).href;
+    // na mensagem vai o link curto do produto; "Ver o resumo" abre a página de demonstração
+    const linkCurto = "munin.app/r/" + S.plano.resumo.token;
     const nome = PAC_.nome.split(" ")[0];
-    const txt = `Olá, ${nome}! Seu resumo está pronto: ${link} (vale até ${S.plano.resumo.expira.slice(0, 5)}).\n\nClínica Aurora`;
+    const txt = `Olá, ${nome}! Seu resumo está pronto: ${linkCurto} (vale até ${S.plano.resumo.expira.slice(0, 5)}).\n\nClínica Aurora`;
     const fone = VA && VA.fone && VA.P[PID] ? VA.fone(PID) : "";
     const html = `<div class="pl-dlg pl-dlg--wa"><div class="pl-dlg__cab"><h2>Enviar resumo</h2><button type="button" class="bt-ico bt-ico--sm bt-ico--plano" data-dlg-fecha aria-label="Fechar">${ico("i-fechar")}</button></div>
       <p class="muted">${esc(PAC_.nome)}${fone ? ` · <span class="num">(${fone.slice(0, 2)}) ${fone.slice(2, 7)}-${fone.slice(7)}</span>` : ""}</p>
       <label class="pl-wa-txt"><span class="sr">Mensagem</span><textarea id="pl-wa-txt" rows="5">${esc(txt)}</textarea></label>
-      <p class="pl-dlg__nota">${ico("i-info")}A mensagem leva só o link, sem procedimento, valor ou desenho: ela pode ser lida por outra pessoa no celular. O link pede a data de nascimento e expira em 7 dias.</p>
+      <p class="pl-dlg__nota">${ico("i-info")}A mensagem leva só o link, sem procedimento, valor ou desenho: ela pode ser lida por outra pessoa no celular. O link pede o dia e o mês de nascimento e vale por 7 dias.</p>
       <div class="pl-dlg__pe"><a class="bt-sec" href="${esc(link)}" target="_blank" rel="noopener">Ver o resumo ${ico("i-pl-ext")}</a><a class="bt-principal" id="pl-wa-abrir" href="${fone ? `https://wa.me/55${fone}?text=${encodeURIComponent(txt)}` : `https://wa.me/?text=${encodeURIComponent(txt)}`}" target="_blank" rel="noopener">${ico("i-whats")}Abrir no WhatsApp</a></div></div>`;
     abreCamada(html, { tipo: "dlg", rotulo: "Enviar resumo pelo WhatsApp", foco: "#pl-wa-txt" });
     delete camada.dataset.uid; delete camada.dataset.alvo;
@@ -1275,8 +1335,7 @@
         <aside class="pl-apres__tl" aria-label="Linha do tempo do plano"><span class="pl-apres__k">${ODONTO() ? "Fases do plano" : "Seu plano no tempo"}</span><ol id="pl-ap-tl"></ol></aside></div>
       <div class="pl-apres__nums" id="pl-ap-nums"></div>
       <footer class="pl-apres__pe"><div class="pl-apres__val" id="pl-ap-v" aria-live="polite"></div><button type="button" class="pl-apres__ag" id="pl-ap-ag">Quero agendar</button></footer>
-      <p class="pl-apres__dica" id="pl-ap-dica" role="status"></p>
-      ${!ODONTO() ? `<p class="pl-apres__cred">Desenho a partir de malhas 3D de CoryRichards e FormForge3D (Sketchfab), CC BY 4.0.</p>` : ""}`;
+      <p class="pl-apres__dica" id="pl-ap-dica" role="status"></p>`;
     body.appendChild(el); body.classList.add("pl-com-apres");
     apres = el;
     try { if (el.requestFullscreen && !q.get("modo")) el.requestFullscreen().catch(() => {}); } catch (e) { /* sem tela cheia */ }
@@ -1322,23 +1381,27 @@
           return `<li class="${feito ? "is-feito" : ""}"><span class="pl-apres__pt"></span><div><b>${esc(g.nome)} · ${esc(tit)}</b><span>${esc([...new Set(its.map(i => curto(i.proc)))].join(", "))}${feito ? " · feito" : ""}</span></div></li>`;
         }).join("");
       } else {
-        $("#pl-ap-tl", el).innerHTML = nos(S.plano, 6).map(n => `<li class="${n.ev.every(e => e.feito) ? "is-feito" : ""}${n.dias === 0 && !n.agendar ? " is-hoje" : ""}${n.agendar ? " is-agendar" : ""}"><span class="pl-apres__pt"></span><div><b>${esc(rotNo(n))}</b><span>${esc([...new Set(n.ev.map(e => e.nome))].slice(0, 3).join(", "))}</span></div></li>`).join("");
+        $("#pl-ap-tl", el).innerHTML = nos(S.plano, 6).map(n => `<li class="${n.ev.every(e => e.feito) ? "is-feito" : ""}${n.dias === 0 && !n.agendar ? " is-hoje" : ""}${n.agendar ? " is-agendar" : ""}"><span class="pl-apres__pt"></span><div><b>${esc(rotNo(n))}</b><span>${esc(juntaNomes([...new Set(n.ev.map(e => e.nome))]).slice(0, 3).join(", "))}</span></div></li>`).join("");
       }
       // três números finos com linha-guia
-      const regs = new Set(itens().map(i => ODONTO() ? i.alvo : i.alvo.replace(/_(e|d)$/, ""))).size;
-      const hoje = eventos(S.plano).filter(e => e.d === HOJE && e.tipo === "sessao" && (e.st === "aceito" || e.st === "realizado")).length;
-      const ret = eventos(S.plano, { futuro: true }).filter(e => e.d && D.diasEntre(HOJE, e.d) > 0 && D.diasEntre(HOJE, e.d) <= 365).length;
+      // mesmos números para closer e médico: só o que está no plano (sem sugestão ainda não aceita)
+      const noPlano = vivos().filter(i => !i.sugerido), planoP = Object.assign({}, S.plano, { itens: noPlano });
+      const regs = new Set(noPlano.map(i => ODONTO() ? i.alvo : i.alvo.replace(/_(e|d)$/, ""))).size;
+      const hoje = eventos(planoP).filter(e => e.d === HOJE && e.tipo === "sessao" && (e.st === "aceito" || e.st === "realizado")).length;
+      // retornos = visitas (datas distintas), não itens: 6 lentes revisadas no mesmo dia contam 1
+      const ret = new Set(eventos(planoP, { futuro: true }).filter(e => e.d && D.diasEntre(HOJE, e.d) > 0 && D.diasEntre(HOJE, e.d) <= 365).map(e => e.d)).size;
       const nums = ODONTO()
-        ? [[new Set(itens().filter(i => (alvoDe(i.alvo) || {}).tipo === "dente").map(i => i.alvo)).size, "dentes no plano"], [new Set(itens().map(i => i.grupo)).size, "fases"], [ret, "retornos no ano"]]
-        : [[regs, regs === 1 ? "região" : "regiões"], [hoje, hoje === 1 ? "sessão hoje" : "sessões hoje"], [ret, "retornos no ano"]];
+        ? [[new Set(noPlano.filter(i => (alvoDe(i.alvo) || {}).tipo === "dente").map(i => i.alvo)).size, "dentes no plano"], [new Set(noPlano.map(i => i.grupo)).size, "fases"], [ret, ret === 1 ? "retorno no ano" : "retornos no ano"]]
+        : [[regs, regs === 1 ? "região" : "regiões"], [hoje, hoje === 1 ? "sessão hoje" : "sessões hoje"], [ret, ret === 1 ? "retorno no ano" : "retornos no ano"]];
       $("#pl-ap-nums", el).innerHTML = nums.map(([n, r]) => `<div class="pl-apres__num"><b data-n="${n}">${REDUZ ? n : 0}</b><i aria-hidden="true"></i><span>${r}</span></div>`).join("");
       if (!REDUZ) $$("[data-n]", el).forEach(b => { const alvo = Number(b.dataset.n), t0 = performance.now(); const f = now => { const p = Math.min(1, (now - t0) / 700); b.textContent = Math.round(alvo * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(f); }; setTimeout(() => requestAnimationFrame(f), 260); });
       valores();
     }
     function valores() {
       const v = $("#pl-ap-v", el), t = tot();
-      if (!VER_RS) { v.innerHTML = `<span class="pl-apres__k">Valores</span><span class="pl-apres__oculto">a closer mostra os valores</span>`; return; }
-      v.innerHTML = st.valores ? `<span class="pl-apres__k">Investimento</span><b><small>R$</small>${real(t.total)}</b><span>${t.parcelas > 1 ? `${t.parcelas}× de R$ ${cent(t.parcela)} sem juros` : "à vista"}</span>` : `<span class="pl-apres__k">Valores</span><span class="pl-apres__oculto">a closer mostra quando você quiser</span>`;
+      const VAL_DEPOIS = `<span class="pl-apres__k">Valores</span><span class="pl-apres__oculto">conversamos sobre o investimento a seguir</span>`;
+      if (!VER_RS) { v.innerHTML = VAL_DEPOIS; return; }
+      v.innerHTML = st.valores ? `<span class="pl-apres__k">Investimento</span><b><small>R$</small>${real(t.total)}</b><span>${t.parcelas > 1 ? `${t.parcelas}× de R$ ${cent(t.parcela)} sem juros` : "à vista"}</span>` : VAL_DEPOIS;
       $("#pl-ap-val", el).setAttribute("aria-pressed", String(st.valores));
     }
     pinta(); lado_();
@@ -1394,11 +1457,15 @@
     let pl = PID ? PLD.plano(PID) : null;
     try { const s = PID && ls.get("munin:plano:" + PID); if (s) pl = JSON.parse(s); } catch (e) { /* usa o exemplo */ }
     const rec = PERFIL === "recepcao", pc = pl ? PAC.get(pl.pacote) : null;
-    $("#pl-nome").textContent = pac ? pac.nome : "Plano";
-    $("#pl-data").innerHTML = `<b>Plano</b> · ${rec ? "a Recepção vê só o total e a forma de pagamento" : "o SDR vê só a categoria de interesse"}`;
-    coluna.innerHTML = `<section class="cartao pl-sem-acesso"><div class="cartao__cab"><h2>Sem acesso ao plano</h2></div>
-      <p class="muted">Itens, regiões e desenho do plano ficam com a closer, a gestão e o profissional.${rec ? " Para a cobrança e o agendamento, aqui ficam o total e a forma de pagamento." : ""}</p>
-      <a class="bt-sec" href="funil.html">Voltar ao funil</a></section>`;
+    // mesmo cabeçalho da closer (avatar + especialidade e profissional), sem regra interna no subtítulo
+    const nomeP = pac ? pac.nome : "Plano";
+    const avP = pac ? (UI && UI.av && VA && VA.P[PID] ? UI.av(pac.med, nomeP) + " " : `<span class="av av--o" aria-hidden="true">${esc(nomeP.split(" ").map(x => x[0]).slice(0, 2).join(""))}</span> `) : "";
+    $("#pl-nome").innerHTML = avP + esc(nomeP);
+    const med = (pl && pl.med) || (pac && pac.med);
+    $("#pl-data").innerHTML = `<b>Plano${pc ? " · " + esc(pc.rot) : ""}</b>${med ? " · " + esc((PLD.profissionais[med] && PLD.profissionais[med].curto) || (UI && UI.nomeMed ? UI.nomeMed(med) : PLD.nomeProf(med))) : ""} · ${rec ? "para cobrar e agendar" : `interesse: ${esc(pc ? pc.rot : "—")}`}`;
+    coluna.innerHTML = `<section class="cartao pl-sem-acesso"><div class="cartao__cab"><h2>${rec ? "Total e pagamento" : "Categoria de interesse"}</h2></div>
+      <p class="muted">${rec ? "Para cobrar e agendar, aqui ficam o total e a forma de pagamento. Os itens do plano ficam com a closer e o profissional." : "Os itens e valores do plano ficam com a closer e o profissional. Aqui fica a categoria de interesse para o contato."}</p>
+      <a class="bt-sec" href="painel.html">Voltar ao início</a></section>`;
     if (rec && pl) {
       const t = PL.totalPlano(pl), forma = (pl.pagamento || {}).forma || "cartao";
       const pg = PAC.pagamento(pc || PAC.get("dermato")).pagamento;
@@ -1412,7 +1479,7 @@
 
   /* ---------- sem paciente: escolha rápida (atalho "Montar orçamento") ---------- */
   function escolhaPaciente() {
-    $("#pl-nome").textContent = "Montar orçamento";
+    $("#pl-nome").textContent = "Montar plano";
     $("#pl-data").innerHTML = "<b>Escolha a paciente</b> · planos em andamento e leads na etapa Plano";
     const com = PLD.ids.map(id => ({ id, p: PLD.paciente(id), pl: PLD.plano(id) })).filter(x => x.p);
     const novos = VA ? Object.values(VA.P).filter(p => p.etapa === "plano" && !PLD.ids.includes(p.id)).slice(0, 8) : [];

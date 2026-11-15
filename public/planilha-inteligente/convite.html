@@ -46,7 +46,7 @@
           <div class="en-foto">
             <span class="en-foto__prev" id="foto-prev" aria-hidden="true"></span>
             <fieldset class="en-cores"><legend>Foto</legend>
-              <label class="google" title="Foto da conta Google"><input type="radio" name="cor" value="google" aria-label="Foto da conta Google"></label>
+              <label class="google" title="Foto do Google"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20c.6-4 3.6-6.3 7.5-6.3s6.9 2.3 7.5 6.3z"/></svg><input type="radio" name="cor" value="google" aria-label="Foto do Google"></label>
               <label style="background:var(--grafite)" title="Iniciais em grafite"><input type="radio" name="cor" value="grafite" aria-label="Iniciais em grafite" checked></label>
               <label style="background:var(--pena)" title="Iniciais em azul pena"><input type="radio" name="cor" value="pena" aria-label="Iniciais em azul pena"></label>
               <label style="background:var(--ardosia)" title="Iniciais em ardósia"><input type="radio" name="cor" value="ardosia" aria-label="Iniciais em ardósia"></label>
@@ -85,13 +85,13 @@
       </section>
 
     </div></div>
-
-    <footer class="en-rodape" data-entra>
-      <span>Munin © 2026</span><a href="entrar.html">Já tenho acesso · Entrar</a><a href="#termos">Termos e privacidade</a>
-    </footer>
   </main>
 
   <aside class="en-palco" id="palco" aria-label="Sobre o Munin"></aside>
+
+  <footer class="en-rodape" data-entra>
+    <span>Munin © 2026</span><a href="entrar.html">Já tenho acesso · Entrar</a><a href="#termos">Termos e privacidade</a>
+  </footer>
 </div>
 
 <script src="dados.js"></script>
@@ -105,22 +105,25 @@ const etapas = [...document.querySelectorAll(".en-etapa")];
 const q = new URLSearchParams(location.search);
 const PERFIL = VA2.PERFIS[q.get("perfil")] ? q.get("perfil") : "sdr";
 const NOME = (q.get("nome") || "Júlia Moraes").trim().slice(0, 60);
-const EMAIL = (q.get("email") || "julia@clinica-aurora.com.br").trim().slice(0, 80);
+// sem ?email=, o endereço sai do primeiro nome (sem acento), no domínio da clínica
+const semAcento = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9.]/g, "");
+const EMAIL = (q.get("email") || `${semAcento(NOME.split(" ")[0]) || "convite"}@clinica-aurora.com.br`).trim().slice(0, 80);
 const POR = (q.get("por") || "Marina Albuquerque").trim().slice(0, 60);
 const P = VA2.PERFIS[PERFIL], primeiro = NOME.split(" ")[0];
+// artigo de cada perfil (nada de adivinhar gênero pelo nome)
+const COM_ARTIGO = { gestao: "a Gestão", medico: "o Médico", sdr: "a SDR", recepcao: "a Recepção", closer: "a Closer" };
 const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 $("en-simbolo").outerHTML = simbolo("");
 $("g-ico").outerHTML = G; $("ico-priv").outerHTML = ico("escudo");
 document.querySelectorAll(".cli").forEach(e => e.textContent = CLIENTE);
-$("t-convite").textContent = `${primeiro}, você foi convidada para o Munin`;
-if (/o$/.test(primeiro) && !/a$/.test(primeiro)) $("t-convite").textContent = `${primeiro}, você foi convidado para o Munin`;
-$("convite-lead").innerHTML = `A <b>${CLIENTE}</b> convidou você para usar o Munin como <b>${P.rot}</b>: ${P.desc.charAt(0).toLowerCase() + P.desc.slice(1)}.`;
+$("t-convite").textContent = `${primeiro}, você recebeu um convite para o Munin`;
+$("convite-lead").innerHTML = `A <b>${CLIENTE}</b> convidou você para usar o Munin no perfil <b>${P.rot}</b>. ${esc(P.desc)}.`;
 $("convite-de").innerHTML = `<span class="av av--r" aria-hidden="true">${iniciais(POR)}</span><div style="min-width:0"><b>Convite de ${esc(POR)} · Gestão</b><span>Para ${esc(EMAIL)} · vale até 20/11</span></div>`;
 $("bt-perfil").innerHTML = `Continuar ${ico("seta")}`;
 $("bt-aceitar").innerHTML = `${ico("check")}Aceitar e entrar`;
 $("bt-voltar-termos").innerHTML = `${ico("esq")}Voltar`;
-palco($("palco"), { topo: `Convite · ${P.rot}`, titulo: "Sua parte da clínica, pronta quando você chega.", texto: `Cada perfil vê o que é seu: a ${P.rot === "SDR" ? "SDR" : P.rot} começa o dia com a lista do que fazer, sem planilha paralela.` });
+palco($("palco"), { topo: `Convite · ${P.rot}`, titulo: "Sua parte da clínica, pronta quando você chega.", texto: `Cada perfil vê o que é seu: ${COM_ARTIGO[PERFIL]} começa o dia com a lista do que fazer, sem planilha paralela.` });
 abertura(document.body);
 
 // 1 → conta Google do convite
@@ -144,14 +147,16 @@ $("c-google").addEventListener("click", e => {
 
 // 2 → nome, saudação e foto
 $("p-nome").value = NOME; $("p-chama").value = primeiro;
-const CORES = { google: "conic-gradient(from 200deg, #4285F4, #34A853, #FBBC05, #EA4335, #4285F4)", grafite: "var(--grafite)", pena: "var(--pena)", ardosia: "var(--ardosia)" };
+const CORES = { google: "var(--ardosia)", grafite: "var(--grafite)", pena: "var(--pena)", ardosia: "var(--ardosia)" };
+const SILHUETA = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20c.6-4 3.6-6.3 7.5-6.3s6.9 2.3 7.5 6.3z"/></svg>';
 function foto() {
   const c = document.querySelector("input[name=cor]:checked").value, prev = $("foto-prev");
-  prev.style.background = CORES[c]; prev.textContent = iniciais($("p-nome").value || NOME);
+  prev.style.background = CORES[c];
+  if (c === "google") prev.innerHTML = SILHUETA; else prev.textContent = iniciais($("p-nome").value || NOME);
 }
 document.querySelectorAll("input[name=cor]").forEach(r => r.addEventListener("change", foto));
 $("p-nome").addEventListener("input", foto); foto();
-$("faz-tit").textContent = `O que ${P.rot === "Gestão" ? "a Gestão" : P.rot === "Médico" ? "o Médico" : "a " + P.rot} faz no Munin`;
+$("faz-tit").textContent = `O que ${COM_ARTIGO[PERFIL]} faz no Munin`;
 $("faz").innerHTML = P.faz.map(t => `<li>${ico("check")}<span>${t}</span></li>`).join("");
 $("f-perfil").addEventListener("submit", e => {
   e.preventDefault();
@@ -164,6 +169,7 @@ $("f-perfil").addEventListener("submit", e => {
 // 3 → termos e entrada
 $("aceite").addEventListener("change", () => { $("bt-aceitar").disabled = !$("aceite").checked; });
 $("bt-voltar-termos").addEventListener("click", () => {
+  if (leitura && DE_ENTRAR) { if (document.referrer.includes("entrar.html")) history.back(); else location.href = "entrar.html"; return; }
   if (leitura) { history.replaceState(null, "", location.pathname + location.search); leitura = false; modoTermos(false); mostra(etapas, "c-convite"); return; }
   mostra(etapas, "c-perfil");
 });
@@ -171,11 +177,13 @@ $("bt-aceitar").addEventListener("click", () => {
   const b = $("bt-aceitar"); b.disabled = true; b.innerHTML = `<span class="en-gira" aria-hidden="true"></span>Criando seu acesso…`;
   setTimeout(() => entra({ nome: ($("p-chama").value.trim() || primeiro).slice(0, 40), perfil: PERFIL }), REDUZ ? 150 : 800);
 });
-// Termos só para leitura (link "Termos e privacidade")
+// Termos só para leitura (link "Termos e privacidade"); ?de=entrar = veio da tela de entrada, "Voltar" volta para lá
+const DE_ENTRAR = q.get("de") === "entrar";
 let leitura = false;
 function modoTermos(sim) {
   $("trilha-termos").hidden = sim; $("aceite-wrap").hidden = sim; $("bt-aceitar").hidden = sim;
   $("termos-rot").textContent = sim ? "Para ler com calma" : "Passo 3 de 3 · Termos";
+  $("bt-voltar-termos").innerHTML = `${ico("esq")}${sim && DE_ENTRAR ? "Voltar para a entrada" : "Voltar"}`;
 }
 function verTermos() { if (location.hash !== "#termos" || !$("c-termos").hidden) return; leitura = true; modoTermos(true); mostra(etapas, "c-termos"); }
 addEventListener("hashchange", verTermos); verTermos();

@@ -24,7 +24,14 @@
   .rc-grupo__cab h3 { font: 600 var(--t-md)/1.2 var(--f-titulo); }
   .rc-grupo__cab .cartao__sub { margin-left: auto; }
   .rc-grupo__pt { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-  :root { --cols-rc: 36px minmax(0, 1.3fr) minmax(0, 1fr) 150px 132px; }
+  /* Colunas por classe (um :root dentro de @container não teria efeito) */
+  .rc-l, .rc-cab-col { --cols: 36px minmax(0, 1.3fr) minmax(0, 1fr) 172px 132px; }
+  .rodape-cartao .legenda-med span { white-space: nowrap; }
+  @container (max-width: 480px) { .rodape-cartao { flex-wrap: wrap; gap: 6px 12px; } }
+  .rc-q .linha__sub { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rc-obs { display: block; font-size: var(--t-xs); color: var(--texto-2); margin-top: 2px; }
+  /* Filtro de prazo como grupo de botões (aria-pressed), igual à tela Metas */
+  .aba[aria-pressed="true"] { background: var(--suave-2); color: var(--tinta); font-weight: 600; }
   .rc-nome { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: inherit; text-align: left; cursor: pointer; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
   .rc-nome:hover { color: var(--pena); }
   .rc-ciclo { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
@@ -33,7 +40,11 @@
   .rc-barra i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: linear-gradient(90deg, var(--pena), var(--pena-claro)); }
   .rc-barra--venc i { background: linear-gradient(90deg, #C9675F, var(--atrasado)); }
   .rc-prazo { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-  .rc-acoes { display: flex; justify-content: flex-end; gap: 6px; align-items: center; }
+  /* Ações em grade fixa: WhatsApp sempre na mesma coluna, à esquerda do botão de texto */
+  .rc-acoes { display: grid; grid-template-columns: var(--alvo) auto; gap: 6px; align-items: center; justify-content: end; justify-items: end; }
+  .rc-acoes > :only-child { grid-column: 2; }
+  .rc-acoes .bt-contato, .rc-acoes > .rc-ag { min-width: 112px; }
+  .rc-ag { display: flex; justify-content: center; }
   .bt-contato { width: auto; padding: 0 12px 0 10px; border-radius: 999px; gap: 6px; font-size: var(--t-xs); font-weight: 600; color: var(--texto-2); display: inline-flex; }
   .bt-contato[aria-pressed="true"] { background: var(--ok-fundo); color: var(--ok); }
   .bt-contato .ico { width: 15px; height: 15px; }
@@ -41,8 +52,8 @@
   .linha.rc-feito .rc-ciclo, .linha.rc-feito .rc-prazo .status { opacity: .55; }
   .rc-vazio { padding: 14px 8px; font-size: var(--t-sm); color: var(--texto-2); }
   @container (max-width: 760px) {
-    :root { --cols-rc: 36px minmax(0, 1fr) auto; }
-    .rc-l { grid-template-areas: "av nm ac" "av pz ac"; row-gap: 4px; align-items: start; }
+    .rc-l { --cols: 36px minmax(0, 1fr) auto !important; grid-template-columns: 36px minmax(0, 1fr) auto; grid-template-areas: "av nm ac" "av pz ac"; row-gap: 4px; align-items: start; }
+    .rc-acoes .bt-contato, .rc-acoes > .rc-ag { min-width: 0; }
     .rc-l > .av { grid-area: av; } .rc-l > .rc-q { grid-area: nm; } .rc-l > .rc-ciclo { display: none; } .rc-l > .rc-prazo { grid-area: pz; flex-direction: row; flex-wrap: wrap; } .rc-l > .rc-acoes { grid-area: ac; align-self: center; }
     .bt-contato span { display: none; } .bt-contato { width: var(--alvo); padding: 0; justify-content: center; }
     .rc-cab-col { display: none !important; }
@@ -58,6 +69,7 @@
   .rc-ret { display: flex; flex-direction: column; gap: 12px; }
   .rc-ret__l { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; font-size: var(--t-sm); }
   .rc-ret__l .bm { grid-column: 1 / -1; }
+  @media (max-width: 480px) { #abas { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; } }
   @media (max-width: 720px) { .kpis .kpi:not(.cartao--foco) { padding: 14px; min-height: 0; } .kpi__ctx { display: none; } .cartao--foco .kpi__ctx { display: block; } }
 </style>
 </head>
@@ -118,15 +130,15 @@
       <section class="cartao cartao--lista" aria-labelledby="t-lista" style="padding-bottom:14px">
         <div class="cartao__cab">
           <h2 id="t-lista">Quem precisa voltar <span class="cartao__sub" id="lista-n"></span></h2>
-          <div class="abas" role="tablist" aria-label="Prazo do recall" id="abas">
-            <button class="aba" role="tab" aria-selected="true" data-g="todos">Todos</button>
-            <button class="aba" role="tab" aria-selected="false" data-g="vencido">Vencidos <span class="pilula__n" data-n="vencido"></span></button>
-            <button class="aba" role="tab" aria-selected="false" data-g="semana">Esta semana <span class="pilula__n" data-n="semana"></span></button>
-            <button class="aba" role="tab" aria-selected="false" data-g="mes">Este mês <span class="pilula__n" data-n="mes"></span></button>
+          <div class="abas" role="group" aria-label="Filtrar por prazo do recall" id="abas">
+            <button type="button" class="aba" aria-pressed="true" data-g="todos">Todos</button>
+            <button type="button" class="aba" aria-pressed="false" data-g="vencido">Vencidos <span class="pilula__n" data-n="vencido"></span></button>
+            <button type="button" class="aba" aria-pressed="false" data-g="semana">Esta semana <span class="pilula__n" data-n="semana"></span></button>
+            <button type="button" class="aba" aria-pressed="false" data-g="mes">Ainda em novembro <span class="pilula__n" data-n="mes"></span></button>
           </div>
         </div>
-        <div class="linha__cab rc-cab-col" style="--cols:var(--cols-rc)"><span></span><span>Paciente</span><span>Ciclo de manutenção</span><span>Prazo</span><span style="text-align:right">Ações</span></div>
-        <div id="grupos"></div>
+        <div class="linha__cab rc-cab-col"><span></span><span>Paciente</span><span>Ciclo de manutenção</span><span>Prazo</span><span style="text-align:right">Ações</span></div>
+        <div id="grupos" aria-live="polite"></div>
         <div class="rodape-cartao"><span class="legenda-med"><span><i class="g"></i>Dr. Rafael</span><span><i class="d"></i>Dra. Lúcia</span></span><span class="cartao__sub">A mensagem fala só do tempo desde o último atendimento, sem citar o procedimento.</span></div>
       </section>
     </div>
@@ -161,6 +173,7 @@ const GRUPOS = [
   { k: "mes", rot: "Ainda em novembro", cor: "var(--pena)", sub: "vencem de 21 a 30/11" },
 ];
 const contatados = new Set();   // marcados nesta sessão
+const registrados = new Set();  // recall registrado de quem está na clínica (conta como contato)
 let filtroMed = "todos", filtroG = "todos";
 const okMed = r => filtroMed === "todos" || r.p.med === filtroMed;
 const prazo = r => r.dias < 0 ? `venceu há ${-r.dias} ${r.dias === -1 ? "dia" : "dias"}` : r.dias === 0 ? "vence hoje" : `vence em ${r.dias} ${r.dias === 1 ? "dia" : "dias"}`;
@@ -170,14 +183,15 @@ function linha(r) {
   const p = r.p;
   const passou = Math.round((VA2.HOJE_D - VA2.dataDe(p.ult)) / 864e5), total = r.meses * 30.4, pct = Math.min(100, passou / total * 100);
   const situ = r.naClinica ? `<span class="status status--ok">Na clínica agora</span>` : r.agendado ? `<span class="status status--ok">Agendado ${p.ag[0]} ${p.ag[1]}</span>` : `<span class="status ${sev(r)}">${prazo(r)}</span>`;
-  const acao = r.naClinica ? `<button type="button" class="bt-ico bt-ico--sm bt-ico--plano bt-contato" data-reg-recall="${r.id}" aria-label="Registrar recall de ${p.nome}"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span>Registrar</span></button>`
-    : r.agendado ? btWa(r.id, "confirmacao") + btAgenda(r.id)
+  const reg = registrados.has(r.id);
+  const acao = r.naClinica ? `<button type="button" class="bt-ico bt-ico--sm bt-ico--plano bt-contato" data-reg-recall="${r.id}" data-sem-aviso aria-pressed="${reg}" aria-label="${reg ? "Recall registrado" : "Registrar recall"}: ${p.nome}"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span>${reg ? "Registrado" : "Registrar"}</span></button>`
+    : r.agendado ? btWa(r.id, "confirmacao") + `<span class="rc-ag">${btAgenda(r.id)}</span>`
     : btWa(r.id, "recall") + `<button type="button" class="bt-ico bt-ico--sm bt-ico--plano bt-contato" data-contato="${r.id}" aria-pressed="${contatados.has(r.id)}" aria-label="${contatados.has(r.id) ? "Contatado" : "Marcar como contatado"}: ${p.nome}"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span>${contatados.has(r.id) ? "Contatado" : "Contatado?"}</span></button>`;
-  return `<li class="linha rc-l${contatados.has(r.id) ? " rc-feito" : ""}" data-id="${r.id}" data-med="${p.med}" style="--cols:var(--cols-rc)">
+  return `<li class="linha rc-l${contatados.has(r.id) || reg ? " rc-feito" : ""}" data-id="${r.id}" data-med="${p.med}">
     ${av(p.med, p.nome)}
-    <div class="rc-q" style="min-width:0"><button type="button" class="rc-nome" data-ficha="${r.id}">${p.nome}</button><span class="linha__sub">${p.proc} · ${nomeMed(p.med)}</span></div>
-    <div class="rc-ciclo"><div class="rc-barra${r.dias < 0 ? " rc-barra--venc" : ""}" role="img" aria-label="${Math.round(pct)}% do intervalo de ${r.meses} meses"><i style="width:${pct.toFixed(1)}%"></i></div><small>última ${r.ultTxt} · a cada ${r.meses} meses${r.obs ? " · " + r.obs : ""}</small></div>
-    <div class="rc-prazo">${situ}${contatados.has(r.id) ? `<span class="status status--ok">contatado hoje</span>` : ""}${regTent(r.id)}</div>
+    <div class="rc-q" style="min-width:0"><button type="button" class="rc-nome" data-ficha="${r.id}">${p.nome}</button><span class="linha__sub">${p.proc} · ${nomeMed(p.med)}</span>${r.obs ? `<span class="rc-obs">${r.obs}</span>` : ""}</div>
+    <div class="rc-ciclo"><div class="rc-barra${r.dias < 0 ? " rc-barra--venc" : ""}" role="img" aria-label="${Math.round(pct)}% do intervalo de ${r.meses} meses"><i style="width:${pct.toFixed(1)}%"></i></div><small>última ${r.ultTxt} · a cada ${r.meses} meses</small></div>
+    <div class="rc-prazo">${situ}${contatados.has(r.id) ? `<span class="status status--ok">contatado hoje</span>` : ""}${reg ? `<span class="status status--ok">recall registrado</span>` : ""}${regTent(r.id)}</div>
     <div class="rc-acoes">${acao}</div>
   </li>`;
 }
@@ -194,24 +208,27 @@ function render() {
   const pend = vis.filter(r => !r.agendado && !r.naClinica && !contatados.has(r.id));
   $("lista-n").textContent = `${vis.length} pacientes · ${pend.length} para contatar`;
   // Números
-  const [rv, rm] = metaVal("rc", filtroMed), extra = vis.filter(r => contatados.has(r.id)).length, v = rv + extra, rt = ritmo(v, rm);
+  const [rv, rm] = metaVal("rc", filtroMed), extra = vis.filter(r => contatados.has(r.id) || registrados.has(r.id)).length, v = rv + extra, rt = ritmo(v, rm);
   $("k-cont").textContent = v; $("k-meta").textContent = rm;
-  poeAnel($("k-anel"), { p: v / rm * 100, marca: FRAC * 100, aria: `${v} de ${rm} contatos de recall; esperado hoje ${br(rm * FRAC)}` });
-  $("k-nota").innerHTML = `<span class="status ${rt.cls}">${rt.rot}</span><span class="nw">esperado hoje <b>${br(rt.esp)}</b></span>`;
-  $("k-ctx").innerHTML = extra ? `<b>+${extra}</b> contatado${extra > 1 ? "s" : ""} agora nesta tela` : `Contato = WhatsApp ou ligação registrada`;
+  poeAnel($("k-anel"), { p: v / rm * 100, marca: FRAC * 100, aria: `${v} de ${rm} contatos de recall; esperado hoje ${Math.round(rm * FRAC)}` });
+  $("k-nota").innerHTML = `<span class="status ${rt.cls}">${rt.rot}</span><span class="nw">esperado hoje <b>${Math.round(rt.esp)}</b></span>`;
+  $("k-ctx").innerHTML = extra ? `<b>+${extra}</b> contato${extra > 1 ? "s" : ""} registrado${extra > 1 ? "s" : ""} agora nesta tela` : `Conta como contato: WhatsApp enviado ou ligação registrada`;
   const venc = vis.filter(r => r.grupo === "vencido" && !r.agendado && !r.naClinica);
   $("k-venc").textContent = venc.length;
   $("k-venc-n").innerHTML = venc.length ? `<span class="status status--atrasado">mais antigo: ${-venc[0].dias} dias</span>` : `<span class="status status--ok">nenhum</span>`;
-  const sem = vis.filter(r => r.grupo === "semana");
-  $("k-sem").textContent = sem.length; $("k-sem-n").innerHTML = `<span class="status status--atencao">${sem.filter(r => r.dias <= 1).length} hoje ou amanhã</span>`;
+  // Mesma regra de "Vencidos": quem já tem horário ou está na clínica não precisa de contato
+  const semTodos = vis.filter(r => r.grupo === "semana"), sem = semTodos.filter(r => !r.agendado && !r.naClinica);
+  const nAg = semTodos.filter(r => r.agendado && !r.naClinica).length, nCl = semTodos.filter(r => r.naClinica).length;
+  const fora = [nAg ? `+${nAg} agendado${nAg > 1 ? "s" : ""}` : "", nCl ? `${nCl} na clínica` : ""].filter(Boolean).join(" · ");
+  $("k-sem").textContent = sem.length; $("k-sem-n").innerHTML = `<span class="status status--atencao">${sem.filter(r => r.dias <= 1).length} hoje ou amanhã</span>${fora ? `<span class="nw">${fora}</span>` : ""}`;
   const [av_, am] = metaVal("ra", filtroMed), ra = ritmo(av_, am);
   $("k-ag").textContent = av_; $("k-ag-m").textContent = am; $("k-ag-n").innerHTML = `<span class="status ${ra.cls}">${ra.rot}</span>`;
   // Metas de recall (as 3 da tela Metas)
   $("metas-rc").innerHTML = ["rc", "ra", "rf"].map(id => {
     const m = METAS.find(x => x.id === id), [mv, mm, ms] = metaVal(id, filtroMed), val = id === "rc" ? mv + extra : mv, r = ritmo(val, mm);
-    return `<div class="rc-ret__l"><b>${m.nome.replace("Recall · ", "")}</b><span class="muted num">${val} de ${mm}</span>${barra({ v: val / ms * 100, m1: mm / ms * 100, m2: 100, r: mm * FRAC / ms * 100, estado: estadoDe(r.cls), alt: "sm", aria: `${m.nome}: ${val} de ${mm}` })}</div>`;
+    return `<div class="rc-ret__l"><b>${m.sub}</b><span class="muted num">${val} de ${mm}</span>${barra({ v: val / ms * 100, m1: mm / ms * 100, m2: 100, r: mm * FRAC / ms * 100, estado: estadoDe(r.cls), alt: "sm", aria: `${m.sub}: ${val} de ${mm}` })}</div>`;
   }).join("");
-  $("resumo-dia").textContent = `Recall · ${venc.length} vencidos, ${sem.length} vencem esta semana`;
+  $("resumo-dia").textContent = `Recall · ${venc.length} vencidos, ${sem.length} vencem esta semana · ${pend.length} para contatar`;
 }
 
 // Intervalos (regra da clínica)
@@ -220,7 +237,7 @@ $("regras").innerHTML = [["Toxina botulínica", "4 meses"], ["Laser", "3 meses"]
 
 pilulasMedico(m => LISTA.filter(r => m === "todos" || r.p.med === m).length, m => { filtroMed = m; render(); });
 document.querySelectorAll("#abas .aba").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll("#abas .aba").forEach(x => x.setAttribute("aria-selected", x === b)); filtroG = b.dataset.g; render();
+  document.querySelectorAll("#abas .aba").forEach(x => x.setAttribute("aria-pressed", x === b)); filtroG = b.dataset.g; render();
 }));
 document.addEventListener("click", e => {
   const c = e.target.closest("[data-contato]");
@@ -233,7 +250,13 @@ document.addEventListener("click", e => {
     return;
   }
   const g = e.target.closest("[data-reg-recall]");
-  if (g) { g.disabled = true; g.querySelector("span").textContent = "Registrado"; g.setAttribute("aria-pressed", "true"); }
+  if (g) {
+    const id = g.dataset.regRecall, nome = VA.P[id].nome;
+    if (registrados.has(id)) registrados.delete(id); else registrados.add(id);
+    render();
+    const nb = document.querySelector(`[data-reg-recall="${id}"]`); if (nb) nb.focus();
+    if (window.TL) TL.aviso(registrados.has(id) ? `Recall registrado · <b>${nome}</b>` : `Registro desfeito · <b>${nome}</b>`);
+  }
 });
 // Abrir o WhatsApp de recall já conta como contato
 document.addEventListener("click", e => {

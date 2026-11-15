@@ -14,15 +14,18 @@
 <style>
   /* Ajustes só desta tela (prefixo metas-) */
   /* Colunas da lista de metas pela largura do PRÓPRIO cartão (container query) */
-  #lista-metas, .metas-cab { --cols-metas: 36px minmax(176px, 1fr) minmax(0, 1.3fr) 104px 140px 36px; }
-  @container (max-width: 979px) { #lista-metas, .metas-cab { --cols-metas: 36px minmax(150px, 1fr) minmax(0, 1.3fr) 96px 136px; } .metas-linha .linha__acao, .metas-cab-acao { display: none; } }
+  #lista-metas, .metas-cab { --cols-metas: 36px minmax(176px, 1fr) minmax(0, 1.3fr) 132px 140px 36px; }
+  /* Cartão médio: a seta de abrir toma o lugar do ícone (continua visível e focável) */
+  @container (max-width: 979px) { #lista-metas, .metas-cab { --cols-metas: 36px minmax(150px, 1fr) minmax(0, 1.3fr) 124px 136px; } .metas-cab-acao, .metas-linha > .metas-ico { display: none; } .metas-linha > .linha__acao { order: -1; } }
   #lista-metas .linha, .metas-cab { column-gap: 24px; }
 
   /* Seletor de mês no topo */
-  .metas-mes { display: inline-flex; align-items: center; gap: 2px; padding: 4px; background: var(--cartao); border-radius: var(--r-pill); box-shadow: var(--sombra-1); }
-  .metas-mes__rot { min-width: 128px; text-align: center; font: 600 var(--t-md)/1 var(--f-titulo); }
+  /* Mês das metas: rótulo fixo (os dados desta tela são do mês corrente) */
+  .metas-mes { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px 0 14px; background: var(--cartao); border-radius: var(--r-pill); box-shadow: var(--sombra-1); }
+  .metas-mes .ico { color: var(--pena); }
+  @media (max-width: 720px) { .metas-dameta { display: none; } }
+  .metas-mes__rot { white-space: nowrap; font: 600 var(--t-md)/1 var(--f-titulo); }
   .metas-mes__rot span { color: var(--texto-2); font-weight: 500; }
-  .metas-mes .bt-ico:disabled { opacity: .4; cursor: default; }
 
   /* Anéis */
   .metas-kpis .kpi { min-height: calc(168px + 16 * var(--k)); }
@@ -33,7 +36,7 @@
   .metas-kcorpo > div:last-child { min-width: 0; }
   /* Ritmo necessário */
   .metas-ritmo { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
-  .metas-ritmo__l { display: grid; grid-template-columns: 52px minmax(0, 1fr) 54px; align-items: center; gap: 8px; font-size: var(--t-xs); color: var(--texto-2); font-variant-numeric: tabular-nums; }
+  .metas-ritmo__l { display: grid; grid-template-columns: 94px minmax(0, 1fr) 54px; align-items: center; gap: 8px; font-size: var(--t-xs); color: var(--texto-2); font-variant-numeric: tabular-nums; }
   .metas-ritmo__l i { display: block; height: 8px; border-radius: 8px; background: var(--suave); position: relative; overflow: hidden; }
   .metas-ritmo__l i b { position: absolute; inset: 0 auto 0 0; border-radius: 8px; background: linear-gradient(90deg, var(--pena-claro), var(--pena)); }
   .metas-ritmo__l:first-child i b { background: linear-gradient(90deg, #C9CCD8, var(--nevoa)); }
@@ -65,7 +68,11 @@
   .metas-nomecel .linha__sub { display: block; }
 
   /* Linhas de meta */
-  .metas-linha { min-height: 64px; }
+  .metas-linha { min-height: 64px; cursor: pointer; }
+  .metas-num__rit { display: block; font-size: var(--t-xs); line-height: 1.3; font-weight: 600; margin-top: 2px; }
+  .metas-rit--ok { color: var(--ok); } .metas-rit--atencao { color: var(--atencao); } .metas-rit--atrasado { color: var(--atrasado); }
+  /* Abas de filtro como grupo de botões (aria-pressed), com o mesmo visual da aba selecionada */
+  .aba[aria-pressed="true"] { background: var(--suave-2); color: var(--tinta); font-weight: 600; }
   .metas-barra { min-width: 0; padding-right: 6px; }
   .metas-barra .barra-meta__leg { margin-top: 7px; gap: 8px; }
   .metas-barra .barra-meta__leg span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -73,7 +80,7 @@
   .metas-num .u { font-size: 11.5px; }
   .metas-num__de { display: block; font: 400 var(--t-xs)/1.3 var(--f-texto); color: var(--texto-2); }
   .metas-proj { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
-  .metas-proj > span:last-child { font-size: var(--t-xs); color: var(--texto-2); padding-left: 9px; white-space: nowrap; }
+  .metas-proj > span:last-child { font-size: var(--t-xs); color: var(--texto-2); padding-left: 9px; line-height: 1.3; max-width: 100%; }
   .metas-ico { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--suave); color: var(--pena); }
   .metas-rodape b { color: var(--tinta); font-weight: 600; }
 
@@ -100,12 +107,16 @@
   .metas-ano__barra { position: absolute; left: 50%; bottom: 0; width: clamp(8px, 52%, 18px); transform: translateX(-50%); border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, var(--pena-claro), var(--pena)); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
   .metas-ano__meta { position: absolute; left: 50%; width: clamp(14px, 78%, 28px); transform: translateX(-50%); height: 0; border-top: 1.5px dashed var(--tinta); }
   .metas-ano__mes--sem .metas-ano__barra { background: linear-gradient(180deg, #DCDBD5, var(--linha-forte)); box-shadow: none; }
-  .metas-ano__mes--abaixo .metas-ano__barra { background: linear-gradient(180deg, #C9CCD8, var(--nevoa)); }
+  /* Abaixo da meta: âmbar suave, como a pílula de % da tabela; sem meta: neutro claro com contorno tracejado */
+  .metas-ano__mes--abaixo .metas-ano__barra { background: linear-gradient(180deg, #DDB067, #A86E1E); box-shadow: none; }
+  .metas-ano__mes--sem .metas-ano__barra { background: var(--suave); box-shadow: inset 0 0 0 1px var(--linha-forte); }
   .metas-ano__mes--futuro .metas-ano__meta { border-top-color: var(--ardosia); }
   .metas-ano__mes--atual { background: linear-gradient(180deg, rgba(230,232,247,0), var(--suave-2)); }
   .metas-ano__mes--atual .metas-ano__barra { background: linear-gradient(180deg, #2A2E44, var(--grafite)); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 4px 10px -4px rgba(22,23,28,.6); }
   .metas-ano__mes--atual .metas-ano__val { opacity: 1; }
-  .metas-ano__mes[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px var(--pena); }
+  .metas-ano__mes { cursor: pointer; }
+  .metas-ano__mes.is-sel { box-shadow: inset 0 0 0 1.5px var(--pena); }
+  .metas-ano__mes.is-sel .metas-ano__val { opacity: 1; }
   .metas-ano__val { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(100% + 4px); font: 600 10.5px/1.1 var(--f-titulo); color: var(--tinta); white-space: nowrap; background: var(--cartao); padding: 2px 4px; border-radius: 4px; box-shadow: var(--sombra-1); opacity: 0; pointer-events: none; z-index: 2; }
   .metas-ano__mes:hover .metas-ano__val, .metas-ano__mes:focus-visible .metas-ano__val { opacity: 1; }
   .metas-ano__fixo { display: flex; justify-content: flex-end; font-size: var(--t-xs); color: var(--texto-2); margin: 2px 0 6px; }
@@ -116,6 +127,9 @@
   .metas-ano__leg { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: var(--t-xs); color: var(--texto-2); margin: 12px 0 4px; }
   .metas-ano__leg span { display: inline-flex; align-items: center; gap: 6px; }
   .metas-ano__leg i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+  .metas-ano__leg .t-bateu { background: linear-gradient(180deg, var(--pena-claro), var(--pena)); }
+  .metas-ano__leg .t-abaixo { background: linear-gradient(180deg, #DDB067, #A86E1E); }
+  .metas-ano__leg .t-sem { background: var(--suave); box-shadow: inset 0 0 0 1px var(--linha-forte); }
   .metas-ano__leg .t-meta { width: 14px; height: 0; border-top: 1.5px dashed var(--tinta); border-radius: 0; }
   .metas-acum { margin-top: 12px; padding: 12px 14px; border-radius: var(--r-sm); background: var(--porcelana); }
   .metas-acum__n { font: 600 26px/1.1 var(--f-titulo); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
@@ -164,9 +178,6 @@
     .metas-kesp .anel { display: none; }
     .metas-kpis > .kpi:last-child .metas-ritmo { max-width: 420px; }
   }
-  @media (max-width: 720px) {
-    .metas-mes { width: 100%; justify-content: space-between; }
-  }
 </style>
 </head>
 <body data-pagina="metas">
@@ -179,15 +190,14 @@
       <p class="topo__data"><b>Sexta-feira, 13 de novembro</b> · 09:40 · Metas do mês: <span id="resumo-dia"></span></p>
     </div>
     <div class="topo__acoes">
-      <div class="metas-mes" role="group" aria-label="Mês das metas">
-        <button class="bt-ico bt-ico--sm bt-ico--plano" id="mes-ant" aria-label="Mês anterior"><svg class="ico ico-sm"><use href="#i-esq"/></svg></button>
-        <span class="metas-mes__rot" id="mes-rot" aria-live="polite">Novembro <span>2026</span></span>
-        <button class="bt-ico bt-ico--sm bt-ico--plano" id="mes-prox" aria-label="Próximo mês"><svg class="ico ico-sm"><use href="#i-dir"/></svg></button>
+      <div class="metas-mes" aria-label="Mês das metas: novembro de 2026">
+        <svg class="ico ico-sm" aria-hidden="true"><use href="#i-agenda"/></svg>
+        <span class="metas-mes__rot" id="mes-rot">Novembro <span>2026</span></span>
       </div>
       <div class="pilulas" role="group" aria-label="Filtrar por médico">
-        <button class="pilula" data-med="todos" aria-pressed="true" title="% da meta de faturamento">Todos <span class="pilula__n"></span></button>
-        <button class="pilula" data-med="g" aria-pressed="false" title="% da meta de faturamento"><span class="av av--g av--sm" aria-hidden="true">RS</span>Dr. Rafael <span class="pilula__n"></span></button>
-        <button class="pilula" data-med="d" aria-pressed="false" title="% da meta de faturamento"><span class="av av--d av--sm" aria-hidden="true">LS</span>Dra. Lúcia <span class="pilula__n"></span></button>
+        <button class="pilula" data-med="todos" aria-pressed="true" title="Quanto da meta de faturamento já entrou">Todos <span class="pilula__n"></span></button>
+        <button class="pilula" data-med="g" aria-pressed="false" title="Quanto da meta de faturamento já entrou"><span class="av av--g av--sm" aria-hidden="true">RS</span>Dr. Rafael <span class="pilula__n"></span></button>
+        <button class="pilula" data-med="d" aria-pressed="false" title="Quanto da meta de faturamento já entrou"><span class="av av--d av--sm" aria-hidden="true">LS</span>Dra. Lúcia <span class="pilula__n"></span></button>
       </div>
       <div class="linha-flex" id="acoes-topo"></div>
     </div>
@@ -247,20 +257,19 @@
       <section class="cartao cartao--lista" aria-labelledby="t-metas" style="padding-bottom:12px">
         <div class="cartao__cab">
           <h2 id="t-metas">Metas de novembro <span class="cartao__sub" id="metas-n">9 metas</span></h2>
-          <div class="abas" role="tablist" aria-label="Grupo de metas" id="abas-metas">
-            <button class="aba" role="tab" aria-selected="true" data-grupo="todos">Todas</button>
-            <button class="aba" role="tab" aria-selected="false" data-grupo="com">Comercial <span class="pilula__n">3</span></button>
-            <button class="aba" role="tab" aria-selected="false" data-grupo="ag">Agenda <span class="pilula__n">3</span></button>
-            <button class="aba" role="tab" aria-selected="false" data-grupo="rec">Recall <span class="pilula__n">3</span></button>
+          <div class="abas" role="group" aria-label="Grupo de metas" id="abas-metas">
+            <button class="aba" aria-pressed="true" data-grupo="todos">Todas</button>
+            <button class="aba" aria-pressed="false" data-grupo="com">Comercial <span class="pilula__n">3</span></button>
+            <button class="aba" aria-pressed="false" data-grupo="ag">Agenda <span class="pilula__n">3</span></button>
+            <button class="aba" aria-pressed="false" data-grupo="rec">Recall <span class="pilula__n">3</span></button>
           </div>
         </div>
         <div class="metas-chave" aria-hidden="true">
           <span><i class="k-valor"></i>Realizado</span>
-          <span><i class="k-ponta"></i>Ponta na cor da situação</span>
           <span><i class="k-faixa"></i>Faixa da meta (da meta à supermeta)</span>
-          <span><i class="k-ritmo"></i>Esperado hoje (8 de 19 dias úteis)</span><span>Projeção = realizado ÷ 8 × 19</span>
+          <span><i class="k-ritmo"></i>Esperado hoje (8 de 19 dias úteis)</span>
         </div>
-        <div class="linha__cab metas-cab" style="--cols:var(--cols-metas)"><span style="width:36px"></span><span>Meta</span><span>Realizado × faixa</span><span>Realizado</span><span>Projeção do mês</span><span class="metas-cab-acao" style="width:36px"></span></div>
+        <div class="linha__cab metas-cab" style="--cols:var(--cols-metas)"><span style="width:36px"></span><span>Meta</span><span>Andamento</span><span>Realizado</span><span>Projeção do mês</span><span class="metas-cab-acao" style="width:36px"></span></div>
         <ul class="lista" id="lista-metas" style="--cols:var(--cols-metas)"></ul>
         <div class="rodape-cartao metas-rodape"><span id="metas-resumo"></span><button class="bt-texto">Editar metas do mês <svg class="ico ico-sm"><use href="#i-dir"/></svg></button></div>
       </section>
@@ -276,12 +285,12 @@
           <h2 id="t-ano">Ano de 2026 <span class="cartao__sub">faturamento</span></h2>
           <span class="cartao__sub">clínica toda</span>
         </div>
-        <div class="metas-ano__fixo" id="ano-fixo"></div>
+        <div class="metas-ano__fixo" id="ano-fixo" aria-live="polite"></div>
         <div class="metas-ano" id="ano" role="group" aria-label="Faturamento por mês em 2026"></div>
         <div class="metas-ano__leg">
-          <span><i style="background:var(--pena-2)"></i>Bateu a meta</span>
-          <span><i style="background:var(--nevoa)"></i>Abaixo da meta</span>
-          <span><i style="background:var(--linha-forte)"></i>Sem meta</span>
+          <span><i class="t-bateu"></i>Bateu a meta</span>
+          <span><i class="t-abaixo"></i>Abaixo da meta</span>
+          <span><i class="t-sem"></i>Sem meta</span>
           <span><i class="t-meta"></i>Meta</span>
           <span><i class="t-atual"></i>Mês atual</span>
         </div>
@@ -305,9 +314,9 @@
         <div class="metas-uteis">
           <div><b>19</b><span>dias úteis</span></div>
           <div><b>8</b><span>concluídos</span></div>
-          <div><b>11</b><span>restam (c/ hoje)</span></div>
+          <div><b>11</b><span>restam</span></div>
         </div>
-        <p class="metas-nota"><svg class="ico ico-sm"><use href="#i-info"/></svg><span>Esperado hoje = meta × dias úteis concluídos ÷ dias úteis do mês (8 ÷ 19 = 42%). Projeção = realizado ÷ 8 × 19.</span></p>
+        <p class="metas-nota"><svg class="ico ico-sm"><use href="#i-info"/></svg><span>Esperado hoje = meta × dias úteis concluídos ÷ dias úteis do mês (8 ÷ 19 = 42%). Hoje entra nos 11 dias que restam. Projeção = realizado ÷ 8 × 19.</span></p>
       </section>
     </aside>
   </div>
@@ -322,13 +331,18 @@
 const { METAS, ANO, DU, FEITOS, FRAC, situacao, ritmo, metaVal, medKey } = VA;
 const { br, mil, rsMil, miniCal, pilulasMedico, poeAnel, estadoDe } = UI;
 const MED = {
-  g: { nome: "Dr. Rafael Sena", ini: "RS", sub: "Meta própria · 50% do faturamento" },
-  d: { nome: "Dra. Lúcia Sena",  ini: "LS", sub: "Meta própria · 50% do faturamento" },
+  g: { nome: "Dr. Rafael Sena", ini: "RS", sub: "Meta própria · metade da meta da clínica" },
+  d: { nome: "Dra. Lúcia Sena",  ini: "LS", sub: "Meta própria · metade da meta da clínica" },
 };
 const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const $ = id => document.getElementById(id);
+/* Unidades por extenso (singular e plural) e status com inicial minúscula, como no resto do sistema */
+const UN = { pl: ["plano", "planos"], co: ["consulta", "consultas"], at: ["atendimento", "atendimentos"], rc: ["contato", "contatos"], ra: ["agendamento", "agendamentos"], rf: ["paciente", "pacientes"] };
+const un = (m, n) => { const u = UN[m.id]; return u ? u[Math.round(n) === 1 ? 0 : 1] : m.u; };
+const minus = t => t.charAt(0).toLowerCase() + t.slice(1);
+const sit = (m, x) => { const s = situacao(m, x); return Object.assign({}, s, { rot: minus(s.rot) }); };
 const fmt = (m, v) => m.rs ? `<span class="u" style="margin-left:0">R$</span>${mil(v)}<span class="u">mil</span>`
-  : m.taxa ? `${br(v)}<span class="u">%</span>` : `${br(v, 0)}<span class="u">${m.u}</span>`;
+  : m.taxa ? `${br(v)}<span class="u">%</span>` : `${br(v, 0)}<span class="u">${un(m, v)}</span>`;
 const txt = (m, v) => m.rs ? `R$ ${mil(v)} mil` : m.taxa ? `${br(v)}%` : br(v, 1);
 function barra(m, x, aria, alt) {
   const [v, meta, sup] = x, max = m.taxa ? 100 : sup * 1.15, pc = y => Math.min(100, y / max * 100);
@@ -338,28 +352,43 @@ function barra(m, x, aria, alt) {
 let med = "todos", grupo = "todos";
 const val = m => m[medKey(med)];
 
+/* Dois critérios, cada um com o seu nome:
+   - ritmo (ritmo()): realizado contra o esperado até hoje. É o que os cartões do alto e a tela Recall mostram.
+   - projeção (situacao()): onde o mês termina se o ritmo continuar, contra a faixa da meta. Só na coluna "Projeção do mês". */
 function renderLista() {
-  $("lista-metas").innerHTML = METAS.map(m => {
-    const x = val(m), [v, meta, sup] = x, s = situacao(m, x), esp = m.taxa ? meta : meta * FRAC;
-    const espTxt = m.taxa ? `meta ≥ ${br(meta)}%` : `esperado ${m.rs ? txt(m, esp) : br(esp, 1)}`;
+  const vis = METAS.filter(m => grupo === "todos" || m.grupo === grupo);
+  $("lista-metas").innerHTML = vis.map(m => {
+    const x = val(m), [v, meta, sup] = x, s = sit(m, x), esp = m.taxa ? meta : meta * FRAC;
+    const r = m.taxa ? null : ritmo(v, meta);
+    const espTxt = m.taxa ? `meta ≥ ${br(meta)}%` : `esperado hoje ${m.rs ? txt(m, esp) : br(esp, 1)}`;
     const faixaTxt = m.taxa ? `faixa ${br(meta)}–${br(sup)}%` : m.rs ? `faixa ${mil(meta)}–${mil(sup)} mil` : `faixa ${br(meta, 0)}–${br(sup, 0)}`;
-    const projTxt = m.taxa ? `hoje ${br(v)}% · vazia ${br(100 - v)}%` : m.rs ? `proj. ${txt(m, s.proj)}` : `proj. ${br(s.proj, 0)} ${m.u}`;
-    const aria = `${m.nome}: ${txt(m, v)} de meta ${txt(m, meta)}; ${espTxt}; ${s.rot}`;
+    const projTxt = m.taxa ? `hoje ${br(v)}% · vazia ${br(100 - v)}%` : m.rs ? `projeção ${txt(m, s.proj)}` : `projeção ${br(s.proj, 0)} ${un(m, s.proj)}`;
+    const aria = `${m.nome}: ${txt(m, v)} de meta ${txt(m, meta)}; ${espTxt}${r ? "; " + r.rot : ""}; projeção: ${s.rot}`;
+    const ritTxt = r ? `<span class="metas-num__rit metas-rit--${r.cls.replace("status--", "")}">${r.rot}</span>` : "";
     return `<li class="linha metas-linha" data-grupo="${m.grupo}">
       <span class="metas-ico" aria-hidden="true"><svg class="ico ico-sm"><use href="#${m.ico}"/></svg></span>
       <div class="metas-nomecel" style="min-width:0"><span class="linha__nome" title="${m.nome}">${m.nome}</span><span class="linha__sub" title="${m.sub}">${m.sub}</span></div>
       <div class="metas-barra">${barra(m, x, aria)}<div class="barra-meta__leg"><span>${espTxt}</span><span>${faixaTxt}</span></div></div>
-      <div class="metas-numcel"><span class="metas-num">${fmt(m, v)}</span><span class="metas-num__de">de ${m.taxa ? br(meta) + "%" : m.rs ? "R$ " + mil(meta) + " mil" : br(meta, 0)}</span></div>
+      <div class="metas-numcel"><span class="metas-num">${fmt(m, v)}</span><span class="metas-num__de">de ${m.taxa ? br(meta) + "%" : m.rs ? "R$ " + mil(meta) + " mil" : br(meta, 0)}</span>${ritTxt}</div>
       <div class="metas-proj"><span class="status ${s.cls}">${s.rot}</span><span>${projTxt}</span></div>
       <button class="bt-ico bt-ico--sm bt-ico--plano linha__acao" aria-label="Abrir detalhe: ${m.nome}"><svg class="ico ico-sm"><use href="#i-seta"/></svg></button>
     </li>`;
   }).join("");
-  let n = 0;
-  document.querySelectorAll("#lista-metas .linha").forEach(el => { const ok = grupo === "todos" || el.dataset.grupo === grupo; el.hidden = !ok; if (ok) n++; });
+  const n = vis.length;
   $("metas-n").textContent = `${n} metas · ${med === "todos" ? "clínica toda" : med === "g" ? "Dr. Rafael" : "Dra. Lúcia"}`;
-  const sits = METAS.map(m => situacao(m, val(m)).cls), c = k => sits.filter(x => x === k).length;
+  const sits = vis.map(m => situacao(m, val(m)).cls), c = k => sits.filter(x => x === k).length;
   $("metas-resumo").innerHTML = `Pela projeção: <b>${c("status--ok")} na faixa ou acima</b> · ${c("status--atencao")} pouco abaixo · ${c("status--atrasado")} abaixo da faixa`;
 }
+/* A linha inteira abre o detalhe (o mesmo destino do botão de seta) */
+$("lista-metas").addEventListener("click", e => {
+  const li = e.target.closest(".metas-linha"); if (!li || e.target.closest("button, a")) return;
+  const bt = li.querySelector(".linha__acao"); if (bt) bt.click();
+});
+/* "Valor em planos fechados" é o que fechou no funil, não o recebido: vai para o Funil */
+$("lista-metas").addEventListener("click", e => {
+  const bt = e.target.closest(".linha__acao"); if (!bt || !/Valor em planos/.test(bt.getAttribute("aria-label") || "")) return;
+  e.stopPropagation(); location.href = "funil.html";
+});
 
 function anel(id, v, meta, esp) { const p = v / meta * 100; poeAnel($(id), { p, marca: FRAC * 100, esp, aria: `${Math.round(p)}% da meta; esperado hoje ${Math.round(FRAC * 100)}%` }); }
 function notaRitmo(el, v, meta) { const r = ritmo(v, meta); $(el).innerHTML = `<span class="status ${r.cls}">${r.rot}</span>`; return r; }
@@ -369,31 +398,32 @@ function renderAneis() {
   anel("a-fat", fv, fm);
   $("f-val").textContent = mil(fv); $("f-meta").textContent = `R$ ${mil(fm)} mil`; $("f-sup").textContent = `R$ ${mil(fs)} mil`;
   const max = fs * 1.15, pc = x => x / max * 100;
-  const sf = situacao(M("fat"), [fv, fm, fs]);
+  const sf = sit(M("fat"), [fv, fm, fs]);
   $("f-barra").innerHTML = UI.barra({ v: pc(fv), m1: pc(fm), m2: pc(fs), r: pc(fm * FRAC), estado: estadoDe(sf.cls), rotulo: "esperado hoje",
-    aria: `Faturamento R$ ${mil(fv)} mil; faixa da meta de R$ ${mil(fm)} a ${mil(fs)} mil; esperado hoje R$ ${mil(fm * FRAC)} mil; ${sf.rot}` });
+    aria: `Faturamento R$ ${mil(fv)} mil; faixa da meta de R$ ${mil(fm)} a ${mil(fs)} mil; esperado hoje R$ ${mil(fm * FRAC)} mil; projeção: ${sf.rot}` });
   $("f-ritmo").innerHTML = `Esperado hoje: <b>R$ ${mil(fm * FRAC)} mil</b>`;
   $("f-proj").innerHTML = `Projeção do mês: <b>R$ ${mil(sf.proj)} mil</b>`;
   anel("a-pl", pl[0], pl[1], 13); $("v-pl").textContent = pl[0]; $("m-pl").textContent = pl[1];
   const rp = notaRitmo("s-pl", pl[0], pl[1]); $("n-pl").textContent = `esperado hoje ${br(rp.esp)}`;
   anel("a-co", co[0], co[1], 13); $("v-co").textContent = co[0]; $("m-co").textContent = co[1];
   const rc = notaRitmo("s-co", co[0], co[1]); $("n-co").textContent = `esperado hoje ${br(rc.esp)}`;
-  // Ritmo necessário: quanto falta por dia útil para bater a meta, contra o ritmo atual
-  const resta = DU - FEITOS, nec = (fm - fv) / resta, atual = fv / FEITOS, maxR = Math.max(nec, atual);
+  // Ritmo necessário: quanto falta por dia útil para bater a meta, contra a média diária até hoje
+  const resta = DU - FEITOS, nec = Math.max(0, (fm - fv) / resta), atual = fv / FEITOS, maxR = Math.max(nec, atual) || 1;
   $("v-rit").innerHTML = `${rsMil(nec)}<small>/dia</small>`;
-  $("rit-barras").innerHTML = `<div class="metas-ritmo__l"><span>até hoje</span><i><b style="width:${atual / maxR * 100}%"></b></i><span>${mil(atual)} mil</span></div>
-    <div class="metas-ritmo__l"><span>preciso</span><i><b style="width:${nec / maxR * 100}%"></b></i><span>${mil(nec)} mil</span></div>`;
-  $("s-rit").innerHTML = `<span class="status ${sf.cls}">${sf.rot.toLowerCase()}</span><span>${resta} dias úteis restam</span>`;
+  $("rit-barras").innerHTML = `<div class="metas-ritmo__l"><span>média até hoje</span><i><b style="width:${atual / maxR * 100}%"></b></i><span>${mil(atual)} mil</span></div>
+    <div class="metas-ritmo__l"><span>necessário</span><i><b style="width:${nec / maxR * 100}%"></b></i><span>${mil(nec)} mil</span></div>`;
+  const ok = atual >= nec, perto = atual >= nec * .9;
+  $("s-rit").innerHTML = `<span class="status ${ok ? "status--ok" : perto ? "status--atencao" : "status--atrasado"}">${ok ? "ritmo suficiente" : "precisa acelerar"}</span><span>${resta} dias úteis restam</span>`;
   $("resumo-dia").textContent = `${FEITOS} de ${DU} dias úteis concluídos`;
 }
 
 function renderMedicos() {
   const ids = ["fat", "pl", "co", "oc"], rot = { fat: "Faturamento", pl: "Planos", co: "Consultas", oc: "Ocupação" };
   $("por-medico").innerHTML = ["g", "d"].map(k => {
-    const s = situacao(METAS[0], METAS[0][k]);
+    const s = sit(METAS[0], METAS[0][k]);
     const linhas = ids.map(id => {
       const m = METAS.find(x => x.id === id), x = m[k], [v, meta] = x;
-      const de = m.taxa ? `meta ${br(meta)}%` : m.rs ? `de ${mil(meta)} mil` : `de ${br(meta, 0)}`;
+      const de = m.taxa ? `meta ${br(meta)}%` : m.rs ? `de R$ ${mil(meta)} mil` : `de ${br(meta, 0)}`;
       return `<div class="metas-mini"><span class="metas-mini__rot">${rot[id]}</span>${barra(m, x, `${rot[id]}: ${txt(m, v)}, ${de}`, "sm")}
         <span class="metas-mini__v">${m.rs ? `<span class="u" style="margin-left:0">R$</span>${mil(v)}<span class="u">mil</span>` : m.taxa ? `${br(v)}<span class="u">%</span>` : br(v, 0)}<small>${de}</small></span></div>`;
     }).join("");
@@ -407,7 +437,16 @@ function renderMedicos() {
   }).join("");
 }
 
-let mesSel = 10;
+/* Quadro do ano: a tela é de novembro (o rótulo do topo não muda). Tocar numa barra
+   só mostra o valor daquele mês na linha acima do gráfico. */
+let mesSel = ANO.findIndex(a => a.atual);
+function linhaMes(i) {
+  const a = ANO[i];
+  if (a.atual) return `${a.m}: <b>R$ ${mil(a.v)} mil</b>em curso · meta R$ ${mil(a.meta)} mil`;
+  if (a.futuro) return `${a.m}: ainda não começou · meta R$ ${mil(a.meta)} mil`;
+  if (!a.meta) return `${a.m}: <b>R$ ${mil(a.v)} mil</b>sem meta`;
+  return `${a.m}: <b>R$ ${mil(a.v)} mil</b>meta R$ ${mil(a.meta)} mil · ${Math.round(a.v / a.meta * 100)}%`;
+}
 function renderAno() {
   const MAX = 210000;
   $("ano").innerHTML = ANO.map((a, i) => {
@@ -415,12 +454,10 @@ function renderAno() {
     const c = ["metas-ano__mes", sem ? "metas-ano__mes--sem" : "", abaixo ? "metas-ano__mes--abaixo" : "", a.atual ? "metas-ano__mes--atual" : "", a.futuro ? "metas-ano__mes--futuro" : ""].join(" ");
     const label = `${MESES[i]}: ${a.futuro ? "ainda não começou" : "R$ " + mil(a.v) + " mil"}${a.meta ? ", meta R$ " + mil(a.meta) + " mil" : ", sem meta"}`;
     const h = (a.v / MAX * 100).toFixed(1);
-    return `<button class="${c}" data-i="${i}" aria-pressed="${i === mesSel}" aria-label="${label}" title="${label}">
+    return `<button class="${c}" data-i="${i}" aria-label="${label}" title="${label}" aria-controls="ano-fixo">
       <span class="metas-ano__area">${a.v ? `<span class="metas-ano__barra" style="height:${h}%"><span class="metas-ano__val">${mil(a.v)} mil</span></span>` : ""}${a.meta ? `<span class="metas-ano__meta" style="bottom:${(a.meta / MAX * 100).toFixed(1)}%"></span>` : ""}</span>
       <span class="metas-ano__rot" aria-hidden="true">${a.m[0]}</span></button>`;
   }).join("");
-  const nov = ANO.find(a => a.atual);
-  $("ano-fixo").innerHTML = `<span>${nov.m}: <b>R$ ${mil(nov.v)} mil</b>em curso</span>`;
   const fechados = ANO.filter(a => a.meta && !a.atual && !a.futuro);
   const sv = fechados.reduce((x, a) => x + a.v, 0), sm = fechados.reduce((x, a) => x + a.meta, 0), bat = fechados.filter(a => a.v >= a.meta).length;
   $("acum-n").innerHTML = `<span class="u" style="margin-left:0">R$</span>${mil(sv)}<span class="u">mil</span> <span class="status ${sv >= sm ? "status--ok" : "status--atencao"}" style="vertical-align:middle">${Math.round(sv / sm * 100)}% da meta</span>`;
@@ -428,25 +465,27 @@ function renderAno() {
   $("ano-tab").innerHTML = ANO.filter(a => a.meta && !a.futuro).map(a => {
     const p = Math.round(a.v / a.meta * 100);
     const st = a.atual ? `<span class="status status--neutro">em curso</span>` : p >= 100 ? `<span class="status status--ok">${p}%</span>` : `<span class="status status--atencao">${p}%</span>`;
-    return `<tr><td>${a.m}</td><td>R$ ${mil(a.v)} mil</td><td>meta ${mil(a.meta)}</td><td>${st}</td></tr>`;
+    return `<tr><td>${a.m}</td><td>R$ ${mil(a.v)} mil</td><td>meta R$ ${mil(a.meta)} mil</td><td>${st}</td></tr>`;
   }).join("");
-  document.querySelectorAll(".metas-ano__mes").forEach(b => b.addEventListener("click", () => { mesSel = +b.dataset.i; mudaMes(); }));
+  document.querySelectorAll(".metas-ano__mes").forEach(b => b.addEventListener("click", () => { mesSel = +b.dataset.i; mostraMes(); }));
 }
-function mudaMes() {
-  $("mes-rot").innerHTML = `${MESES[mesSel]} <span>2026</span>`;
-  document.querySelectorAll(".metas-ano__mes").forEach(b => b.setAttribute("aria-pressed", +b.dataset.i === mesSel));
-  $("mes-ant").disabled = mesSel === 0; $("mes-prox").disabled = mesSel === 11;
+function mostraMes() {
+  $("ano-fixo").innerHTML = `<span>${linhaMes(mesSel)}</span>`;
+  document.querySelectorAll(".metas-ano__mes").forEach(b => b.classList.toggle("is-sel", +b.dataset.i === mesSel));
 }
-$("mes-ant").addEventListener("click", () => { if (mesSel > 0) { mesSel--; mudaMes(); } });
-$("mes-prox").addEventListener("click", () => { if (mesSel < 11) { mesSel++; mudaMes(); } });
 
 function tudo() { renderAneis(); renderLista(); renderMedicos(); }
-pilulasMedico(m => { const [v, meta] = metaVal("fat", m); return Math.round(v / meta * 100) + "%"; }, m => { med = m; tudo(); });
+/* Pílula do médico: % da meta de faturamento; a pílula ativa diz "da meta" por extenso */
+const pctFat = m => { const [v, meta] = metaVal("fat", m); return Math.round(v / meta * 100) + "%"; };
+function rotPilulas() { document.querySelectorAll(".pilula[data-med]").forEach(b => { const n = b.querySelector(".pilula__n"); if (n) n.innerHTML = pctFat(b.dataset.med) + (b.dataset.med === med ? '<span class="metas-dameta"> da meta</span>' : ""); }); }
+pilulasMedico(pctFat, m => { med = m; rotPilulas(); tudo(); });
+rotPilulas();
+/* Grupo de metas: filtro (não troca de painel), então é um grupo de botões com aria-pressed */
 document.querySelectorAll("#abas-metas .aba").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll("#abas-metas .aba").forEach(x => x.setAttribute("aria-selected", x === b));
+  document.querySelectorAll("#abas-metas .aba").forEach(x => x.setAttribute("aria-pressed", x === b));
   grupo = b.dataset.grupo; renderLista();
 }));
-miniCal($("mcal"), { conta: true, estatico: true }); renderAno(); mudaMes(); tudo();
+miniCal($("mcal"), { conta: true, estatico: true }); renderAno(); mostraMes(); tudo();
 </script>
 <link rel="stylesheet" href="telas.css">
 <script src="telas.js"></script>

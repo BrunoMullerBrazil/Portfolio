@@ -21,6 +21,7 @@
   .demo-menu select{height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#F4F3EF;padding:0 10px;font:500 14px Inter,sans-serif}
   .demo-menu select option{color:#16171C}
   @media (max-width:720px){.demo-fab{right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px))}.demo-fab>button{height:42px}}
+  /*fab-plano-2*/@media (max-width:720px){body:has(.pl-barra) .demo-fab{bottom:calc(140px + env(safe-area-inset-bottom,0px))}}body:has(.pl-apres) .demo-fab{top:20px;bottom:auto!important;left:50%;right:auto;transform:translateX(-50%)}body:has(.pl-apres) .demo-menu{top:58px;bottom:auto;right:auto;left:50%;margin-left:-150px;transform-origin:50% 0}@media (max-width:720px){body:has(.pl-apres) .demo-fab{left:60px;transform:none}body:has(.pl-apres) .demo-fab>button{width:44px;height:44px;padding:0;gap:0;justify-content:center;font-size:0}body:has(.pl-apres) .demo-menu{left:-44px;margin-left:0;transform-origin:0 0}}
   @media (prefers-reduced-motion:reduce){.demo-menu{transition:opacity .15s}}`;
   const st = d.createElement("style"); st.textContent = css; d.head.appendChild(st);
 

@@ -37,6 +37,11 @@
   function nomeAtual() {
     const p = q.get("nome");
     if (p && p.trim()) return p.trim().slice(0, 40);
+    // ?perfil= sem ?nome: a conta daquele perfil (a SDR não aparece como "Dra. Lúcia")
+    const pf = (q.get("perfil") || "").toLowerCase();
+    const contas = (window.VA2 && window.VA2.CONTAS) || [];
+    const conta = pf && contas.find(c => c.perfil === pf);
+    if (conta) return conta.nome;
     const s = ls.get("vam:nome");
     return s && PESSOAS.includes(s) ? s : "Dra. Lúcia";
   }
@@ -50,6 +55,14 @@
   })();
   const hhmm = h => `${String(Math.floor(h)).padStart(2, "0")}:${String(Math.round((h % 1) * 60)).padStart(2, "0")}`;
   const saudacao = h => h >= 18 ? "Boa noite" : h >= 12 ? "Boa tarde" : "Bom dia";
+  // ?hora= também muda a hora escrita sob a saudação (senão "Boa noite" convive com "· 09:40")
+  if (q.get("hora") != null && q.get("hora") !== "") {
+    const td = doc.querySelector(".topo__data");
+    if (td) {
+      const w = doc.createTreeWalker(td, NodeFilter.SHOW_TEXT); let t;
+      while ((t = w.nextNode())) if (/\b\d{2}:\d{2}\b/.test(t.nodeValue)) { t.nodeValue = t.nodeValue.replace(/\b\d{2}:\d{2}\b/, hhmm(HORA)); break; }
+    }
+  }
 
   /* ---------- digitação: nada anima enquanto se digita ------------------- */
   let ultimaTecla = 0, tDig = 0;
@@ -316,7 +329,8 @@
   const RX_SALVA = /^(salvar|registrar|registrar tentativa|confirmar|marcar como feit)/i;
   doc.addEventListener("click", e => {
     const bt = e.target.closest("button, [role=button]");
-    if (!bt || bt.closest(".vam-tela") || bt.disabled || bt.matches("[data-wa], [data-agenda], [aria-haspopup], [data-fecha]") || bt.closest(".wa-pop, .ag-menu")) return;
+    // botões que já dão o próprio aviso (remover acesso, confirmar em diálogo de plano) não ganham o automático
+    if (!bt || bt.closest(".vam-tela") || bt.disabled || bt.matches("[data-wa], [data-agenda], [aria-haspopup], [data-fecha], [data-remover], [data-dlg-ok], [data-sem-aviso]") || bt.closest(".wa-pop, .ag-menu, .pl-camada, [data-sem-aviso]")) return;
     const rot = (bt.dataset.dica || bt.getAttribute("aria-label") || bt.textContent || "").trim();
     const linha = bt.closest(".linha, tr, .fn-card");
     const nome = linha && (linha.querySelector(".linha__nome, .fn-card__nome, .fn-pac b") || {}).textContent;
@@ -507,7 +521,7 @@
       </div>
       <p class="sr vam-tela__voz" role="status" aria-live="polite"></p>
       <label class="vam-demo" title="Seletor de demonstração">Entrar como <select aria-label="Pessoa (demonstração)">${opts}</select></label>
-      <span class="vam-tela__pular" aria-hidden="true">Clique ou tecle para pular</span>`;
+      <span class="vam-tela__pular" aria-hidden="true">${mm("(pointer: coarse)") ? "Toque para pular" : "Clique ou tecle para pular"}</span>`;
     body.appendChild(tela);
     inerte(true);
     anuncia(tela, `${frase} ${itensPl.map(it => [it.pre, fmtN(it.n) + (it.suf || ""), it.rot].filter(Boolean).join(" ")).join(", ")}.`);

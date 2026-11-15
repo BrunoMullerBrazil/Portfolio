@@ -45,14 +45,14 @@
 .pf-foco .kpi__nota .status--atrasado { background: rgba(248,227,225,.14); color: #F2B8B3; }
 .pf-foco__extra { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, max-content); margin: 0; align-self: center; }
 .pf-foco__extra > div { padding: 2px 0 2px 20px; margin-left: 20px; border-left: 1px solid rgba(255,255,255,.12); display: flex; flex-direction: column; gap: 4px; }
-.pf-foco__extra > div:first-child { margin-left: 0; }
+.pf-foco__extra > div:first-child { margin-left: 0; padding-left: 0; border-left: 0; }
 .pf-foco__extra dt { font-size: var(--t-xs); color: var(--foco-texto-2); white-space: nowrap; }
 .pf-foco__extra dd { margin: 0; font: 600 calc(20px + 4 * var(--k))/1.1 var(--f-titulo); letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; color: #fff; }
 .pf-foco__extra dd small { font-size: .6em; font-weight: 500; opacity: .75; }
 @container (max-width: 699px) {
   .pf-foco__extra { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.12); }
   .pf-foco__extra > div { padding: 0 0 0 12px; margin-left: 12px; }
-  .pf-foco__extra > div:first-child { padding-left: 0; }
+  .pf-foco__extra > div:first-child { padding-left: 0; margin-left: 0; border-left: 0; }
   .pf-foco__extra dt { white-space: normal; line-height: 1.25; }
 }
 
@@ -111,6 +111,12 @@
   .pf-checkin span { display: none; }
   .pf-checkin { width: var(--alvo); padding: 0; }
   .pf-l .escala-grupo { display: none; }
+  /* Recepção: a ação principal não vira um check sem rótulo; ações numa linha própria, abaixo do texto */
+  .pf-fila--chegadas .pf-l:not(.pf-l--compacta) { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "lado corpo" "lado prazo" "lado acoes"; }
+  .pf-fila--chegadas .pf-l:not(.pf-l--compacta) > .pf-l__acoes { flex-direction: row; justify-content: flex-start; align-self: start; }
+  .pf-fila--chegadas .pf-l:not(.pf-l--compacta) > .pf-l__acoes:empty { display: none; }
+  .pf-fila--chegadas .pf-checkin span { display: inline; }
+  .pf-fila--chegadas .pf-checkin { width: auto; padding: 0 16px; }
 }
 
 /* Meta (barra com faixa) */
@@ -156,12 +162,17 @@
 .pf-bt__passo { display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: var(--r-md); background: var(--porcelana); min-width: 0; position: relative; }
 .pf-bt__passo--garg { background: var(--cartao); box-shadow: inset 0 0 0 1.5px var(--atrasado-fundo), 0 0 0 0 transparent; }
 .pf-bt__passo--garg::before { content: ""; position: absolute; left: 14px; right: 14px; top: 0; height: 3px; border-radius: 0 0 3px 3px; background: var(--atrasado); }
+.pf-bt__link { position: absolute; inset: 0; border-radius: inherit; z-index: 1; }
+.pf-bt__link:focus-visible { outline: 2px solid var(--pena); outline-offset: 2px; }
+.pf-bt__passo { transition: background-color .25s, box-shadow .25s; }
+.pf-bt__passo:has(> .pf-bt__link:hover) { background: var(--suave); }
+.pf-bt__passo--garg:has(> .pf-bt__link:hover) { background: var(--porcelana); }
 .pf-bt__quem { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .pf-bt__pessoa { font-size: var(--t-xs); color: var(--texto-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pf-bt__n .kpi__valor { --num-max: calc(30px + 4 * var(--k)); --num-min: 24px; font-size: var(--num-max); }
 .pf-bt__rot { font-size: var(--t-xs); color: var(--texto-2); }
 .pf-bt__st { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: auto; }
-.pf-bt__garg { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--atrasado); }
+.pf-bt__garg { font-size: var(--t-xs); font-weight: 600; color: var(--atrasado); }
 .pf-bt__gargalo { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 10px 12px; border-radius: var(--r-md);
   background: linear-gradient(90deg, rgba(248,227,225,.9), rgba(248,227,225,0) 60%), var(--cartao); box-shadow: inset 0 0 0 1px var(--linha); }
 .pf-bt__gargalo p { flex: 1; min-width: 0; font-size: var(--t-sm); line-height: 1.4; }
@@ -196,15 +207,16 @@
 /* Linhas de metas sem faturamento: barra e números dão lugar à frase */
 .pf-linha-oculta .metas-barra, .pf-linha-oculta .metas-numcel, .pf-linha-oculta .metas-proj { visibility: hidden; }
 .pf-linha-oculta .metas-barra { position: relative; }
-.pf-linha-oculta .metas-barra::after { content: "Visível para a gestão"; visibility: visible; position: absolute; inset: 0; display: flex; align-items: center; font-size: var(--t-sm); color: var(--texto-2); }
+.pf-linha-oculta .metas-barra::after { content: "Visível só para a gestão"; visibility: visible; position: absolute; inset: 0; display: flex; align-items: center; font-size: var(--t-sm); color: var(--texto-2); }
 .pf-mini-oculta { position: relative; }
 .pf-mini-oculta > * { visibility: hidden; }
-.pf-mini-oculta::after { content: "Faturamento · visível para a gestão"; position: absolute; inset: 0; display: flex; align-items: center; font-size: var(--t-xs); color: var(--texto-2); }
-.metas-mini.pf-mini-oculta::after { content: "Faturamento · visível para a gestão"; }
-.rodape-cartao.pf-mini-oculta::after { content: "Projeção do faturamento · visível para a gestão"; }
+.pf-mini-oculta::after { content: "Faturamento · visível só para a gestão"; position: absolute; inset: 0; display: flex; align-items: center; font-size: var(--t-xs); color: var(--texto-2); }
+.metas-mini.pf-mini-oculta::after { content: "Faturamento · visível só para a gestão"; }
+.rodape-cartao.pf-mini-oculta::after { content: "Projeção do faturamento · visível só para a gestão"; }
 /* Funil sem valores (SDR e Recepção por padrão) */
 .pf-sem-valor .fn-col__valor, .pf-sem-valor .fn-card__valor, .pf-sem-valor .fn-card__pot, .pf-sem-valor .fn-valor { visibility: hidden; }
 .pf-sem-valor .fn-card__valor, .pf-sem-valor .fn-card__pot { display: none; }
+.pf-sem-valor .fn-lista .tabela th:nth-child(7), .pf-sem-valor .fn-lista .tabela tr:not(.fn-grupo) > td:nth-child(7) { display: none !important; }
 
 /* ---------- Placar da abertura com 3 números -------------------------- */
 .vam-pl:has(> .vam-pl__item:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 820px; margin-inline: auto; }
@@ -221,3 +233,20 @@
 .pf-foco__leg { flex-basis: 100%; font-size: var(--t-xs); color: var(--foco-texto-2); }
 .pf-foco__leg b { color: var(--foco-texto) !important; }
 .pf-oculto { visibility: hidden; }
+.pf-fora { display: none !important; }
+
+/* Relatórios sem valores: a coluna "Valor fechado" sai do grid (sem vão à direita) */
+@container (min-width: 681px) {
+  .pf-sem-valor .rl-orig { grid-template-columns: 150px minmax(0, 1fr) 92px 92px; }
+}
+
+/* Médico: a pílula escolhe a agenda de um dos dois; "Todos" não tem tela própria aqui */
+body[data-perfil="medico"][data-pagina="painel"] .pilulas .pilula[data-med="todos"] { display: none; }
+
+/* Gestão: o total de parados vai para a Passagem de bastão; sem segunda faixa rosa logo acima */
+body[data-perfil="gestao"] main:has(#pf-bastao) #aviso-parados { display: none !important; }
+
+/* Ajustes fora da Gestão: só leitura */
+.pf-so-gestao { margin: 0 0 12px; }
+.pf-leitura :is(button, select, input, textarea)[data-pf-trava] { cursor: not-allowed; }
+.pf-leitura :is(button, select, input, textarea)[data-pf-trava] { opacity: .55; }

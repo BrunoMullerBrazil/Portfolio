@@ -54,6 +54,9 @@
   .rs-erro { color: var(--atrasado); font-size: var(--t-xs); min-height: 16px; }
   .rs-ok { font-size: var(--t-sm); color: var(--ok); text-align: center; min-height: 1px; }
   .rs-expirou { text-align: center; padding: 40px 18px; }
+  .rs-itens li.rs-fase { display: block; padding: 14px 0 4px; border-bottom: 0; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--texto-2); font-weight: 600; }
+  .rs-itens li.rs-fase:first-child { padding-top: 4px; }
+  .rs-via { text-align: center; font-size: 11px; color: var(--texto-2); margin-top: -8px; }
 </style>
 </head>
 <body>
@@ -73,7 +76,9 @@
   const real = v => Math.round(v).toLocaleString("pt-BR");
   const cent = v => v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const CLINICA = "Clínica Aurora";
-  const MARCA = '<p class="rs-marca"><svg width="22" height="22" viewBox="0 0 94 94" aria-hidden="true"><path fill="#16171C" d="M5.5 70a18.5 18.5 0 1 0 37 0a18.5 18.5 0 1 0-37 0ZM49.5 23a18.5 18.5 0 1 0 37 0a18.5 18.5 0 1 0-37 0ZM49.5 70a18.5 18.5 0 1 0 37 0a18.5 18.5 0 1 0-37 0ZM49.5 23V70H86.5V23ZM42.49 69.39C41.86 50.29 49.51 42.12 68.61 41.49A18.5 18.5 0 1 0 49.51 23.61C50.14 42.71 42.49 50.88 23.39 51.51Z"/><path fill="#4657C8" d="M5.5 23a18.5 18.5 0 1 0 37 0a18.5 18.5 0 1 0-37 0Z"/></svg><b>' + CLINICA + '</b></p>';
+  // a clínica não tem logo na interface: só o nome no topo; o Munin aparece discreto no rodapé
+  const MARCA = '<p class="rs-marca"><b>' + CLINICA + '</b></p>';
+  const VIA = '<p class="rs-via">via Munin</p>';
   // procura o plano pelo token: o que a tela salvou no navegador ou a semente
   function acha(tok) {
     if (!tok) return null;
@@ -86,7 +91,7 @@
   const vencido = !plano || PL.data.diasEntre(PL.HOJE, plano.resumo.expira) < 0;
   if (vencido) {
     raiz.innerHTML = MARCA + '<section class="rs-cartao rs-expirou"><h1>Este link expirou.</h1><p class="rs-sub">Peça um novo à clínica pelo WhatsApp.</p></section>' +
-      '<p class="rs-nota">Por segurança, o resumo do plano fica disponível só por alguns dias.</p>';
+      '<p class="rs-nota">Por segurança, o resumo do plano fica disponível só por alguns dias.</p>' + VIA;
     return;
   }
   const pac = PAC.get(plano.pacote), pessoa = PLD.paciente(plano.paciente) || { nome: "" };
@@ -96,12 +101,14 @@
         <div class="campos"><label>Dia<input inputmode="numeric" maxlength="2" id="rs-d" autocomplete="bday-day" placeholder="DD" required></label><label>Mês<input inputmode="numeric" maxlength="2" id="rs-m" autocomplete="bday-month" placeholder="MM" required></label></div>
         <p class="rs-erro" id="rs-e" role="alert"></p><button class="rs-bt" type="submit">Ver o resumo</button></form>
       <p class="rs-val">Válido até ${esc(plano.resumo.expira)}</p>
-      <p class="rs-nota">Protótipo: qualquer dia e mês com 4 dígitos passam. No produto, a data é conferida com o cadastro.</p>`;
+      <p class="rs-nota">Protótipo: qualquer data válida passa. No produto, o dia e o mês são conferidos com o cadastro.</p>${VIA}`;
     document.getElementById("rs-d").focus();
     document.getElementById("rs-f").addEventListener("submit", e => {
       e.preventDefault();
       const d = document.getElementById("rs-d").value.trim(), m = document.getElementById("rs-m").value.trim();
-      if (!/^\d{2}$/.test(d) || !/^\d{2}$/.test(m)) { document.getElementById("rs-e").textContent = "Digite o dia e o mês com 2 números cada (ex.: 07 e 03)."; return; }
+      if (!/^\d{1,2}$/.test(d) || !/^\d{1,2}$/.test(m)) { document.getElementById("rs-e").textContent = "Digite o dia e o mês com números (ex.: 07 e 03)."; return; }
+      const dn = Number(d), mn = Number(m), maxDia = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][mn - 1];
+      if (mn < 1 || mn > 12 || dn < 1 || dn > (maxDia || 31)) { document.getElementById("rs-e").textContent = "Confira o dia e o mês."; return; }
       try { sessionStorage.setItem("munin:resumo:" + t, "1"); } catch (er) { /* ok */ }
       mostra();
     });
@@ -115,14 +122,38 @@
     const qtd = it => { const p = PAC.proc(pac, it.proc), u = PAC.UNIDADES[p.unidade] || {}; if (p.porFace) { const n = (it.faces || []).length; return n + (n > 1 ? " faces" : " face"); } if (p.unidade === "U") return it.qtd + " U"; if (p.unidade === "dente" || p.unidade === "pacote") return ""; return it.qtd + " " + (it.qtd === 1 ? u.um : u.varios); };
     const nome = it => { const a = PAC.alvo(pac, it.alvo); return a && a.tipo === "dente" ? "Dente " + a.nomeCurto : PAC.nomeAlvo(pac, it); };
     const recs = PL.recallsDe(planoV, { incluirPropostos: true }).filter(r => r.dias > 0 && r.dias <= 400);
-    const tl = [{ rot: "Início", txt: "primeira sessão, combinada com a clínica", hoje: true }].concat(recs.slice(0, 4).map(r => ({ rot: r.mes, txt: (r.rot === "Recall" ? "retorno" : r.rot.toLowerCase()) + " · " + r.procNome.split(" · ")[0].toLowerCase() })));
+    // linha do tempo: uma linha por mês (as 6 lentes revisadas juntas viram uma só)
+    const porMes = new Map();
+    recs.forEach(r => { const o = porMes.get(r.mes) || new Map(); const rot = r.rot === "Recall" ? "retorno" : r.rot.toLowerCase(), pn = r.procNome.split(" · ")[0].toLowerCase();
+      const l = o.get(rot) || []; if (!l.includes(pn)) l.push(pn); o.set(rot, l); porMes.set(r.mes, o); });
+    const junta = l => l.length > 1 ? l.slice(0, -1).join(", ") + " e " + l[l.length - 1] : l[0];
+    const tl = [{ rot: "Início", txt: "primeira sessão, combinada com a clínica", hoje: true }].concat([...porMes.entries()].slice(0, 4).map(([mes, o]) => ({ rot: mes, txt: [...o.entries()].map(([rot, ps]) => rot + " · " + junta(ps)).join("; ") })));
+    // itens: mesmo procedimento em vários dentes vira uma linha ("Lente de contato dental · 6 dentes (13 a 23)")
+    const linhasDe = lista => {
+      const out = [], grupos = new Map();
+      lista.forEach(it => {
+        const a = PAC.alvo(pac, it.alvo), p = PAC.proc(pac, it.proc);
+        if (a && a.tipo === "dente" && !p.porFace) { const k = it.proc; if (!grupos.has(k)) { const g = { p, its: [] }; grupos.set(k, g); out.push(g); } grupos.get(k).its.push(it); }
+        else out.push({ p, its: [it] });
+      });
+      return out.map(({ p, its: g }) => {
+        const v = g.reduce((s, it) => s + (vals[it.uid] || 0), 0);
+        if (g.length === 1) return `<li><b>${esc(nome(g[0]))}</b><span>${esc(p.nome)}${qtd(g[0]) ? " · " + esc(qtd(g[0])) : ""}</span><span class="v">${p.aDefinir ? "a definir" : "R$ " + real(v)}</span></li>`;
+        const fdi = g.map(it => (PAC.alvo(pac, it.alvo) || {}).nomeCurto || it.alvo);
+        return `<li><b>${esc(p.nome)}</b><span>${g.length} dentes (${esc(fdi.length > 2 ? fdi[0] + " a " + fdi[fdi.length - 1] : fdi.join(" e "))})</span><span class="v">${p.aDefinir ? "a definir" : "R$ " + real(v)}</span></li>`;
+      }).join("");
+    };
+    const fases = pac.id === "odonto" && pac.grupos ? pac.grupos.map(g => ({ g, its: its.filter(i => i.grupo === g.id) })).filter(x => x.its.length) : null;
+    const itensHtml = fases && fases.length > 1
+      ? fases.map(({ g, its: fi }) => `<li class="rs-fase">${esc(g.nome)} · ${esc((plano.titulos && plano.titulos[g.id]) || g.titulo || "")}</li>${linhasDe(fi)}`).join("")
+      : linhasDe(its);
     raiz.innerHTML = MARCA + `<div><h1>Olá, <b>${esc(pessoa.nome.split(" ")[0])}</b></h1><p class="rs-sub">Este é o resumo do plano que você conversou com a clínica.</p></div>
-      <section class="rs-cartao" aria-labelledby="rs-t-i"><span class="rs-k" id="rs-t-i">O que está no plano</span><ul class="rs-itens">${its.map(it => { const p = PAC.proc(pac, it.proc); return `<li><b>${esc(nome(it))}</b><span>${esc(p.nome)}${qtd(it) ? " · " + esc(qtd(it)) : ""}</span><span class="v">${p.aDefinir ? "a definir" : "R$ " + real(vals[it.uid] || 0)}</span></li>`; }).join("")}</ul></section>
+      <section class="rs-cartao" aria-labelledby="rs-t-i"><span class="rs-k" id="rs-t-i">O que está no plano</span><ul class="rs-itens">${itensHtml}</ul></section>
       <section class="rs-total" aria-label="Total"><span class="rs-k">Total</span><b><small>R$</small>${real(tot.total)}</b><span>${tot.parcelas > 1 ? tot.parcelas + "× de R$ " + cent(tot.parcela) + " sem juros" : "à vista"}${tot.desconto ? " · com desconto de R$ " + real(tot.desconto) : ""}</span></section>
       <section class="rs-cartao" aria-labelledby="rs-t-t"><span class="rs-k" id="rs-t-t">Seu plano no tempo</span><ol class="rs-tl">${tl.map(x => `<li class="${x.hoje ? "hoje" : ""}"><i></i><div><b>${esc(x.rot)}</b><span>${esc(x.txt)}</span></div></li>`).join("")}</ol></section>
       <button class="rs-bt" type="button" id="rs-ag">Quero agendar</button><p class="rs-ok" id="rs-ok" role="status"></p>
       <p class="rs-val">Válido até ${esc(plano.resumo.expira)}</p>
-      <p class="rs-nota">Este resumo é comercial: não substitui a consulta nem o prontuário. Protótipo com dados fictícios.</p>`;
+      <p class="rs-nota">Este resumo é comercial: não substitui a consulta nem o prontuário. Protótipo com dados fictícios.</p>${VIA}`;
     document.getElementById("rs-ag").addEventListener("click", () => { document.getElementById("rs-ok").textContent = "Pedido enviado. A clínica responde pelo WhatsApp para marcar o horário."; });
   }
   let ok = false; try { ok = sessionStorage.getItem("munin:resumo:" + t) === "1"; } catch (e) { /* ok */ }
