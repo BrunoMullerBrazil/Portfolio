@@ -177,9 +177,9 @@
       if (el.hidden || !visivel(el) || !naTela(el.getBoundingClientRect())) return;
       if (REDUZ) { animaE(el, [{ opacity: 1 }, { opacity: .75 }, { opacity: 1 }], { duration: 300, delay: atraso }); return; }
       animaE(el, [
-        { boxShadow: "0 1px 2px rgba(23,35,27,.05), 0 0 0 0 rgba(163,50,44,0)" },
-        { boxShadow: "0 1px 2px rgba(23,35,27,.05), 0 0 0 3px rgba(163,50,44,.22)", offset: .25 },
-        { boxShadow: "0 1px 2px rgba(23,35,27,.05), 0 0 0 16px rgba(163,50,44,0)" }],
+        { boxShadow: "0 1px 2px rgba(22,23,28,.05), 0 0 0 0 rgba(163,50,44,0)" },
+        { boxShadow: "0 1px 2px rgba(22,23,28,.05), 0 0 0 3px rgba(163,50,44,.22)", offset: .25 },
+        { boxShadow: "0 1px 2px rgba(22,23,28,.05), 0 0 0 16px rgba(163,50,44,0)" }],
         { duration: 1600, delay: atraso, easing: "cubic-bezier(.33,0,.2,1)" });
     });
   }
@@ -389,8 +389,12 @@
   /* =====================================================================
      1. ABERTURA "BOM DIA"
      ===================================================================== */
-  const MONO = '<polygon pathLength="1" points="61,16 70,16 101,112 91,112 65.5,30 40,112 30,112"/><polygon pathLength="1" points="47,80 84,80 81,89 50,89"/>';
-  const mono = () => `<svg class="vam-mono" viewBox="21 11 90 106" aria-hidden="true">${MONO}</svg>`;
+  // Símbolo Munin (Munin_marca/svg/munin_simbolo.svg) para a abertura e o encerramento.
+  // .vam-forma é o contorno externo da mesma forma (cápsula + gota + ponte) num só traço, para
+  // o desenho do contorno ser contínuo; preenchida, coincide com o símbolo do kit. O ponto
+  // azul pena (.vam-ponto) entra por último.
+  const MONO = '<path class="vam-forma" pathLength="1" d="M23.39,51.51 C42.49,50.88 50.14,42.71 49.51,23.61 L49.5,23 A18.5,18.5 0 0 1 86.5,23 L86.5,70 A18.5,18.5 0 0 1 49.5,70 L49.49,47.23 C44.30,51.69 42.14,58.89 42.49,69.39 A18.5,18.5 0 1 1 23.39,51.51 Z"/><circle class="vam-ponto" cx="24" cy="23" r="18.5"/>';
+  const mono = () => `<svg class="vam-mono" viewBox="0 0 94 94" aria-hidden="true">${MONO}</svg>`;
   const palavras = s => s.split(/(\s+)/).filter(Boolean).map(w => /^\s+$/.test(w) ? w : `<span>${w}</span>`).join("");
 
   function dadosDoDia() {
@@ -429,13 +433,14 @@
 
     const anims = [];
     const A = (el, kf, o) => { const a = anima(el, kf, Object.assign({ fill: "both" }, o)); if (a) anims.push(a); return a; };
-    const polys = tela.querySelectorAll(".vam-mono polygon");
+    const forma = tela.querySelector(".vam-mono .vam-forma"), ponto = tela.querySelector(".vam-mono .vam-ponto");
     const ws = tela.querySelectorAll(".vam-tela__ola span");
     const resumo = tela.querySelector(".vam-tela__resumo");
     const extras = tela.querySelectorAll(".vam-demo, .vam-tela__pular");
 
     /* Linha do tempo (~4,5s; com movimento reduzido, metade e só opacidade):
-       0,0–1,4s  monograma: três traços sobrepostos se desenham com calma e enchem
+       0,0–1,5s  símbolo Munin: o contorno se desenha (0,1–1,0s), o corpo enche (0,8–1,2s)
+                 e o ponto azul pena chega por último (1,05–1,5s)
        1,1–2,3s  saudação palavra por palavra (600ms cada, desfoque saindo, subida pequena)
        2,2–2,9s  resumo do dia
        2,9–3,5s  pausa de leitura
@@ -443,12 +448,14 @@
     const T = REDUZ ? .5 : 1, t = ms => Math.round(ms * T);
     const sobe = (y, blur) => REDUZ ? [{ opacity: 0 }, { opacity: 1 }]
       : [{ opacity: 0, transform: `translateY(${y}px)`, filter: `blur(${blur}px)` }, { opacity: 1, transform: "none", filter: "blur(0)" }];
-    polys.forEach((p, i) => {
-      const d = t(120 + i * 260);
-      if (REDUZ) { A(p, [{ fillOpacity: 0, strokeDashoffset: 0, opacity: 0 }, { fillOpacity: 1, strokeDashoffset: 0, opacity: 1 }], { duration: 300, delay: d }); return; }
-      A(p, [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 680, delay: d, easing: "cubic-bezier(.45,0,.2,1)" });
-      A(p, [{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: 440, delay: d + 500, easing: EASE_IO });
-    });
+    if (REDUZ) {
+      A(forma, [{ fillOpacity: 0, strokeDashoffset: 0, opacity: 0 }, { fillOpacity: 1, strokeDashoffset: 0, opacity: 1 }], { duration: 300, delay: 60 });
+      A(ponto, [{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 260 });
+    } else {
+      A(forma, [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 900, delay: 100, easing: "cubic-bezier(.45,0,.2,1)" });
+      A(forma, [{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: 420, delay: 800, easing: EASE_IO });
+      A(ponto, [{ opacity: 0, transform: "scale(.2)" }, { opacity: 1, transform: "scale(1.08)", offset: .7 }, { opacity: 1, transform: "scale(1)" }], { duration: 450, delay: 1050, easing: EASE });
+    }
     const T_OLA = t(1100);
     const passoW = ws.length > 1 ? Math.max(110, Math.min(200, 800 / (ws.length - 1))) : 0;
     ws.forEach((w, i) => A(w, sobe(8, 6), { duration: t(600), delay: T_OLA + t(i * passoW), easing: EASE }));
@@ -560,7 +567,7 @@
        0,0–0,6s  a tela clareia
        0,3–1,5s  "Boa noite" palavra por palavra (600ms cada, 200ms entre elas)
        1,3–2,2s  os três números do dia
-       2,1–3,4s  o monograma se desfaz devagar, do último traço ao primeiro
+       2,1–3,4s  o símbolo se desfaz devagar: o ponto apaga, o corpo esvazia e o contorno se recolhe
        2,9–3,6s  "Até amanhã." e o botão Fechar */
     const T = REDUZ ? .5 : 1, t = ms => Math.round(ms * T);
     const A = (el, kf, o) => anima(el, kf, Object.assign({ fill: "both" }, o));
@@ -568,18 +575,20 @@
       : [{ opacity: 0, transform: `translateY(${y}px)`, filter: `blur(${blur}px)` }, { opacity: 1, transform: "none", filter: "blur(0)" }],
       { duration: t(dur), delay: t(d), easing: EASE });
     A(tela, [{ opacity: 0 }, { opacity: 1 }], { duration: t(600), easing: EASE });
-    const polys = tela.querySelectorAll(".vam-mono polygon");
-    polys.forEach(p => { p.style.fillOpacity = 1; p.style.strokeDashoffset = 0; });
+    const forma = tela.querySelector(".vam-mono .vam-forma"), ponto = tela.querySelector(".vam-mono .vam-ponto");
+    forma.style.fillOpacity = 1; forma.style.strokeDashoffset = 0; ponto.style.opacity = 1;
     fade(tela.querySelector(".vam-mono"), 0, 700, 4, 4);
     tela.querySelectorAll(".vam-tela__ola span").forEach((w, i) => fade(w, 300 + i * 200, 600, 8, 6));
     tela.querySelectorAll(".vam-fim__nums > div").forEach((n, i) => fade(n, 1300 + i * 150, 600, 6, 3));
-    // o monograma se desfaz (enche → contorno → some, do último traço ao primeiro); fica um vestígio
-    [...polys].reverse().forEach((p, i) => {
-      const d = t(2100 + i * 200);
-      if (REDUZ) { A(p, [{ opacity: 1 }, { opacity: .1 }], { duration: 300, delay: d }); return; }
-      A(p, [{ fillOpacity: 1 }, { fillOpacity: .1 }], { duration: 420, delay: d, easing: EASE_IO });
-      A(p, [{ strokeDashoffset: 0 }, { strokeDashoffset: -1 }], { duration: 700, delay: d + 260, easing: EASE_IO });
-    });
+    // o símbolo se desfaz (o inverso da abertura): o ponto apaga, o corpo esvazia, o contorno se recolhe; fica um vestígio
+    if (REDUZ) {
+      A(ponto, [{ opacity: 1 }, { opacity: .15 }], { duration: 300, delay: t(2100) });
+      A(forma, [{ opacity: 1 }, { opacity: .1 }], { duration: 300, delay: t(2200) });
+    } else {
+      A(ponto, [{ opacity: 1, transform: "scale(1)" }, { opacity: .15, transform: "scale(.6)" }], { duration: 420, delay: 2100, easing: EASE_IO });
+      A(forma, [{ fillOpacity: 1 }, { fillOpacity: .1 }], { duration: 420, delay: 2300, easing: EASE_IO });
+      A(forma, [{ strokeDashoffset: 0 }, { strokeDashoffset: -1 }], { duration: 760, delay: 2560, easing: EASE_IO });
+    }
     fade(tela.querySelector(".vam-fim__ate"), 2900, 700, 6, 4);
     fade(tela.querySelector(".vam-fim__fechar"), 3200, 500, 0);
 

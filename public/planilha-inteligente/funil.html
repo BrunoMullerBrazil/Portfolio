@@ -4,7 +4,9 @@
 <meta name="robots" content="noindex, nofollow">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Funil · Clínica Aurora</title>
+<title>Munin · Funil</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100.00 100.00%22%3E%3Crect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%2316171C%22/%3E%3Csvg x=%2212.00%22 y=%2212.00%22 width=%2276.00%22 height=%2276.00%22 viewBox=%220 0 94 94%22%3E%3Cpath d=%22M5.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 L49.50,70.00 L86.50,70.00 L86.50,23.00 Z M42.49,69.39 C41.86,50.29 49.51,42.12 68.61,41.49 A18.5,18.5 0 1 0 49.51,23.61 C50.14,42.71 42.49,50.88 23.39,51.51 Z%22 fill=%22%23F4F3EF%22/%3E%3Cpath d=%22M5.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z%22 fill=%22%234657C8%22/%3E%3C/svg%3E%3C/svg%3E">
+<meta name="theme-color" content="#16171C">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
@@ -89,8 +91,8 @@
   .fn-col { background: var(--suave); border-radius: 20px; padding: 8px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
   .fn-col__cab { position: relative; padding: 8px 8px 10px; display: flex; flex-direction: column; gap: 2px; }
   .fn-col__tit { display: flex; align-items: center; gap: 8px; font: 600 var(--t-md)/1.2 var(--f-titulo); }
-  .fn-passo { width: 24px; height: 24px; border-radius: 50%; flex: none; display: grid; place-items: center; font: 700 11.5px/1 var(--f-titulo); background: var(--cartao); color: var(--floresta); box-shadow: inset 0 0 0 1.5px var(--salvia); position: relative; z-index: 1; }
-  .fn-passo--fim { background: var(--floresta); color: #fff; box-shadow: none; }
+  .fn-passo { width: 24px; height: 24px; border-radius: 50%; flex: none; display: grid; place-items: center; font: 700 11.5px/1 var(--f-titulo); background: var(--cartao); color: var(--pena); box-shadow: inset 0 0 0 1.5px var(--nevoa); position: relative; z-index: 1; }
+  .fn-passo--fim { background: var(--pena); color: #fff; box-shadow: none; }
   .fn-passo--fim .ico { width: 13px; height: 13px; stroke-width: 2.4; }
   .fn-col:not(:last-child) .fn-col__cab::after { content: ""; position: absolute; left: 32px; right: -24px; top: 19px; height: 2px; background: repeating-linear-gradient(90deg, var(--linha-forte) 0 4px, transparent 4px 8px); }
   .fn-col:not(:last-child) .fn-col__tit > span:not(.fn-passo) { background: var(--suave); position: relative; z-index: 1; padding-right: 6px; }
@@ -208,7 +210,7 @@
   }
 
   /* Gaveta: agenda de hoje */
-  .fn-gaveta { position: fixed; top: 0; right: 0; bottom: 0; width: 360px; z-index: 30; background: var(--porcelana); box-shadow: -12px 0 40px -16px rgba(23,35,27,.28); padding: 20px; overflow-y: auto; transform: translateX(105%); transition: transform .2s; }
+  .fn-gaveta { position: fixed; top: 0; right: 0; bottom: 0; width: 360px; z-index: 30; background: var(--porcelana); box-shadow: -12px 0 40px -16px rgba(22,23,28,.28); padding: 20px; overflow-y: auto; transform: translateX(105%); transition: transform .2s; }
   .fn-gaveta.aberta { transform: none; }
   .fn-gaveta .cartao__cab { margin-bottom: 12px; }
   #bt-agenda[aria-expanded="true"] { background: var(--suave-2); box-shadow: inset 0 0 0 1px var(--linha-forte); }

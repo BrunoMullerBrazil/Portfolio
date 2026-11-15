@@ -2,24 +2,24 @@
 (function () {
   const d = document, q = new URLSearchParams(location.search);
   const css = `
-  .demo-fab{position:fixed;right:20px;bottom:20px;z-index:9000;font:600 14px/1 Inter,system-ui,sans-serif;color:#F4F5F2}
+  .demo-fab{position:fixed;right:20px;bottom:20px;z-index:9000;font:600 14px/1 Inter,system-ui,sans-serif;color:#F4F3EF}
   .demo-fab>button{display:flex;align-items:center;gap:10px;height:46px;padding:0 18px 0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
-    background:rgba(30,51,40,.88);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);color:inherit;cursor:pointer;
-    box-shadow:0 12px 32px rgba(14,22,17,.28),inset 0 1px 0 rgba(255,255,255,.14);font:inherit}
-  .demo-fab>button i{width:8px;height:8px;border-radius:50%;background:#A5C8B3;box-shadow:0 0 0 4px rgba(165,200,179,.18)}
-  .demo-menu{position:absolute;right:0;bottom:58px;width:300px;padding:10px;border-radius:20px;background:rgba(22,39,30,.94);
-    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.14);box-shadow:0 24px 60px rgba(14,22,17,.35);
+    background:rgba(22,23,28,.88);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);color:inherit;cursor:pointer;
+    box-shadow:0 12px 32px rgba(10,11,14,.28),inset 0 1px 0 rgba(255,255,255,.14);font:inherit}
+  .demo-fab>button i{width:8px;height:8px;border-radius:50%;background:#8591E2;box-shadow:0 0 0 4px rgba(133,145,226,.24)}
+  .demo-menu{position:absolute;right:0;bottom:58px;width:300px;padding:10px;border-radius:20px;background:rgba(22,23,28,.95);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.14);box-shadow:0 24px 60px rgba(10,11,14,.35);
     transform-origin:100% 100%;transition:opacity .2s cubic-bezier(.2,.8,.2,1),transform .2s cubic-bezier(.2,.8,.2,1)}
   .demo-menu[hidden]{display:block;opacity:0;transform:translateY(6px) scale(.98);pointer-events:none;visibility:hidden}
-  .demo-menu h4{margin:6px 10px 8px;font:600 11px/1 Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#A5C8B3}
+  .demo-menu h4{margin:6px 10px 8px;font:600 11px/1 Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#8591E2}
   .demo-menu a,.demo-menu button.it{display:block;width:100%;min-height:44px;padding:10px 12px;border-radius:12px;border:0;background:none;
-    color:#F4F5F2;text-decoration:none;font:500 15px/1.2 Inter,sans-serif;cursor:pointer;text-align:left}
+    color:#F4F3EF;text-decoration:none;font:500 15px/1.2 Inter,sans-serif;cursor:pointer;text-align:left}
   .demo-menu a:hover,.demo-menu button.it:hover,.demo-menu a:focus-visible,.demo-menu button.it:focus-visible{background:rgba(255,255,255,.08);outline:none}
-  .demo-menu small{display:block;color:rgba(244,245,242,.6);font-weight:400;font-size:12.5px;margin-top:3px}
+  .demo-menu small{display:block;color:rgba(244,243,239,.6);font-weight:400;font-size:12.5px;margin-top:3px}
   .demo-menu .sep{height:1px;background:rgba(255,255,255,.1);margin:8px 6px}
-  .demo-menu label{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 12px 8px;font:500 14px/1 Inter,sans-serif;color:rgba(244,245,242,.8)}
-  .demo-menu select{height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#F4F5F2;padding:0 10px;font:500 14px Inter,sans-serif}
-  .demo-menu select option{color:#17231B}
+  .demo-menu label{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 12px 8px;font:500 14px/1 Inter,sans-serif;color:rgba(244,243,239,.8)}
+  .demo-menu select{height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#F4F3EF;padding:0 10px;font:500 14px Inter,sans-serif}
+  .demo-menu select option{color:#16171C}
   @media (max-width:720px){.demo-fab{right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px))}.demo-fab>button{height:42px}}
   @media (prefers-reduced-motion:reduce){.demo-menu{transition:opacity .15s}}`;
   const st = d.createElement("style"); st.textContent = css; d.head.appendChild(st);
