@@ -153,6 +153,7 @@ body.en { min-height: 100vh; margin: 0; background: var(--porcelana); }
   .en-tela { grid-template-columns: minmax(0, 1fr); }
   .en-palco { margin: 0 12px 12px; border-radius: 26px; min-height: 0; padding: 22px 22px 24px; }
   .en-palco__topo span:last-child { display: none; }
+  .en-palco { justify-content: flex-start; }
   .en-palco__simbolo { width: 46%; right: -6%; bottom: -30%; }
   .en-previa, .en-palco__pe { display: none; }
   .en-palco__frase { margin-top: 18px; }

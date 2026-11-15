@@ -223,7 +223,7 @@ const equipe = EQUIPE.map(u => Object.assign({}, u));
 function renderUs() {
   $("usuarios").innerHTML = equipe.map((u, i) => `<li class="linha aj-us" data-i="${i}">
     <span class="av av--${avCor(u)}" aria-hidden="true">${ini(u.nome.replace(/^Dra?\. /, "") + (u.nome.split(" ").length > 1 ? "" : " x"))}</span>
-    <div class="aj-q" style="min-width:0"><span class="linha__nome">${esc(u.nome)}${u.gestora ? `<span class="aj-badge">autoriza acessos</span>` : ""}</span><span class="linha__sub">${esc(u.email)}</span></div>
+    <div class="aj-q" style="min-width:0"><span class="linha__nome">${esc(u.nome)}${u.gestora ? `<span class="aj-badge" title="Autoriza os acessos">gestora</span>` : ""}</span><span class="linha__sub">${esc(u.email)}</span></div>
     <div class="aj-pf"><label class="sr" for="pf-${i}">Perfil de ${esc(u.nome)}</label><select class="tl-select aj-sel" id="pf-${i}" data-pf="${i}"${u.gestora ? " disabled" : ""}>${optsPerfil(u.perfil)}</select></div>
     <div class="aj-st">${u.st === "convite" ? `<span class="status status--atencao">Convite pendente</span>` : `<span class="status status--ok">Ativo</span>`}<span class="linha__sub" style="margin-top:3px">${u.st === "convite" ? u.visto : "último acesso " + u.visto}</span></div>
     <div class="aj-acoes">${u.st === "convite" ? `<button type="button" class="bt-sec" data-copiar="${i}" aria-label="Copiar link do convite de ${esc(u.nome)}"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-plano"/></svg>Copiar link</button>` : ""}

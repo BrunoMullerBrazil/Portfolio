@@ -489,24 +489,28 @@
     const tela = doc.createElement("div");
     tela.className = "vam-tela vam-intro";
     tela.setAttribute("role", "dialog"); tela.setAttribute("aria-modal", "true"); tela.setAttribute("aria-label", "Abertura do dia");
-    const opts = PESSOAS.map(p => `<option${p === NOME ? " selected" : ""}>${p}</option>`).join("") + (PESSOAS.includes(NOME) ? "" : `<option selected>${NOME}</option>`);
+    // Perfis (perfis.js): o seletor lista "Nome · Perfil" e o placar muda conforme o perfil
+    const CT = window.MUNIN_CONTAS, PF = window.MUNIN_PERFIL;
+    const opts = CT ? CT.map(c => `<option value="${c.nome}|${c.perfil}"${c.nome === NOME && c.perfil === PF ? " selected" : ""}>${c.nome} · ${c.rot}</option>`).join("") + (CT.some(c => c.nome === NOME && c.perfil === PF) ? "" : `<option selected>${NOME}</option>`)
+      : PESSOAS.map(p => `<option${p === NOME ? " selected" : ""}>${p}</option>`).join("") + (PESSOAS.includes(NOME) ? "" : `<option selected>${NOME}</option>`);
+    const itensPl = (window.MUNIN_PLACAR && window.MUNIN_PLACAR("abertura", dd, HORA)) || [
+      { n: dd.metaPct, suf: "%", rot: "da meta do mês" },
+      { n: dd.pacientes, rot: pl(dd.pacientes, "paciente hoje", "pacientes hoje") },
+      { n: dd.atrasadas, rot: pl(dd.atrasadas, "pendência atrasada", "pendências atrasadas") },
+      { n: dd.parados, rot: pl(dd.parados, "lead parado", "leads parados"), alerta: dd.parados > 0 },
+    ];
     tela.innerHTML = `<div class="vam-tela__fundo" aria-hidden="true"></div>
       <div class="vam-tela__centro">
         ${mono()}
         <h2 class="vam-tela__ola">${palavras(frase)}</h2>
-        ${placar([
-          { n: dd.metaPct, suf: "%", rot: "da meta do mês" },
-          { n: dd.pacientes, rot: pl(dd.pacientes, "paciente hoje", "pacientes hoje") },
-          { n: dd.atrasadas, rot: pl(dd.atrasadas, "pendência atrasada", "pendências atrasadas") },
-          { n: dd.parados, rot: pl(dd.parados, "lead parado", "leads parados"), alerta: dd.parados > 0 },
-        ])}
+        ${placar(itensPl)}
       </div>
       <p class="sr vam-tela__voz" role="status" aria-live="polite"></p>
       <label class="vam-demo" title="Seletor de demonstração">Entrar como <select aria-label="Pessoa (demonstração)">${opts}</select></label>
       <span class="vam-tela__pular" aria-hidden="true">Clique ou tecle para pular</span>`;
     body.appendChild(tela);
     inerte(true);
-    anuncia(tela, `${frase} ${dd.metaPct}% da meta do mês, ${dd.pacientes} pacientes hoje, ${dd.atrasadas} pendências atrasadas, ${dd.parados} leads parados.`);
+    anuncia(tela, `${frase} ${itensPl.map(it => [it.pre, fmtN(it.n) + (it.suf || ""), it.rot].filter(Boolean).join(" ")).join(", ")}.`);
 
     const anims = [];
     const A = (el, kf, o) => { const a = anima(el, kf, Object.assign({ fill: "both" }, o)); if (a) anims.push(a); return a; };
@@ -613,8 +617,10 @@
     sel.addEventListener("focus", () => anims.forEach(a => a.pause()));
     sel.addEventListener("blur", () => { if (!acabou) anims.forEach(a => a.play()); });
     sel.addEventListener("change", () => {
-      ls.set("vam:nome", sel.value);
+      const [nm, pf] = sel.value.split("|");
+      ls.set("vam:nome", nm);
       const u = new URL(location.href); u.searchParams.delete("nome"); u.searchParams.set("intro", "1");
+      if (pf) { ls.set("munin:perfil", pf); ls.set("munin:nome", nm); u.searchParams.set("nome", nm); u.searchParams.set("perfil", pf); }
       location.replace(u.href);
     });
     VAM.intro = { tela, anims, pular, saida: T_SAI, entrada: T_ENTRADA };
@@ -670,7 +676,7 @@
       <div class="vam-tela__centro">
         ${mono()}
         <h2 class="vam-tela__ola">${palavras(frase)}</h2>
-        ${placar([
+        ${placar((window.MUNIN_PLACAR && window.MUNIN_PLACAR("encerramento", dd, HORA)) || [
           { n: dd.atendidos, rot: `atendimento${pl(dd.atendidos)} realizado${pl(dd.atendidos)}`, sub: `de ${dd.pacientes} na agenda` },
           { n: dd.valorHoje, pre: "R$", rot: "em planos fechados hoje", sub: dd.planosHoje ? `${dd.planosHoje} plano${pl(dd.planosHoje)}` : "nenhum plano hoje" },
           { n: dd.resolvidas, rot: `pendência${pl(dd.resolvidas)} resolvida${pl(dd.resolvidas)}`, sub: `de ${dd.pendencias} na lista` },
@@ -683,7 +689,7 @@
     body.appendChild(tela);
     inerte(true);
     ls.set(chaveFim(), new Date().toISOString());
-    anuncia(tela, `${frase} ${dd.atendidos} atendimentos realizados, ${dd.resolvidas} pendências resolvidas, ${dd.abertas} ficam para amanhã.`);
+    anuncia(tela, `${frase} ${[...tela.querySelectorAll(".vam-pl .sr")].map(s => s.textContent).join(", ")}.`);
 
     /* Linha do tempo (~5,6s até o botão Fechar; movimento reduzido: ~2,5s, só opacidade, números finais direto):
        0,00–1,00s  a tela escurece suave para o grafite (gradiente radial sutil): modo noite
