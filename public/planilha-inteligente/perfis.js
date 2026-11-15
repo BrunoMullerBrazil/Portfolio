@@ -391,7 +391,7 @@
           <summary class="pf-l">
             <div class="pf-l__lado"><span class="hora${a.st === "atend" ? " hora--agora" : feito ? " hora--passou" : ""}">${a.h}</span></div>
             <div class="pf-l__corpo"><div class="pf-l__l1"><span class="pf-l__nome">${esc(p.nome)}</span>${p.carteira ? `<span class="chip">Carteira ${p.carteira}</span>` : ""}${chipCom(a.id, { omiteEu: true })}</div>
-              <div class="pf-l__l2">${a.tipo} · ${p.proc}${a.det ? " · " + a.det : ""}</div></div>
+              <div class="pf-l__l2">${a.tipo} · ${p.proc}${a.det ? " · " + a.det : ""}</div><div class="pf-plmini" data-plmini="${a.id}"></div></div>
             <div class="pf-l__prazo">${st(cls.replace("status--", ""), rot)}</div>
             <div class="pf-l__acoes"><span class="pf-est__abre">${feito ? "Ver" : "Estudo"}${ico("i-dir", "ico ico-sm")}</span></div>
           </summary>
@@ -510,9 +510,22 @@
   function renderPerfil(anim) {
     const t = TELAS[PERFIL](medAtual());
     raizPerfil.innerHTML = `<div class="coluna">${t.coluna}</div><aside class="lado" aria-label="Também para hoje">${t.lado}</aside>`;
+    if (PERFIL === "medico") plMini(raizPerfil);
     const r = $("#resumo-dia"); if (r) r.textContent = t.resumo;
     UI.medeNumeros && UI.medeNumeros();
     if (anim) entraLinhas(raizPerfil);
+  }
+  // revisão pacotes: mini-mapa do plano (48px) no estudo da agenda do Médico.
+  // Os scripts do plano carregam sob demanda (o Painel não os inclui; os números não mudam).
+  function plMini(raiz) {
+    if (!$("[data-plmini]", raiz)) return;
+    const vai = () => { if (window.PLMINI) window.PLMINI.preenche(raiz, { valores: false }); };
+    if (window.PLMINI) { vai(); return; }
+    const tem = { "pacotes.js": () => window.PAC, "plano_motor.js": () => window.PL, "planos_dados.js": () => window.PLD,
+      "desenhos/desenhos_estetica.js": () => window.DES && window.DES.rosto, "desenhos/desenhos_odonto.js": () => window.DES && window.DES.odontograma, "plano_mini.js": () => window.PLMINI };
+    const fila = Object.keys(tem).filter(k => !tem[k]());
+    const um = () => { const s = fila.shift(); if (!s) { vai(); return; } const e = doc.createElement("script"); e.src = s; e.onload = um; e.onerror = um; doc.body.appendChild(e); };
+    um();
   }
   function montaPainel() {
     const grade = $("main .grade"); if (!grade) return;
@@ -540,7 +553,7 @@
       const li = bt.closest("[data-id]"), id = li && li.dataset.id, p = id && P[id], hh = horaAgora();
       const tipo = bt.dataset.pf;
       if (tipo === "orcamento") {
-        aviso(`Gerador de orçamento em construção${p ? ` · <b>${esc(p.nome)}</b>` : ""}. Por enquanto, monte pela planilha de preços.`);
+        location.href = p ? `plano.html?p=${encodeURIComponent(id)}` : "plano.html";   // revisão pacotes: a tela do plano
       } else if (tipo === "checkin") {
         const on = !chegou[id];
         if (on) { chegou[id] = hh; nChegadas++; } else { delete chegou[id]; nChegadas--; }

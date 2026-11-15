@@ -398,7 +398,11 @@ function cartao(l) {
   const dh = temData ? `<div class="datahora" aria-label="${l.falta ? "Faltou em" : "Consulta"} ${l.dh[0]} às ${l.dh[1]}"><div><span>${l.falta ? "Faltou" : "Data"}</span><b>${l.dh[0]}</b></div><div><span>Hora</span><b>${l.dh[1]}</b></div></div>` : "";
   const st = l.etapa === "fechou" ? `<span class="status status--ok">Fechou ${l.dt}</span>` : `<span class="status ${parado(l) ? "status--forte" : SEV[l.sev]}">${diasTxt(l)}</span>`;
   const wa = btWa(l.id, modeloWa(l)), ag = l.etapa === "agendado" || l.etapa === "confirmado" ? btAgenda(l.id) : "";
-  const acoes = wa || ag ? `<div class="fn-card__acoes">${wa}${ag}${regTent(l.id)}</div>` : "";
+  // revisão pacotes: etapa Plano ganha o atalho para a tela do plano (+ selo se fechou nesta sessão)
+  let fechouSessao = false; try { fechouSessao = !!sessionStorage.getItem("munin:fechado:" + l.id); } catch (e) { /* sem armazenamento */ }
+  const pfAt = window.MUNIN_PERFIL || (() => { try { return new URLSearchParams(location.search).get("perfil") || localStorage.getItem("munin:perfil"); } catch (e) { return null; } })();
+  const pl = l.etapa === "plano" && pfAt !== "sdr" && pfAt !== "recepcao" ? `<a class="bt-ico bt-ico--sm bt-ico--plano" href="plano.html?p=${l.id}" aria-label="Montar plano de ${l.nome}" title="Montar plano"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-plano"/></svg></a>${fechouSessao ? `<span class="status status--ok">Fechado nesta sessão</span>` : ""}` : "";
+  const acoes = wa || ag || pl ? `<div class="fn-card__acoes">${wa}${ag}${pl}${regTent(l.id)}</div>` : "";
   const marca = parado(l) ? " fn-card--parado" : limite(l) ? " fn-card--limite" : "";
   return `<article class="cartao recorte fn-card${marca}" data-med="${l.med}">
     <span class="recorte__filete recorte__filete--a"></span><span class="recorte__filete recorte__filete--b"></span>

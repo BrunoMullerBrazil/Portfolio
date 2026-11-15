@@ -38,6 +38,8 @@
       <a role="menuitem" href="funil.html#parados">Leads parados<small>Funil filtrado nos que passaram do prazo</small></a>
       <a role="menuitem" href="painel.html?intro=0">WhatsApp e agenda<small>Botões em "Atenção hoje" e na linha do tempo</small></a>
       <a role="menuitem" href="metas.html?intro=0">Metas<small>Anéis, faixa da meta e o ano</small></a>
+      <a role="menuitem" href="plano.html?p=cristina&perfil=closer">Plano · Estética<small>Mapa do rosto e do corpo, orçamento vivo e modo apresentação</small></a>
+      <a role="menuitem" href="plano.html?demo=odonto&perfil=closer">Plano · Odontologia<small>Odontograma FDI, faces, fases e modo Sorriso</small></a>
       <div class="sep"></div>
       <label>Entrar como
         <select id="demoNome" aria-label="Entrar como">

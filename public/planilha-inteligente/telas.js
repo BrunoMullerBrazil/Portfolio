@@ -231,8 +231,13 @@
     if (p.etapa === "plano" || p.etapa === "fechou") hist.push([p.etapa === "fechou" ? `Fechou plano` : "Plano apresentado", p.etapa === "fechou" ? `${p.dt} · R$ ${UI.real(p.v)}` : `R$ ${UI.real(p.v)}`]);
     if (p.ult) hist.push(["Última sessão", p.ult]);
     if (p.nota) hist.push([p.nota, p.prox || "Próximo passo", true]);
-    const links = [["funil", "Ver no funil", `funil.html?ficha=${id}`, !!p.etapa], ["agenda", "Ver na agenda", `agenda.html?ficha=${id}`, !!(c || hoje)], ["recall", "Ver no recall", `recall.html?ficha=${id}`, !!r]]
-      .filter(l => l[3] && l[0] !== pagina).map(l => `<a class="bt-sec" href="${l[2]}">${l[1]} ${ico("i-dir", "ico ico-sm")}</a>`).join("");
+    // revisão pacotes: selo do plano fechado nesta sessão (a etapa em VA.P não muda)
+    try { if (sessionStorage.getItem("munin:fechado:" + id)) hist.push(["Plano fechado nesta sessão", "pela tela do plano", true]); } catch (e) { /* sem armazenamento */ }
+    // §4e: SDR e Recepção não abrem o plano (itens, regiões e R$ por linha)
+    const pf = window.MUNIN_PERFIL || (() => { try { return new URLSearchParams(location.search).get("perfil") || localStorage.getItem("munin:perfil"); } catch (e) { return null; } })();
+    const podePlano = pf !== "sdr" && pf !== "recepcao";
+    const links = [["plano", "Montar plano", `plano.html?p=${id}`, podePlano], ["funil", "Ver no funil", `funil.html?ficha=${id}`, !!p.etapa], ["agenda", "Ver na agenda", `agenda.html?ficha=${id}`, !!(c || hoje)], ["recall", "Ver no recall", `recall.html?ficha=${id}`, !!r]]
+      .filter(l => l[3] && l[0] !== pagina).map(l => `<a class="bt-sec" href="${l[2]}">${l[0] === "plano" ? ico("i-plano", "ico ico-sm") : ""}${l[1]} ${ico("i-dir", "ico ico-sm")}</a>`).join("");
     gav.innerHTML = cabGaveta(esc(p.nome), `${d.rot}`, UI.av(p.med, p.nome)) + `<div class="tl-gaveta__corpo">
       <div class="tl-ficha__acoes" data-entra>${UI.btWa(id, wa)}${UI.btAgenda(id)}<a class="bt-ico bt-ico--sm bt-ico--plano" href="tel:+55${fone}" aria-label="Ligar para ${esc(p.nome)}" title="Ligar">${ico("i-tel", "ico ico-sm")}</a>${UI.regTent(id)}</div>
       <dl class="tl-dl" data-entra>${linhas.map(([a, b]) => `<div><dt>${a}</dt><dd>${b}</dd></div>`).join("")}</dl>
