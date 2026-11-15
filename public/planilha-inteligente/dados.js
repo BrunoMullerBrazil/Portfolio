@@ -38,7 +38,7 @@
 
   // ---- Funil: 1 · Lead em contato
   add("livia",    { nome: "Lívia Carvalho",   med: "g", origem: "Parceria", proc: "Protocolo Natural Lift", t: 3, pot: 6500, lead: "01/11/2026", etapa: "contato", d: 12, sev: "atrasado", venc: 4, tent: 1, nota: "Pediu valor no WhatsApp · 1 tentativa", prox: "Retorno venceu 09/11" });
-  add("priscila", { nome: "Priscila Andrade", med: "d", origem: "Indicação", proc: "Liftera papada",         t: 4, pot: 4200, lead: "02/11/2026", etapa: "contato", d: 11, sev: "atrasado", venc: 2, tent: 3, nota: "Indecisão · 3 tentativas sem resposta", prox: "Retorno venceu 11/11" });
+  add("priscila", { nome: "Patrícia Andrade", med: "d", origem: "Indicação", proc: "Liftera papada",         t: 4, pot: 4200, lead: "02/11/2026", etapa: "contato", d: 11, sev: "atrasado", venc: 2, tent: 3, nota: "Indecisão · 3 tentativas sem resposta", prox: "Retorno venceu 11/11" });
   add("sofia",    { nome: "Sofia Brandt",     med: "d", origem: "Outro",     proc: "Acne adulta",            t: 4, pot: 1800, lead: "09/11/2026", etapa: "contato", d: 4,  sev: "atencao",  nota: "Ligar hoje · prefere manhã", prox: "Ligar hoje" });
   add("lucas",    { nome: "Lucas Ferraz",     med: "g", origem: "Campanha",  proc: "Mapeamento de pintas",   t: 3, pot: 900,  lead: "12/11/2026", etapa: "contato", d: 1,  sev: "neutro",   nota: "Sem próximo contato definido", prox: "Sem data" });
   add("cecilia",  { nome: "Cecília Furtado",  med: "g", origem: "Indicação", proc: "Clareamento de melasma", t: 3, pot: 2600, lead: "12/11/2026", etapa: "contato", d: 1,  sev: "ok",       nota: "Aguardando data · volta a falar 25/11", prox: "Retorno 25/11" });

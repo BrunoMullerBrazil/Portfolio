@@ -31,6 +31,8 @@
   box.innerHTML = `
     <div class="demo-menu" id="demoMenu" role="menu" hidden>
       <h4>Demonstração</h4>
+      <a role="menuitem" href="entrar.html">Tela de login<small>Entrar com Google, escolha de conta e acesso negado</small></a>
+      <a role="menuitem" href="convite.html">Cadastro por convite<small>Como a pessoa convidada cria o acesso</small></a>
       <a role="menuitem" href="${url("painel.html", { intro: 1 })}">Abertura "Bom dia"<small>Como a pessoa vê no primeiro acesso do dia</small></a>
       <button role="menuitem" class="it" id="demoNoite" type="button">Encerrar o dia · "Boa noite"<small>Resumo do dia e despedida</small></button>
       <a role="menuitem" href="funil.html#parados">Leads parados<small>Funil filtrado nos que passaram do prazo</small></a>
@@ -39,7 +41,8 @@
       <div class="sep"></div>
       <label>Entrar como
         <select id="demoNome" aria-label="Entrar como">
-          ${["Dra. Lúcia", "Dr. Rafael", "Recepção"].map(n => `<option${n === nomeAtual ? " selected" : ""}>${n}</option>`).join("")}
+          ${(window.MUNIN_CONTAS || [{ nome: "Marina", perfil: "gestao", rot: "Gestão" }, { nome: "Dra. Lúcia", perfil: "medico", rot: "Médico" }, { nome: "Júlia", perfil: "sdr", rot: "SDR" }, { nome: "Carla", perfil: "recepcao", rot: "Recepção" }, { nome: "Tatiana", perfil: "closer", rot: "Closer" }])
+            .map(c => `<option value="${c.nome}|${c.perfil}"${c.nome === nomeAtual && c.perfil === (window.MUNIN_PERFIL || "gestao") ? " selected" : ""}>${c.nome} · ${c.rot}</option>`).join("")}
         </select></label>
     </div>
     <button type="button" aria-expanded="false" aria-controls="demoMenu"><i></i>Demonstração</button>`;
@@ -57,7 +60,8 @@
     else location.href = url("painel.html", { hora: 18, intro: 0 });
   });
   box.querySelector("#demoNome").addEventListener("change", e => {
-    const u = new URL("painel.html", location.href); u.searchParams.set("nome", e.target.value); u.searchParams.set("intro", "1");
+    const [nome, perfil] = e.target.value.split("|");
+    const u = new URL("painel.html", location.href); u.searchParams.set("nome", nome); if (perfil) u.searchParams.set("perfil", perfil); u.searchParams.set("intro", "1");
     location.href = u.pathname.split("/").pop() + u.search;
   });
 })();
