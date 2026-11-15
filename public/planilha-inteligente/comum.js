@@ -55,14 +55,18 @@
   // data-rotulo: no computador (>= 1024px) a peça mostra só ícones e o rótulo vira tooltip
   const item = i => `<a class="trilho__item ${i.cel || "trilho__item--desk"}" href="${i.href}" data-rotulo="${i.rot}"${i.k === pagina ? ' aria-current="page"' : ""}>
       <svg class="ico" aria-hidden="true"><use href="#${i.ico}"/></svg><span class="trilho__rot">${i.rot}</span></a>`;
-  // Monograma da clínica: cópia fiel de brand/va_monograma.svg, inline, fill = currentColor
-  // (sem círculo e sem fundo; a cor vem do CSS: porcelana no trilho, floresta-noite no topo do celular)
-  const MONO = `<polygon points="61,16 70,16 101,112 91,112 65.5,30 40,112 30,112"/><polygon points="47,80 84,80 81,89 50,89"/>`;
-  const monograma = cls => `<svg class="${cls}" viewBox="21 11 90 106" fill="currentColor" aria-hidden="true">${MONO}</svg>`;
-  const logo = `<a class="trilho__logo" href="painel.html" aria-label="Clínica Aurora · Painel">${monograma("")}</a>`;
-  const nav = `<nav class="trilho" aria-label="Navegação principal">${logo}
+  // Símbolo Munin: cópia fiel de Munin_marca/svg/munin_simbolo.svg, inline.
+  // O corpo usa currentColor (porcelana sobre o grafite = versão negativa; grafite sobre o claro = positiva)
+  // e o ponto é sempre azul pena (.munin-ponto).
+  const SIMBOLO = `<path class="munin-corpo" d="M5.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,70.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z M49.50,23.00 L49.50,70.00 L86.50,70.00 L86.50,23.00 Z M42.49,69.39 C41.86,50.29 49.51,42.12 68.61,41.49 A18.5,18.5 0 1 0 49.51,23.61 C50.14,42.71 42.49,50.88 23.39,51.51 Z"/><path class="munin-ponto" d="M5.50,23.00 a18.5,18.5 0 1,0 37.0,0 a18.5,18.5 0 1,0 -37.0,0 Z"/>`;
+  const simbolo = cls => `<svg class="munin ${cls}" viewBox="0 0 94 94" aria-hidden="true">${SIMBOLO}</svg>`;
+  // A clínica é a CLIENTE dentro do produto: nome discreto no topo do conteúdo (sem logo da clínica)
+  const CLIENTE = "Clínica Aurora";
+  const logo = `<a class="trilho__logo" href="painel.html" aria-label="Munin · Painel">${simbolo("")}</a>`;
+  const nav = `<nav class="trilho" aria-label="Navegação principal">
     <div class="trilho__aba"><i></i><button class="trilho__novo" data-rotulo="Novo lead" aria-label="Novo lead"><svg class="ico"><use href="#i-mais"/></svg></button><i></i></div>
     <div class="trilho__peca">
+    ${logo}
     ${ITENS.map(item).join("")}
     <span class="trilho__sep"></span>
     ${item({ k: "ajustes", rot: "Ajustes", ico: "i-ajustes", href: "#" })}
@@ -72,7 +76,8 @@
   // no tablet e no celular é display: contents (os itens seguem filhos diretos do trilho).
   document.querySelector("main").insertAdjacentHTML("beforebegin", nav);
   const ola = document.querySelector(".topo__ola");
-  if (ola) ola.insertAdjacentHTML("afterbegin", monograma("marca-cel"));
+  // Topo do conteúdo: símbolo Munin (só no celular) + nome da clínica do usuário
+  if (ola) ola.insertAdjacentHTML("afterbegin", `<p class="cliente">${simbolo("marca-cel")}<span class="cliente__nome"><span class="sr">Clínica do usuário: </span>${CLIENTE}</span></p>`);
 
   /* ---------- Ações do topo: iguais nas 3 telas -------------------------- */
   const acoes = document.getElementById("acoes-topo");
@@ -218,7 +223,7 @@
      Sem API: o WhatsApp abre por link (wa.me) com a mensagem pronta e editável; a agenda
      abre o Google Agenda por link ou baixa um convite .ics gerado aqui (Blob).
      Nada de diagnóstico, valor ou detalhe clínico nas mensagens e nos convites. */
-  const CLINICA = "Clínica Aurora";
+  const CLINICA = CLIENTE;
   const MED_NOME = { g: "Dr. Rafael Sena", d: "Dra. Lúcia Sena" };
   const MED_ART = { g: "o Dr. Rafael Sena", d: "a Dra. Lúcia Sena" };
   const SEMANA = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
@@ -377,7 +382,7 @@
     out.push(atual); return out.join("\r\n ");
   }
   function ics(e) {
-    const linhas = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Clinica Clínica Aurora//Planilha Inteligente//PT-BR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    const linhas = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Munin//Clinica Aurora//PT-BR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
       "BEGIN:VEVENT", `UID:${e.p.id}-${utc(e.ini)}@clinica-aurora.invalid`, `DTSTAMP:${utc(new Date())}`,
       `DTSTART:${utc(e.ini)}`, `DTEND:${utc(e.fim)}`, `SUMMARY:${escICS(e.titulo)}`, `DESCRIPTION:${escICS(e.detalhes)}`, `LOCATION:${escICS(CLINICA)}`,
       "STATUS:CONFIRMED", "TRANSP:OPAQUE", "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${escICS(e.titulo)}`, "TRIGGER:-PT1H", "END:VALARM",
